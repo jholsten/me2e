@@ -6,4 +6,5 @@ publish-package:
   stage: publish
   image: amazoncorretto:18
   script:
+    - chmod +x ./gradlew
     - ./gradlew clean publish
