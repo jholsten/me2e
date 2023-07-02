@@ -11,4 +11,3 @@ plugins {
 }
 
 rootProject.name = 'me2e'
-include('lib')
