@@ -1,0 +1,9 @@
+stages:
+  - publish
+
+# Publishes package to GitLab Package Registry:
+publish-package:
+  stage: publish
+  image: amazoncorretto:18
+  script:
+    - ./gradlew clean publish
