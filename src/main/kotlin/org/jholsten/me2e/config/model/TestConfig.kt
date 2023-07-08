@@ -1,5 +1,7 @@
 package org.jholsten.me2e.config.model
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import org.jholsten.me2e.config.utils.ContainerMapDeserializer
 import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.mock.MockServer
 
@@ -10,12 +12,13 @@ class TestConfig(
     /**
      * List of Docker containers to start for the end-to-end test.
      */
-    val containers: List<Container>,
+    @JsonDeserialize(using = ContainerMapDeserializer::class)
+    val containers: Map<String, Container>,
 
     /**
      * List of third party services to be mocked.
      */
-    val mockServers: List<MockServer>,
+    val mockServers: List<MockServer> = listOf(),
 ) {
 
 }
