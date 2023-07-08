@@ -4,6 +4,11 @@ stages:
   - test
   - publish
 
+cache:
+  paths:
+    - .gradle/wrapper
+    - .gradle/caches
+
 # Runs JUnit tests
 test:
   stage: test
