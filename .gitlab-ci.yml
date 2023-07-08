@@ -1,5 +1,17 @@
 stages:
+  - test
   - publish
+
+# Runs JUnit tests
+test:
+  stage: test
+  image: gradle:jdk16
+  script:
+    - ./gradlew check
+  artifacts:
+    when: always
+    reports:
+      junit: build/test-results/test/**/TEST-*.xml
 
 # Publishes package to GitLab Package Registry:
 publish-package:
