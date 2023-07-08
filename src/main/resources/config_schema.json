@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-08/schema#",
+  "title": "Me2e Test Configuration",
+  "description": "Test Configuration for the Me2e Library",
+  "type": "object",
+  "properties": {
+    "containers": {
+      "id": "#/properties/containers",
+      "type": "object",
+      "description": "Map of container names and containers to start",
+      "patternProperties": {
+        "^[a-zA-Z0-9._-]+$": {
+          "$ref": "#/definitions/container"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+
+  "definitions": {
+    "container": {
+      "id": "#/definitions/container",
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "MICROSERVICE",
+            "DATABASE",
+            "MISC"
+          ]
+        },
+        "image": {
+          "type": "string",
+          "description": "Docker image for this container"
+        },
+        "environment": {"$ref": "#/definitions/list_or_dict"}
+      },
+      "required": [
+        "type",
+        "image"
+      ]
+    },
+
+    "list_or_dict": {
+      "oneOf": [
+        {
+          "type": "object",
+          "patternProperties": {
+            ".+": {
+              "type": ["string", "number", "null"]
+            }
+          },
+          "additionalProperties": false
+        },
+        {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+      ]
+    }
+  }
+}
