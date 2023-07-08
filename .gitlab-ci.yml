@@ -1,6 +1,7 @@
 image: amazoncorretto:18
 
 stages:
+  - build
   - test
   - publish
 
@@ -9,25 +10,48 @@ cache:
     - .gradle/wrapper
     - .gradle/caches
 
+# Builds package and uploads cache
+build:
+  stage: build
+  before_script:
+    - chmod +x ./gradlew
+  script:
+    - ./gradlew --build-cache assemble
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: push
+    paths:
+      - build
+      - .gradle
+
 # Runs JUnit tests
 test:
   stage: test
-  before_script:
-    - chmod +x ./gradlew
   script:
     - ./gradlew check
   artifacts:
     when: always
     reports:
       junit: build/test-results/test/**/TEST-*.xml
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: pull
+    paths:
+      - build
+      - .gradle
 
 # Publishes package to GitLab Package Registry:
 publish-package:
   stage: publish
   before_script:
     - export VERSION_NUMBER=$CI_COMMIT_TAG
-    - chmod +x ./gradlew
   script:
     - ./gradlew clean publish
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: pull
+    paths:
+      - build
+      - .gradle
   only:
     - tags
