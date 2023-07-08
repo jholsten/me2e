@@ -1,3 +1,5 @@
+image: amazoncorretto:18
+
 stages:
   - test
   - publish
@@ -5,7 +7,8 @@ stages:
 # Runs JUnit tests
 test:
   stage: test
-  image: gradle:jdk16
+  before_script:
+    - chmod +x ./gradlew
   script:
     - ./gradlew check
   artifacts:
@@ -16,11 +19,10 @@ test:
 # Publishes package to GitLab Package Registry:
 publish-package:
   stage: publish
-  image: amazoncorretto:18
   before_script:
     - export VERSION_NUMBER=$CI_COMMIT_TAG
-  script:
     - chmod +x ./gradlew
+  script:
     - ./gradlew clean publish
   only:
     - tags
