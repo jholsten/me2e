@@ -62,6 +62,12 @@ dependencies {
 
     // Dependency for executing HTTP requests
     implementation "com.squareup.okhttp3:okhttp:4.9.3"
+
+    // Dependency for Kotlin support for Jackson
+    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.8"
+
+    // Dependency for parsing YAML files
+    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.2"
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
