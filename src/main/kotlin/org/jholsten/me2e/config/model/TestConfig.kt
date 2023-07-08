@@ -14,7 +14,6 @@ class TestConfig(
 
     /**
      * List of third party services to be mocked.
-     * TODO: Maybe it is better to register mock-servers on the fly like Wiremock? Then you can add custom mocks at runtime
      */
     val mockServers: List<MockServer>,
 ) {
