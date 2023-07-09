@@ -7,7 +7,7 @@ import org.jholsten.me2e.request.model.HttpResponse
 class MicroserviceContainer(
     name: String,
     image: String,
-    environment: Map<String, String>,
+    environment: Map<String, String>? = null,
 ): Container(
     name = name,
     image = image,

@@ -39,7 +39,7 @@ open class Container(
     /**
      * Environment variables for this container.
      */
-    val environment: Map<String, String>?,
+    val environment: Map<String, String>? = null,
     
     // TODO: Add additional fields from docker-compose
 ) {
