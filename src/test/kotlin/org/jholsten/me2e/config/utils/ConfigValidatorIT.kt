@@ -7,7 +7,7 @@ import org.jholsten.me2e.config.exception.ValidationException
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
-class ConfigValidatorTest {
+internal class ConfigValidatorIT {
     
     companion object {
         private val YAML_MAPPER = YAMLMapper().registerModule(KotlinModule.Builder().build())
@@ -15,7 +15,7 @@ class ConfigValidatorTest {
     }
     
     @Test
-    fun testValidateYaml() {
+    fun `Validating valid YAML should not throw`() {
         val value = """
             containers:
               gateway-service:
@@ -29,7 +29,7 @@ class ConfigValidatorTest {
     }
     
     @Test
-    fun testValidateJson() {
+    fun `Validating valid JSON should not throw`() {
         val value = """
             {
               "containers": {
@@ -43,19 +43,19 @@ class ConfigValidatorTest {
               }
             }
         """.trimIndent()
-    
+        
         assertDoesNotThrow { ConfigValidator.validate(value, JSON_MAPPER) }
     }
     
     @Test
-    fun testValidateWithMissingFields() {
+    fun `Validating YAML with missing fields should fail`() {
         val value = """
             containers:
               gateway-service:
                 environment:
                   DB_PASSWORD: 123
         """.trimIndent()
-    
+        
         val e = assertThrowsExactly(ValidationException::class.java) { ConfigValidator.validate(value, YAML_MAPPER) }
         
         assertEquals(2, e.validationErrors.size)
@@ -65,7 +65,7 @@ class ConfigValidatorTest {
     }
     
     @Test
-    fun testValidateWithInvalidEnum() {
+    fun `Validating YAML with invalid enum value should fail`() {
         val value = """
             containers:
               gateway-service:
@@ -74,9 +74,9 @@ class ConfigValidatorTest {
                 environment:
                   DB_PASSWORD: 123
         """.trimIndent()
-    
+        
         val e = assertThrowsExactly(ValidationException::class.java) { ConfigValidator.validate(value, YAML_MAPPER) }
-    
+        
         assertEquals(1, e.validationErrors.size)
         assertNotNull(e.message)
         assertTrue(e.message!!.contains("type"))
