@@ -9,12 +9,12 @@ class FileUtilsTest {
     
     @Test
     fun testReadFileFromResources() {
-        val contents = FileUtils.readFileFromResources("test-file.txt")
+        val contents = FileUtils.readFileContentsFromResources("test-file.txt")
         assertEquals("Test", contents)
     }
     
     @Test
     fun testReadFileFromResourcesWithNonExistingFile() {
-        assertThrowsExactly(FileNotFoundException::class.java) { FileUtils.readFileFromResources("non-existing") }
+        assertThrowsExactly(FileNotFoundException::class.java) { FileUtils.readFileContentsFromResources("non-existing") }
     }
 }

@@ -1,11 +1,11 @@
 {
-  "$schema": "http://json-schema.org/draft-08/schema#",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Me2e Test Configuration",
   "description": "Test Configuration for the Me2e Library",
   "type": "object",
   "properties": {
     "containers": {
-      "id": "#/properties/containers",
+      "$id": "#/properties/containers",
       "type": "object",
       "description": "Map of container names and containers to start",
       "patternProperties": {
@@ -19,7 +19,7 @@
 
   "definitions": {
     "container": {
-      "id": "#/definitions/container",
+      "$id": "#/definitions/container",
       "type": "object",
       "properties": {
         "type": {

@@ -1,7 +1,6 @@
 containers:
   gateway-service:
     type: MICROSERVICE
-#    name: gateway-service
     image: postgres:12
     environment:
       DB_PASSWORD: 123

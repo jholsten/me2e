@@ -1,6 +1,7 @@
 /*
  * Build configuration for the library.
- * For more details on building Java & JVM projects, please refer to https://docs.gradle.org/8.2/userguide/building_java_projects.html in the Gradle documentation.
+ * For more details on building Java & JVM projects, please refer to https://docs.gradle.org/8.2/userguide/building_java_projects.html
+ * in the Gradle documentation.
  */
 
 plugins {
@@ -68,6 +69,9 @@ dependencies {
 
     // Dependency for parsing YAML files
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.2"
+
+    // Dependency for validating data using JSON schema
+    implementation "com.networknt:json-schema-validator:1.0.86"
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
@@ -77,7 +81,7 @@ java {
     }
 }
 
-tasks.named('test') {
+tasks.named("test") {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
 }
