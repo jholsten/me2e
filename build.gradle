@@ -50,9 +50,6 @@ dependencies {
     // Use the Kotlin JUnit 5 integration.
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit5"
 
-    // Dependency for mockito
-    testImplementation "org.mockito.kotlin:mockito-kotlin:5.0.0"
-
     // Dependency for extended mocking
     testImplementation 'io.mockk:mockk:1.13.4'
 

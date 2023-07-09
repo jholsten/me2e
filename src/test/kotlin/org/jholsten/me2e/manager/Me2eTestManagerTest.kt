@@ -1,5 +1,8 @@
 package org.jholsten.me2e.manager
 
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import org.jholsten.me2e.config.model.ConfigFormat
 import org.jholsten.me2e.config.model.TestConfig
 import org.jholsten.me2e.config.parser.YamlConfigParser
@@ -8,17 +11,16 @@ import org.jholsten.me2e.container.microservice.MicroserviceContainer
 import org.jholsten.me2e.container.model.ContainerType
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
 
 internal class Me2eTestManagerTest {
     
     @Test
     fun `Using builder should create Test Manager instance`() {
         val config = testConfig()
-        val yamlConfigParser = mock<YamlConfigParser> { on { parseFile("any-file") } doReturn config }
-        val format = mock<ConfigFormat> { on { parser } doReturn yamlConfigParser }
+        val yamlConfigParser = mockk<YamlConfigParser>()
+        every { yamlConfigParser.parseFile(any()) } returns config
+        val format = mockk<ConfigFormat>()
+        every { format.parser } returns yamlConfigParser
         
         val expectedContainerNames = listOf("gateway-service", "database")
         val expectedMicroservices = mapOf("gateway-service" to config.containers["gateway-service"])
@@ -29,7 +31,7 @@ internal class Me2eTestManagerTest {
         
         assertEquals(expectedContainerNames, manager.containerNames)
         assertEquals(expectedMicroservices, manager.microservices)
-        verify(yamlConfigParser).parseFile("any-file")
+        verify { yamlConfigParser.parseFile("any-file") }
     }
     
     @Test
