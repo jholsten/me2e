@@ -1,29 +1,24 @@
 package org.jholsten.me2e.config.parser
 
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.jholsten.me2e.config.exception.ConfigParseException
 import org.jholsten.me2e.config.exception.ValidationException
 import org.jholsten.me2e.config.model.TestConfig
 import org.jholsten.me2e.config.utils.ConfigValidator
+import org.jholsten.me2e.config.utils.DeserializerFactory
 import org.jholsten.me2e.config.utils.FileUtils
 import java.lang.Exception
 
 /**
  * Class for parsing test configuration defined in YAML file.
  */
-class YamlConfigParser: ConfigParser {
-    companion object {
-        private val YAML_MAPPER = YAMLMapper().registerModule(KotlinModule.Builder().build())
-    }
-    
+class YamlConfigParser : ConfigParser {
     override fun parseFile(filename: String): TestConfig {
         val fileContents = FileUtils.readFileContentsFromResources(filename)
-        ConfigValidator.validate(fileContents, YAML_MAPPER)
-
+        ConfigValidator.validate(fileContents, DeserializerFactory.getYamlMapper())
+        
         try {
-            return YAML_MAPPER.readValue(fileContents, TestConfig::class.java)
+            return DeserializerFactory.getYamlMapper().readValue(fileContents, TestConfig::class.java)
         } catch (e: MismatchedInputException) {
             throw ValidationException(listOf("${e.path.joinToString(".") { it.fieldName }}: ${e.message}"))
         } catch (e: Exception) {
