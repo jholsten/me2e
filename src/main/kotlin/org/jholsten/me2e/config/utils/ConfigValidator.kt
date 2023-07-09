@@ -21,6 +21,7 @@ class ConfigValidator {
          * @param mapper Object mapper to use for reading the value
          */
         @Throws(InvalidFormatException::class, ValidationException::class)
+        @JvmStatic
         fun validate(value: String, mapper: ObjectMapper) {
             val schema = readJsonSchema(mapper)
             val result = schema.validate(mapper.readTree(value))
