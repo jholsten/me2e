@@ -4,3 +4,9 @@ containers:
     image: postgres:12
     environment:
       DB_PASSWORD: 123
+
+  database:
+    type: DATABASE
+    image: postgres:12
+    environment:
+      DB_PASSWORD: 123

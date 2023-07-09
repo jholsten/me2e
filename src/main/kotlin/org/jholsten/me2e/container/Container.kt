@@ -10,7 +10,13 @@ import org.jholsten.me2e.container.model.ContainerType
  * Model representing one Docker container.
  * This may be a microservice, a database or any other kind of supporting service.
  */
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", include = JsonTypeInfo.As.EXISTING_PROPERTY, defaultImpl = Container::class)
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.NAME,
+    property = "type",
+    include = JsonTypeInfo.As.PROPERTY,
+    defaultImpl = Container::class,
+    visible = true,
+)
 @JsonSubTypes(value = [
     JsonSubTypes.Type(value = MicroserviceContainer::class, name = "MICROSERVICE")
 ])

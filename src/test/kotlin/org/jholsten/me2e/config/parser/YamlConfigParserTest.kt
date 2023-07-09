@@ -10,7 +10,7 @@ class YamlConfigParserTest {
     fun testParseYamlConfig() {
         val config = YamlConfigParser().parseFile("me2e-config-test.yaml")
         
-        assertEquals(1, config.containers.size)
+        assertEquals(2, config.containers.size)
         // TODO: Add additional assertions
     }
     
