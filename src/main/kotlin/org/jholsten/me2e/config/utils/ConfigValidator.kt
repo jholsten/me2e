@@ -12,7 +12,7 @@ import kotlin.jvm.Throws
 /**
  * Validator that verifies that the configuration matches the JSON schema.
  */
-class ConfigValidator {
+internal class ConfigValidator {
     
     companion object {
         /**

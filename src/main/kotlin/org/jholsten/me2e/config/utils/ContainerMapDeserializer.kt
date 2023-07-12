@@ -10,7 +10,7 @@ import org.jholsten.me2e.container.Container
  * Custom deserializer for map of `(containerName, container)`.
  * Sets `name` field to `containerName` for each container.
  */
-class ContainerMapDeserializer : JsonDeserializer<Map<String, Container>>() {
+internal class ContainerMapDeserializer : JsonDeserializer<Map<String, Container>>() {
     override fun deserialize(p: JsonParser, ctxt: DeserializationContext): Map<String, Container> {
         val containers = mutableMapOf<String, Container>()
         val node = p.readValueAsTree<ObjectNode>()

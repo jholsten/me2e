@@ -12,7 +12,7 @@ import java.lang.Exception
 /**
  * Class for parsing test configuration defined in YAML file.
  */
-class YamlConfigParser : ConfigParser {
+internal class YamlConfigParser : ConfigParser {
     override fun parseFile(filename: String): TestConfig {
         val fileContents = FileUtils.readFileContentsFromResources(filename)
         ConfigValidator.validate(fileContents, DeserializerFactory.getYamlMapper())

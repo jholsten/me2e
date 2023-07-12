@@ -7,7 +7,7 @@ import kotlin.jvm.Throws
 /**
  * Utility class for reading file contents.
  */
-class FileUtils {
+internal class FileUtils {
     companion object {
         /**
          * Reads contents of file with the given name located in the `resources` folder.
