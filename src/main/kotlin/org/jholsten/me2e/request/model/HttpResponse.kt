@@ -9,7 +9,7 @@ import okhttp3.Request
  */
 class HttpResponse(
     /**
-     * TODO
+     * TODO: Make this independent of okhttp
      */
     private val request: Request,
     private val protocol: Protocol,
@@ -17,5 +17,5 @@ class HttpResponse(
     private val code: Int,
     private val handshake: Handshake?,
     
-) {
+    ) {
 }
