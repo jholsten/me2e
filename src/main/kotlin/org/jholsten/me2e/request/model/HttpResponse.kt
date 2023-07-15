@@ -1,21 +1,38 @@
 package org.jholsten.me2e.request.model
 
-import okhttp3.Handshake
-import okhttp3.Protocol
-import okhttp3.Request
-
 /**
  * Model representing an HTTP response.
  */
 class HttpResponse(
     /**
-     * TODO: Make this independent of okhttp
+     * The request that initiated this HTTP response.
+     * This may be different to the original request executed by the application
+     * (e.g. in case the request was redirected).
      */
-    private val request: Request,
-    private val protocol: Protocol,
-    private val message: String,
-    private val code: Int,
-    private val handshake: Handshake?,
-    
-    ) {
-}
+    val request: HttpRequest,
+
+    /**
+     * HTTP protocol that was used, such as `http/1.1`.
+     */
+    val protocol: String,
+
+    /**
+     * HTTP status message of this response.
+     */
+    val message: String,
+
+    /**
+     * HTTP status code of this response.
+     */
+    val code: Int,
+
+    /**
+     * HTTP headers set in this response.
+     */
+    val headers: Map<String, List<String>>,
+
+    /**
+     * Response body of this response.
+     */
+    val body: HttpResponseBody?,
+)
