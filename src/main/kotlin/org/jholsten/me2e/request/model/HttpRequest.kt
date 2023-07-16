@@ -20,7 +20,7 @@ class HttpRequest(
     /**
      * Headers of this request.
      */
-    val headers: Map<String, List<String>>,
+    val headers: Map<String, List<String>> = mapOf(),
 
     /**
      * Optional request body of this request.

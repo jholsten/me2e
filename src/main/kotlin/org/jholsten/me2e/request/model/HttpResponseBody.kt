@@ -1,7 +1,5 @@
 package org.jholsten.me2e.request.model
 
-import okio.ByteString
-
 /**
  * Model representing the response body of an HTTP response.
  */
@@ -24,5 +22,5 @@ class HttpResponseBody internal constructor(
     /**
      * Content of the response body as a byte string.
      */
-    val binaryContent: ByteString?,
+    val binaryContent: ByteArray?,
 )

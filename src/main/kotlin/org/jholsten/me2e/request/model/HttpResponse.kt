@@ -29,7 +29,7 @@ class HttpResponse(
     /**
      * HTTP headers set in this response.
      */
-    val headers: Map<String, List<String>>,
+    val headers: Map<String, List<String>> = mapOf(),
 
     /**
      * Response body of this response.
