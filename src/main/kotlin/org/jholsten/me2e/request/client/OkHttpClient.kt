@@ -1,39 +1,86 @@
 package org.jholsten.me2e.request.client
 
-import okhttp3.*
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import org.jholsten.me2e.request.mapper.HttpRequestMapper
+import org.jholsten.me2e.request.mapper.HttpResponseMapper
+import org.jholsten.me2e.request.model.HttpMethod
+import org.jholsten.me2e.request.model.HttpRequest
+import org.jholsten.me2e.request.model.HttpRequestBody
+import org.jholsten.me2e.request.model.HttpResponse
 
 /**
  * Client to use for executing requests over HTTP.
+ * Uses OkHttp internally for executing and processing the requests.
  */
-class HttpClient(
+class OkHttpClient(
     /**
      * Base URL to set for all requests.
      */
     val baseUrl: String,
+) : HttpClient {
     /**
      * Configured client which executes the requests.
+     * TODO: How to configure the client?
      */
-    val httpClient: OkHttpClient = OkHttpClient(),
-) {
-    
-    fun get(relativePath: String, headers: Map<String, String> = mapOf(), queryParams: Map<String, String> = mapOf()) {
-        val request = Request.Builder().get()
-        RequestBody.create("")
-        httpClient.newCall()
+    private val httpClient: okhttp3.OkHttpClient = okhttp3.OkHttpClient()
+
+    // TODO: @JvmOverloads
+    override fun get(path: String, queryParams: Map<String, String>, headers: Map<String, List<String>>): HttpResponse {
+        val request = HttpRequest.Builder()
+            .withUrl(baseUrl, relativePath = path, queryParams = queryParams)
+            .withMethod(HttpMethod.GET)
+            .withHeaders(headers)
+            .build()
+
+        return execute(request)
     }
-    
-    private fun createUrlWithQueryParams(relativePath: String, queryParams: Map<String, String>): HttpUrl {
-        val urlBuilder = createUrlBuilder(relativePath)
-        for (param in queryParams) {
-            urlBuilder.addQueryParameter(name = param.key, value = param.value)
+
+    override fun post(path: String, body: HttpRequestBody, queryParams: Map<String, String>, headers: Map<String, List<String>>): HttpResponse {
+        val request = HttpRequest.Builder()
+            .withUrl(baseUrl, relativePath = path, queryParams = queryParams)
+            .withMethod(HttpMethod.POST)
+            .withHeaders(headers)
+            .withBody(body)
+            .build()
+
+        return execute(request)
+    }
+
+    override fun put(path: String, body: HttpRequestBody, queryParams: Map<String, String>, headers: Map<String, List<String>>): HttpResponse {
+        val request = HttpRequest.Builder()
+            .withUrl(baseUrl, relativePath = path, queryParams = queryParams)
+            .withMethod(HttpMethod.PUT)
+            .withHeaders(headers)
+            .withBody(body)
+            .build()
+
+        return execute(request)
+    }
+
+    override fun patch(path: String, body: HttpRequestBody, queryParams: Map<String, String>, headers: Map<String, List<String>>): HttpResponse {
+        val request = HttpRequest.Builder()
+            .withUrl(baseUrl, relativePath = path, queryParams = queryParams)
+            .withMethod(HttpMethod.PATCH)
+            .withHeaders(headers)
+            .withBody(body)
+            .build()
+
+        return execute(request)
+    }
+
+    override fun delete(path: String, body: HttpRequestBody?, queryParams: Map<String, String>, headers: Map<String, List<String>>): HttpResponse {
+        val request = HttpRequest.Builder()
+            .withUrl(baseUrl, relativePath = path, queryParams = queryParams)
+            .withMethod(HttpMethod.DELETE)
+            .withHeaders(headers)
+            .withBody(body)
+            .build()
+
+        return execute(request)
+    }
+
+    override fun execute(request: HttpRequest): HttpResponse {
+        httpClient.newCall(HttpRequestMapper.INSTANCE.toOkHttpRequest(request)).execute().use {
+            return HttpResponseMapper.INSTANCE.toInternalDto(it)
         }
-        return urlBuilder.build()
-    }
-    
-    private fun createUrlBuilder(relativePath: String): HttpUrl.Builder {
-        val url = (baseUrl + relativePath).toHttpUrlOrNull()
-            ?: throw IllegalArgumentException("Invalid url format: '${baseUrl + relativePath}'")
-        return url.newBuilder()
     }
 }
