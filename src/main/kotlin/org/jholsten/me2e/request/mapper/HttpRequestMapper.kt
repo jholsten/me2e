@@ -31,7 +31,7 @@ internal abstract class HttpRequestMapper {
     @Mapping(target = "headers", source = "request.headers", qualifiedByName = ["mapHeadersToOkHttp"])
     @Mapping(target = "body", source = "body", qualifiedByName = ["mapBodyToOkHttp"])
     @Mapping(target = "tags\$okhttp", ignore = true)
-    @Mapping(target = "tags", ignore = true)
+    @Mapping(target = "tags", expression = "java(new java.util.HashMap<>())")
     abstract fun toOkHttpRequest(request: HttpRequest): Request
 
     @Named("mapHttpMethod")
