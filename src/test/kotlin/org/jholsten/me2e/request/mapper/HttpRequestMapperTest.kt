@@ -49,4 +49,41 @@ internal class HttpRequestMapperTest {
 
         RecursiveComparison.assertEquals(expected, result)
     }
+
+    @Test
+    fun `Mapping GET Request to okhttp should succeed`() {
+        val result = HttpRequestMapper.INSTANCE.toOkHttpRequest(HttpRequest(
+            url = "https://google.com/",
+            method = HttpMethod.GET,
+            headers = mapOf("Name" to listOf("Value")),
+            body = null,
+        ))
+
+        val expected = Request.Builder()
+            .get().url("https://google.com")
+            .header("Name", "Value")
+            .build()
+
+        RecursiveComparison.assertEquals(expected, result)
+    }
+
+    @Test
+    fun `Mapping POST Request with body to okhttp should succeed`() {
+        val result = HttpRequestMapper.INSTANCE.toOkHttpRequest(HttpRequest(
+            url = "https://google.com/",
+            method = HttpMethod.POST,
+            headers = mapOf("Name" to listOf("Value")),
+            body = HttpRequestBody(
+                content = "{\"name\": \"value\"}",
+                contentType = MediaType("application/json"),
+            ),
+        ))
+
+        val expected = Request.Builder()
+            .post("{\"name\": \"value\"}".toRequestBody("application/json".toMediaType())).url("https://google.com")
+            .header("Name", "Value")
+            .build()
+
+        RecursiveComparison.assertEquals(expected, result)
+    }
 }
