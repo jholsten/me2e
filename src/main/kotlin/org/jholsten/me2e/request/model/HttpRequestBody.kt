@@ -11,24 +11,24 @@ class HttpRequestBody {
     /**
      * The content of the body as a String.
      */
-    private val stringContent: String?
+    val stringContent: String?
 
     /**
      * The content of the body as a file.
      * This value is ignored if the [stringContent] is also set.
      */
-    private val fileContent: File?
+    val fileContent: File?
 
     /**
      * The content of the body as a byte string.
      * This value is ignored if the [stringContent] is also set.
      */
-    private val binaryContent: ByteString?
+    val binaryContent: ByteString?
 
     /**
      * Content type of the request body.
      */
-    private val contentType: MediaType?
+    val contentType: MediaType?
 
     constructor(content: String, contentType: MediaType) {
         this.stringContent = content

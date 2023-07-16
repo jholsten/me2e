@@ -9,7 +9,11 @@ class MediaType(
         private const val TOKEN = "[0-9A-Za-z!#\$%&'*+.^_`|~-]+"
         private val TYPE_REGEX = Pattern.compile("($TOKEN)/($TOKEN)")
 
+        @JvmStatic
         val JSON_UTF8 = MediaType("application/json; charset=utf-8")
+
+        @JvmStatic
+        val TEXT_PLAIN_UTF8 = MediaType("text/plain; charset=utf-8")
     }
 
     /**
