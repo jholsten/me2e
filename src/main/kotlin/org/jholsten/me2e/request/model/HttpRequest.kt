@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils
 /**
  * Model representing an HTTP request.
  */
-class HttpRequest(
+class HttpRequest internal constructor(
     /**
      * URL of this request.
      */
@@ -81,8 +81,10 @@ class HttpRequest(
 
         fun addHeader(key: String, value: String) = apply {
             val values = this.headers.getOrDefault(key, listOf()).toMutableList()
-            values.add(value)
-            this.headers[key] = values
+            if (!values.contains(value)) {
+                values.add(value)
+                this.headers[key] = values
+            }
         }
 
         fun withBody(body: HttpRequestBody?) = apply {
@@ -92,6 +94,12 @@ class HttpRequest(
         fun build(): HttpRequest {
             val url = this.url ?: throw IllegalArgumentException("Url cannot be null")
             val method = this.method ?: throw IllegalArgumentException("Http method cannot be null")
+            if (method.requiresRequestBody()) {
+                require(body != null) { "HTTP method $method needs to have a request body" }
+            }
+            if (!method.allowsRequestBody()) {
+                require(body == null) { "HTTP method $method does not allow to have a request body" }
+            }
             return HttpRequest(
                 url = url,
                 method = method,
