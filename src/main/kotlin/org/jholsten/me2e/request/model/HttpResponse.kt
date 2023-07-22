@@ -5,7 +5,7 @@ import okhttp3.internal.toImmutableMap
 /**
  * Model representing an HTTP response.
  */
-class HttpResponse(
+class HttpResponse internal constructor(
     /**
      * The request that initiated this HTTP response.
      * This may be different to the original request executed by the application
@@ -86,8 +86,10 @@ class HttpResponse(
 
         fun addHeader(key: String, value: String) = apply {
             val values = this.headers.getOrDefault(key, listOf()).toMutableList()
-            values.add(value)
-            this.headers[key] = values
+            if (!values.contains(value)) {
+                values.add(value)
+                this.headers[key] = values
+            }
         }
 
         fun withBody(body: HttpResponseBody?) = apply {
@@ -95,12 +97,12 @@ class HttpResponse(
         }
 
         fun build(): HttpResponse {
-            val httpRequest = this.request ?: throw IllegalArgumentException("Request cannot be null")
+            val request = this.request ?: throw IllegalArgumentException("Request cannot be null")
             val protocol = this.protocol ?: throw IllegalArgumentException("Protocol cannot be null")
             val message = this.message ?: throw IllegalArgumentException("Message cannot be null")
             val code = this.code ?: throw IllegalArgumentException("Code cannot be null")
             return HttpResponse(
-                request = httpRequest,
+                request = request,
                 protocol = protocol,
                 message = message,
                 code = code,
