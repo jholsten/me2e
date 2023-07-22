@@ -11,5 +11,19 @@ enum class HttpMethod {
     DELETE,
     HEAD,
     OPTIONS,
-    UNKNOWN,
+    UNKNOWN;
+
+    /**
+     * Returns whether this HTTP method requires a request body.
+     */
+    fun requiresRequestBody(): Boolean {
+        return this == POST || this == PUT || this == PATCH
+    }
+
+    /**
+     * Returns whether this HTTP method allows having a request body.
+     */
+    fun allowsRequestBody(): Boolean {
+        return this != GET && this != HEAD
+    }
 }
