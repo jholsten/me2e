@@ -10,6 +10,7 @@ import org.jholsten.me2e.request.mapper.HttpResponseMapper
 import org.jholsten.me2e.request.model.HttpMethod
 import org.jholsten.me2e.request.model.HttpRequest
 import org.jholsten.me2e.request.model.HttpResponse
+import org.jholsten.util.RecursiveComparison
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -75,8 +76,9 @@ internal class OkHttpRequestInterceptorTest {
     fun `Modifying interceptor should call okhttp3 chain`() {
         val interceptor = object : RequestInterceptor {
             override fun intercept(chain: RequestInterceptor.Chain): HttpResponse {
-                val request = chain.getRequest()
-                request.headers["Authorization"] = listOf("Bearer 123")
+                val request = chain.getRequest().newBuilder()
+                    .addHeader("Authorization", "Bearer 123")
+                    .build()
                 return chain.proceed(request)
             }
         }
@@ -84,7 +86,10 @@ internal class OkHttpRequestInterceptorTest {
         val httpRequest = httpRequest()
         val okHttpResponse = okHttpResponse()
         val httpResponse = httpResponse()
-        val modifiedOkHttpRequest = okHttpRequest().newBuilder()
+        val modifiedOkHttpRequest = originalOkHttpRequest.newBuilder()
+            .addHeader("Authorization", "Bearer 123")
+            .build()
+        val modifiedHttpRequest = httpRequest.newBuilder()
             .addHeader("Authorization", "Bearer 123")
             .build()
 
@@ -102,7 +107,11 @@ internal class OkHttpRequestInterceptorTest {
         verify { chain.request() }
         verify { chain.proceed(modifiedOkHttpRequest) }
         verify { httpRequestMapper.toInternalDto(originalOkHttpRequest) }
-        verify { httpRequestMapper.toOkHttpRequest(httpRequest) }
+        verify {
+            httpRequestMapper.toOkHttpRequest(match {
+                RecursiveComparison.isEqualTo(modifiedHttpRequest, it)
+            })
+        }
         verify { httpResponseMapper.toInternalDto(okHttpResponse) }
         verify { httpResponseMapper.toOkHttpResponse(httpResponse) }
     }
@@ -118,7 +127,7 @@ internal class OkHttpRequestInterceptorTest {
         return HttpRequest(
             url = "https://google.com/",
             method = HttpMethod.GET,
-            headers = mutableMapOf("Name" to listOf("Value")),
+            headers = mapOf("Name" to listOf("Value")),
             body = null,
         )
     }
@@ -140,7 +149,7 @@ internal class OkHttpRequestInterceptorTest {
             request = HttpRequest(
                 url = "https://google.com/",
                 method = HttpMethod.GET,
-                headers = mutableMapOf("Name" to listOf("Value")),
+                headers = mapOf("Name" to listOf("Value")),
                 body = null,
             ),
             protocol = "http/1.1",

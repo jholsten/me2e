@@ -50,8 +50,9 @@ internal class OkHttpClientTest {
         val interceptors = listOf(
             object : RequestInterceptor {
                 override fun intercept(chain: RequestInterceptor.Chain): HttpResponse {
-                    val request = chain.getRequest()
-                    request.headers["Authorization"] = listOf("Bearer 123")
+                    val request = chain.getRequest().newBuilder()
+                        .addHeader("Authorization", "Bearer 123")
+                        .build()
                     return chain.proceed(request)
                 }
             },
@@ -160,8 +161,9 @@ internal class OkHttpClientTest {
         val interceptors = listOf(
             object : RequestInterceptor {
                 override fun intercept(chain: RequestInterceptor.Chain): HttpResponse {
-                    val request = chain.getRequest()
-                    request.headers["Authorization"] = listOf("Bearer 123")
+                    val request = chain.getRequest().newBuilder()
+                        .addHeader("Authorization", "Bearer 123")
+                        .build()
                     return chain.proceed(request)
                 }
             },
@@ -234,8 +236,9 @@ internal class OkHttpClientTest {
         val interceptors = listOf(
             object : RequestInterceptor {
                 override fun intercept(chain: RequestInterceptor.Chain): HttpResponse {
-                    val request = chain.getRequest()
-                    request.headers["Authorization"] = listOf("Bearer 123")
+                    val request = chain.getRequest().newBuilder()
+                        .addHeader("Authorization", "Bearer 123")
+                        .build()
                     return chain.proceed(request)
                 }
             },
@@ -296,7 +299,7 @@ internal class OkHttpClientTest {
         val httpRequest = HttpRequest(
             url = "https://google.com/search?name=dog&id=1",
             method = HttpMethod.GET,
-            headers = mutableMapOf("Name" to listOf("Value")),
+            headers = mapOf("Name" to listOf("Value")),
             body = null,
         )
 
@@ -314,7 +317,7 @@ internal class OkHttpClientTest {
         val httpRequest = HttpRequest(
             url = "https://google.com/search",
             method = HttpMethod.GET,
-            headers = mutableMapOf(),
+            headers = mapOf(),
             body = null,
         )
 
@@ -328,7 +331,7 @@ internal class OkHttpClientTest {
         val httpRequest = HttpRequest(
             url = "https://google.com/upload?name=dog&id=1",
             method = HttpMethod.POST,
-            headers = mutableMapOf("Name" to listOf("Value")),
+            headers = mapOf("Name" to listOf("Value")),
             body = HttpRequestBody("Hello World", MediaType.TEXT_PLAIN_UTF8),
         )
 
@@ -347,7 +350,7 @@ internal class OkHttpClientTest {
         val httpRequest = HttpRequest(
             url = "https://google.com/upload",
             method = HttpMethod.POST,
-            headers = mutableMapOf(),
+            headers = mapOf(),
             body = HttpRequestBody("Hello World", MediaType.TEXT_PLAIN_UTF8),
         )
 
@@ -364,7 +367,7 @@ internal class OkHttpClientTest {
         val httpRequest = HttpRequest(
             url = "https://google.com/upload?name=dog&id=1",
             method = HttpMethod.PUT,
-            headers = mutableMapOf("Name" to listOf("Value")),
+            headers = mapOf("Name" to listOf("Value")),
             body = HttpRequestBody("Hello World", MediaType.TEXT_PLAIN_UTF8),
         )
 
@@ -383,7 +386,7 @@ internal class OkHttpClientTest {
         val httpRequest = HttpRequest(
             url = "https://google.com/upload",
             method = HttpMethod.PUT,
-            headers = mutableMapOf(),
+            headers = mapOf(),
             body = HttpRequestBody("Hello World", MediaType.TEXT_PLAIN_UTF8),
         )
 
@@ -400,7 +403,7 @@ internal class OkHttpClientTest {
         val httpRequest = HttpRequest(
             url = "https://google.com/upload?name=dog&id=1",
             method = HttpMethod.PATCH,
-            headers = mutableMapOf("Name" to listOf("Value")),
+            headers = mapOf("Name" to listOf("Value")),
             body = HttpRequestBody("Hello World", MediaType.TEXT_PLAIN_UTF8),
         )
 
@@ -419,7 +422,7 @@ internal class OkHttpClientTest {
         val httpRequest = HttpRequest(
             url = "https://google.com/upload",
             method = HttpMethod.PATCH,
-            headers = mutableMapOf(),
+            headers = mapOf(),
             body = HttpRequestBody("Hello World", MediaType.TEXT_PLAIN_UTF8),
         )
 
@@ -436,7 +439,7 @@ internal class OkHttpClientTest {
         val httpRequest = HttpRequest(
             url = "https://google.com/image?name=dog&id=1",
             method = HttpMethod.DELETE,
-            headers = mutableMapOf("Name" to listOf("Value")),
+            headers = mapOf("Name" to listOf("Value")),
             body = HttpRequestBody("Hello World", MediaType.TEXT_PLAIN_UTF8),
         )
 
@@ -455,7 +458,7 @@ internal class OkHttpClientTest {
         val httpRequest = HttpRequest(
             url = "https://google.com/image",
             method = HttpMethod.DELETE,
-            headers = mutableMapOf(),
+            headers = mapOf(),
             body = null,
         )
 
@@ -473,7 +476,7 @@ internal class OkHttpClientTest {
         val httpRequest = HttpRequest(
             url = "https://google.com/search?name=dog&id=1",
             method = HttpMethod.GET,
-            headers = mutableMapOf("Name" to listOf("Value")),
+            headers = mapOf("Name" to listOf("Value")),
             body = null,
         )
         val okHttpRequest = okHttpRequestWithoutBody()
@@ -507,7 +510,7 @@ internal class OkHttpClientTest {
         val httpRequest = HttpRequest(
             url = "https://google.com/search?name=dog&id=1",
             method = HttpMethod.GET,
-            headers = mutableMapOf("Name" to listOf("Value")),
+            headers = mapOf("Name" to listOf("Value")),
             body = null,
         )
         val okHttpRequest = okHttpRequestWithBody()
@@ -613,7 +616,7 @@ internal class OkHttpClientTest {
             request = HttpRequest(
                 url = "https://google.com/",
                 method = HttpMethod.GET,
-                headers = mutableMapOf("Name" to listOf("Value")),
+                headers = mapOf("Name" to listOf("Value")),
                 body = null,
             ),
             protocol = "http/1.1",

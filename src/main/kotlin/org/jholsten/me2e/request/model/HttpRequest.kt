@@ -1,6 +1,7 @@
 package org.jholsten.me2e.request.model
 
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import okhttp3.internal.toImmutableMap
 import org.apache.commons.lang3.StringUtils
 
 /**
@@ -20,20 +21,33 @@ class HttpRequest(
     /**
      * Headers of this request.
      */
-    val headers: MutableMap<String, List<String>> = mutableMapOf(),
+    val headers: Map<String, List<String>> = mapOf(),
 
     /**
      * Optional request body of this request.
      */
     val body: HttpRequestBody?,
-
-    // TODO: newBuilder to modify instance
 ) {
-    class Builder {
+    /**
+     * Returns new builder instance initialized with the properties of this HTTP request.
+     * This allows to create new instances with partly modified properties.
+     */
+    fun newBuilder(): Builder {
+        return Builder(this)
+    }
+
+    class Builder constructor() {
         private var url: String? = null
         private var method: HttpMethod? = null
-        private var headers: Map<String, List<String>> = mapOf()
+        private var headers: MutableMap<String, List<String>> = mutableMapOf()
         private var body: HttpRequestBody? = null
+
+        internal constructor(httpRequest: HttpRequest) : this() {
+            this.url = httpRequest.url
+            this.method = httpRequest.method
+            this.headers = httpRequest.headers.toMutableMap()
+            this.body = httpRequest.body
+        }
 
         /**
          * Builds the URL from base URL, relative path and optional query parameters.
@@ -45,7 +59,7 @@ class HttpRequest(
          * The base URL and relative path are normalized, so that they can include leading and trailing
          * slashes, which will be removed when constructing the URL.
          */
-        fun withUrl(baseUrl: String, relativePath: String, queryParams: Map<String, String> = mapOf()): Builder {
+        fun withUrl(baseUrl: String, relativePath: String, queryParams: Map<String, String> = mapOf()) = apply {
             val normalizedBaseUrl = StringUtils.stripEnd(baseUrl, "/")
             val normalizedRelativePath = StringUtils.stripStart(relativePath, "/")
             val url = "$normalizedBaseUrl/$normalizedRelativePath"
@@ -55,22 +69,24 @@ class HttpRequest(
             }
 
             this.url = urlBuilder.build().toString()
-            return this
         }
 
-        fun withMethod(method: HttpMethod): Builder {
+        fun withMethod(method: HttpMethod) = apply {
             this.method = method
-            return this
         }
 
-        fun withHeaders(headers: Map<String, List<String>>): Builder {
-            this.headers = headers
-            return this
+        fun withHeaders(headers: Map<String, List<String>>) = apply {
+            this.headers = headers.toMutableMap()
         }
 
-        fun withBody(body: HttpRequestBody?): Builder {
+        fun addHeader(key: String, value: String) = apply {
+            val values = this.headers.getOrDefault(key, listOf()).toMutableList()
+            values.add(value)
+            this.headers[key] = values
+        }
+
+        fun withBody(body: HttpRequestBody?) = apply {
             this.body = body
-            return this
         }
 
         fun build(): HttpRequest {
@@ -79,7 +95,7 @@ class HttpRequest(
             return HttpRequest(
                 url = url,
                 method = method,
-                headers = headers.toMutableMap(),
+                headers = headers.toImmutableMap(),
                 body = body,
             )
         }

@@ -28,7 +28,7 @@ internal class HttpResponseMapperIT {
             request = HttpRequest(
                 url = "https://google.com/",
                 method = HttpMethod.GET,
-                headers = mutableMapOf("Name" to listOf("Value")),
+                headers = mapOf("Name" to listOf("Value")),
                 body = null,
             ),
             protocol = "http/1.1",
@@ -61,7 +61,7 @@ internal class HttpResponseMapperIT {
             request = HttpRequest(
                 url = "https://google.com/",
                 method = HttpMethod.GET,
-                headers = mutableMapOf("Name" to listOf("Value")),
+                headers = mapOf("Name" to listOf("Value")),
                 body = null,
             ),
             protocol = "http/1.1",
@@ -123,7 +123,7 @@ internal class HttpResponseMapperIT {
             request = HttpRequest(
                 url = "https://google.com/",
                 method = HttpMethod.GET,
-                headers = mutableMapOf("Name" to listOf("Value")),
+                headers = mapOf("Name" to listOf("Value")),
                 body = null,
             ),
             protocol = "http/1.1",
@@ -153,7 +153,7 @@ internal class HttpResponseMapperIT {
             request = HttpRequest(
                 url = "https://google.com/",
                 method = HttpMethod.GET,
-                headers = mutableMapOf("Name" to listOf("Value")),
+                headers = mapOf("Name" to listOf("Value")),
                 body = null,
             ),
             protocol = "http/1.1",
