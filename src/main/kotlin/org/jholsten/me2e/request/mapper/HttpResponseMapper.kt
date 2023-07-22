@@ -1,6 +1,9 @@
 package org.jholsten.me2e.request.mapper
 
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.Response
+import okhttp3.ResponseBody
+import okhttp3.ResponseBody.Companion.toResponseBody
 import org.jholsten.me2e.request.model.HttpRequest
 import org.jholsten.me2e.request.model.HttpResponse
 import org.jholsten.me2e.request.model.HttpResponseBody
@@ -8,9 +11,11 @@ import org.mapstruct.Mapper
 import org.mapstruct.Mapping
 import org.mapstruct.Named
 import org.mapstruct.factory.Mappers
+import java.io.IOException
 import java.nio.charset.Charset
+import kotlin.jvm.Throws
 
-@Mapper
+@Mapper(uses = [HttpRequestMapper::class])
 internal abstract class HttpResponseMapper {
     companion object {
         val INSTANCE: HttpResponseMapper = Mappers.getMapper(HttpResponseMapper::class.java)
@@ -23,6 +28,12 @@ internal abstract class HttpResponseMapper {
     @Mapping(target = "headers", expression = "java(okHttpResponse.headers().toMultimap())")
     @Mapping(target = "body", source = "okHttpResponse", qualifiedByName = ["mapResponseBody"])
     abstract fun toInternalDto(okHttpResponse: Response): HttpResponse
+
+    @Mapping(target = "protocol", expression = "java(Protocol.get(response.getProtocol()))")
+    @Mapping(target = "headers", source = "response.headers", qualifiedByName = ["mapHeadersToOkHttp"])
+    @Mapping(target = "body", source = "body", qualifiedByName = ["mapResponseBodyToOkHttp"])
+    @Throws(IOException::class)
+    abstract fun toOkHttpResponse(response: HttpResponse): Response
 
     @Named("mapRequest")
     fun mapRequest(okHttpResponse: Response): HttpRequest {
@@ -41,6 +52,20 @@ internal abstract class HttpResponseMapper {
                 stringContent = binaryContent.toString(Charset.forName("UTF-8")),
                 binaryContent = binaryContent,
             )
+        }
+    }
+
+    @Named("mapResponseBodyToOkHttp")
+    fun mapResponseBodyToOkHttp(responseBody: HttpResponseBody?): ResponseBody? {
+        if (responseBody == null) {
+            return null
+        }
+
+        val mediaType = responseBody.contentType?.value?.toMediaTypeOrNull()
+        return when {
+            responseBody.stringContent != null -> responseBody.stringContent.toResponseBody(mediaType)
+            responseBody.binaryContent != null -> responseBody.binaryContent.toResponseBody(mediaType)
+            else -> null
         }
     }
 }

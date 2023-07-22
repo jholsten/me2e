@@ -10,7 +10,7 @@ import org.jholsten.me2e.request.model.MediaType
 import org.jholsten.util.RecursiveComparison
 import org.junit.jupiter.api.Test
 
-internal class HttpRequestMapperTest {
+internal class HttpRequestMapperIT {
 
     @Test
     fun `Mapping okhttp3 GET Request should succeed`() {
