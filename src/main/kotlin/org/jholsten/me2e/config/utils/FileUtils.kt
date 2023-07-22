@@ -7,7 +7,7 @@ import kotlin.jvm.Throws
 /**
  * Utility class for reading file contents.
  */
-internal class FileUtils {
+internal class FileUtils private constructor() {
     companion object {
         /**
          * Reads contents of file with the given name located in the `resources` folder.
@@ -20,7 +20,7 @@ internal class FileUtils {
                 ?: throw FileNotFoundException("File $filename could not be found in resources folder.")
             return file.readText()
         }
-        
+
         /**
          * Returns input stream of file with the given name located in the `resources` folder.
          * @param filename Relative path of the file to read, starting from `resources` folder.
