@@ -36,7 +36,7 @@ internal class MediaTypeTest {
         assertEquals("application/json", mediaType.withoutParameters())
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "[{index}] String Media Type {0} should be interpreted as String")
     @ValueSource(strings = ["text/plain", "text/*", "application/json", "application/xml"])
     fun `String media types should be interpreted as Strings`(value: String) {
         val mediaType = MediaType(value)
@@ -44,7 +44,7 @@ internal class MediaTypeTest {
         assertTrue(mediaType.isStringType())
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "[{index}] Binary Media Type {0} should not be interpreted as String")
     @ValueSource(strings = ["application/pdf", "image/png", "video/mp4", "application/xhtml+xml"])
     fun `Binary media types should not be interpreted as Strings`(value: String) {
         val mediaType = MediaType(value)
