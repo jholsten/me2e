@@ -20,12 +20,14 @@ class HttpRequest(
     /**
      * Headers of this request.
      */
-    val headers: Map<String, List<String>> = mapOf(),
+    val headers: MutableMap<String, List<String>> = mutableMapOf(),
 
     /**
      * Optional request body of this request.
      */
     val body: HttpRequestBody?,
+
+    // TODO: newBuilder to modify instance
 ) {
     class Builder {
         private var url: String? = null
@@ -77,7 +79,7 @@ class HttpRequest(
             return HttpRequest(
                 url = url,
                 method = method,
-                headers = headers,
+                headers = headers.toMutableMap(),
                 body = body,
             )
         }

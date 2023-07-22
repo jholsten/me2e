@@ -1,13 +1,41 @@
 package org.jholsten.me2e.request.client
 
+import org.jholsten.me2e.request.interceptor.RequestInterceptor
 import org.jholsten.me2e.request.model.HttpRequest
 import org.jholsten.me2e.request.model.HttpRequestBody
 import org.jholsten.me2e.request.model.HttpResponse
+import java.util.concurrent.TimeUnit
 
 /**
  * Client to use for executing requests over HTTP.
  */
 interface HttpClient {
+
+    /**
+     * Changes the configuration of the HTTP client after its instantiation.
+     * Returns [Configurator] instance to configure the client's properties.
+     */
+    fun configure(): Configurator
+
+    /**
+     * Returns list of request interceptors used for this HTTP client.
+     */
+    fun getRequestInterceptors(): List<RequestInterceptor>
+
+    /**
+     * Returns configured connect timeout in milliseconds.
+     */
+    fun getConnectTimeout(): Long
+
+    /**
+     * Returns configured read timeout in milliseconds.
+     */
+    fun getReadTimeout(): Long
+
+    /**
+     * Returns configured write timeout in milliseconds.
+     */
+    fun getWriteTimeout(): Long
 
     /**
      * Executes an HTTP GET request to the given path.
@@ -68,4 +96,76 @@ interface HttpClient {
      * @param request HTTP request to execute.
      */
     fun execute(request: HttpRequest): HttpResponse
+
+    /**
+     * Builder for the HTTP client.
+     */
+    interface Builder {
+        /**
+         * Sets the base URL of the client.
+         */
+        fun withBaseUrl(baseUrl: String): Builder
+
+        /**
+         * Adds the given interceptor for all outgoing requests.
+         */
+        fun addRequestInterceptor(interceptor: RequestInterceptor): Builder
+
+        /**
+         * Builds and returns the configured HttpClient.
+         */
+        fun build(): HttpClient
+    }
+
+    /**
+     * Configurator for changing the HTTP client configuration after its instantiation.
+     */
+    interface Configurator {
+        /**
+         * Adds the given interceptor for all outgoing requests.
+         * @param interceptor Request interceptor to add
+         */
+        fun addRequestInterceptor(interceptor: RequestInterceptor): Configurator
+
+        /**
+         * Sets the given connect timeout for new connections. The default value is 10 seconds.
+         */
+        fun setConnectTimeout(timeout: Long, unit: TimeUnit): Configurator
+
+        /**
+         * Sets the given read timeout for new connections. The default value is 10 seconds.
+         */
+        fun setReadTimeout(timeout: Long, unit: TimeUnit): Configurator
+
+        /**
+         * Sets the given write timeout for new connections. The default value is 10 seconds.
+         */
+        fun setWriteTimeout(timeout: Long, unit: TimeUnit): Configurator
+    }
+
+    /**
+     * Configuration of the HTTP client.
+     */
+    interface Configuration {
+        /**
+         * Adds the given interceptor for all outgoing requests.
+         * @param interceptor Request interceptor to add
+         */
+        fun addRequestInterceptor(interceptor: RequestInterceptor)
+
+        /**
+         * Sets the given connect timeout for new connections. The default value is 10 seconds.
+         */
+        fun setConnectTimeout(timeout: Long, unit: TimeUnit)
+
+        /**
+         * Sets the given read timeout for new connections. The default value is 10 seconds.
+         */
+        fun setReadTimeout(timeout: Long, unit: TimeUnit)
+
+        /**
+         * Sets the given write timeout for new connections. The default value is 10 seconds.
+         */
+        fun setWriteTimeout(timeout: Long, unit: TimeUnit)
+    }
 }

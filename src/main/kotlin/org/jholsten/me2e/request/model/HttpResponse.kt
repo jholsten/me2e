@@ -35,4 +35,6 @@ class HttpResponse(
      * Response body of this response.
      */
     val body: HttpResponseBody?,
+
+    // TODO: newBuilder to modify instance
 )
