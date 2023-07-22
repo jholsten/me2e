@@ -1,5 +1,6 @@
 package org.jholsten.me2e.request.client
 
+import okhttp3.ResponseBody
 import okhttp3.internal.toImmutableList
 import org.jholsten.me2e.request.interceptor.OkHttpRequestInterceptor
 import org.jholsten.me2e.request.interceptor.RequestInterceptor
@@ -101,8 +102,15 @@ class OkHttpClient private constructor(
     }
 
     override fun execute(request: HttpRequest): HttpResponse {
-        configuration.httpClient.newCall(HttpRequestMapper.INSTANCE.toOkHttpRequest(request)).execute().use {
-            return HttpResponseMapper.INSTANCE.toInternalDto(it)
+        // The response may only be closed, if a body is present (otherwise an [IllegalStateException] is thrown).
+        // Therefore, `use` cannot be applied here.
+        var responseBody: ResponseBody? = null
+        try {
+            val response = configuration.httpClient.newCall(HttpRequestMapper.INSTANCE.toOkHttpRequest(request)).execute()
+            responseBody = response.body
+            return HttpResponseMapper.INSTANCE.toInternalDto(response)
+        } finally {
+            responseBody?.close()
         }
     }
 
@@ -118,7 +126,19 @@ class OkHttpClient private constructor(
             configuration.addRequestInterceptor(interceptor)
         }
 
-        override fun build(): HttpClient {
+        override fun withConnectTimeout(timeout: Long, unit: TimeUnit) = apply {
+            configuration.setConnectTimeout(timeout, unit)
+        }
+
+        override fun withReadTimeout(timeout: Long, unit: TimeUnit) = apply {
+            configuration.setReadTimeout(timeout, unit)
+        }
+
+        override fun withWriteTimeout(timeout: Long, unit: TimeUnit) = apply {
+            configuration.setWriteTimeout(timeout, unit)
+        }
+
+        override fun build(): OkHttpClient {
             val baseUrl = this.baseUrl ?: throw IllegalArgumentException("Base URL cannot be null")
             configuration.apply()
             return OkHttpClient(

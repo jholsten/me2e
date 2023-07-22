@@ -108,8 +108,24 @@ interface HttpClient {
 
         /**
          * Adds the given interceptor for all outgoing requests.
+         * @param interceptor Request interceptor to add
          */
         fun addRequestInterceptor(interceptor: RequestInterceptor): Builder
+
+        /**
+         * Sets the given connect timeout for new connections. The default value is 10 seconds.
+         */
+        fun withConnectTimeout(timeout: Long, unit: TimeUnit): Builder
+
+        /**
+         * Sets the given read timeout for new connections. The default value is 10 seconds.
+         */
+        fun withReadTimeout(timeout: Long, unit: TimeUnit): Builder
+
+        /**
+         * Sets the given write timeout for new connections. The default value is 10 seconds.
+         */
+        fun withWriteTimeout(timeout: Long, unit: TimeUnit): Builder
 
         /**
          * Builds and returns the configured HttpClient.
