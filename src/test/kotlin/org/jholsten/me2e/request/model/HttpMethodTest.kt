@@ -19,14 +19,14 @@ internal class HttpMethodTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0} should allow a request body")
-    @EnumSource(HttpMethod::class, names = ["GET", "HEAD"])
+    @EnumSource(HttpMethod::class, names = ["GET", "HEAD"], mode = EnumSource.Mode.EXCLUDE)
     fun `HTTP methods should allow a request body`(method: HttpMethod) {
-        assertFalse(method.allowsRequestBody())
+        assertTrue(method.allowsRequestBody())
     }
 
     @ParameterizedTest(name = "[{index}] {0} should not allow a request body")
-    @EnumSource(HttpMethod::class, names = ["GET", "HEAD"], mode = EnumSource.Mode.EXCLUDE)
+    @EnumSource(HttpMethod::class, names = ["GET", "HEAD"])
     fun `HTTP methods should not allow a request body`(method: HttpMethod) {
-        assertTrue(method.allowsRequestBody())
+        assertFalse(method.allowsRequestBody())
     }
 }
