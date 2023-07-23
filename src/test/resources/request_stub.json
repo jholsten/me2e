@@ -1,0 +1,36 @@
+{
+  "request": {
+    "method": "POST",
+    "path": {
+      "equals": "/search"
+    },
+    "body-patterns": [
+      {
+        "contains": "\"id\": 123"
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "json-content": {
+        "id": 123,
+        "items": [
+          {
+            "name": "A",
+            "value": 42
+          },
+          {
+            "name": "B",
+            "value": 1
+          }
+        ]
+      }
+    },
+    "headers": {
+      "Content-Type": [
+        "application/json"
+      ]
+    }
+  }
+}

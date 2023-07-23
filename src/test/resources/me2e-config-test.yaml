@@ -10,3 +10,10 @@ containers:
     image: postgres:12
     environment:
       DB_PASSWORD: 123
+
+mock-servers:
+  port: 9000
+  services:
+    payment-service:
+      stubs:
+        - request_stub.json

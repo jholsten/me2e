@@ -14,13 +14,37 @@
         }
       },
       "additionalProperties": false
+    },
+    "mock-servers": {
+      "$id": "#/properties/mock-servers",
+      "type": "object",
+      "description": "HTTP web servers mocking third party services",
+      "properties": {
+        "port": {
+          "type": "integer",
+          "description": "Port where mocked web servers are exposed",
+          "default": 9000
+        },
+        "services": {
+          "description": "Map of service name and stubs for this third party service",
+          "patternProperties": {
+            "^[a-zA-Z0-9._-]+$": {
+              "$ref": "#/definitions/mock-server"
+            }
+          }
+        }
+      },
+      "additionalProperties": false
     }
   },
-
+  "required": [
+    "containers"
+  ],
   "definitions": {
     "container": {
       "$id": "#/definitions/container",
       "type": "object",
+      "description": "Definition of a Docker container to be started",
       "properties": {
         "type": {
           "type": "string",
@@ -34,26 +58,51 @@
           "type": "string",
           "description": "Docker image for this container"
         },
-        "environment": {"$ref": "#/definitions/list_or_dict"}
+        "environment": {
+          "$ref": "#/definitions/list_or_dict"
+        }
       },
       "required": [
         "type",
         "image"
       ]
     },
-
+    "mock-server": {
+      "$id": "#/definitions/mock-server",
+      "type": "object",
+      "properties": {
+        "stubs": {
+          "type": "array",
+          "description": "List of paths to stub definitions. The files need to be located in `resources` folder.",
+          "items": {
+            "type": "string",
+            "pattern": "^([^\\r\\n\\t\\f\\v\\?\\\\*\\\\|\\<\\>\\/]+\\/?)*stub\\.json$"
+          }
+        }
+      }
+    },
     "list_or_dict": {
       "oneOf": [
         {
           "type": "object",
           "patternProperties": {
             ".+": {
-              "type": ["string", "number", "null"]
+              "type": [
+                "string",
+                "number",
+                "null"
+              ]
             }
           },
           "additionalProperties": false
         },
-        {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        }
       ]
     }
   }

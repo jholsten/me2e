@@ -1,0 +1,165 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Me2e definition of stubs",
+  "description": "Stub definition for the Me2e Library",
+  "type": "object",
+  "properties": {
+    "request": {
+      "$id": "#/properties/request",
+      "$ref": "#/definitions/request"
+    },
+    "response": {
+      "$id": "#/properties/response",
+      "$ref": "#/definitions/response"
+    }
+  },
+  "definitions": {
+    "request": {
+      "$id": "#/definitions/request",
+      "type": "object",
+      "description": "Definition of the request to which the stub should respond.",
+      "properties": {
+        "method": {
+          "type": "string",
+          "description": "HTTP method of the request",
+          "enum": [
+            "GET",
+            "PUT",
+            "POST",
+            "PATCH",
+            "DELETE",
+            "HEAD",
+            "OPTIONS"
+          ]
+        },
+        "path": {
+          "$ref": "#/definitions/string-matcher",
+          "description": "URL path of the request"
+        },
+        "headers": {
+          "type": "object",
+          "description": "Headers of the request as map of header name and string matcher",
+          "patternProperties": {
+            ".+": {
+              "$ref": "#/definitions/string-matcher"
+            }
+          }
+        },
+        "query-parameters": {
+          "type": "object",
+          "description": "Query parameters of the request as map of query parameter name and string matcher for the values",
+          "patternProperties": {
+            ".+": {
+              "$ref": "#/definitions/string-matcher"
+            }
+          }
+        },
+        "body-patterns": {
+          "type": "array",
+          "description": "Patterns to match the request body",
+          "items": {
+            "$ref": "#/definitions/string-matcher"
+          }
+        }
+      }
+    },
+    "response": {
+      "$id": "#/definitions/response",
+      "type": "object",
+      "description": "Definition of the response to be returned by the mocked web server",
+      "properties": {
+        "status": {
+          "type": "integer",
+          "description": "HTTP status code to return"
+        },
+        "headers": {
+          "type": "object",
+          "description": "Headers of the response",
+          "patternProperties": {
+            ".+": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "body": {
+          "$ref": "#/definitions/response-body",
+          "description": "Response body"
+        }
+      }
+    },
+    "response-body": {
+      "$id": "#/definitions/response-body",
+      "type": "object",
+      "description": "Definition of the response body",
+      "properties": {
+        "string-content": {
+          "type": "string",
+          "description": "Literal text to return in the response body"
+        },
+        "json-content": {
+          "$ref": "#/definitions/dictionary",
+          "description": "JSON content of the response body as a dictionary"
+        },
+        "base64-content": {
+          "type": "string",
+          "description": "Binary content of the response body encoded as Base 64"
+        }
+      }
+    },
+    "body-pattern": {
+      "$id": "#/definitions/body-pattern",
+      "type": "object",
+      "description": "Pattern to match a request body"
+    },
+    "string-matcher": {
+      "$id": "#/definitions/string-matcher",
+      "type": "object",
+      "description": "Pattern to match strings",
+      "properties": {
+        "equals": {
+          "type": "string",
+          "description": "Matches only if the string is exactly equal to the defined one"
+        },
+        "matches": {
+          "type": "string",
+          "description": "Matches if the string conforms to the defined regex pattern"
+        },
+        "not-matches": {
+          "type": "string",
+          "description": "Matches if the string does not conform to the defined regex pattern"
+        },
+        "contains": {
+          "type": "string",
+          "description": "Matches if the string contains the defined one"
+        },
+        "not-contains": {
+          "type": "string",
+          "description": "Matches if the string does not contain the defined one"
+        },
+        "ignore-case": {
+          "type": "boolean",
+          "description": "Whether to disable case sensitivity for the string matching",
+          "default": false
+        }
+      }
+    },
+    "dictionary": {
+      "$id": "#/definitions/dictionary",
+      "type": "object",
+      "patternProperties": {
+        ".+": {
+          "type": [
+            "string",
+            "number",
+            "boolean",
+            "array",
+            "null"
+          ]
+        }
+      }
+    }
+  }
+}
