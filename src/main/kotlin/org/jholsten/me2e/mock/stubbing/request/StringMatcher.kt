@@ -37,18 +37,24 @@ class StringMatcher(
      * Whether to disable case sensitivity for the string matching.
      */
     @JsonProperty("ignore-case")
-    internal val ignoreCase: Boolean,
+    internal val ignoreCase: Boolean = false,
 ) {
 
     /**
      * Returns whether the given string conforms to all of the requirements of this matcher.
+     * @param isUrl Whether the given value is a URL. If true, the value is stripped so that only the path remains.
      */
-    internal fun matches(value: String): Boolean {
-        if (!matchesEqual(value)) {
+    internal fun matches(value: String, isUrl: Boolean = false): Boolean {
+        val strippedValue = when {
+            isUrl -> if (value.contains("?")) value.substring(0, value.indexOf("?")) else value
+            else -> value
+        }
+
+        if (!matchesEqual(strippedValue)) {
             return false
-        } else if (!matchesPattern(value)) {
+        } else if (!matchesPattern(strippedValue)) {
             return false
-        } else if (!matchesContains(value)) {
+        } else if (!matchesContains(strippedValue)) {
             return false
         }
 
