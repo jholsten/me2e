@@ -62,7 +62,7 @@ class MockServerStubRequest(
     }
 
     internal fun pathMatches(actualUrl: String): Boolean {
-        return this.path.matches(actualUrl)
+        return this.path.matches(actualUrl, isUrl = true)
     }
 
     internal fun headersMatch(headers: HttpHeaders?): Boolean {
@@ -73,8 +73,8 @@ class MockServerStubRequest(
         }
 
         for (header in this.headers) {
-            val actualHeaderValues = headers.getHeader(header.key).values()
-            if (!actualHeaderValues.any { header.value.matches(it) }) {
+            val actualHeader = headers.getHeader(header.key)
+            if (!actualHeader.isPresent || !actualHeader.values().any { header.value.matches(it) }) {
                 return false
             }
         }
@@ -88,8 +88,8 @@ class MockServerStubRequest(
         }
 
         for (parameter in this.queryParameters) {
-            val actualParameterValues = request.queryParameter(parameter.key).values()
-            if (!actualParameterValues.any { parameter.value.matches(it) }) {
+            val actualParameter = request.queryParameter(parameter.key)
+            if (!actualParameter.isPresent || !actualParameter.values().any { parameter.value.matches(it) }) {
                 return false
             }
         }
