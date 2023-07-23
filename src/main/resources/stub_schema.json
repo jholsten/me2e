@@ -13,6 +13,10 @@
       "$ref": "#/definitions/response"
     }
   },
+  "required": [
+    "request",
+    "response"
+  ],
   "definitions": {
     "request": {
       "$id": "#/definitions/request",
@@ -61,7 +65,11 @@
             "$ref": "#/definitions/string-matcher"
           }
         }
-      }
+      },
+      "required": [
+        "method",
+        "path"
+      ]
     },
     "response": {
       "$id": "#/definitions/response",
@@ -107,7 +115,24 @@
           "type": "string",
           "description": "Binary content of the response body encoded as Base 64"
         }
-      }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "string-content"
+          ]
+        },
+        {
+          "required": [
+            "json-content"
+          ]
+        },
+        {
+          "required": [
+            "base64-content"
+          ]
+        }
+      ]
     },
     "body-pattern": {
       "$id": "#/definitions/body-pattern",
