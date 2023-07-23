@@ -91,6 +91,9 @@ dependencies {
 
     // Dependency for utils
     implementation "org.apache.commons:commons-lang3:3.12.0"
+
+    // Dependency for mocking web servers
+    implementation "com.github.tomakehurst:wiremock-jre8:2.35.0"
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
