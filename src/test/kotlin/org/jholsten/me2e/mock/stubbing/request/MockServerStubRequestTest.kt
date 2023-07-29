@@ -169,6 +169,65 @@ internal class MockServerStubRequestTest {
         assertFalse(matcher.matches(request))
     }
 
+    @Test
+    fun `Request with the same body should match`() {
+        val matcher = MockServerStubRequest(
+            path = StringMatcher(equals = "/upload"),
+            method = HttpMethod.POST,
+            bodyPatterns = listOf(
+                StringMatcher(equals = "Hello World")
+            )
+        )
+        val request = wireMockRequest(
+            url = "/upload",
+            method = RequestMethod.POST,
+            body = "Hello World",
+        )
+
+        assertTrue(matcher.bodyPatternsMatch(request))
+        assertTrue(matcher.matches(request))
+    }
+
+    @Test
+    fun `Request with multiple body patterns should match`() {
+        val matcher = MockServerStubRequest(
+            path = StringMatcher(equals = "/upload"),
+            method = HttpMethod.POST,
+            bodyPatterns = listOf(
+                StringMatcher(contains = "Hello"),
+                StringMatcher(contains = "World")
+            )
+        )
+        val request = wireMockRequest(
+            url = "/upload",
+            method = RequestMethod.POST,
+            body = "Hello World",
+        )
+
+        assertTrue(matcher.bodyPatternsMatch(request))
+        assertTrue(matcher.matches(request))
+    }
+
+    @Test
+    fun `Request with one of multiple body patterns not matching should not match`() {
+        val matcher = MockServerStubRequest(
+            path = StringMatcher(equals = "/upload"),
+            method = HttpMethod.POST,
+            bodyPatterns = listOf(
+                StringMatcher(contains = "Hello"),
+                StringMatcher(contains = "No")
+            )
+        )
+        val request = wireMockRequest(
+            url = "/upload",
+            method = RequestMethod.POST,
+            body = "Hello World",
+        )
+
+        assertFalse(matcher.bodyPatternsMatch(request))
+        assertFalse(matcher.matches(request))
+    }
+
     private fun wireMockRequest(url: String, method: RequestMethod, headers: HttpHeaders = HttpHeaders.noHeaders(), body: String? = null): Request {
         return LoggedRequest(
             url,

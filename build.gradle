@@ -94,6 +94,9 @@ dependencies {
 
     // Dependency for mocking web servers
     implementation "com.github.tomakehurst:wiremock-jre8:2.35.0"
+
+    // Dependency for awaiting events
+    implementation "org.awaitility:awaitility:4.1.0"
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
