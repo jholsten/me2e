@@ -54,7 +54,7 @@ internal class OkHttpRequestInterceptorTest {
         every { logger.info(any()) } just runs
         every { chain.request() } returns okHttpRequest
         every { chain.proceed(any()) } returns okHttpResponse
-        every { httpRequestMapper.toInternalDto(any()) } returns httpRequest
+        every { httpRequestMapper.toInternalDto(any<Request>()) } returns httpRequest
         every { httpRequestMapper.toOkHttpRequest(any()) } returns okHttpRequest
         every { httpResponseMapper.toInternalDto(any()) } returns httpResponse
         every { httpResponseMapper.toOkHttpResponse(any()) } returns okHttpResponse
@@ -95,7 +95,7 @@ internal class OkHttpRequestInterceptorTest {
 
         every { chain.request() } returns originalOkHttpRequest
         every { chain.proceed(any()) } returns okHttpResponse
-        every { httpRequestMapper.toInternalDto(any()) } returns httpRequest
+        every { httpRequestMapper.toInternalDto(any<Request>()) } returns httpRequest
         every { httpRequestMapper.toOkHttpRequest(any()) } returns modifiedOkHttpRequest
         every { httpResponseMapper.toInternalDto(any()) } returns httpResponse
         every { httpResponseMapper.toOkHttpResponse(any()) } returns okHttpResponse

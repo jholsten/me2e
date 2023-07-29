@@ -3,8 +3,12 @@ package org.jholsten.me2e.mock.stubbing.response
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 
-internal class MockServerStubResponseMapper {
+internal class MockServerStubResponseMapper private constructor() {
     companion object {
+        /**
+         * Maps the given stub response to Wire Mock equivalent.
+         */
+        @JvmStatic
         fun toWireMockResponseDefinition(stubResponse: MockServerStubResponse): ResponseDefinitionBuilder {
             val builder = aResponse().withStatus(stubResponse.code)
             for (header in stubResponse.headers) {

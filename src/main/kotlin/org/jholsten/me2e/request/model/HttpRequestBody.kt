@@ -30,7 +30,7 @@ class HttpRequestBody {
      */
     val contentType: MediaType?
 
-    constructor(content: String, contentType: MediaType) {
+    constructor(content: String, contentType: MediaType?) {
         this.stringContent = content
         this.fileContent = null
         this.binaryContent = null

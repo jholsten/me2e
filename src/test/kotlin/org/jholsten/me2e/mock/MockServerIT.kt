@@ -2,7 +2,6 @@ package org.jholsten.me2e.mock
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.jholsten.me2e.mock.stubbing.MockServerStub
 import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequest
@@ -11,6 +10,7 @@ import org.jholsten.me2e.mock.stubbing.response.MockServerStubResponse
 import org.jholsten.me2e.mock.stubbing.response.MockServerStubResponseBody
 import org.jholsten.me2e.request.client.OkHttpClient
 import org.jholsten.me2e.request.model.HttpMethod
+import org.jholsten.me2e.request.model.HttpRequest
 import org.jholsten.me2e.request.model.HttpRequestBody
 import org.jholsten.me2e.request.model.MediaType
 import org.jholsten.util.RecursiveComparison
@@ -39,6 +39,11 @@ internal class MockServerIT {
                 headers = mapOf("Content-Type" to listOf("application/json")),
             )
         )
+        val expectedReceivedRequest = HttpRequest(
+            url = "http://localhost:9000/search",
+            method = HttpMethod.POST,
+            body = HttpRequestBody("{\"id\": 123}", MediaType.JSON_UTF8),
+        )
         server.start()
 
         val response = client.post("/search", HttpRequestBody("{\"id\": 123}", MediaType.JSON_UTF8))
@@ -49,6 +54,12 @@ internal class MockServerIT {
         assertEquals(listOf("application/json"), response.headers["content-type"])
         assertEquals(1, server.stubs.size)
         RecursiveComparison.assertEquals(expectedStub, server.stubs.first())
+        assertEquals(1, server.getReceivedRequests().size)
+        assertEquals(expectedReceivedRequest.url, server.getReceivedRequests().first().url)
+        assertEquals(expectedReceivedRequest.method, server.getReceivedRequests().first().method)
+        assertEquals(expectedReceivedRequest.body?.stringContent, server.getReceivedRequests().first().body?.stringContent)
+        assertEquals("application/json", server.getReceivedRequests().first().body?.contentType?.value)
+        assertTrue(server.isRunning())
     }
 
     private fun parseJsonNode(value: String): JsonNode {

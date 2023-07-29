@@ -1,5 +1,7 @@
 package org.jholsten.me2e.request.mapper
 
+import com.github.tomakehurst.wiremock.http.HttpHeaders
+import com.github.tomakehurst.wiremock.http.RequestMethod
 import okhttp3.Headers
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.Request
@@ -27,6 +29,12 @@ internal abstract class HttpRequestMapper {
     @Mapping(target = "body", source = "okHttpRequest", qualifiedByName = ["mapBody"])
     abstract fun toInternalDto(okHttpRequest: Request): HttpRequest
 
+    @Mapping(target = "url", source = "absoluteUrl")
+    @Mapping(target = "method", source = "request.method", qualifiedByName = ["mapHttpMethod"])
+    @Mapping(target = "headers", source = "request.headers", qualifiedByName = ["mapHeaders"])
+    @Mapping(target = "body", source = "request", qualifiedByName = ["mapBody"])
+    abstract fun toInternalDto(request: com.github.tomakehurst.wiremock.http.Request): HttpRequest
+
     @Mapping(target = "url", expression = "java(HttpUrl.parse(request.getUrl()))")
     @Mapping(target = "headers", source = "request.headers", qualifiedByName = ["mapHeadersToOkHttp"])
     @Mapping(target = "body", source = "body", qualifiedByName = ["mapBodyToOkHttp"])
@@ -39,9 +47,19 @@ internal abstract class HttpRequestMapper {
         return HttpMethodMapper.INSTANCE.toInternalDto(okHttpRequest.method)
     }
 
+    @Named("mapHttpMethod")
+    fun mapHttpMethod(requestMethod: RequestMethod): HttpMethod {
+        return HttpMethodMapper.INSTANCE.toInternalDto(requestMethod.value())
+    }
+
     @Named("mapHeaders")
     fun mapHeaders(okHttpRequest: Request): Map<String, List<String>> {
         return okHttpRequest.headers.toMultimap()
+    }
+
+    @Named("mapHeaders")
+    fun mapHeaders(headers: HttpHeaders): Map<String, List<String>> {
+        return headers.all().associate { it.key() to it.values() }
     }
 
     @Named("mapBody")
@@ -52,6 +70,15 @@ internal abstract class HttpRequestMapper {
         return HttpRequestBody(
             buffer = buffer,
             contentType = body.contentType()?.let { return@let MediaTypeMapper.INSTANCE.toInternalDto(it) },
+        )
+    }
+
+    @Named("mapBody")
+    fun mapBody(request: com.github.tomakehurst.wiremock.http.Request): HttpRequestBody? {
+        request.body ?: return null
+        return HttpRequestBody(
+            content = request.bodyAsString,
+            contentType = request.contentTypeHeader()?.let { return@let MediaTypeMapper.INSTANCE.toInternalDto(it) },
         )
     }
 

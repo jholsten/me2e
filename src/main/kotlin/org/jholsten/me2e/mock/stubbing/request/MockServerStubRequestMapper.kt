@@ -6,7 +6,7 @@ import com.github.tomakehurst.wiremock.http.Request
 import com.github.tomakehurst.wiremock.matching.MatchResult
 import com.github.tomakehurst.wiremock.matching.ValueMatcher
 
-internal class MockServerStubRequestMapper {
+internal class MockServerStubRequestMapper private constructor() {
     companion object {
         /**
          * Maps stub request to equivalent stub for WireMock.

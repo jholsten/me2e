@@ -11,6 +11,8 @@ import org.awaitility.core.ConditionTimeoutException
 import org.jholsten.me2e.container.exception.ServiceStartupException
 import org.jholsten.me2e.container.healthcheck.exception.ServiceNotHealthyException
 import org.jholsten.me2e.mock.parser.YamlMockServerStubParser
+import org.jholsten.me2e.request.mapper.HttpRequestMapper
+import org.jholsten.me2e.request.model.HttpRequest
 
 
 /**
@@ -73,10 +75,19 @@ class MockServer(
     }
 
     /**
+     * Returns whether this mock server is currently up and running.
+     */
+    fun isRunning(): Boolean {
+        return this.wireMockServer.isRunning
+    }
+
+    /**
      * Returns all requests that this mock server received.
      */
-    fun getEvents() {
-        // TODO
+    fun getReceivedRequests(): List<HttpRequest> {
+        val events = wireMockServer.allServeEvents
+        events.sortBy { it.request.loggedDate }
+        return events.map { HttpRequestMapper.INSTANCE.toInternalDto(it.request) }
     }
 
     private fun readStubs(stubFiles: List<String>): List<MockServerStub> {
