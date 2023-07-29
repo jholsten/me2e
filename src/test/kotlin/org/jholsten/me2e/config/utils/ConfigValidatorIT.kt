@@ -16,6 +16,7 @@ internal class ConfigValidatorIT {
 
     @Test
     fun `Validating valid YAML should not throw`() {
+        val validator = ConfigValidator(YAML_MAPPER)
         val value = """
             containers:
               gateway-service:
@@ -25,11 +26,12 @@ internal class ConfigValidatorIT {
                   DB_PASSWORD: 123
         """.trimIndent()
 
-        assertDoesNotThrow { ConfigValidator.validate(value, YAML_MAPPER) }
+        assertDoesNotThrow { validator.validate(value) }
     }
 
     @Test
     fun `Validating valid JSON should not throw`() {
+        val validator = ConfigValidator(JSON_MAPPER)
         val value = """
             {
               "containers": {
@@ -44,11 +46,12 @@ internal class ConfigValidatorIT {
             }
         """.trimIndent()
 
-        assertDoesNotThrow { ConfigValidator.validate(value, JSON_MAPPER) }
+        assertDoesNotThrow { validator.validate(value) }
     }
 
     @Test
     fun `Validating YAML with missing fields should fail`() {
+        val validator = ConfigValidator(YAML_MAPPER)
         val value = """
             containers:
               gateway-service:
@@ -56,7 +59,7 @@ internal class ConfigValidatorIT {
                   DB_PASSWORD: 123
         """.trimIndent()
 
-        val e = assertThrowsExactly(ValidationException::class.java) { ConfigValidator.validate(value, YAML_MAPPER) }
+        val e = assertThrowsExactly(ValidationException::class.java) { validator.validate(value) }
 
         assertEquals(2, e.validationErrors.size)
         assertNotNull(e.message)
@@ -66,6 +69,7 @@ internal class ConfigValidatorIT {
 
     @Test
     fun `Validating YAML with invalid enum value should fail`() {
+        val validator = ConfigValidator(YAML_MAPPER)
         val value = """
             containers:
               gateway-service:
@@ -75,7 +79,7 @@ internal class ConfigValidatorIT {
                   DB_PASSWORD: 123
         """.trimIndent()
 
-        val e = assertThrowsExactly(ValidationException::class.java) { ConfigValidator.validate(value, YAML_MAPPER) }
+        val e = assertThrowsExactly(ValidationException::class.java) { validator.validate(value) }
 
         assertEquals(1, e.validationErrors.size)
         assertNotNull(e.message)

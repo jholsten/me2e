@@ -14,7 +14,7 @@ import kotlin.jvm.Throws
 /**
  * Validator that verifies that a value matches a JSON schema.
  */
-internal class SchemaValidator(
+internal open class SchemaValidator(
     /**
      * Filename of the JSON schema. Needs to be located in resources folder.
      */

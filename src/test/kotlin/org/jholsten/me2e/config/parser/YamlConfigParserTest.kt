@@ -3,6 +3,7 @@ package org.jholsten.me2e.config.parser
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
+import com.networknt.schema.JsonSchemaFactory
 import io.mockk.*
 import org.jholsten.me2e.parsing.exception.ParseException
 import org.jholsten.me2e.parsing.exception.InvalidFormatException
@@ -18,6 +19,8 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertThrowsExactly
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.io.BufferedInputStream
+import java.io.InputStream
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -55,7 +58,7 @@ internal class YamlConfigParserTest {
         val result = YamlConfigParser().parseFile(filename)
 
         assertEquals(config, result)
-        verify { ConfigValidator.validate(contents, yamlMapper) }
+        verify { anyConstructed<ConfigValidator>().validate(contents) }
         verify { FileUtils.readFileContentsFromResources(filename) }
     }
 
@@ -63,7 +66,7 @@ internal class YamlConfigParserTest {
     fun `Parsing invalid YAML should fail`() {
         val filename = "any-file"
         mockDeserializationAndValidation(testConfig())
-        every { ConfigValidator.validate(any(), any()) } throws InvalidFormatException("Some validation error")
+        every { anyConstructed<ConfigValidator>().validate(any()) } throws InvalidFormatException("Some validation error")
 
         assertThrowsExactly(InvalidFormatException::class.java) { YamlConfigParser().parseFile(filename) }
     }
@@ -98,10 +101,15 @@ internal class YamlConfigParserTest {
         mockkObject(FileUtils.Companion)
         every { FileUtils.readFileContentsFromResources(any()) } returns contents
 
-        mockkObject(ConfigValidator.Companion)
-        every { ConfigValidator.validate(any(), any()) } just runs
+        mockkConstructor(ConfigValidator::class)
+        every { anyConstructed<ConfigValidator>().validate(any()) } just runs
+
+        // JsonSchemaFactory needs to be mocked since init-Block of SchemaValidator is executed even though it is mocked
+        mockkConstructor(JsonSchemaFactory::class)
+        every { anyConstructed<JsonSchemaFactory>().getSchema(any<InputStream>()) } returns mockk()
 
         every { yamlMapper.readValue(contents, TestConfig::class.java) } returns config
+        every { yamlMapper.readTree(any<BufferedInputStream>()) } returns null
     }
 
     private fun testConfig(): TestConfig {
