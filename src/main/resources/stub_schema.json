@@ -76,7 +76,7 @@
       "type": "object",
       "description": "Definition of the response to be returned by the mocked web server",
       "properties": {
-        "status": {
+        "code": {
           "type": "integer",
           "description": "HTTP status code to return"
         },
@@ -96,7 +96,10 @@
           "$ref": "#/definitions/response-body",
           "description": "Response body"
         }
-      }
+      },
+      "required": [
+        "code"
+      ]
     },
     "response-body": {
       "$id": "#/definitions/response-body",
@@ -105,7 +108,7 @@
       "properties": {
         "string-content": {
           "type": "string",
-          "description": "Literal text to return in the response body"
+          "description": "Literal text content of the response body"
         },
         "json-content": {
           "$ref": "#/definitions/dictionary",

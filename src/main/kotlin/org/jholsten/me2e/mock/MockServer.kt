@@ -3,12 +3,14 @@ package org.jholsten.me2e.mock
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.common.FatalStartupException
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import okhttp3.internal.toImmutableList
 import org.jholsten.me2e.mock.stubbing.MockServerStub
 import org.awaitility.Awaitility.await
 import org.awaitility.Durations
 import org.awaitility.core.ConditionTimeoutException
 import org.jholsten.me2e.container.exception.ServiceStartupException
 import org.jholsten.me2e.container.healthcheck.exception.ServiceNotHealthyException
+import org.jholsten.me2e.mock.parser.YamlMockServerStubParser
 
 
 /**
@@ -41,7 +43,7 @@ class MockServer(
     private val wireMockServer: WireMockServer = WireMockServer(WireMockConfiguration().port(this.port))
 
     init {
-        this.stubs = listOf() // stubs TODO: Read from file
+        this.stubs = readStubs(stubs)
         for (stub in this.stubs) {
             stub.register(wireMockServer)
         }
@@ -75,5 +77,10 @@ class MockServer(
      */
     fun getEvents() {
         // TODO
+    }
+
+    private fun readStubs(stubFiles: List<String>): List<MockServerStub> {
+        val parser = YamlMockServerStubParser()
+        return stubFiles.map { parser.parseFile(it) }.toImmutableList()
     }
 }

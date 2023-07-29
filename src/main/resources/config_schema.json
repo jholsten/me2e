@@ -71,7 +71,7 @@
           "description": "List of paths to stub definitions. The files need to be located in `resources` folder.",
           "items": {
             "type": "string",
-            "pattern": "^([^\\r\\n\\t\\f\\v\\?\\\\*\\\\|\\<\\>\\/]+\\/?)*stub\\.json$"
+            "pattern": "^([^\\r\\n\\t\\f\\v\\?\\\\*\\\\|\\<\\>\\/]+\\/?)*stub\\.(yaml|json)$"
           }
         }
       }

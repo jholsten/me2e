@@ -3,6 +3,8 @@ package org.jholsten.me2e.mock.stubbing
 import com.github.tomakehurst.wiremock.WireMockServer
 import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequest
 import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequestMapper
+import org.jholsten.me2e.mock.stubbing.response.MockServerStubResponse
+import org.jholsten.me2e.mock.stubbing.response.MockServerStubResponseMapper
 
 /**
  * Stub defining how the Mock Server should respond on certain requests.
@@ -12,13 +14,21 @@ class MockServerStub(
      * Request to which the stub should respond.
      */
     val request: MockServerStubRequest,
+
+    /**
+     * Response to be returned.
+     */
+    val response: MockServerStubResponse,
 ) {
     /**
      * Registers this stub at the given wire mock server instance.
      * This results in the instance returning the specified response whenever the request matches the specified stub.
+     * @param wireMockServer Wire mock server instance at which stub should be registered
      */
     internal fun register(wireMockServer: WireMockServer) {
-        wireMockServer.stubFor(MockServerStubRequestMapper.toWireMockStubRequestMatcher(request))
-        // TODO: Return response
+        val requestMatcher = MockServerStubRequestMapper.toWireMockStubRequestMatcher(this.request)
+        val response = MockServerStubResponseMapper.toWireMockResponseDefinition(this.response)
+
+        wireMockServer.stubFor(requestMatcher.willReturn(response))
     }
 }
