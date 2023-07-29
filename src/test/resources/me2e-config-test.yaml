@@ -12,8 +12,7 @@ containers:
       DB_PASSWORD: 123
 
 mock-servers:
-  port: 9000
-  services:
-    payment-service:
-      stubs:
-        - request_stub.json
+  payment-service:
+    port: 9000
+    stubs:
+      - request_stub.json

@@ -3,7 +3,9 @@ package org.jholsten.me2e.config.model
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import org.jholsten.me2e.config.utils.ContainerMapDeserializer
+import org.jholsten.me2e.config.utils.MockServerMapDeserializer
 import org.jholsten.me2e.container.Container
+import org.jholsten.me2e.mock.MockServer
 
 /**
  * Model containing the test configuration to use.
@@ -19,7 +21,8 @@ class TestConfig(
      * HTTP web servers mocking third party services.
      */
     @JsonProperty("mock-servers")
-    val mockServers: MockServerConfig? = null,
+    @JsonDeserialize(using = MockServerMapDeserializer::class)
+    val services: Map<String, MockServer> = mapOf(),
 ) {
 
 }
