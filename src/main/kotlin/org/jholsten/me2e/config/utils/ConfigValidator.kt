@@ -1,12 +1,9 @@
 package org.jholsten.me2e.config.utils
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.networknt.schema.JsonSchema
-import com.networknt.schema.JsonSchemaFactory
-import com.networknt.schema.SpecVersion
-import com.networknt.schema.ValidationMessage
-import org.jholsten.me2e.config.exception.InvalidFormatException
-import org.jholsten.me2e.config.exception.ValidationException
+import org.jholsten.me2e.parsing.exception.InvalidFormatException
+import org.jholsten.me2e.parsing.exception.ValidationException
+import org.jholsten.me2e.parsing.utils.SchemaValidator
 import kotlin.jvm.Throws
 
 /**
@@ -23,29 +20,7 @@ internal class ConfigValidator private constructor() {
         @Throws(InvalidFormatException::class, ValidationException::class)
         @JvmStatic
         fun validate(value: String, mapper: ObjectMapper) {
-            val schema = readJsonSchema(mapper)
-            val result = schema.validate(mapper.readTree(value))
-
-            if (result.isEmpty()) {
-                return
-            }
-
-            throwExceptionForValidationErrors(result)
-        }
-
-        private fun readJsonSchema(mapper: ObjectMapper): JsonSchema {
-            val factory = JsonSchemaFactory.builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7)).objectMapper(mapper).build()
-            return factory.getSchema(FileUtils.getResourceAsStream("config_schema.json"))
-        }
-
-        private fun throwExceptionForValidationErrors(errors: Set<ValidationMessage>) {
-            val typeErrors = errors.filter { it.type == "type" }
-
-            if (typeErrors.isNotEmpty()) {
-                throw InvalidFormatException("Invalid test configuration format: ${typeErrors.map { it.message }}")
-            }
-
-            throw ValidationException(errors.map { it.message })
+            SchemaValidator("config_schema.json", mapper).validate(value)
         }
     }
 }

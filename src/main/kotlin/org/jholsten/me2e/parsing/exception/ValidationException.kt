@@ -1,4 +1,4 @@
-package org.jholsten.me2e.config.exception
+package org.jholsten.me2e.parsing.exception
 
 /**
  * Exception that occurs when the test configuration is invalid.
@@ -9,4 +9,4 @@ package org.jholsten.me2e.config.exception
  */
 class ValidationException(
     val validationErrors: List<String>,
-): ConfigParseException("Validation for test configuration failed: $validationErrors")
+) : ParseException("Validation failed: $validationErrors")

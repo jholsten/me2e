@@ -2,6 +2,7 @@ package org.jholsten.me2e.config.utils
 
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.node.ObjectNode
+import org.jholsten.me2e.parsing.utils.DeserializerFactory
 
 internal class MapDeserializerUtils {
     companion object {
