@@ -15,20 +15,18 @@ internal class MockServerStubRequestMapper private constructor() {
          */
         @JvmStatic
         fun toWireMockStubRequestMatcher(stubRequest: MockServerStubRequest): MappingBuilder {
-            val matcher = object : ValueMatcher<Request> {
-                override fun match(request: Request): MatchResult {
-                    val results = listOf(
-                        stubRequest.pathMatches(request.url) to 10.0,
-                        stubRequest.methodMatches(request.method) to 10.0,
-                        stubRequest.headersMatch(request.headers) to 1.0,
-                        stubRequest.queryParametersMatch(request) to 1.0,
-                        stubRequest.bodyPatternsMatch(request) to 1.0,
-                    )
+            val matcher = ValueMatcher<Request> { request ->
+                val results = listOf(
+                    stubRequest.pathMatches(request.url) to 10.0,
+                    stubRequest.methodMatches(request.method) to 10.0,
+                    stubRequest.headersMatch(request.headers) to 1.0,
+                    stubRequest.queryParametersMatch(request) to 1.0,
+                    stubRequest.bodyPatternsMatch(request) to 1.0,
+                )
 
-                    return MatchResult.aggregateWeighted(results.map {
-                        weight(if (it.first) MatchResult.exactMatch() else MatchResult.noMatch(), it.second)
-                    })
-                }
+                MatchResult.aggregateWeighted(results.map {
+                    weight(if (it.first) MatchResult.exactMatch() else MatchResult.noMatch(), it.second)
+                })
             }
             return WireMock.requestMatching(matcher)
         }

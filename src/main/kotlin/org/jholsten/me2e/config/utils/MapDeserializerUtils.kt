@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.node.ObjectNode
 import org.jholsten.me2e.parsing.utils.DeserializerFactory
 
-internal class MapDeserializerUtils {
+internal class MapDeserializerUtils private constructor() {
     companion object {
         /**
          * Sets `name` field of the map's value objects to the key of the corresponding map entry.

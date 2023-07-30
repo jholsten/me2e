@@ -39,6 +39,19 @@ internal class MockServerStubRequestTest {
     }
 
     @Test
+    fun `Request with another url should not match`() {
+        val matcher = MockServerStubRequest(
+            path = StringMatcher(equals = "/search"),
+            method = HttpMethod.POST
+        )
+        val request = wireMockRequest(url = "/upload", method = RequestMethod.POST)
+
+        assertTrue(matcher.methodMatches(request.method))
+        assertFalse(matcher.pathMatches(request.url))
+        assertFalse(matcher.matches(request))
+    }
+
+    @Test
     fun `Request with the same headers should match`() {
         val matcher = MockServerStubRequest(
             path = StringMatcher(equals = "/search"),

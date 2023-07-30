@@ -1,5 +1,7 @@
 package org.jholsten.me2e.mock.stubbing.request
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
@@ -146,5 +148,29 @@ internal class StringMatcherTest {
 
         assertTrue(matcher.matches("ABC"))
         assertFalse(matcher.matches("DEF"))
+    }
+
+    @Test
+    fun `Deserializing string matcher should set correct properties`() {
+        val value = """
+            {
+                "equals": "abc",
+                "matches": "123",
+                "not-matches": "456",
+                "contains": "ABC",
+                "not-contains": "999",
+                "ignore-case": true
+            }
+        """.trimIndent()
+
+        val mapper = ObjectMapper().registerModule(KotlinModule.Builder().build())
+        val result = mapper.readValue(value, StringMatcher::class.java)
+
+        assertEquals("abc", result.equals)
+        assertEquals("123", result.matches)
+        assertEquals("456", result.notMatches)
+        assertEquals("ABC", result.contains)
+        assertEquals("999", result.notContains)
+        assertTrue(result.ignoreCase)
     }
 }
