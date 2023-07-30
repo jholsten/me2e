@@ -57,7 +57,7 @@ internal class MockServerIT {
         assertEquals(1, server.getReceivedRequests().size)
         assertEquals(expectedReceivedRequest.url, server.getReceivedRequests().first().url)
         assertEquals(expectedReceivedRequest.method, server.getReceivedRequests().first().method)
-        assertEquals(expectedReceivedRequest.body?.stringContent, server.getReceivedRequests().first().body?.stringContent)
+        assertEquals(expectedReceivedRequest.body?.asString(), server.getReceivedRequests().first().body?.asString())
         assertEquals("application/json", server.getReceivedRequests().first().body?.contentType?.value)
         assertTrue(server.isRunning())
     }

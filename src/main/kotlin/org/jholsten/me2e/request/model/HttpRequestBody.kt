@@ -1,66 +1,61 @@
 package org.jholsten.me2e.request.model
 
 import okio.Buffer
-import okio.ByteString
 import java.io.File
+import java.util.*
 
 /**
  * Model representing the request body of an HTTP request.
  */
 class HttpRequestBody {
     /**
-     * The content of the body as a String.
-     */
-    val stringContent: String?
-
-    /**
-     * The content of the body as a file.
-     * This value is ignored if the [stringContent] is also set.
-     */
-    val fileContent: File?
-
-    /**
-     * The content of the body as a byte string.
-     * This value is ignored if the [stringContent] is also set.
-     */
-    val binaryContent: ByteString?
-
-    /**
      * Content type of the request body.
      */
     val contentType: MediaType?
 
+    /**
+     * Content of the request body.
+     */
+    private val content: ByteArray?
+
     constructor(content: String, contentType: MediaType?) {
-        this.stringContent = content
-        this.fileContent = null
-        this.binaryContent = null
+        this.content = content.toByteArray()
         this.contentType = contentType
     }
 
-    constructor(content: File, contentType: MediaType) {
-        this.fileContent = content
-        this.stringContent = null
-        this.binaryContent = null
+    constructor(content: File, contentType: MediaType?) {
+        this.content = content.readBytes()
         this.contentType = contentType
     }
 
-    constructor(content: ByteString, contentType: MediaType) {
-        this.binaryContent = content
-        this.stringContent = null
-        this.fileContent = null
+    constructor(content: ByteArray, contentType: MediaType?) {
+        this.content = content
         this.contentType = contentType
     }
 
     internal constructor(buffer: Buffer, contentType: MediaType?) {
-        if (contentType?.isStringType() == true) {
-            this.stringContent = buffer.readUtf8()
-            this.binaryContent = null
-        } else {
-            this.binaryContent = buffer.readByteString()
-            this.stringContent = null
-        }
-
+        this.content = buffer.readByteArray()
         this.contentType = contentType
-        this.fileContent = null
+    }
+
+    /**
+     * Returns request body content as string or null, if no content is present.
+     */
+    fun asString(): String? {
+        return content?.decodeToString()
+    }
+
+    /**
+     * Returns binary content of the request body or null, if no content is present.
+     */
+    fun asBinary(): ByteArray? {
+        return content
+    }
+
+    /**
+     * Returns binary content encoded as Base 64 or null, if no content is present.
+     */
+    fun asBase64(): String? {
+        return content?.let { Base64.getEncoder().encodeToString(it) }
     }
 }

@@ -6,7 +6,6 @@ import okhttp3.Headers
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.Request
 import okhttp3.RequestBody
-import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okio.Buffer
 import org.jholsten.me2e.request.model.HttpMethod
@@ -99,11 +98,6 @@ internal abstract class HttpRequestMapper {
         }
 
         val mediaType = body.contentType?.value?.toMediaTypeOrNull()
-        return when {
-            body.stringContent != null -> body.stringContent.toRequestBody(mediaType)
-            body.binaryContent != null -> body.binaryContent.toRequestBody(mediaType)
-            body.fileContent != null -> body.fileContent.asRequestBody(mediaType)
-            else -> null
-        }
+        return body.asBinary()?.toRequestBody(mediaType)
     }
 }
