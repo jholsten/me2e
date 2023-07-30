@@ -12,7 +12,6 @@ import org.mapstruct.Mapping
 import org.mapstruct.Named
 import org.mapstruct.factory.Mappers
 import java.io.IOException
-import java.nio.charset.Charset
 import kotlin.jvm.Throws
 
 @Mapper(uses = [HttpRequestMapper::class])
@@ -48,9 +47,7 @@ internal abstract class HttpResponseMapper {
             val binaryContent = body.bytes()
             return HttpResponseBody(
                 contentType = body.contentType()?.let { return@let MediaTypeMapper.INSTANCE.toInternalDto(it) },
-                contentLength = body.contentLength(),
-                stringContent = binaryContent.toString(Charset.forName("UTF-8")),
-                binaryContent = binaryContent,
+                content = binaryContent,
             )
         }
     }
@@ -62,10 +59,6 @@ internal abstract class HttpResponseMapper {
         }
 
         val mediaType = responseBody.contentType?.value?.toMediaTypeOrNull()
-        return when {
-            responseBody.stringContent != null -> responseBody.stringContent.toResponseBody(mediaType)
-            responseBody.binaryContent != null -> responseBody.binaryContent.toResponseBody(mediaType)
-            else -> null
-        }
+        return responseBody.asBinary()?.toResponseBody(mediaType)
     }
 }

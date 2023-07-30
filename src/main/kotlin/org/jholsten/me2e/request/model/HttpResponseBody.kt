@@ -1,5 +1,7 @@
 package org.jholsten.me2e.request.model
 
+import java.util.*
+
 /**
  * Model representing the response body of an HTTP response.
  */
@@ -10,17 +12,28 @@ class HttpResponseBody internal constructor(
     val contentType: MediaType?,
 
     /**
-     * Length of the content in number of bytes.
+     * Content of the response body.
      */
-    val contentLength: Long,
+    private val content: ByteArray?,
+) {
+    /**
+     * Returns response body content as string or null, if no content is present.
+     */
+    fun asString(): String? {
+        return content?.decodeToString()
+    }
 
     /**
-     * Content of the response body as string value.
+     * Returns binary content of the response body or null, if no content is present.
      */
-    val stringContent: String?,
+    fun asBinary(): ByteArray? {
+        return content
+    }
 
     /**
-     * Content of the response body as a byte string.
+     * Returns binary content encoded as Base 64 or null, if no content is present.
      */
-    val binaryContent: ByteArray?,
-)
+    fun asBase64(): String? {
+        return content?.let { Base64.getEncoder().encodeToString(it) }
+    }
+}

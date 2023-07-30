@@ -70,9 +70,7 @@ internal class HttpResponseMapperIT {
             headers = mapOf("Authorization" to listOf("Bearer 123")),
             body = HttpResponseBody(
                 contentType = MediaType("application/json"),
-                contentLength = 17,
-                stringContent = "{\"name\": \"value\"}",
-                binaryContent = byteArrayOf(123, 34, 110, 97, 109, 101, 34, 58, 32, 34, 118, 97, 108, 117, 101, 34, 125),
+                content = byteArrayOf(123, 34, 110, 97, 109, 101, 34, 58, 32, 34, 118, 97, 108, 117, 101, 34, 125),
             ),
         )
 
@@ -104,9 +102,7 @@ internal class HttpResponseMapperIT {
             code = 200,
             body = HttpResponseBody(
                 contentType = MediaType("text/plain"),
-                contentLength = 23,
-                stringContent = "abcäÄöÖüÜèé%&~'",
-                binaryContent = byteArrayOf(
+                content = byteArrayOf(
                     97, 98, 99, 195.toByte(), 164.toByte(), 195.toByte(), 132.toByte(), 195.toByte(), 182.toByte(),
                     195.toByte(), 150.toByte(), 195.toByte(), 188.toByte(), 195.toByte(), 156.toByte(), 195.toByte(),
                     168.toByte(), 195.toByte(), 169.toByte(), 37, 38, 126, 39
@@ -162,9 +158,7 @@ internal class HttpResponseMapperIT {
             headers = mapOf("Authorization" to listOf("Bearer 123")),
             body = HttpResponseBody(
                 contentType = MediaType("application/json"),
-                contentLength = 17,
-                stringContent = "{\"name\": \"value\"}",
-                binaryContent = byteArrayOf(123, 34, 110, 97, 109, 101, 34, 58, 32, 34, 118, 97, 108, 117, 101, 34, 125),
+                content = byteArrayOf(123, 34, 110, 97, 109, 101, 34, 58, 32, 34, 118, 97, 108, 117, 101, 34, 125),
             ),
         ))
 
@@ -196,9 +190,7 @@ internal class HttpResponseMapperIT {
             code = 200,
             body = HttpResponseBody(
                 contentType = MediaType("text/plain"),
-                contentLength = 23,
-                stringContent = "abcäÄöÖüÜèé%&~'",
-                binaryContent = byteArrayOf(
+                content = byteArrayOf(
                     97, 98, 99, 195.toByte(), 164.toByte(), 195.toByte(), 132.toByte(), 195.toByte(), 182.toByte(),
                     195.toByte(), 150.toByte(), 195.toByte(), 188.toByte(), 195.toByte(), 156.toByte(), 195.toByte(),
                     168.toByte(), 195.toByte(), 169.toByte(), 37, 38, 126, 39

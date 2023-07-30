@@ -11,9 +11,7 @@ internal class HttpResponseTest {
         val httpRequest = httpRequest()
         val body = HttpResponseBody(
             contentType = MediaType("application/json"),
-            contentLength = 17,
-            stringContent = "{\"name\": \"value\"}",
-            binaryContent = byteArrayOf(123, 34, 110, 97, 109, 101, 34, 58, 32, 34, 118, 97, 108, 117, 101, 34, 125),
+            content = byteArrayOf(123, 34, 110, 97, 109, 101, 34, 58, 32, 34, 118, 97, 108, 117, 101, 34, 125),
         )
         val httpResponse = HttpResponse.Builder()
             .withRequest(httpRequest)
@@ -102,9 +100,7 @@ internal class HttpResponseTest {
             headers = mapOf("Name" to listOf("Value")),
             body = HttpResponseBody(
                 contentType = MediaType("application/json"),
-                contentLength = 17,
-                stringContent = "{\"name\": \"value\"}",
-                binaryContent = byteArrayOf(123, 34, 110, 97, 109, 101, 34, 58, 32, 34, 118, 97, 108, 117, 101, 34, 125),
+                content = byteArrayOf(123, 34, 110, 97, 109, 101, 34, 58, 32, 34, 118, 97, 108, 117, 101, 34, 125),
             ),
         )
 

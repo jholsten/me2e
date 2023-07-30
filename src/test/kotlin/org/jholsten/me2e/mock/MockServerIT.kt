@@ -50,7 +50,7 @@ internal class MockServerIT {
 
         assertEquals(200, response.code)
         assertNotNull(response.body)
-        assertEquals(responseBodyContent, response.body!!.stringContent)
+        assertEquals(responseBodyContent, response.body!!.asString())
         assertEquals(listOf("application/json"), response.headers["content-type"])
         assertEquals(1, server.stubs.size)
         RecursiveComparison.assertEquals(expectedStub, server.stubs.first())
