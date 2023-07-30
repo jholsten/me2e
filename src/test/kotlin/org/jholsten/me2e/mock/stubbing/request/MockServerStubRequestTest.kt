@@ -1,11 +1,14 @@
 package org.jholsten.me2e.mock.stubbing.request
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.github.tomakehurst.wiremock.http.HttpHeader
 import com.github.tomakehurst.wiremock.http.HttpHeaders
 import com.github.tomakehurst.wiremock.http.Request
 import com.github.tomakehurst.wiremock.http.RequestMethod
 import com.github.tomakehurst.wiremock.verification.LoggedRequest
 import org.jholsten.me2e.request.model.HttpMethod
+import org.jholsten.util.RecursiveComparison
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -239,6 +242,42 @@ internal class MockServerStubRequestTest {
 
         assertFalse(matcher.bodyPatternsMatch(request))
         assertFalse(matcher.matches(request))
+    }
+
+    @Test
+    fun `Deserializing mock server stub request should set correct properties`() {
+        val value = """
+            {
+                "method": "GET",
+                "path": {
+                    "equals": "/search"
+                },
+                "headers": {
+                    "Content-Type": {
+                        "equals": "application/json"
+                    }
+                },
+                "query-parameters": {
+                    "name": {
+                        "equals": "dog"
+                    }
+                },
+                "body-patterns": [
+                    {
+                        "contains": "id"
+                    }
+                ]
+            }
+        """.trimIndent()
+
+        val mapper = ObjectMapper().registerModule(KotlinModule.Builder().build())
+        val result = mapper.readValue(value, MockServerStubRequest::class.java)
+
+        assertEquals(HttpMethod.GET, result.method)
+        RecursiveComparison.assertEquals(StringMatcher(equals = "/search"), result.path)
+        RecursiveComparison.assertEquals(mapOf("Content-Type" to StringMatcher(equals = "application/json")), result.headers)
+        RecursiveComparison.assertEquals(mapOf("name" to StringMatcher(equals = "dog")), result.queryParameters)
+        RecursiveComparison.assertEquals(listOf(StringMatcher(contains = "id")), result.bodyPatterns)
     }
 
     private fun wireMockRequest(url: String, method: RequestMethod, headers: HttpHeaders = HttpHeaders.noHeaders(), body: String? = null): Request {
