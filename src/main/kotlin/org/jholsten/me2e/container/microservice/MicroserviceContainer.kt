@@ -4,11 +4,15 @@ import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.container.model.ContainerType
 import org.jholsten.me2e.request.model.HttpResponse
 
+/**
+ * Model representing one Microservice container.
+ * In this context, a Microservice is expected to offer a REST API.
+ */
 class MicroserviceContainer(
     name: String,
     image: String,
     environment: Map<String, String>? = null,
-): Container(
+) : Container(
     name = name,
     image = image,
     type = ContainerType.MICROSERVICE,

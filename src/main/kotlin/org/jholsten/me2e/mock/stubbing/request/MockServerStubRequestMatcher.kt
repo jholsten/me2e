@@ -8,17 +8,18 @@ import org.jholsten.me2e.request.model.HttpMethod
 
 /**
  * Definition of the request to which the stub should respond.
+ * Matches the request depending on certain patterns.
  */
-class MockServerStubRequest(
+class MockServerStubRequestMatcher(
     /**
      * HTTP method of the request
      */
-    val method: HttpMethod,
+    val method: HttpMethod?,
 
     /**
      * URL path of the request
      */
-    val path: StringMatcher,
+    val path: StringMatcher?,
 
     /**
      * Headers of the request as map of header name and string matcher
@@ -37,6 +38,53 @@ class MockServerStubRequest(
     @JsonProperty("body-patterns")
     val bodyPatterns: List<StringMatcher>? = null,
 ) {
+    companion object {
+        /**
+         * Returns matcher that matches any request that the mock server receives.
+         */
+        @JvmStatic
+        fun any(): MockServerStubRequestMatcher {
+            return MockServerStubRequestMatcher(
+                method = null,
+                path = null,
+                headers = null,
+                queryParameters = null,
+                bodyPatterns = null,
+            )
+        }
+    }
+
+    class Builder(
+        val method: HttpMethod,
+        val path: StringMatcher,
+    ) {
+        private var headers: Map<String, StringMatcher>? = null
+        private var queryParameters: Map<String, StringMatcher>? = null
+        private var bodyPatterns: List<StringMatcher>? = null
+
+        fun withHeaders(headers: Map<String, StringMatcher>): Builder = apply {
+            this.headers = headers
+        }
+
+        fun withQueryParameters(queryParameters: Map<String, StringMatcher>): Builder = apply {
+            this.queryParameters = queryParameters
+        }
+
+        fun withBodyPatterns(bodyPatterns: List<StringMatcher>): Builder = apply {
+            this.bodyPatterns = bodyPatterns
+        }
+
+        fun build(): MockServerStubRequestMatcher {
+            return MockServerStubRequestMatcher(
+                method = this.method,
+                path = this.path,
+                headers = this.headers,
+                queryParameters = this.queryParameters,
+                bodyPatterns = this.bodyPatterns,
+            )
+        }
+    }
+
     /**
      * Returns whether the given WireMock request matches the requirements of this stub request.
      * @param request Actual request that was executed.
@@ -58,15 +106,23 @@ class MockServerStubRequest(
     }
 
     internal fun methodMatches(actualMethod: RequestMethod): Boolean {
+        if (this.method == null) {
+            return true
+        }
+
         return this.method.name == actualMethod.name
     }
 
     internal fun pathMatches(actualUrl: String): Boolean {
+        if (this.path == null) {
+            return true
+        }
+
         return this.path.matches(actualUrl, isUrl = true)
     }
 
     internal fun headersMatch(headers: HttpHeaders?): Boolean {
-        if (this.headers == null || this.headers.isEmpty()) {
+        if (this.headers.isNullOrEmpty()) {
             return true
         } else if (headers == null) {
             return false
@@ -83,7 +139,7 @@ class MockServerStubRequest(
     }
 
     internal fun queryParametersMatch(request: Request): Boolean {
-        if (this.queryParameters == null || this.queryParameters.isEmpty()) {
+        if (this.queryParameters.isNullOrEmpty()) {
             return true
         }
 

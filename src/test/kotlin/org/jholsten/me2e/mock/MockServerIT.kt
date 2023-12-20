@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.jholsten.me2e.mock.stubbing.MockServerStub
-import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequest
+import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequestMatcher
 import org.jholsten.me2e.mock.stubbing.request.StringMatcher
 import org.jholsten.me2e.mock.stubbing.response.MockServerStubResponse
 import org.jholsten.me2e.mock.stubbing.response.MockServerStubResponseBody
@@ -26,7 +26,7 @@ internal class MockServerIT {
         val responseBodyContent = "{\"id\":123,\"items\":[{\"name\":\"A\",\"value\":42},{\"name\":\"B\",\"value\":1}]}"
         val server = MockServer("service", 9000, listOf("request_stub.json"))
         val expectedStub = MockServerStub(
-            request = MockServerStubRequest(
+            request = MockServerStubRequestMatcher(
                 method = HttpMethod.POST,
                 path = StringMatcher(equals = "/search"),
                 bodyPatterns = listOf(StringMatcher(contains = "\"id\": 123"))

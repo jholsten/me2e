@@ -14,7 +14,7 @@ class MockServerStubResponseBody(
     val stringContent: String? = null,
 
     /**
-     * JSON content of the response body as a dictionary
+     * JSON content of the response body as a JSON node
      */
     @JsonProperty("json-content")
     val jsonContent: JsonNode? = null,

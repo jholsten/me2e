@@ -14,7 +14,7 @@ internal class MockServerStubRequestMapper private constructor() {
          * (as in [com.github.tomakehurst.wiremock.matching.RequestPattern])
          */
         @JvmStatic
-        fun toWireMockStubRequestMatcher(stubRequest: MockServerStubRequest): MappingBuilder {
+        fun toWireMockStubRequestMatcher(stubRequest: MockServerStubRequestMatcher): MappingBuilder {
             val matcher = ValueMatcher<Request> { request ->
                 val results = listOf(
                     stubRequest.pathMatches(request.url) to 10.0,

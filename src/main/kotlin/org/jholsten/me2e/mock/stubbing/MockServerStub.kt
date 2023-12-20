@@ -1,7 +1,7 @@
 package org.jholsten.me2e.mock.stubbing
 
 import com.github.tomakehurst.wiremock.WireMockServer
-import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequest
+import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequestMatcher
 import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequestMapper
 import org.jholsten.me2e.mock.stubbing.response.MockServerStubResponse
 import org.jholsten.me2e.mock.stubbing.response.MockServerStubResponseMapper
@@ -13,7 +13,7 @@ class MockServerStub(
     /**
      * Request to which the stub should respond.
      */
-    val request: MockServerStubRequest,
+    val request: MockServerStubRequestMatcher,
 
     /**
      * Response to be returned.

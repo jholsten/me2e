@@ -9,6 +9,7 @@ import org.jholsten.me2e.parsing.exception.ParseException
 import org.jholsten.me2e.parsing.exception.InvalidFormatException
 import org.jholsten.me2e.parsing.exception.ValidationException
 import org.jholsten.me2e.config.model.TestConfig
+import org.jholsten.me2e.config.model.TestEnvironmentConfig
 import org.jholsten.me2e.config.utils.ConfigValidator
 import org.jholsten.me2e.parsing.utils.DeserializerFactory
 import org.jholsten.me2e.parsing.utils.FileUtils
@@ -30,12 +31,8 @@ internal class YamlConfigParserTest {
     private val yamlMapper = mockk<YAMLMapper>()
 
     private val contents = """
-            containers:
-              gateway-service:
-                type: MICROSERVICE
-                image: postgres:12
-                environment:
-                  DB_PASSWORD: 123
+            environment:
+              docker-compose: docker-compose.yml
         """.trimIndent()
 
     @BeforeEach
@@ -114,17 +111,14 @@ internal class YamlConfigParserTest {
 
     private fun testConfig(): TestConfig {
         return TestConfig(
-            containers = mapOf(
-                "gateway-service" to MicroserviceContainer(
-                    name = "gateway-service",
-                    image = "service:latest",
+            environment = TestEnvironmentConfig(
+                containers = mapOf(
+                    "api-gateway" to MicroserviceContainer(
+                        name = "api-gateway",
+                        image = "service:latest",
+                    ),
                 ),
-                "database" to Container(
-                    name = "database",
-                    type = ContainerType.DATABASE,
-                    image = "postgres:12",
-                )
-            )
+            ),
         )
     }
 }

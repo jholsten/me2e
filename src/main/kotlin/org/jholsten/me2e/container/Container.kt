@@ -2,6 +2,12 @@ package org.jholsten.me2e.container
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.github.dockerjava.core.DefaultDockerClientConfig
+import com.github.dockerjava.okhttp.OkDockerHttpClient
+import com.github.dockerjava.transport.DockerHttpClient
+import org.jholsten.me2e.config.utils.ContainerPortListDeserializer
+import org.jholsten.me2e.container.database.DatabaseContainer
 import org.jholsten.me2e.container.microservice.MicroserviceContainer
 import org.jholsten.me2e.container.model.ContainerType
 
@@ -18,19 +24,20 @@ import org.jholsten.me2e.container.model.ContainerType
     visible = true,
 )
 @JsonSubTypes(value = [
-    JsonSubTypes.Type(value = MicroserviceContainer::class, name = "MICROSERVICE")
+    JsonSubTypes.Type(value = MicroserviceContainer::class, name = "MICROSERVICE"),
+    JsonSubTypes.Type(value = DatabaseContainer::class, name = "DATABASE"),
 ])
 open class Container(
     /**
      * Unique name of this container.
      */
     val name: String,
-    
+
     /**
      * Type of this container.
      */
-    val type: ContainerType,
-    
+    val type: ContainerType = ContainerType.MISC,
+
     /**
      * Image to start the container from.
      */
@@ -40,9 +47,36 @@ open class Container(
      * Environment variables for this container.
      */
     val environment: Map<String, String>? = null,
-    
-    // TODO: Add additional fields from docker-compose
+
+    /**
+     * Whether this container should be accessible from localhost.
+     */
+    val public: Boolean = false,
+
+    /**
+     * Ports that should be exposed to localhost.
+     * Only applicable if [public] is true.
+     */
+    val ports: ExposedPortsList = ExposedPortsList(),
 ) {
+    @JsonDeserialize(using = ContainerPortListDeserializer::class)
+    class ExposedPortsList(ports: List<ExposedPort> = listOf()) : ArrayList<ExposedPort>(ports) {  }
+
+    /**
+     * Representation of a port mapping from container-internal port
+     * to port that is accessible from localhost.
+     */
+    class ExposedPort (
+        /**
+         * Container-internal port to be exposed.
+         */
+        val internal: Int,
+        /**
+         * Port from which container is accessible from localhost.
+         * This value is assigned automatically as soon as the container is started.
+         */
+        var external: Int? = null,
+    )
     /**
      * Starts this container and assigns the specified ports.
      * If a healthcheck is defined, it waits until the container is "healthy".
@@ -50,7 +84,7 @@ open class Container(
     fun start() {
         // TODO
     }
-    
+
     /**
      * Executes the given command inside the container.
      */

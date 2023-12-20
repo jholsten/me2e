@@ -29,7 +29,8 @@ internal open class YamlParser<T>(
         try {
             return DeserializerFactory.getYamlMapper().readValue(value, clazz)
         } catch (e: MismatchedInputException) {
-            throw ValidationException(listOf("${e.path.joinToString(".") { it.fieldName }}: ${e.message}"))
+            val path = e.path.filter { it.fieldName != null }.joinToString(".") { it.fieldName }
+            throw ValidationException(listOf("$path: ${e.message}"))
         } catch (e: Exception) {
             throw ParseException("Parsing value '$value' failed: ${e.message}")
         }

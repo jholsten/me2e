@@ -4,59 +4,34 @@
   "description": "Test Configuration for the Me2e Library",
   "type": "object",
   "properties": {
-    "containers": {
-      "$id": "#/properties/containers",
+    "environment": {
+      "$id": "#/properties/environment",
       "type": "object",
-      "description": "Map of container names and containers to start",
-      "patternProperties": {
-        "^[a-zA-Z0-9._-]+$": {
-          "$ref": "#/definitions/container"
-        }
-      },
-      "additionalProperties": false
-    },
-    "mock-servers": {
-      "$id": "#/properties/mock-servers",
-      "type": "object",
-      "description": "HTTP web servers mocking third party services",
-      "patternProperties": {
-        "^[a-zA-Z0-9._-]+$": {
-          "$ref": "#/definitions/mock-server"
+      "description": "Definition of the test environment",
+      "properties": {
+        "docker-compose": {
+          "type": "string",
+          "description": "Path to Docker-Compose file for the Microservice System containing definitions for all self-managed services. The file needs to be located in the `resources` folder."
+        },
+        "mock-servers": {
+          "$id": "#/properties/mock-servers",
+          "type": "object",
+          "description": "HTTP web servers mocking third party services",
+          "patternProperties": {
+            "^[a-zA-Z0-9._-]+$": {
+              "$ref": "#/definitions/mock-server"
+            }
+          },
+          "additionalProperties": false
         }
       },
       "additionalProperties": false
     }
   },
   "required": [
-    "containers"
+    "environment"
   ],
   "definitions": {
-    "container": {
-      "$id": "#/definitions/container",
-      "type": "object",
-      "description": "Definition of a Docker container to be started",
-      "properties": {
-        "type": {
-          "type": "string",
-          "enum": [
-            "MICROSERVICE",
-            "DATABASE",
-            "MISC"
-          ]
-        },
-        "image": {
-          "type": "string",
-          "description": "Docker image for this container"
-        },
-        "environment": {
-          "$ref": "#/definitions/list_or_dict"
-        }
-      },
-      "required": [
-        "type",
-        "image"
-      ]
-    },
     "mock-server": {
       "$id": "#/definitions/mock-server",
       "type": "object",
@@ -75,30 +50,6 @@
           }
         }
       }
-    },
-    "list_or_dict": {
-      "oneOf": [
-        {
-          "type": "object",
-          "patternProperties": {
-            ".+": {
-              "type": [
-                "string",
-                "number",
-                "null"
-              ]
-            }
-          },
-          "additionalProperties": false
-        },
-        {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "uniqueItems": true
-        }
-      ]
     }
   }
 }

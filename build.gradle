@@ -57,7 +57,7 @@ dependencies {
     testImplementation 'io.mockk:mockk:1.13.4'
 
     // Use the JUnit 5 integration.
-    testImplementation "org.junit.jupiter:junit-jupiter-engine:5.9.2"
+    implementation "org.junit.jupiter:junit-jupiter-engine:5.9.2"
 
     // Dependency for recursive comparison in tests
     testImplementation "org.assertj:assertj-core:3.24.2"

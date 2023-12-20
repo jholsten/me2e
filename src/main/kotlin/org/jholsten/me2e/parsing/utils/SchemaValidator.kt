@@ -16,7 +16,7 @@ import kotlin.jvm.Throws
  */
 internal open class SchemaValidator(
     /**
-     * Filename of the JSON schema. Needs to be located in resources folder.
+     * Filename of the JSON schema. Needs to be located in `resources` folder.
      */
     schema: String,
 

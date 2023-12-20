@@ -13,7 +13,7 @@ internal class MockServerStubRequestMapperTest {
 
     @Test
     fun `Mapping request with all patterns matching should return exact match`() {
-        val stub = mockk<MockServerStubRequest>()
+        val stub = mockk<MockServerStubRequestMatcher>()
         every { stub.pathMatches(any()) } returns true
         every { stub.methodMatches(any()) } returns true
         every { stub.headersMatch(any()) } returns true
@@ -39,7 +39,7 @@ internal class MockServerStubRequestMapperTest {
 
     @Test
     fun `Mapping request with no patterns matching should return no match`() {
-        val stub = mockk<MockServerStubRequest>()
+        val stub = mockk<MockServerStubRequestMatcher>()
         every { stub.pathMatches(any()) } returns false
         every { stub.methodMatches(any()) } returns false
         every { stub.headersMatch(any()) } returns false

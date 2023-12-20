@@ -13,11 +13,11 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.util.*
 
-internal class MockServerStubRequestTest {
+internal class MockServerStubRequestMatcherTest {
 
     @Test
     fun `Request with the same method and url should match`() {
-        val matcher = MockServerStubRequest(
+        val matcher = MockServerStubRequestMatcher(
             path = StringMatcher(equals = "/search"),
             method = HttpMethod.GET
         )
@@ -30,7 +30,7 @@ internal class MockServerStubRequestTest {
 
     @Test
     fun `Request with another method and url should not match`() {
-        val matcher = MockServerStubRequest(
+        val matcher = MockServerStubRequestMatcher(
             path = StringMatcher(equals = "/search"),
             method = HttpMethod.GET
         )
@@ -43,7 +43,7 @@ internal class MockServerStubRequestTest {
 
     @Test
     fun `Request with another url should not match`() {
-        val matcher = MockServerStubRequest(
+        val matcher = MockServerStubRequestMatcher(
             path = StringMatcher(equals = "/search"),
             method = HttpMethod.POST
         )
@@ -56,7 +56,7 @@ internal class MockServerStubRequestTest {
 
     @Test
     fun `Request with the same headers should match`() {
-        val matcher = MockServerStubRequest(
+        val matcher = MockServerStubRequestMatcher(
             path = StringMatcher(equals = "/search"),
             method = HttpMethod.GET,
             headers = mapOf("Content-Type" to StringMatcher(equals = "application/json")),
@@ -73,7 +73,7 @@ internal class MockServerStubRequestTest {
 
     @Test
     fun `Request with empty headers should match`() {
-        val matcher = MockServerStubRequest(
+        val matcher = MockServerStubRequestMatcher(
             path = StringMatcher(equals = "/search"),
             method = HttpMethod.GET,
             headers = mapOf(),
@@ -90,7 +90,7 @@ internal class MockServerStubRequestTest {
 
     @Test
     fun `Request without headers should not match`() {
-        val matcher = MockServerStubRequest(
+        val matcher = MockServerStubRequestMatcher(
             path = StringMatcher(equals = "/search"),
             method = HttpMethod.GET,
             headers = mapOf("Content-Type" to StringMatcher(equals = "application/json")),
@@ -106,7 +106,7 @@ internal class MockServerStubRequestTest {
 
     @Test
     fun `Request with other headers should not match`() {
-        val matcher = MockServerStubRequest(
+        val matcher = MockServerStubRequestMatcher(
             path = StringMatcher(equals = "/search"),
             method = HttpMethod.GET,
             headers = mapOf("Content-Type" to StringMatcher(equals = "application/json")),
@@ -123,7 +123,7 @@ internal class MockServerStubRequestTest {
 
     @Test
     fun `Request with the same query parameters should match`() {
-        val matcher = MockServerStubRequest(
+        val matcher = MockServerStubRequestMatcher(
             path = StringMatcher(equals = "/search"),
             method = HttpMethod.GET,
             queryParameters = mapOf("name" to StringMatcher(equals = "dog"))
@@ -139,7 +139,7 @@ internal class MockServerStubRequestTest {
 
     @Test
     fun `Request with empty query parameters should match`() {
-        val matcher = MockServerStubRequest(
+        val matcher = MockServerStubRequestMatcher(
             path = StringMatcher(equals = "/search"),
             method = HttpMethod.GET,
             queryParameters = mapOf()
@@ -155,7 +155,7 @@ internal class MockServerStubRequestTest {
 
     @Test
     fun `Request without query parameters should not match`() {
-        val matcher = MockServerStubRequest(
+        val matcher = MockServerStubRequestMatcher(
             path = StringMatcher(equals = "/search"),
             method = HttpMethod.GET,
             queryParameters = mapOf("name" to StringMatcher(equals = "dog"))
@@ -171,7 +171,7 @@ internal class MockServerStubRequestTest {
 
     @Test
     fun `Request with other query parameters should not match`() {
-        val matcher = MockServerStubRequest(
+        val matcher = MockServerStubRequestMatcher(
             path = StringMatcher(equals = "/search"),
             method = HttpMethod.GET,
             queryParameters = mapOf("name" to StringMatcher(equals = "dog"))
@@ -187,7 +187,7 @@ internal class MockServerStubRequestTest {
 
     @Test
     fun `Request with the same body should match`() {
-        val matcher = MockServerStubRequest(
+        val matcher = MockServerStubRequestMatcher(
             path = StringMatcher(equals = "/upload"),
             method = HttpMethod.POST,
             bodyPatterns = listOf(
@@ -206,7 +206,7 @@ internal class MockServerStubRequestTest {
 
     @Test
     fun `Request with multiple body patterns should match`() {
-        val matcher = MockServerStubRequest(
+        val matcher = MockServerStubRequestMatcher(
             path = StringMatcher(equals = "/upload"),
             method = HttpMethod.POST,
             bodyPatterns = listOf(
@@ -226,7 +226,7 @@ internal class MockServerStubRequestTest {
 
     @Test
     fun `Request with one of multiple body patterns not matching should not match`() {
-        val matcher = MockServerStubRequest(
+        val matcher = MockServerStubRequestMatcher(
             path = StringMatcher(equals = "/upload"),
             method = HttpMethod.POST,
             bodyPatterns = listOf(
@@ -271,7 +271,7 @@ internal class MockServerStubRequestTest {
         """.trimIndent()
 
         val mapper = ObjectMapper().registerModule(KotlinModule.Builder().build())
-        val result = mapper.readValue(value, MockServerStubRequest::class.java)
+        val result = mapper.readValue(value, MockServerStubRequestMatcher::class.java)
 
         assertEquals(HttpMethod.GET, result.method)
         RecursiveComparison.assertEquals(StringMatcher(equals = "/search"), result.path)
