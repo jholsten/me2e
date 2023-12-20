@@ -18,12 +18,8 @@ internal class ConfigValidatorIT {
     fun `Validating valid YAML should not throw`() {
         val validator = ConfigValidator(YAML_MAPPER)
         val value = """
-            containers:
-              gateway-service:
-                type: MICROSERVICE
-                image: postgres:12
-                environment:
-                  DB_PASSWORD: 123
+            environment:
+              docker-compose: docker-compose.yml
         """.trimIndent()
 
         assertDoesNotThrow { validator.validate(value) }
@@ -34,14 +30,8 @@ internal class ConfigValidatorIT {
         val validator = ConfigValidator(JSON_MAPPER)
         val value = """
             {
-              "containers": {
-                "gateway-service": {
-                  "type": "MICROSERVICE",
-                  "image": "postgres:12",
-                  "environment": {
-                    "DB_PASSWORD": "123"
-                  }
-                }
+              "environment": {
+                "docker-compose": "docker-compose.yml"
               }
             }
         """.trimIndent()
@@ -53,36 +43,33 @@ internal class ConfigValidatorIT {
     fun `Validating YAML with missing fields should fail`() {
         val validator = ConfigValidator(YAML_MAPPER)
         val value = """
-            containers:
-              gateway-service:
-                environment:
-                  DB_PASSWORD: 123
-        """.trimIndent()
-
-        val e = assertThrowsExactly(ValidationException::class.java) { validator.validate(value) }
-
-        assertEquals(2, e.validationErrors.size)
-        assertNotNull(e.message)
-        assertTrue(e.message!!.contains("type"))
-        assertTrue(e.message!!.contains("image"))
-    }
-
-    @Test
-    fun `Validating YAML with invalid enum value should fail`() {
-        val validator = ConfigValidator(YAML_MAPPER)
-        val value = """
-            containers:
-              gateway-service:
-                type: invalid
-                image: postgres:12
-                environment:
-                  DB_PASSWORD: 123
+            other:
         """.trimIndent()
 
         val e = assertThrowsExactly(ValidationException::class.java) { validator.validate(value) }
 
         assertEquals(1, e.validationErrors.size)
         assertNotNull(e.message)
-        assertTrue(e.message!!.contains("type"))
+        assertTrue(e.message!!.contains("environment"))
+    }
+
+    @Test
+    fun `Validating YAML with invalid regex value should fail`() {
+        val validator = ConfigValidator(YAML_MAPPER)
+        val value = """
+            environment:
+              docker-compose: docker-compose.yml
+              mock-servers:
+                payment-service:
+                  port: 9000
+                  stubs:
+                    - invalid-file.txt
+        """.trimIndent()
+
+        val e = assertThrowsExactly(ValidationException::class.java) { validator.validate(value) }
+
+        assertEquals(1, e.validationErrors.size)
+        assertNotNull(e.message)
+        assertTrue(e.message!!.contains("stubs"))
     }
 }
