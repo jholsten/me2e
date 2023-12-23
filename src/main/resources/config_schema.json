@@ -36,10 +36,10 @@
       "$id": "#/definitions/mock-server",
       "type": "object",
       "properties": {
-        "port": {
-          "type": "integer",
-          "description": "Port where this mocked web server is exposed",
-          "default": 9000
+        "hostname": {
+          "type": "string",
+          "description": "Hostname of the service to be represented by this mock server",
+          "pattern": "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$"
         },
         "stubs": {
           "type": "array",
@@ -49,7 +49,9 @@
             "pattern": "^([^\\r\\n\\t\\f\\v\\?\\\\*\\\\|\\<\\>\\/]+\\/?)*stub\\.(yaml|json)$"
           }
         }
-      }
+      },
+      "additionalProperties": false,
+      "required": ["hostname"]
     }
   }
 }

@@ -8,6 +8,7 @@ import org.jholsten.me2e.mock.stubbing.MockServerStub
 import org.awaitility.Awaitility.await
 import org.awaitility.Durations
 import org.awaitility.core.ConditionTimeoutException
+import org.jholsten.me2e.config.utils.MockServerDeserializer
 import org.jholsten.me2e.container.exception.ServiceStartupException
 import org.jholsten.me2e.container.healthcheck.exception.ServiceNotHealthyException
 import org.jholsten.me2e.mock.parser.YamlMockServerStubParser
@@ -18,6 +19,7 @@ import org.jholsten.me2e.request.model.HttpRequest
 /**
  * Model representing a third party service to be mocked.
  */
+@JsonDeserialize(using = MockServerDeserializer::class)
 class MockServer(
     /**
      * Unique name of this mock server.
@@ -25,9 +27,9 @@ class MockServer(
     val name: String,
 
     /**
-     * Port where this mocked web server is exposed
+     * Hostname of the service to be mocked
      */
-    val port: Int,
+    val hostname: String,
 
     /**
      * List of paths to stub definitions. The files need to be located in `resources` folder.

@@ -1,5 +1,6 @@
 package org.jholsten.me2e.mock.stubbing.request
 
+import com.fasterxml.jackson.annotation.JacksonInject
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.github.tomakehurst.wiremock.http.HttpHeaders
 import com.github.tomakehurst.wiremock.http.Request
@@ -11,6 +12,14 @@ import org.jholsten.me2e.request.model.HttpMethod
  * Matches the request depending on certain patterns.
  */
 class MockServerStubRequestMatcher(
+    /**
+     * Hostname of the third-party service to be mocked.
+     * The value is set to the [org.jholsten.me2e.mock.MockServer]'s hostname while deserializing
+     * (see [org.jholsten.me2e.config.utils.MockServerDeserializer.parseStubFiles]).
+     */
+    @JacksonInject("hostname")
+    val hostname: String,
+
     /**
      * HTTP method of the request
      */
@@ -38,22 +47,6 @@ class MockServerStubRequestMatcher(
     @JsonProperty("body-patterns")
     val bodyPatterns: List<StringMatcher>? = null,
 ) {
-    companion object {
-        /**
-         * Returns matcher that matches any request that the mock server receives.
-         */
-        @JvmStatic
-        fun any(): MockServerStubRequestMatcher {
-            return MockServerStubRequestMatcher(
-                method = null,
-                path = null,
-                headers = null,
-                queryParameters = null,
-                bodyPatterns = null,
-            )
-        }
-    }
-
     class Builder(
         val method: HttpMethod,
         val path: StringMatcher,
@@ -73,16 +66,6 @@ class MockServerStubRequestMatcher(
         fun withBodyPatterns(bodyPatterns: List<StringMatcher>): Builder = apply {
             this.bodyPatterns = bodyPatterns
         }
-
-        fun build(): MockServerStubRequestMatcher {
-            return MockServerStubRequestMatcher(
-                method = this.method,
-                path = this.path,
-                headers = this.headers,
-                queryParameters = this.queryParameters,
-                bodyPatterns = this.bodyPatterns,
-            )
-        }
     }
 
     /**
@@ -90,7 +73,9 @@ class MockServerStubRequestMatcher(
      * @param request Actual request that was executed.
      */
     internal fun matches(request: Request): Boolean {
-        if (!methodMatches(request.method)) {
+        if (!hostnameMatches(request.host)) {
+            return false
+        } else if (!methodMatches(request.method)) {
             return false
         } else if (!pathMatches(request.url)) {
             return false
@@ -103,6 +88,10 @@ class MockServerStubRequestMatcher(
         }
 
         return true
+    }
+
+    internal fun hostnameMatches(actualHostname: String): Boolean {
+        return this.hostname == actualHostname
     }
 
     internal fun methodMatches(actualMethod: RequestMethod): Boolean {

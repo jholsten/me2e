@@ -2,6 +2,6 @@ environment:
   docker-compose: docker-compose.yml
   mock-servers:
     payment-service:
-      port: 9000
+      hostname: payment.example.com
       stubs:
         - request_stub.json

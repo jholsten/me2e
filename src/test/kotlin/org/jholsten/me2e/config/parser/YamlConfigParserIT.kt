@@ -131,10 +131,11 @@ internal class YamlConfigParserIT {
         assertMockServerAsExpected(
             mockServers = mockServers,
             name = "payment-service",
-            port = 9000,
+            hostname = "payment.example.com",
             stubs = listOf(
                 MockServerStub(
                     request = MockServerStubRequestMatcher(
+                        hostname = "payment.example.com",
                         method = HttpMethod.POST,
                         path = StringMatcher(equals = "/search"),
                         bodyPatterns = listOf(StringMatcher(contains = "\"id\": 123")),
@@ -156,11 +157,11 @@ internal class YamlConfigParserIT {
         )
     }
 
-    private fun assertMockServerAsExpected(mockServers: Map<String, MockServer>, name: String, port: Int, stubs: List<MockServerStub>) {
+    private fun assertMockServerAsExpected(mockServers: Map<String, MockServer>, name: String, hostname: String, stubs: List<MockServerStub>) {
         val mockServer = mockServers[name]
         assertNotNull(mockServer)
         assertEquals(name, mockServer.name)
-        assertEquals(port, mockServer.port)
+        assertEquals(hostname, mockServer.hostname)
         RecursiveComparison.assertEquals(stubs, mockServer.stubs)
     }
 }
