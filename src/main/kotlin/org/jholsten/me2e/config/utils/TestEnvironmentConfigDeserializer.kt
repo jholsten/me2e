@@ -11,7 +11,7 @@ import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.mock.MockServer
 import org.jholsten.me2e.parsing.utils.DeserializerFactory
 import org.jholsten.me2e.parsing.utils.FileUtils
-import org.slf4j.LoggerFactory
+import org.jholsten.me2e.utils.logger
 
 /**
  * Custom deserializer for deserializing test environment configuration.
@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory
  */
 class TestEnvironmentConfigDeserializer: JsonDeserializer<TestEnvironmentConfig>() {
     companion object {
-        private val LOGGER = LoggerFactory.getLogger(this::class.java)
         /**
          * Label key for specifying the container type of a service
          */
@@ -38,6 +37,7 @@ class TestEnvironmentConfigDeserializer: JsonDeserializer<TestEnvironmentConfig>
         private const val DATABASE_TYPE_KEY = "org.jholsten.me2e.database-type"
     }
 
+    private val logger = logger(this)
     private var mapper = DeserializerFactory.getObjectMapper()
 
     override fun deserialize(p: JsonParser, ctxt: DeserializationContext): TestEnvironmentConfig {
@@ -127,7 +127,7 @@ class TestEnvironmentConfigDeserializer: JsonDeserializer<TestEnvironmentConfig>
         for (entry in serviceNode[key].elements()) {
             val keyValuePair = entry.textValue().split("=")
             if (keyValuePair.size != 2) {
-                LOGGER.warn("Ignoring entry ${entry.textValue()} in $key since the entry is not in the required format.")
+                logger.warn("Ignoring entry ${entry.textValue()} in $key since the entry is not in the required format.")
                 return
             }
             result[keyValuePair[0]] = keyValuePair[1]
