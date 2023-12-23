@@ -10,8 +10,7 @@ import org.jholsten.me2e.config.parser.YamlConfigParser
 import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.container.microservice.MicroserviceContainer
 import org.jholsten.me2e.container.model.ContainerType
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Test
+import kotlin.test.*
 
 internal class Me2eTestManagerTest {
     
@@ -38,7 +37,7 @@ internal class Me2eTestManagerTest {
     
     @Test
     fun `Using builder without specifying config should fail`() {
-        assertThrowsExactly(IllegalArgumentException::class.java) { Me2eTestManager.Builder().build() }
+        assertFailsWith<IllegalArgumentException> { Me2eTestManager.Builder().build() }
     }
     
     private fun testConfig(): TestConfig {

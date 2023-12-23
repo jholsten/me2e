@@ -1,9 +1,8 @@
 package org.jholsten.me2e.request.model
 
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
+import kotlin.test.*
 
 internal class MediaTypeTest {
 
@@ -25,7 +24,7 @@ internal class MediaTypeTest {
 
     @Test
     fun `Constructor with invalid format should throw exception`() {
-        val e = assertThrowsExactly(IllegalArgumentException::class.java) { MediaType("invalid") }
+        val e = assertFailsWith<IllegalArgumentException> { MediaType("invalid") }
         assertEquals("Invalid media type \"invalid\"", e.message)
     }
 

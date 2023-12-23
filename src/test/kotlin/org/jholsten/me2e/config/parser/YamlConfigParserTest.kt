@@ -13,16 +13,14 @@ import org.jholsten.me2e.config.model.TestEnvironmentConfig
 import org.jholsten.me2e.config.utils.ConfigValidator
 import org.jholsten.me2e.parsing.utils.DeserializerFactory
 import org.jholsten.me2e.parsing.utils.FileUtils
-import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.container.microservice.MicroserviceContainer
-import org.jholsten.me2e.container.model.ContainerType
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertThrowsExactly
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import java.io.BufferedInputStream
 import java.io.InputStream
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -35,14 +33,14 @@ internal class YamlConfigParserTest {
               docker-compose: docker-compose.yml
         """.trimIndent()
 
-    @BeforeEach
-    fun beforeEach() {
+    @BeforeTest
+    fun beforeTest() {
         mockkObject(DeserializerFactory.Companion)
         every { DeserializerFactory.getYamlMapper() } returns yamlMapper
     }
 
-    @AfterEach
-    fun afterEach() {
+    @AfterTest
+    fun afterTest() {
         unmockkAll()
     }
 
@@ -65,7 +63,7 @@ internal class YamlConfigParserTest {
         mockDeserializationAndValidation(testConfig())
         every { anyConstructed<ConfigValidator>().validate(any()) } throws InvalidFormatException("Some validation error")
 
-        assertThrowsExactly(InvalidFormatException::class.java) { YamlConfigParser().parseFile(filename) }
+        assertFailsWith<InvalidFormatException> { YamlConfigParser().parseFile(filename) }
     }
 
     @Test
@@ -75,7 +73,7 @@ internal class YamlConfigParserTest {
         val mismatchedInputException = MismatchedInputException.from(null as JsonParser?, "Some mismatched input")
         every { yamlMapper.readValue(contents, TestConfig::class.java) } throws mismatchedInputException
 
-        val e = assertThrowsExactly(ValidationException::class.java) { YamlConfigParser().parseFile(filename) }
+        val e = assertFailsWith<ValidationException> { YamlConfigParser().parseFile(filename) }
 
         assertNotNull(e.message)
         assertTrue(e.message!!.contains(mismatchedInputException.message!!))
@@ -88,7 +86,7 @@ internal class YamlConfigParserTest {
         val exception = RuntimeException("Some error")
         every { yamlMapper.readValue(contents, TestConfig::class.java) } throws exception
 
-        val e = assertThrowsExactly(ParseException::class.java) { YamlConfigParser().parseFile(filename) }
+        val e = assertFailsWith<ParseException> { YamlConfigParser().parseFile(filename) }
 
         assertNotNull(e.message)
         assertTrue(e.message!!.contains(exception.message!!))

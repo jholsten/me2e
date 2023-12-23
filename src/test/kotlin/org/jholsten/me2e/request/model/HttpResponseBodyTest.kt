@@ -1,8 +1,7 @@
 package org.jholsten.me2e.request.model
 
 import org.jholsten.util.RecursiveComparison
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Test
+import kotlin.test.*
 
 internal class HttpResponseBodyTest {
 

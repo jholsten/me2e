@@ -1,10 +1,9 @@
 package org.jholsten.me2e.request.model
 
 import org.jholsten.util.RecursiveComparison
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import kotlin.test.*
 
 internal class HttpRequestTest {
 
@@ -141,7 +140,7 @@ internal class HttpRequestTest {
             .withMethod(HttpMethod.GET)
             .withHeaders(mapOf("Name" to listOf("Value")))
 
-        assertThrowsExactly(IllegalArgumentException::class.java) {
+        assertFailsWith<IllegalArgumentException> {
             builder.build()
         }
     }
@@ -152,7 +151,7 @@ internal class HttpRequestTest {
             .withUrl("https://google.com", "/search")
             .withHeaders(mapOf("Name" to listOf("Value")))
 
-        assertThrowsExactly(IllegalArgumentException::class.java) {
+        assertFailsWith<IllegalArgumentException> {
             builder.build()
         }
     }
@@ -165,7 +164,7 @@ internal class HttpRequestTest {
             .withMethod(method)
             .withHeaders(mapOf("Name" to listOf("Value")))
 
-        assertThrowsExactly(IllegalArgumentException::class.java) {
+        assertFailsWith<IllegalArgumentException> {
             builder.build()
         }
     }
@@ -179,7 +178,7 @@ internal class HttpRequestTest {
             .withHeaders(mapOf("Name" to listOf("Value")))
             .withBody(HttpRequestBody("content", MediaType.TEXT_PLAIN_UTF8))
 
-        assertThrowsExactly(IllegalArgumentException::class.java) {
+        assertFailsWith<IllegalArgumentException> {
             builder.build()
         }
     }

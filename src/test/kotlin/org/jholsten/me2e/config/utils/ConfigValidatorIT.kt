@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.jholsten.me2e.parsing.exception.ValidationException
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Test
+import org.jholsten.util.assertDoesNotThrow
+import kotlin.test.*
 
 internal class ConfigValidatorIT {
 
@@ -46,7 +46,7 @@ internal class ConfigValidatorIT {
             other:
         """.trimIndent()
 
-        val e = assertThrowsExactly(ValidationException::class.java) { validator.validate(value) }
+        val e = assertFailsWith<ValidationException> { validator.validate(value) }
 
         assertEquals(1, e.validationErrors.size)
         assertNotNull(e.message)
@@ -66,7 +66,7 @@ internal class ConfigValidatorIT {
                     - invalid-file.txt
         """.trimIndent()
 
-        val e = assertThrowsExactly(ValidationException::class.java) { validator.validate(value) }
+        val e = assertFailsWith<ValidationException> { validator.validate(value) }
 
         assertEquals(1, e.validationErrors.size)
         assertNotNull(e.message)

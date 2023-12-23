@@ -18,8 +18,7 @@ import org.jholsten.me2e.parsing.exception.InvalidFormatException
 import org.jholsten.me2e.parsing.exception.ParseException
 import org.jholsten.me2e.request.model.HttpMethod
 import org.jholsten.util.RecursiveComparison
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Test
+import kotlin.test.*
 
 internal class YamlConfigParserIT {
 
@@ -32,12 +31,12 @@ internal class YamlConfigParserIT {
 
     @Test
     fun `Parsing YAML config with invalid format should fail`() {
-        assertThrowsExactly(InvalidFormatException::class.java) { YamlConfigParser().parseFile("test-file.txt") }
+        assertFailsWith<InvalidFormatException> { YamlConfigParser().parseFile("test-file.txt") }
     }
 
     @Test
     fun `Parsing YAML config with non-existent Docker-Compose should fail`() {
-        assertThrowsExactly(ParseException::class.java) { YamlConfigParser().parseFile("me2e-config-invalid-docker-compose.yaml") }
+        assertFailsWith<ParseException> { YamlConfigParser().parseFile("me2e-config-invalid-docker-compose.yaml") }
     }
 
     private fun assertContainersAsExpected(config: TestConfig) {
@@ -110,11 +109,11 @@ internal class YamlConfigParserIT {
         val container = containers[name]
         assertNotNull(container)
         when (type) {
-            ContainerType.MICROSERVICE -> assertTrue(container is MicroserviceContainer)
-            ContainerType.DATABASE -> assertTrue(container is DatabaseContainer)
-            ContainerType.MISC -> assertTrue(container is Container)
+            ContainerType.MICROSERVICE -> assertIs<MicroserviceContainer>(container)
+            ContainerType.DATABASE -> assertIs<DatabaseContainer>(container)
+            ContainerType.MISC -> assertIs<Container>(container)
         }
-        assertEquals(name, container!!.name)
+        assertEquals(name, container.name)
         assertEquals(type, container.type)
         assertEquals(image, container.image)
         assertEquals(environment, container.environment)
@@ -138,7 +137,7 @@ internal class YamlConfigParserIT {
                     request = MockServerStubRequestMatcher(
                         method = HttpMethod.POST,
                         path = StringMatcher(equals = "/search"),
-                        bodyPatterns = listOf(StringMatcher(contains = "\"id\": 123"))
+                        bodyPatterns = listOf(StringMatcher(contains = "\"id\": 123")),
                     ),
                     response = MockServerStubResponse(
                         code = 200,
@@ -160,7 +159,7 @@ internal class YamlConfigParserIT {
     private fun assertMockServerAsExpected(mockServers: Map<String, MockServer>, name: String, port: Int, stubs: List<MockServerStub>) {
         val mockServer = mockServers[name]
         assertNotNull(mockServer)
-        assertEquals(name, mockServer!!.name)
+        assertEquals(name, mockServer.name)
         assertEquals(port, mockServer.port)
         RecursiveComparison.assertEquals(stubs, mockServer.stubs)
     }

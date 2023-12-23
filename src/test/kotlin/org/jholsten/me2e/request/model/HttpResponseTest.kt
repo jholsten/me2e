@@ -1,8 +1,7 @@
 package org.jholsten.me2e.request.model
 
 import org.jholsten.util.RecursiveComparison
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Test
+import kotlin.test.*
 
 internal class HttpResponseTest {
 
@@ -118,7 +117,7 @@ internal class HttpResponseTest {
             .withCode(200)
             .withHeaders(mapOf("Name" to listOf("Value")))
 
-        assertThrowsExactly(IllegalArgumentException::class.java) {
+        assertFailsWith<IllegalArgumentException> {
             builder.build()
         }
     }
@@ -132,7 +131,7 @@ internal class HttpResponseTest {
             .withCode(200)
             .withHeaders(mapOf("Name" to listOf("Value")))
 
-        assertThrowsExactly(IllegalArgumentException::class.java) {
+        assertFailsWith<IllegalArgumentException> {
             builder.build()
         }
     }
@@ -146,7 +145,7 @@ internal class HttpResponseTest {
             .withCode(200)
             .withHeaders(mapOf("Name" to listOf("Value")))
 
-        assertThrowsExactly(IllegalArgumentException::class.java) {
+        assertFailsWith<IllegalArgumentException> {
             builder.build()
         }
     }
@@ -160,7 +159,7 @@ internal class HttpResponseTest {
             .withMessage("Hello World")
             .withHeaders(mapOf("Name" to listOf("Value")))
 
-        assertThrowsExactly(IllegalArgumentException::class.java) {
+        assertFailsWith<IllegalArgumentException> {
             builder.build()
         }
     }

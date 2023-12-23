@@ -11,10 +11,10 @@ import org.jholsten.me2e.request.model.HttpMethod
 import org.jholsten.me2e.request.model.HttpRequest
 import org.jholsten.me2e.request.model.HttpResponse
 import org.jholsten.util.RecursiveComparison
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import org.slf4j.Logger
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 import kotlin.test.assertEquals
 
 internal class OkHttpRequestInterceptorTest {
@@ -23,8 +23,8 @@ internal class OkHttpRequestInterceptorTest {
     private val httpRequestMapper = mockk<HttpRequestMapper>()
     private val httpResponseMapper = mockk<HttpResponseMapper>()
 
-    @BeforeEach
-    fun beforeEach() {
+    @BeforeTest
+    fun beforeTest() {
         mockkObject(HttpRequestMapper.Companion)
         every { HttpRequestMapper.INSTANCE } returns httpRequestMapper
 
@@ -32,8 +32,8 @@ internal class OkHttpRequestInterceptorTest {
         every { HttpResponseMapper.INSTANCE } returns httpResponseMapper
     }
 
-    @AfterEach
-    fun afterEach() {
+    @AfterTest
+    fun afterTest() {
         unmockkAll()
     }
 

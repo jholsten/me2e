@@ -1,8 +1,7 @@
 package org.jholsten.me2e.request.mapper
 
 import org.jholsten.me2e.request.model.HttpMethod
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Test
+import kotlin.test.*
 
 internal class HttpMethodMapperTest {
 

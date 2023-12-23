@@ -7,7 +7,7 @@ import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.jholsten.me2e.request.model.*
 import org.jholsten.util.RecursiveComparison
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 internal class HttpResponseMapperIT {
     @Test

@@ -15,11 +15,8 @@ import org.jholsten.me2e.request.mapper.HttpRequestMapper
 import org.jholsten.me2e.request.mapper.HttpResponseMapper
 import org.jholsten.me2e.request.model.*
 import org.jholsten.util.RecursiveComparison
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
+import kotlin.test.*
 
 internal class OkHttpClientTest {
 
@@ -28,8 +25,8 @@ internal class OkHttpClientTest {
     private val httpResponseMapper = mockk<HttpResponseMapper>()
     private val call = mockk<Call>()
 
-    @BeforeEach
-    fun beforeEach() {
+    @BeforeTest
+    fun beforeTest() {
         mockOkHttpClientBuilder()
         mockkObject(OkHttpRequestInterceptor.Companion)
 
@@ -40,8 +37,8 @@ internal class OkHttpClientTest {
         every { HttpResponseMapper.INSTANCE } returns httpResponseMapper
     }
 
-    @AfterEach
-    fun afterEach() {
+    @AfterTest
+    fun afterTest() {
         unmockkAll()
     }
 
@@ -111,7 +108,7 @@ internal class OkHttpClientTest {
     @Test
     fun `Configuration with negative connect timeout should fail`() {
         val configuration = OkHttpClient.Configuration()
-        assertThrowsExactly(IllegalArgumentException::class.java) {
+        assertFailsWith<IllegalArgumentException> {
             configuration.setConnectTimeout(-1, TimeUnit.SECONDS)
         }
     }
@@ -119,7 +116,7 @@ internal class OkHttpClientTest {
     @Test
     fun `Configuration with connect timeout too large should fail`() {
         val configuration = OkHttpClient.Configuration()
-        assertThrowsExactly(IllegalArgumentException::class.java) {
+        assertFailsWith<IllegalArgumentException> {
             configuration.setConnectTimeout(Integer.MAX_VALUE.toLong() + 1, TimeUnit.SECONDS)
         }
     }
@@ -127,7 +124,7 @@ internal class OkHttpClientTest {
     @Test
     fun `Configuration with negative read timeout should fail`() {
         val configuration = OkHttpClient.Configuration()
-        assertThrowsExactly(IllegalArgumentException::class.java) {
+        assertFailsWith<IllegalArgumentException> {
             configuration.setReadTimeout(-1, TimeUnit.SECONDS)
         }
     }
@@ -135,7 +132,7 @@ internal class OkHttpClientTest {
     @Test
     fun `Configuration with read timeout too large should fail`() {
         val configuration = OkHttpClient.Configuration()
-        assertThrowsExactly(IllegalArgumentException::class.java) {
+        assertFailsWith<IllegalArgumentException> {
             configuration.setReadTimeout(Integer.MAX_VALUE.toLong() + 1, TimeUnit.SECONDS)
         }
     }
@@ -143,7 +140,7 @@ internal class OkHttpClientTest {
     @Test
     fun `Configuration with negative write timeout should fail`() {
         val configuration = OkHttpClient.Configuration()
-        assertThrowsExactly(IllegalArgumentException::class.java) {
+        assertFailsWith<IllegalArgumentException> {
             configuration.setWriteTimeout(-1, TimeUnit.SECONDS)
         }
     }
@@ -151,7 +148,7 @@ internal class OkHttpClientTest {
     @Test
     fun `Configuration with write timeout too large should fail`() {
         val configuration = OkHttpClient.Configuration()
-        assertThrowsExactly(IllegalArgumentException::class.java) {
+        assertFailsWith<IllegalArgumentException> {
             configuration.setWriteTimeout(Integer.MAX_VALUE.toLong() + 1, TimeUnit.SECONDS)
         }
     }
@@ -206,7 +203,7 @@ internal class OkHttpClientTest {
 
     @Test
     fun `Builder without base URL should fail`() {
-        assertThrowsExactly(IllegalArgumentException::class.java) {
+        assertFailsWith<IllegalArgumentException> {
             OkHttpClient.Builder().build()
         }
     }

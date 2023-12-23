@@ -1,9 +1,9 @@
 package org.jholsten.me2e.parsing.utils
 
-import org.junit.jupiter.api.Assertions.assertThrowsExactly
-import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.Test
 
 internal class FileUtilsIT {
 
@@ -15,6 +15,6 @@ internal class FileUtilsIT {
 
     @Test
     fun `Reading contents from non-existing file should fail`() {
-        assertThrowsExactly(FileNotFoundException::class.java) { FileUtils.readFileContentsFromResources("non-existing") }
+        assertFailsWith<FileNotFoundException> { FileUtils.readFileContentsFromResources("non-existing") }
     }
 }

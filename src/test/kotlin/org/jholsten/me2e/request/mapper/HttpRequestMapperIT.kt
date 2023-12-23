@@ -8,7 +8,7 @@ import org.jholsten.me2e.request.model.HttpRequest
 import org.jholsten.me2e.request.model.HttpRequestBody
 import org.jholsten.me2e.request.model.MediaType
 import org.jholsten.util.RecursiveComparison
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 internal class HttpRequestMapperIT {
 

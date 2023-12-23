@@ -8,10 +8,8 @@ import io.mockk.mockkObject
 import io.mockk.unmockkAll
 import org.jholsten.me2e.parsing.exception.InvalidFormatException
 import org.jholsten.me2e.parsing.exception.ValidationException
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
+import org.jholsten.util.assertDoesNotThrow
+import kotlin.test.*
 
 internal class SchemaValidatorTest {
 
@@ -49,14 +47,14 @@ internal class SchemaValidatorTest {
         """.trimIndent()
     }
 
-    @BeforeEach
-    fun beforeEach() {
+    @BeforeTest
+    fun beforeTest() {
         mockkObject(FileUtils.Companion)
         every { FileUtils.getResourceAsStream(any()) } returns SCHEMA.byteInputStream()
     }
 
-    @AfterEach
-    fun afterEach() {
+    @AfterTest
+    fun afterTest() {
         unmockkAll()
     }
 
@@ -95,7 +93,7 @@ internal class SchemaValidatorTest {
             latitude: 9.255876310462527
         """.trimIndent()
 
-        val e = assertThrowsExactly(ValidationException::class.java) { validator.validate(value) }
+        val e = assertFailsWith<ValidationException> { validator.validate(value) }
 
         assertEquals(1, e.validationErrors.size)
         assertNotNull(e.message)
@@ -110,7 +108,7 @@ internal class SchemaValidatorTest {
             longitude: 53.11505019602539
         """.trimIndent()
 
-        val e = assertThrowsExactly(InvalidFormatException::class.java) { validator.validate(value) }
+        val e = assertFailsWith<InvalidFormatException> { validator.validate(value) }
 
         assertNotNull(e.message)
         assertTrue(e.message!!.contains("latitude"))
@@ -125,7 +123,7 @@ internal class SchemaValidatorTest {
             status: invalid-value
         """.trimIndent()
 
-        val e = assertThrowsExactly(ValidationException::class.java) { validator.validate(value) }
+        val e = assertFailsWith<ValidationException> { validator.validate(value) }
 
         assertEquals(1, e.validationErrors.size)
         assertNotNull(e.message)
@@ -140,7 +138,7 @@ internal class SchemaValidatorTest {
             longitude: 53.11505019602539
         """.trimIndent()
 
-        val e = assertThrowsExactly(ValidationException::class.java) { validator.validate(value) }
+        val e = assertFailsWith<ValidationException> { validator.validate(value) }
 
         assertEquals(1, e.validationErrors.size)
         assertNotNull(e.message)
@@ -156,7 +154,7 @@ internal class SchemaValidatorTest {
             id: invalid-value
         """.trimIndent()
 
-        val e = assertThrowsExactly(ValidationException::class.java) { validator.validate(value) }
+        val e = assertFailsWith<ValidationException> { validator.validate(value) }
 
         assertEquals(1, e.validationErrors.size)
         assertNotNull(e.message)
@@ -170,7 +168,7 @@ internal class SchemaValidatorTest {
             invalid-yaml
         """.trimIndent()
 
-        val e = assertThrowsExactly(InvalidFormatException::class.java) { validator.validate(value) }
+        val e = assertFailsWith<InvalidFormatException> { validator.validate(value) }
 
         assertNotNull(e.message)
     }
@@ -182,7 +180,7 @@ internal class SchemaValidatorTest {
             invalid-json
         """.trimIndent()
 
-        val e = assertThrowsExactly(InvalidFormatException::class.java) { validator.validate(value) }
+        val e = assertFailsWith<InvalidFormatException> { validator.validate(value) }
 
         assertNotNull(e.message)
     }

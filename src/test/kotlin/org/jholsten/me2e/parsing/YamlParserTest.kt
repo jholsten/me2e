@@ -5,26 +5,23 @@ import io.mockk.*
 import org.jholsten.me2e.parsing.utils.DeserializerFactory
 import org.jholsten.me2e.parsing.utils.FileUtils
 import org.jholsten.me2e.parsing.utils.SchemaValidator
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
+import kotlin.test.*
 
 internal class YamlParserTest {
 
     private val yamlMapper = mockk<YAMLMapper>()
     private val validator = mockk<SchemaValidator>()
 
-    @BeforeEach
-    fun beforeEach() {
+    @BeforeTest
+    fun beforeTest() {
         mockkObject(DeserializerFactory)
         every { DeserializerFactory.getYamlMapper() } returns yamlMapper
 
         mockkObject(FileUtils.Companion)
     }
 
-    @AfterEach
-    fun afterEach() {
+    @AfterTest
+    fun afterTest() {
         unmockkAll()
     }
 
