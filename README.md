@@ -1,4 +1,5 @@
 # me2e Library for End-to-End Tests for Microservice Applications
+
 me2e (Microservice End-to-End) is a library for writing end-to-end tests for microservice applications.
 
 ## Usage
@@ -11,22 +12,22 @@ Add the following entries to the `pom.xml` of your project to access the GitLab 
 
 ```xml
 <repositories>
-  <repository>
-    <id>gitlab-maven</id>
-    <url>https://gitlab.informatik.uni-bremen.de/api/v4/projects/33508/packages/maven</url>
-  </repository>
+    <repository>
+        <id>gitlab-maven</id>
+        <url>https://gitlab.informatik.uni-bremen.de/api/v4/projects/33508/packages/maven</url>
+    </repository>
 </repositories>
 
 <distributionManagement>
-  <repository>
-    <id>gitlab-maven</id>
-    <url>https://gitlab.informatik.uni-bremen.de/api/v4/projects/33508/packages/maven</url>
-  </repository>
-
-  <snapshotRepository>
-    <id>gitlab-maven</id>
-    <url>https://gitlab.informatik.uni-bremen.de/api/v4/projects/33508/packages/maven</url>
-  </snapshotRepository>
+    <repository>
+        <id>gitlab-maven</id>
+        <url>https://gitlab.informatik.uni-bremen.de/api/v4/projects/33508/packages/maven</url>
+    </repository>
+    
+    <snapshotRepository>
+        <id>gitlab-maven</id>
+        <url>https://gitlab.informatik.uni-bremen.de/api/v4/projects/33508/packages/maven</url>
+    </snapshotRepository>
 </distributionManagement>
 ```
 
@@ -95,3 +96,17 @@ dependencies {
     implementation "org.jholsten:me2e:$me2eVersion"
 }
 ```
+
+### Configuration
+#### Mock Server Configuration
+To enable forwarding requests to third-party services to the corresponding mock server, you need to point the services' hostname to the host's IP address.
+For each microservice which is communication with the third-party service, add an [extra_hosts](https://docs.docker.com/compose/compose-file/compose-file-v3/#extra_hosts) entry to the Docker-Compose file.
+
+Example: To forward requests to `example.com` and `google.com` to the corresponding mock servers, set:
+```yaml
+    extra_hosts:
+      - "example.com:host-gateway"
+      - "google.com:host-gateway"
+```
+
+In case you are receiving 403 errors and your operating system is Windows, you may need to [disable the automatic proxy detection](https://support.rezstream.com/hc/en-us/articles/360025156853-Disable-Auto-Proxy-Settings-in-Windows-10) (see [GitHub Issue](https://github.com/docker/for-win/issues/13127)).
