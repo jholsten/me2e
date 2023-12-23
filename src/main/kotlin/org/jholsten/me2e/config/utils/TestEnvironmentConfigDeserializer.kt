@@ -72,7 +72,9 @@ class TestEnvironmentConfigDeserializer: JsonDeserializer<TestEnvironmentConfig>
     private fun deserializeContainers(dockerComposeFile: String): Map<String, Container> {
         val dockerComposeContent = FileUtils.readFileContentsFromResources(dockerComposeFile)
         val dockerCompose = DeserializerFactory.getYamlMapper().readTree(dockerComposeContent)
-        val services = dockerCompose.get("services").fields()
+        val serviceNode = dockerCompose.get("services")
+        require(serviceNode != null) { "Docker-Compose needs to have services defined." }
+        val services = serviceNode.fields()
         return deserializeContainers(services)
     }
 
@@ -92,11 +94,11 @@ class TestEnvironmentConfigDeserializer: JsonDeserializer<TestEnvironmentConfig>
         return result
     }
 
-    private fun getImageLabels(labelsNode: JsonNode): Map<String, String?> {
+    private fun getImageLabels(labelsNode: JsonNode?): Map<String, String?> {
         return mapOf(
-            CONTAINER_TYPE_KEY to labelsNode.get(CONTAINER_TYPE_KEY)?.textValue(),
-            IS_PUBLIC_KEY to labelsNode.get(IS_PUBLIC_KEY)?.textValue(),
-            DATABASE_TYPE_KEY to labelsNode.get(DATABASE_TYPE_KEY)?.textValue(),
+            CONTAINER_TYPE_KEY to labelsNode?.get(CONTAINER_TYPE_KEY)?.textValue(),
+            IS_PUBLIC_KEY to labelsNode?.get(IS_PUBLIC_KEY)?.textValue(),
+            DATABASE_TYPE_KEY to labelsNode?.get(DATABASE_TYPE_KEY)?.textValue(),
         )
     }
 
@@ -119,7 +121,7 @@ class TestEnvironmentConfigDeserializer: JsonDeserializer<TestEnvironmentConfig>
      * Since we need the entry in the format of Option 1, we need to convert entries given in Option-2-Format.
      */
     private fun convertListToMap(serviceNode: ObjectNode, key: String) {
-        if (!serviceNode[key].isArray) {
+        if (serviceNode[key] == null || !serviceNode[key].isArray) {
             return
         }
 
@@ -128,7 +130,7 @@ class TestEnvironmentConfigDeserializer: JsonDeserializer<TestEnvironmentConfig>
             val keyValuePair = entry.textValue().split("=")
             if (keyValuePair.size != 2) {
                 logger.warn("Ignoring entry ${entry.textValue()} in $key since the entry is not in the required format.")
-                return
+                continue
             }
             result[keyValuePair[0]] = keyValuePair[1]
         }
