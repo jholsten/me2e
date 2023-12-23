@@ -1,5 +1,6 @@
 package org.jholsten.me2e.parsing
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import org.jholsten.me2e.parsing.exception.ParseException
 import org.jholsten.me2e.parsing.exception.ValidationException
@@ -21,13 +22,21 @@ internal open class YamlParser<T>(
      * Model to which value should be parsed
      */
     private val clazz: Class<T>,
+
+    /**
+     * Object mapper to use for deserialization.
+     * By default, this is set to the standard YAML mapper defined in the [DeserializerFactory].
+     * In case any additional configuration needs to be applied, this value can be set to a
+     * custom mapper.
+     */
+    private val yamlMapper: ObjectMapper = DeserializerFactory.getYamlMapper(),
 ) : Parser<T> {
 
     override fun parse(value: String): T {
         validator.validate(value)
 
         try {
-            return DeserializerFactory.getYamlMapper().readValue(value, clazz)
+            return yamlMapper.readValue(value, clazz)
         } catch (e: MismatchedInputException) {
             val path = e.path.filter { it.fieldName != null }.joinToString(".") { it.fieldName }
             throw ValidationException(listOf("$path: ${e.message}"))

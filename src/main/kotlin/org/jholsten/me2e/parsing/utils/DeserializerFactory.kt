@@ -19,12 +19,12 @@ internal class DeserializerFactory private constructor() {
 
         @JvmStatic
         fun getYamlMapper(): ObjectMapper {
-            return YAML_MAPPER
+            return YAML_MAPPER.copy()
         }
 
         @JvmStatic
         fun getObjectMapper(): ObjectMapper {
-            return OBJECT_MAPPER
+            return OBJECT_MAPPER.copy()
         }
     }
 }
