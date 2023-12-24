@@ -97,4 +97,17 @@ class StringMatcher(
 
         return true
     }
+
+    override fun toString(): String {
+        return """
+            {
+                "equals": $equals,
+                "matches": $matches,
+                "notMatches": $notMatches,
+                "contains": $contains,
+                "notContains": $notContains,
+                "ignoreCase": $ignoreCase
+            }
+        """.trimIndent()
+    }
 }

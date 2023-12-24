@@ -1,17 +1,9 @@
 package org.jholsten.me2e.mock
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.common.FatalStartupException
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import okhttp3.internal.toImmutableList
 import org.jholsten.me2e.mock.stubbing.MockServerStub
-import org.awaitility.Awaitility.await
-import org.awaitility.Durations
-import org.awaitility.core.ConditionTimeoutException
 import org.jholsten.me2e.config.utils.MockServerDeserializer
-import org.jholsten.me2e.container.exception.ServiceStartupException
-import org.jholsten.me2e.container.healthcheck.exception.ServiceNotHealthyException
-import org.jholsten.me2e.mock.parser.YamlMockServerStubParser
 import org.jholsten.me2e.request.mapper.HttpRequestMapper
 import org.jholsten.me2e.request.model.HttpRequest
 
@@ -32,68 +24,32 @@ class MockServer(
     val hostname: String,
 
     /**
-     * List of paths to stub definitions. The files need to be located in `resources` folder.
-     */
-    stubs: List<String> = listOf(),
-) {
-    /**
      * Definition of stubs for this mock server
      */
-    val stubs: List<MockServerStub>
+    val stubs: List<MockServerStub> = listOf(),
+) {
 
     /**
      * Mock server instance that handles incoming requests
      */
-    private val wireMockServer: WireMockServer = WireMockServer(WireMockConfiguration().port(this.port))
+    private var wireMockServer: WireMockServer? = null
 
-    init {
-        this.stubs = readStubs(stubs)
+    internal fun initialize(wireMockServer: WireMockServer) {
+        this.wireMockServer = wireMockServer
         for (stub in this.stubs) {
-            stub.register(wireMockServer)
+            stub.registerAt(wireMockServer)
         }
     }
 
     /**
-     * Starts this mocked HTTP server and waits at most 5 seconds until it's running.
-     * @throws ServiceStartupException if server could not be started.
-     * @throws ServiceNotHealthyException if server is not running within 5 seconds.
+     * Returns all requests that this mock server received sorted by their timestamp.
+     * @throws IllegalStateException if the HTTP mock server is not initialized or not running.
      */
-    fun start() {
-        try {
-            this.wireMockServer.start()
-            await().atMost(Durations.FIVE_SECONDS).until { wireMockServer.isRunning }
-        } catch (e: FatalStartupException) {
-            throw ServiceStartupException("Mock server $name could not be started: ${e.message}")
-        } catch (e: ConditionTimeoutException) {
-            throw ServiceNotHealthyException("Mock server $name was not running within 5 seconds.")
+    val requestsReceived: List<HttpRequest>
+        get() {
+            check(wireMockServer != null && wireMockServer!!.isRunning) { "Received requests can only be retrieved when mock server is running" }
+            val events = wireMockServer!!.allServeEvents.filter { it.request.host == hostname }.toMutableList()
+            events.sortBy { it.request.loggedDate }
+            return events.map { HttpRequestMapper.INSTANCE.toInternalDto(it.request) }
         }
-    }
-
-    /**
-     * Stops this mocked HTTP server.
-     */
-    fun stop() {
-        this.wireMockServer.stop()
-    }
-
-    /**
-     * Returns whether this mock server is currently up and running.
-     */
-    fun isRunning(): Boolean {
-        return this.wireMockServer.isRunning
-    }
-
-    /**
-     * Returns all requests that this mock server received.
-     */
-    fun getReceivedRequests(): List<HttpRequest> {
-        val events = wireMockServer.allServeEvents
-        events.sortBy { it.request.loggedDate }
-        return events.map { HttpRequestMapper.INSTANCE.toInternalDto(it.request) }
-    }
-
-    private fun readStubs(stubFiles: List<String>): List<MockServerStub> {
-        val parser = YamlMockServerStubParser()
-        return stubFiles.map { parser.parseFile(it) }.toImmutableList()
-    }
 }

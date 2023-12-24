@@ -23,12 +23,12 @@ class MockServerStubRequestMatcher(
     /**
      * HTTP method of the request
      */
-    val method: HttpMethod?,
+    val method: HttpMethod? = null,
 
     /**
      * URL path of the request
      */
-    val path: StringMatcher?,
+    val path: StringMatcher? = null,
 
     /**
      * Headers of the request as map of header name and string matcher
@@ -143,11 +143,24 @@ class MockServerStubRequestMatcher(
     }
 
     internal fun bodyPatternsMatch(request: Request): Boolean {
-        if (this.bodyPatterns == null || this.bodyPatterns.isEmpty()) {
+        if (this.bodyPatterns.isNullOrEmpty()) {
             return true
         }
 
         val body = request.bodyAsString
         return this.bodyPatterns.all { it.matches(body) }
+    }
+
+    override fun toString(): String {
+        return """
+            {
+                "hostname": $hostname,
+                "method": $method,
+                "path": $path,
+                "headers": $headers,
+                "queryParameters": $queryParameters,
+                "bodyPatterns": $bodyPatterns
+            }
+        """.trimIndent()
     }
 }
