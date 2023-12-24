@@ -34,7 +34,7 @@ internal class MockServerStubRequestMapper private constructor() {
                 }
             }
 
-            return WireMock.requestMatching(matcher)
+            return WireMock.requestMatching(matcher).withMetadata(Metadata(mapOf("matcher" to stubRequest)))
         }
     }
 }

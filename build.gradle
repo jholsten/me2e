@@ -98,6 +98,7 @@ dependencies {
     // Dependency for awaiting events
     implementation "org.awaitility:awaitility:4.1.0"
     implementation 'org.slf4j:slf4j-jdk14:2.0.9'
+    implementation "de.m3y.kformat:kformat:0.10"
 }
 
 // Apply a specific Java toolchain to ease working on different environments.

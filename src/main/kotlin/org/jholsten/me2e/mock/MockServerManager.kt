@@ -31,6 +31,7 @@ class MockServerManager(
         WireMockConfiguration()
             .port(80)
             .httpsPort(443)
+            .notMatchedRenderer(MockServerStubNotMatchedRenderer())
     )
     // TODO: Methods to reset + register stubs
 
