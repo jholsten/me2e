@@ -11,7 +11,7 @@ import org.jholsten.me2e.container.healthcheck.exception.ServiceNotHealthyExcept
 import org.jholsten.me2e.mock.stubbing.MockServerStubNotMatchedRenderer
 import org.jholsten.me2e.request.mapper.HttpRequestMapper
 import org.jholsten.me2e.request.model.HttpRequest
-import org.jholsten.me2e.utils.isPortAvailable
+import org.jholsten.me2e.utils.PortUtils
 import org.jholsten.me2e.utils.logger
 
 /**
@@ -150,7 +150,7 @@ class MockServerManager(
 
     private fun assertPortsAreAvailable() {
         for (port in listOf(HTTP_PORT, HTTPS_PORT)) {
-            if (!isPortAvailable(port)) {
+            if (!PortUtils.isPortAvailable(port)) {
                 throw ServiceStartupException("Port $port is already in use")
             }
         }
