@@ -25,8 +25,8 @@ class MockServerStub(
      * This results in the instance returning the specified response whenever the request matches the specified stub.
      * @param wireMockServer Wire mock server instance at which stub should be registered
      */
-    internal fun registerAt(wireMockServer: WireMockServer) {
-        val requestMatcher = MockServerStubRequestMapper.toWireMockStubRequestMatcher(this.request)
+    internal fun registerAt(mockServerName: String, wireMockServer: WireMockServer) {
+        val requestMatcher = MockServerStubRequestMapper.toWireMockStubRequestMatcher(mockServerName, this.request)
         val response = MockServerStubResponseMapper.toWireMockResponseDefinition(this.response)
 
         wireMockServer.stubFor(requestMatcher.willReturn(response))

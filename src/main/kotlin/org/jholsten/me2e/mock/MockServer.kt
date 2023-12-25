@@ -2,8 +2,10 @@ package org.jholsten.me2e.mock
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.WireMock
 import org.jholsten.me2e.mock.stubbing.MockServerStub
 import org.jholsten.me2e.config.utils.MockServerDeserializer
+import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequestMapper.Companion.METADATA_MOCK_SERVER_NAME_KEY
 import org.jholsten.me2e.request.mapper.HttpRequestMapper
 import org.jholsten.me2e.request.model.HttpRequest
 
@@ -36,9 +38,29 @@ class MockServer(
 
     internal fun initialize(wireMockServer: WireMockServer) {
         this.wireMockServer = wireMockServer
+    }
+
+    /**
+     * Registers all stubs defined for this mock server.
+     * This leads to the mock server responding with the specified response whenever the request matches the specified stub.
+     * @throws IllegalStateException if the mock server is not initialized.
+     */
+    fun registerStubs() {
+        checkNotNull(wireMockServer) { "Mock server needs to be initialized" }
         for (stub in this.stubs) {
-            stub.registerAt(wireMockServer)
+            stub.registerAt(name, wireMockServer!!)
         }
+    }
+
+    /**
+     * Resets all stubs and registered requests for this mock server.
+     * @throws IllegalStateException if the mock server is not initialized.
+     */
+    fun reset() {
+        checkNotNull(wireMockServer) { "Mock server needs to be initialized" }
+        val metadataMatcher = WireMock.matchingJsonPath("$.$METADATA_MOCK_SERVER_NAME_KEY", WireMock.equalTo(name))
+        wireMockServer!!.removeStubsByMetadata(metadataMatcher)
+        wireMockServer!!.removeServeEventsForStubsMatchingMetadata(metadataMatcher)
     }
 
     /**

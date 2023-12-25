@@ -13,6 +13,7 @@ import de.m3y.kformat.Table
 import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequestMatcher
 import de.m3y.kformat.Table.Hints
 import de.m3y.kformat.table
+import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequestMapper.Companion.METADATA_MATCHER_KEY
 import org.jholsten.me2e.mock.stubbing.request.StringMatcher
 import kotlin.math.max
 
@@ -44,7 +45,7 @@ class MockServerStubNotMatchedRenderer : NotMatchedRenderer() {
     }
 
     private fun renderNearestMiss(nearestMiss: NearMiss): String {
-        val requestMatcher = nearestMiss.stubMapping.metadata["matcher"] as MockServerStubRequestMatcher
+        val requestMatcher = nearestMiss.stubMapping.metadata[METADATA_MATCHER_KEY] as MockServerStubRequestMatcher
         val stringBuilder = StringBuilder()
         stringBuilder.appendLine("Request was not matched.")
 

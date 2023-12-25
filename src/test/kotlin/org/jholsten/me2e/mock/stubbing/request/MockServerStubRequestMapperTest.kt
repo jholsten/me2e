@@ -6,6 +6,8 @@ import com.github.tomakehurst.wiremock.http.RequestMethod
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequestMapper.Companion.METADATA_MATCHER_KEY
+import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequestMapper.Companion.METADATA_MOCK_SERVER_NAME_KEY
 import kotlin.test.*
 
 internal class MockServerStubRequestMapperTest {
@@ -26,11 +28,13 @@ internal class MockServerStubRequestMapperTest {
         every { request.method } returns RequestMethod.GET
         every { request.headers } returns HttpHeaders()
 
-        val mapping = MockServerStubRequestMapper.toWireMockStubRequestMatcher(stub).build()
+        val mapping = MockServerStubRequestMapper.toWireMockStubRequestMatcher("example-service", stub).build()
 
         val matchResult = mapping.request.match(request)
         assertTrue(matchResult.isExactMatch)
         assertEquals(0.0, matchResult.distance)
+        assertEquals(stub, mapping.metadata[METADATA_MATCHER_KEY])
+        assertEquals("example-service", mapping.metadata[METADATA_MOCK_SERVER_NAME_KEY])
         verify { stub.hostnameMatches("example.com") }
         verify { stub.pathMatches("/search") }
         verify { stub.methodMatches(RequestMethod.GET) }
@@ -55,11 +59,13 @@ internal class MockServerStubRequestMapperTest {
         every { request.method } returns RequestMethod.GET
         every { request.headers } returns HttpHeaders()
 
-        val mapping = MockServerStubRequestMapper.toWireMockStubRequestMatcher(stub).build()
+        val mapping = MockServerStubRequestMapper.toWireMockStubRequestMatcher("example-service", stub).build()
 
         val matchResult = mapping.request.match(request)
         assertFalse(matchResult.isExactMatch)
         assertTrue(matchResult.distance > 0.0)
+        assertEquals(stub, mapping.metadata[METADATA_MATCHER_KEY])
+        assertEquals("example-service", mapping.metadata[METADATA_MOCK_SERVER_NAME_KEY])
         verify { stub.hostnameMatches("example.com") }
         verify { stub.pathMatches("/search") }
         verify { stub.methodMatches(RequestMethod.GET) }

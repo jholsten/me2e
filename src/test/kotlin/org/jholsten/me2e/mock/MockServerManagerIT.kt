@@ -7,11 +7,11 @@ import com.github.tomakehurst.wiremock.http.JvmProxyConfigurer
 import com.github.tomakehurst.wiremock.junit5.WireMockTest
 import org.apache.hc.client5.http.classic.methods.HttpGet
 import org.apache.hc.client5.http.classic.methods.HttpPost
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.HttpEntity
 import org.apache.hc.core5.http.io.entity.StringEntity
+import org.jholsten.me2e.container.exception.ServiceStartupException
 import org.jholsten.me2e.mock.stubbing.MockServerStub
 import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequestMatcher
 import org.jholsten.me2e.mock.stubbing.request.StringMatcher
@@ -100,7 +100,7 @@ internal class MockServerManagerIT {
 
         val request = HttpPost("http://example.com/search")
         request.entity = StringEntity("{\"id\": 123}", ContentType.APPLICATION_JSON)
-        val response: CloseableHttpResponse? = client.execute(request)
+        val response = client.execute(request)
 
         assertTrue(manager.isRunning)
         assertEquals(200, response?.code)
@@ -123,7 +123,7 @@ internal class MockServerManagerIT {
         val manager = startManager()
 
         val request = HttpPost("http://example.com/not-stubbed")
-        val response: CloseableHttpResponse? = client.execute(request)
+        val response = client.execute(request)
 
         assertTrue(manager.isRunning)
         assertEquals(404, response?.code)
@@ -146,7 +146,7 @@ internal class MockServerManagerIT {
         val manager = startManager(mockServers = mapOf())
 
         val request = HttpGet("http://localhost")
-        val response: CloseableHttpResponse? = client.execute(request)
+        val response = client.execute(request)
 
         assertTrue(manager.isRunning)
         assertEquals(404, response?.code)
@@ -160,6 +160,41 @@ internal class MockServerManagerIT {
 
         manager.stop()
         assertFalse(manager.isRunning)
+    }
+
+    @Test
+    fun `Resetting mock servers should reset stubs and requests`() {
+        val manager = startManager()
+
+        val request = HttpGet("http://example.com")
+        val response = client.execute(request)
+
+        assertTrue(manager.isRunning)
+        assertEquals(200, response.code)
+        assertEquals("Some Response", encodeResponseBody(response?.entity))
+        assertEquals(1, exampleServer.requestsReceived.size)
+        assertEquals(0, googleServer.requestsReceived.size)
+
+        manager.resetAll()
+        assertEquals(0, exampleServer.requestsReceived.size)
+        assertEquals(0, googleServer.requestsReceived.size)
+
+        manager.stop()
+        assertFalse(manager.isRunning)
+    }
+
+    @Test
+    fun `Trying to start mock server if port is already in use should throw exception`() {
+        val manager1 = MockServerManager(mapOf())
+        val manager2 = MockServerManager(mapOf())
+
+        try {
+            manager1.start()
+            val e = assertFailsWith<ServiceStartupException> { manager2.start() }
+            assertEquals("Port 80 is already in use", e.message)
+        } finally {
+            manager1.stop()
+        }
     }
 
     private fun startManager(

@@ -9,6 +9,7 @@ import org.awaitility.core.ConditionTimeoutException
 import org.jholsten.me2e.container.exception.ServiceStartupException
 import org.jholsten.me2e.container.healthcheck.exception.ServiceNotHealthyException
 import org.jholsten.me2e.mock.stubbing.MockServerStubNotMatchedRenderer
+import org.jholsten.me2e.utils.isPortAvailable
 import org.jholsten.me2e.utils.logger
 
 /**
@@ -22,6 +23,11 @@ class MockServerManager(
      */
     private val mockServers: Map<String, MockServer>,
 ) {
+    companion object {
+        private const val HTTP_PORT = 80
+        private const val HTTPS_PORT = 443
+    }
+
     private val logger = logger(this)
 
     /**
@@ -29,29 +35,55 @@ class MockServerManager(
      */
     private val wireMockServer: WireMockServer = WireMockServer(
         WireMockConfiguration()
-            .port(80)
-            .httpsPort(443)
+            .port(HTTP_PORT)
+            .httpsPort(HTTPS_PORT)
             .notMatchedRenderer(MockServerStubNotMatchedRenderer())
     )
-    // TODO: Methods to reset + register stubs
 
     /**
      * Initializes all mock server instances and starts mocked HTTP server.
      * Waits at most 5 seconds until the HTTP server is running.
      * @throws ServiceStartupException if server could not be started.
      * @throws ServiceNotHealthyException if server is not running within 5 seconds.
+     * @throws IllegalStateException if mock server is already running
      */
     fun start() {
+        check(!isRunning) { "Mock server is already running" }
+        assertPortsAreAvailable()
         initializeMockServers()
+        registerAllStubs()
         startHTTPMockServer()
     }
 
     /**
      * Stops HTTP mock server. The server also stops automatically when all tests are finished.
+     * @throws IllegalStateException if mock server is currently not running
      */
     fun stop() {
+        check(isRunning) { "Mock server can only be stopped if it is currently running" }
         this.wireMockServer.stop()
         logger.info("Stopped HTTP mock server")
+    }
+
+    /**
+     * Registers all stubs defined for all mock servers.
+     * This leads to the mock servers responding with the specified response whenever the request matches the specified stub.
+     * @throws IllegalStateException if the mock server is not initialized.
+     */
+    fun registerAllStubs() {
+        for (mockServer in mockServers.values) {
+            mockServer.registerStubs()
+        }
+    }
+
+    /**
+     * Resets all stubs and registered requests for all mock servers.
+     * @throws IllegalStateException if the mock server is not initialized.
+     */
+    fun resetAll() {
+        for (mockServer in mockServers.values) {
+            mockServer.reset()
+        }
     }
 
     /**
@@ -62,23 +94,15 @@ class MockServerManager(
 
     /**
      * Returns the HTTP port of the HTTP mock server.
-     * @throws IllegalStateException if the mock server is not running.
      */
     val httpPort: Int
-        get() {
-            check(isRunning) { "Mock server needs to be started to retrieve the HTTP port." }
-            return wireMockServer.port()
-        }
+        get() = HTTP_PORT
 
     /**
      * Returns the HTTPS port of the HTTP mock server.
-     * @throws IllegalStateException if the mock server is not running.
      */
     val httpsPort: Int
-        get() {
-            check(isRunning) { "Mock server needs to be started to retrieve the HTTPS port." }
-            return wireMockServer.httpsPort()
-        }
+        get() = HTTPS_PORT
 
     /**
      * Starts mocked HTTP server and waits at most 5 seconds until it's running.
@@ -106,6 +130,14 @@ class MockServerManager(
         for ((mockServerName, mockServer) in mockServers) {
             mockServer.initialize(wireMockServer)
             logger.info("Initialized mock server $mockServerName")
+        }
+    }
+
+    private fun assertPortsAreAvailable() {
+        for (port in listOf(HTTP_PORT, HTTPS_PORT)) {
+            if (!isPortAvailable(port)) {
+                throw ServiceStartupException("Port $port is already in use")
+            }
         }
     }
 }

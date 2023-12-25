@@ -12,11 +12,21 @@ import com.github.tomakehurst.wiremock.matching.WeightedMatchResult.weight
 internal class MockServerStubRequestMapper private constructor() {
     companion object {
         /**
+         * Key for which [MockServerStubRequestMatcher] instance is stored in stub metadata.
+         */
+        internal const val METADATA_MATCHER_KEY = "matcher"
+
+        /**
+         * Key for which name of the mock server is stored in stub metadata.
+         */
+        internal const val METADATA_MOCK_SERVER_NAME_KEY = "name"
+
+        /**
          * Maps stub request to equivalent stub for WireMock. Uses weighted matching to show nearly missed stubs.
          * @see [com.github.tomakehurst.wiremock.matching.RequestPattern]
          */
         @JvmStatic
-        fun toWireMockStubRequestMatcher(stubRequest: MockServerStubRequestMatcher): MappingBuilder {
+        fun toWireMockStubRequestMatcher(mockServerName: String, stubRequest: MockServerStubRequestMatcher): MappingBuilder {
             val matcher = object : RequestMatcherExtension() {
                 override fun match(request: Request, parameters: Parameters): MatchResult {
                     val results = listOf(
@@ -34,7 +44,14 @@ internal class MockServerStubRequestMapper private constructor() {
                 }
             }
 
-            return WireMock.requestMatching(matcher).withMetadata(Metadata(mapOf("matcher" to stubRequest)))
+            return WireMock.requestMatching(matcher).withMetadata(
+                Metadata(
+                    mapOf(
+                        METADATA_MATCHER_KEY to stubRequest,
+                        METADATA_MOCK_SERVER_NAME_KEY to mockServerName,
+                    )
+                )
+            )
         }
     }
 }
