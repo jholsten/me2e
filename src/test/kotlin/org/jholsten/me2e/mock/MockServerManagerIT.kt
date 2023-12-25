@@ -107,6 +107,7 @@ internal class MockServerManagerIT {
         assertNotNull(response?.entity)
         assertEquals(responseBodyContent, encodeResponseBody(response?.entity))
         assertEquals("application/json", response?.getFirstHeader("Content-Type")?.value)
+        assertEquals(1, manager.requestsReceived.size)
         assertEquals(1, exampleServer.requestsReceived.size)
         assertEquals(0, googleServer.requestsReceived.size)
         assertEquals(expectedReceivedRequest.url, exampleServer.requestsReceived.first().url)
@@ -128,6 +129,7 @@ internal class MockServerManagerIT {
         assertTrue(manager.isRunning)
         assertEquals(404, response?.code)
         assertNotNull(response?.entity)
+        assertEquals(1, manager.requestsReceived.size)
         assertEquals(1, exampleServer.requestsReceived.size)
         assertEquals(0, googleServer.requestsReceived.size)
         assertNull(exampleServer.requestsReceived.first().body)
@@ -151,6 +153,7 @@ internal class MockServerManagerIT {
         assertTrue(manager.isRunning)
         assertEquals(404, response?.code)
         assertNotNull(response?.entity)
+        assertEquals(1, manager.requestsReceived.size)
 
         assertEquals(
             "No response could be served as there are no stubs registered for the mock server.",
@@ -166,16 +169,19 @@ internal class MockServerManagerIT {
     fun `Resetting mock servers should reset stubs and requests`() {
         val manager = startManager()
 
-        val request = HttpGet("http://example.com")
-        val response = client.execute(request)
+        val response1 = client.execute(HttpGet("http://example.com"))
+        val response2 = client.execute(HttpGet("http://localhost"))
 
         assertTrue(manager.isRunning)
-        assertEquals(200, response.code)
-        assertEquals("Some Response", encodeResponseBody(response?.entity))
+        assertEquals(404, response2.code)
+        assertEquals(200, response1.code)
+        assertEquals("Some Response", encodeResponseBody(response1?.entity))
+        assertEquals(2, manager.requestsReceived.size)
         assertEquals(1, exampleServer.requestsReceived.size)
         assertEquals(0, googleServer.requestsReceived.size)
 
         manager.resetAll()
+        assertEquals(0, manager.requestsReceived.size)
         assertEquals(0, exampleServer.requestsReceived.size)
         assertEquals(0, googleServer.requestsReceived.size)
 

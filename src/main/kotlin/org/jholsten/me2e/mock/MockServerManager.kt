@@ -9,6 +9,8 @@ import org.awaitility.core.ConditionTimeoutException
 import org.jholsten.me2e.container.exception.ServiceStartupException
 import org.jholsten.me2e.container.healthcheck.exception.ServiceNotHealthyException
 import org.jholsten.me2e.mock.stubbing.MockServerStubNotMatchedRenderer
+import org.jholsten.me2e.request.mapper.HttpRequestMapper
+import org.jholsten.me2e.request.model.HttpRequest
 import org.jholsten.me2e.utils.isPortAvailable
 import org.jholsten.me2e.utils.logger
 
@@ -84,7 +86,20 @@ class MockServerManager(
         for (mockServer in mockServers.values) {
             mockServer.reset()
         }
+        wireMockServer.resetAll()
     }
+
+    /**
+     * Returns all requests that any mock server received sorted by their timestamp.
+     * @throws IllegalStateException if the HTTP mock server is not running.
+     */
+    val requestsReceived: List<HttpRequest>
+        get() {
+            check(wireMockServer.isRunning) { "Received requests can only be retrieved when mock server is running" }
+            val events = wireMockServer.allServeEvents.toMutableList()
+            events.sortBy { it.request.loggedDate }
+            return events.map { HttpRequestMapper.INSTANCE.toInternalDto(it.request) }
+        }
 
     /**
      * Returns whether the HTTP mock server is currently up and running.
