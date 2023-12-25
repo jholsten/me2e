@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.github.tomakehurst.wiremock.http.JvmProxyConfigurer
 import com.github.tomakehurst.wiremock.junit5.WireMockTest
+import org.apache.hc.client5.http.classic.methods.HttpGet
 import org.apache.hc.client5.http.classic.methods.HttpPost
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
@@ -29,11 +30,6 @@ internal class MockServerManagerIT {
     private val client = HttpClientBuilder.create()
         .useSystemProperties()
         .build()
-
-    @AfterTest
-    fun afterTest() {
-        JvmProxyConfigurer.restorePrevious()
-    }
 
     private val responseBodyContent = "{\"id\":123,\"items\":[{\"name\":\"A\",\"value\":42},{\"name\":\"B\",\"value\":1}]}"
 
@@ -88,6 +84,11 @@ internal class MockServerManagerIT {
         )
     )
 
+    @AfterTest
+    fun afterTest() {
+        JvmProxyConfigurer.restorePrevious()
+    }
+
     @Test
     fun `Mock server should respond with stubbed response`() {
         val expectedReceivedRequest = HttpRequest(
@@ -101,6 +102,7 @@ internal class MockServerManagerIT {
         request.entity = StringEntity("{\"id\": 123}", ContentType.APPLICATION_JSON)
         val response: CloseableHttpResponse? = client.execute(request)
 
+        assertTrue(manager.isRunning)
         assertEquals(200, response?.code)
         assertNotNull(response?.entity)
         assertEquals(responseBodyContent, encodeResponseBody(response?.entity))
@@ -111,7 +113,53 @@ internal class MockServerManagerIT {
         assertEquals(expectedReceivedRequest.method, exampleServer.requestsReceived.first().method)
         assertEquals(expectedReceivedRequest.body?.asString(), exampleServer.requestsReceived.first().body?.asString())
         assertEquals("application/json", exampleServer.requestsReceived.first().body?.contentType?.value)
+
+        manager.stop()
+        assertFalse(manager.isRunning)
+    }
+
+    @Test
+    fun `Mock server should respond with 404 if no stub mapping matches`() {
+        val manager = startManager()
+
+        val request = HttpPost("http://example.com/not-stubbed")
+        val response: CloseableHttpResponse? = client.execute(request)
+
         assertTrue(manager.isRunning)
+        assertEquals(404, response?.code)
+        assertNotNull(response?.entity)
+        assertEquals(1, exampleServer.requestsReceived.size)
+        assertEquals(0, googleServer.requestsReceived.size)
+        assertNull(exampleServer.requestsReceived.first().body)
+
+        val responseBody = encodeResponseBody(response?.entity)
+        assertNotNull(responseBody)
+        assertContains(responseBody, "Request was not matched")
+        assertEquals("text/plain", response?.getFirstHeader("Content-Type")?.value)
+
+        manager.stop()
+        assertFalse(manager.isRunning)
+    }
+
+    @Test
+    fun `Mock server should respond with 404 if no stubs are registered`() {
+        val manager = startManager(mockServers = mapOf())
+
+        val request = HttpGet("http://localhost")
+        val response: CloseableHttpResponse? = client.execute(request)
+
+        assertTrue(manager.isRunning)
+        assertEquals(404, response?.code)
+        assertNotNull(response?.entity)
+
+        assertEquals(
+            "No response could be served as there are no stubs registered for the mock server.",
+            encodeResponseBody(response?.entity),
+        )
+        assertEquals("text/plain", response?.getFirstHeader("Content-Type")?.value)
+
+        manager.stop()
+        assertFalse(manager.isRunning)
     }
 
     private fun startManager(
