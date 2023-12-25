@@ -61,7 +61,7 @@ internal class ConfigValidatorIT {
               docker-compose: docker-compose.yml
               mock-servers:
                 payment-service:
-                  port: 9000
+                  hostname: example.com
                   stubs:
                     - invalid-file.txt
         """.trimIndent()

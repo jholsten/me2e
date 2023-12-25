@@ -1,5 +1,6 @@
 package org.jholsten.me2e.mock.stubbing.request
 
+import com.fasterxml.jackson.databind.InjectableValues
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.github.tomakehurst.wiremock.http.HttpHeader
@@ -284,16 +285,23 @@ internal class MockServerStubRequestMatcherTest {
         """.trimIndent()
 
         val mapper = ObjectMapper().registerModule(KotlinModule.Builder().build())
+            .setInjectableValues(InjectableValues.Std().addValue("hostname", "example.com"))
         val result = mapper.readValue(value, MockServerStubRequestMatcher::class.java)
 
         assertEquals(HttpMethod.GET, result.method)
+        assertEquals("example.com", result.hostname)
         RecursiveComparison.assertEquals(StringMatcher(equals = "/search"), result.path)
         RecursiveComparison.assertEquals(mapOf("Content-Type" to StringMatcher(equals = "application/json")), result.headers)
         RecursiveComparison.assertEquals(mapOf("name" to StringMatcher(equals = "dog")), result.queryParameters)
         RecursiveComparison.assertEquals(listOf(StringMatcher(contains = "id")), result.bodyPatterns)
     }
 
-    private fun wireMockRequest(url: String, method: RequestMethod, headers: HttpHeaders = HttpHeaders.noHeaders(), body: String? = null): Request {
+    private fun wireMockRequest(
+        url: String,
+        method: RequestMethod,
+        headers: HttpHeaders = HttpHeaders.noHeaders(),
+        body: String? = null
+    ): Request {
         return LoggedRequest(
             url,
             "http://example.com$url",
