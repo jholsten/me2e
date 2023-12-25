@@ -5,12 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.github.tomakehurst.wiremock.http.JvmProxyConfigurer
 import com.github.tomakehurst.wiremock.junit5.WireMockTest
-import org.apache.http.HttpEntity
-import org.apache.http.client.methods.CloseableHttpResponse
-import org.apache.http.client.methods.HttpPost
-import org.apache.http.entity.ContentType
-import org.apache.http.entity.StringEntity
-import org.apache.http.impl.client.HttpClientBuilder
+import org.apache.hc.client5.http.classic.methods.HttpPost
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
+import org.apache.hc.core5.http.ContentType
+import org.apache.hc.core5.http.HttpEntity
+import org.apache.hc.core5.http.io.entity.StringEntity
 import org.jholsten.me2e.mock.stubbing.MockServerStub
 import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequestMatcher
 import org.jholsten.me2e.mock.stubbing.request.StringMatcher
@@ -101,7 +101,7 @@ internal class MockServerManagerIT {
         request.entity = StringEntity("{\"id\": 123}", ContentType.APPLICATION_JSON)
         val response: CloseableHttpResponse? = client.execute(request)
 
-        assertEquals(200, response?.statusLine?.statusCode)
+        assertEquals(200, response?.code)
         assertNotNull(response?.entity)
         assertEquals(responseBodyContent, encodeResponseBody(response?.entity))
         assertEquals("application/json", response?.getFirstHeader("Content-Type")?.value)
