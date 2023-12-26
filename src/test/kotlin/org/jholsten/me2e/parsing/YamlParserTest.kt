@@ -5,12 +5,14 @@ import io.mockk.*
 import org.jholsten.me2e.parsing.utils.DeserializerFactory
 import org.jholsten.me2e.parsing.utils.FileUtils
 import org.jholsten.me2e.parsing.utils.SchemaValidator
+import org.jholsten.me2e.parsing.utils.Validator
 import kotlin.test.*
 
 internal class YamlParserTest {
 
     private val yamlMapper = mockk<YAMLMapper>()
-    private val validator = mockk<SchemaValidator>()
+    private val schemaValidator = mockk<SchemaValidator>()
+    private val additionalValueValidator = mockk<Validator<Pair<*, *>>>()
 
     @BeforeTest
     fun beforeTest() {
@@ -29,14 +31,16 @@ internal class YamlParserTest {
     fun `Parsing YAML should validate and parse value`() {
         val value = "any-value"
         val parsed = Pair("A", "B")
-        every { validator.validate(any()) } just runs
+        every { schemaValidator.validate(any()) } just runs
+        every { additionalValueValidator.validate(any()) } just runs
         every { yamlMapper.readValue(any<String>(), any<Class<*>>()) } returns parsed
 
-        val parser = YamlParser(validator, Pair::class.java)
+        val parser = YamlParser(schemaValidator, listOf(additionalValueValidator), Pair::class.java)
         val result = parser.parse(value)
 
         assertEquals(parsed, result)
-        verify { validator.validate(value) }
+        verify { schemaValidator.validate(value) }
+        verify { additionalValueValidator.validate(result) }
         verify { yamlMapper.readValue(value, Pair::class.java) }
     }
 
@@ -45,14 +49,16 @@ internal class YamlParserTest {
         val value = "any-value"
         val parsed = Pair("A", "B")
         every { FileUtils.readFileContentsFromResources(any()) } returns value
-        every { validator.validate(any()) } just runs
+        every { schemaValidator.validate(any()) } just runs
+        every { additionalValueValidator.validate(any()) } just runs
         every { yamlMapper.readValue(any<String>(), any<Class<*>>()) } returns parsed
 
-        val parser = YamlParser(validator, Pair::class.java)
+        val parser = YamlParser(schemaValidator, listOf(additionalValueValidator), Pair::class.java)
         val result = parser.parseFile("file.yaml")
 
         assertEquals(parsed, result)
-        verify { validator.validate(value) }
+        verify { schemaValidator.validate(value) }
+        verify { additionalValueValidator.validate(result) }
         verify { yamlMapper.readValue(value, Pair::class.java) }
         verify { FileUtils.readFileContentsFromResources("file.yaml") }
     }

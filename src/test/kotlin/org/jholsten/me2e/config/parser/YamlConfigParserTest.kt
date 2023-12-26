@@ -10,7 +10,7 @@ import org.jholsten.me2e.parsing.exception.InvalidFormatException
 import org.jholsten.me2e.parsing.exception.ValidationException
 import org.jholsten.me2e.config.model.TestConfig
 import org.jholsten.me2e.config.model.TestEnvironmentConfig
-import org.jholsten.me2e.config.utils.ConfigValidator
+import org.jholsten.me2e.config.utils.ConfigSchemaValidator
 import org.jholsten.me2e.parsing.utils.DeserializerFactory
 import org.jholsten.me2e.parsing.utils.FileUtils
 import org.jholsten.me2e.container.microservice.MicroserviceContainer
@@ -53,7 +53,7 @@ internal class YamlConfigParserTest {
         val result = YamlConfigParser().parseFile(filename)
 
         assertEquals(config, result)
-        verify { anyConstructed<ConfigValidator>().validate(contents) }
+        verify { anyConstructed<ConfigSchemaValidator>().validate(contents) }
         verify { FileUtils.readFileContentsFromResources(filename) }
     }
 
@@ -61,7 +61,7 @@ internal class YamlConfigParserTest {
     fun `Parsing invalid YAML should fail`() {
         val filename = "any-file"
         mockDeserializationAndValidation(testConfig())
-        every { anyConstructed<ConfigValidator>().validate(any()) } throws InvalidFormatException("Some validation error")
+        every { anyConstructed<ConfigSchemaValidator>().validate(any()) } throws InvalidFormatException("Some validation error")
 
         assertFailsWith<InvalidFormatException> { YamlConfigParser().parseFile(filename) }
     }
@@ -96,8 +96,8 @@ internal class YamlConfigParserTest {
         mockkObject(FileUtils.Companion)
         every { FileUtils.readFileContentsFromResources(any()) } returns contents
 
-        mockkConstructor(ConfigValidator::class)
-        every { anyConstructed<ConfigValidator>().validate(any()) } just runs
+        mockkConstructor(ConfigSchemaValidator::class)
+        every { anyConstructed<ConfigSchemaValidator>().validate(any()) } just runs
 
         // JsonSchemaFactory needs to be mocked since init-Block of SchemaValidator is executed even though it is mocked
         mockkConstructor(JsonSchemaFactory::class)

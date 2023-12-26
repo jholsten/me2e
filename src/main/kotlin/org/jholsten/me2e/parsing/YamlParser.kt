@@ -7,6 +7,7 @@ import org.jholsten.me2e.parsing.exception.ValidationException
 import org.jholsten.me2e.parsing.utils.DeserializerFactory
 import org.jholsten.me2e.parsing.utils.FileUtils
 import org.jholsten.me2e.parsing.utils.SchemaValidator
+import org.jholsten.me2e.parsing.utils.Validator
 import java.lang.Exception
 
 /**
@@ -16,7 +17,12 @@ internal open class YamlParser<T>(
     /**
      * Schema validator to use
      */
-    private val validator: SchemaValidator,
+    private val schemaValidator: SchemaValidator,
+
+    /**
+     * Additional validators to validate values of type [T].
+     */
+    private val additionalValueValidators: List<Validator<T>> = listOf(),
 
     /**
      * Model to which value should be parsed
@@ -33,16 +39,21 @@ internal open class YamlParser<T>(
 ) : Parser<T> {
 
     override fun parse(value: String): T {
-        validator.validate(value)
+        schemaValidator.validate(value)
 
-        try {
-            return yamlMapper.readValue(value, clazz)
+        val result = try {
+            yamlMapper.readValue(value, clazz)
         } catch (e: MismatchedInputException) {
             val path = e.path.filter { it.fieldName != null }.joinToString(".") { it.fieldName }
             throw ValidationException(listOf("$path: ${e.message}"))
         } catch (e: Exception) {
             throw ParseException("Parsing value '$value' failed: ${e.message}")
         }
+
+        for (validator in additionalValueValidators) {
+            validator.validate(result)
+        }
+        return result
     }
 
     override fun parseFile(filename: String): T {

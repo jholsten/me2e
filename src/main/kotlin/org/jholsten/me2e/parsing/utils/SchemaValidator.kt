@@ -24,7 +24,7 @@ internal open class SchemaValidator(
      * Object mapper to use for reading the value.
      */
     private val mapper: ObjectMapper,
-) {
+) : Validator<String> {
     /**
      * JSON schema to use for validating the value.
      */
@@ -39,7 +39,7 @@ internal open class SchemaValidator(
      * @param value Value to validate
      */
     @Throws(InvalidFormatException::class, ValidationException::class)
-    fun validate(value: String) {
+    override fun validate(value: String) {
         val result = this.schema.validate(readValue(value))
 
         if (result.isEmpty()) {

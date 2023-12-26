@@ -7,7 +7,7 @@ import org.jholsten.me2e.parsing.exception.ValidationException
 import org.jholsten.util.assertDoesNotThrow
 import kotlin.test.*
 
-internal class ConfigValidatorIT {
+internal class ConfigSchemaValidatorIT {
 
     companion object {
         private val YAML_MAPPER = YAMLMapper().registerModule(KotlinModule.Builder().build())
@@ -16,7 +16,7 @@ internal class ConfigValidatorIT {
 
     @Test
     fun `Validating valid YAML should not throw`() {
-        val validator = ConfigValidator(YAML_MAPPER)
+        val validator = ConfigSchemaValidator(YAML_MAPPER)
         val value = """
             environment:
               docker-compose: docker-compose.yml
@@ -27,7 +27,7 @@ internal class ConfigValidatorIT {
 
     @Test
     fun `Validating valid JSON should not throw`() {
-        val validator = ConfigValidator(JSON_MAPPER)
+        val validator = ConfigSchemaValidator(JSON_MAPPER)
         val value = """
             {
               "environment": {
@@ -41,7 +41,7 @@ internal class ConfigValidatorIT {
 
     @Test
     fun `Validating YAML with missing fields should fail`() {
-        val validator = ConfigValidator(YAML_MAPPER)
+        val validator = ConfigSchemaValidator(YAML_MAPPER)
         val value = """
             other:
         """.trimIndent()
@@ -55,7 +55,7 @@ internal class ConfigValidatorIT {
 
     @Test
     fun `Validating YAML with invalid regex value should fail`() {
-        val validator = ConfigValidator(YAML_MAPPER)
+        val validator = ConfigSchemaValidator(YAML_MAPPER)
         val value = """
             environment:
               docker-compose: docker-compose.yml
