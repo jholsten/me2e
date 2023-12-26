@@ -39,6 +39,71 @@ open class StringMatcher(
     @JsonProperty("ignore-case")
     internal val ignoreCase: Boolean = false,
 ) {
+    companion object {
+        /**
+         * Returns matcher that matches if the String value to be compared is exactly
+         * equal to the given [value].
+         */
+        @JvmStatic
+        fun equals(value: String): StringMatcher {
+            return StringMatcher(equals = value)
+        }
+
+        /**
+         * Returns matcher that matches if the String value to be compared is equal
+         * to the given [value] while ignoring case sensitivity.
+         */
+        @JvmStatic
+        fun equalsIgnoreCase(value: String): StringMatcher {
+            return StringMatcher(equals = value, ignoreCase = true)
+        }
+
+        /**
+         * Returns matcher that matches if the String value to be compared conforms
+         * to the given [regexPattern].
+         */
+        @JvmStatic
+        fun matches(regexPattern: String): StringMatcher {
+            return StringMatcher(matches = regexPattern)
+        }
+
+        /**
+         * Returns matcher that matches if the String value to be compared does not
+         * conform to the given [regexPattern].
+         */
+        @JvmStatic
+        fun notMatches(regexPattern: String): StringMatcher {
+            return StringMatcher(notMatches = regexPattern)
+        }
+
+        /**
+         * Returns matcher that matches if the String value to be compared contains
+         * exactly the given [value].
+         */
+        @JvmStatic
+        fun contains(value: String): StringMatcher {
+            return StringMatcher(contains = value)
+        }
+
+        /**
+         * Returns matcher that matches if the String value to be compared contains
+         * the given [value] while ignoring case sensitivity.
+         */
+        @JvmStatic
+        fun containsIgnoreCase(value: String): StringMatcher {
+            return StringMatcher(contains = value, ignoreCase = true)
+        }
+
+        /**
+         * Returns matcher that matches if the String value to be compared does not
+         * contain exactly the given [value].
+         */
+        @JvmStatic
+        fun notContains(value: String): StringMatcher {
+            return StringMatcher(notContains = value)
+        }
+    }
+
     /**
      * Chains this matcher with the given other [matcher] using a logical `AND`.
      * Matches only if both this and [matcher] match a given value.
