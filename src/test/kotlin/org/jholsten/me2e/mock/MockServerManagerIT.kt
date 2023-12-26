@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.github.tomakehurst.wiremock.http.JvmProxyConfigurer
-import com.github.tomakehurst.wiremock.junit5.WireMockTest
 import org.apache.hc.client5.http.classic.methods.HttpGet
 import org.apache.hc.client5.http.classic.methods.HttpPost
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
@@ -24,7 +23,6 @@ import org.jholsten.me2e.request.model.MediaType
 import kotlin.test.*
 import kotlin.test.Test
 
-@WireMockTest(proxyMode = true)
 internal class MockServerManagerIT {
 
     private val client = HttpClientBuilder.create()
