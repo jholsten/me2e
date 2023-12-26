@@ -45,7 +45,7 @@ open class StringMatcher(
          * equal to the given [value].
          */
         @JvmStatic
-        fun equals(value: String): StringMatcher {
+        fun equalTo(value: String): StringMatcher {
             return StringMatcher(equals = value)
         }
 
@@ -54,7 +54,7 @@ open class StringMatcher(
          * to the given [value] while ignoring case sensitivity.
          */
         @JvmStatic
-        fun equalsIgnoreCase(value: String): StringMatcher {
+        fun equalToIgnoreCase(value: String): StringMatcher {
             return StringMatcher(equals = value, ignoreCase = true)
         }
 

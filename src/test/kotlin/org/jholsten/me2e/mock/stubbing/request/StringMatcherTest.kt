@@ -195,8 +195,8 @@ internal class StringMatcherTest {
         private fun factoryComparisonProvider(): Stream<Arguments> {
             val value = "ABC"
             return Stream.of(
-                Arguments.of("equals", StringMatcher(equals = value), StringMatcher.equals(value)),
-                Arguments.of("equalsIgnoreCase", StringMatcher(equals = value, ignoreCase = true), StringMatcher.equalsIgnoreCase(value)),
+                Arguments.of("equalTo", StringMatcher(equals = value), StringMatcher.equalTo(value)),
+                Arguments.of("equalToIgnoreCase", StringMatcher(equals = value, ignoreCase = true), StringMatcher.equalToIgnoreCase(value)),
                 Arguments.of("matches", StringMatcher(matches = value), StringMatcher.matches(value)),
                 Arguments.of("notMatches", StringMatcher(notMatches = value), StringMatcher.notMatches(value)),
                 Arguments.of("contains", StringMatcher(contains = value), StringMatcher.contains(value)),
