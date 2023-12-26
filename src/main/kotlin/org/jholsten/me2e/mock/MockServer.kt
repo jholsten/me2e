@@ -109,6 +109,8 @@ class MockServer(
 
         if (verification.times != null && verification.times != matchResults.size) {
             throw VerificationException("Expected ${verification.times} number of requests to match the following patterns, but received ${matchResults.size}.")
+        } else if (verification.times == null && matchResults.isEmpty()) {
+            throw VerificationException("Expected at least one request to match the following patterns.")
         } else if (verification.noOther && wireMockRequestsReceived.size != matchResults.size) {
             throw VerificationException("Expected $name to only receive requests matching the following pattern, but received ${wireMockRequestsReceived.size - matchResults.size} other requests.")
         }
