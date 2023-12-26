@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 /**
  * Pattern to match string values.
  */
-class StringMatcher(
+open class StringMatcher(
     /**
      * Matches only if the string is exactly equal to the defined one.
      */
@@ -39,12 +39,27 @@ class StringMatcher(
     @JsonProperty("ignore-case")
     internal val ignoreCase: Boolean = false,
 ) {
+    /**
+     * Chains this matcher with the given other [matcher] using a logical `AND`.
+     * Matches only if both this and [matcher] match a given value.
+     */
+    fun and(matcher: StringMatcher): LogicalAnd {
+        return LogicalAnd(this, matcher)
+    }
+
+    /**
+     * Chains this matcher with the given other [matcher] using a logical `OR`.
+     * Matches if this and/or [matcher] match a given value.
+     */
+    fun or(matcher: StringMatcher): LogicalOr {
+        return LogicalOr(this, matcher)
+    }
 
     /**
      * Returns whether the given string conforms to all of the requirements of this matcher.
      * @param isUrl Whether the given value is a URL. If true, the value is stripped so that only the path remains.
      */
-    internal fun matches(value: String, isUrl: Boolean = false): Boolean {
+    internal open fun matches(value: String, isUrl: Boolean = false): Boolean {
         val strippedValue = when {
             isUrl -> if (value.contains("?")) value.substring(0, value.indexOf("?")) else value
             else -> value

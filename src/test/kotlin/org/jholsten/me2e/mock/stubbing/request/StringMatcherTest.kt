@@ -150,6 +150,24 @@ internal class StringMatcherTest {
     }
 
     @Test
+    fun `String matchers chained with AND should match`() {
+        val matcher = StringMatcher(contains = "A").and(StringMatcher(contains = "B"))
+
+        assertTrue(matcher.matches("AB"))
+        assertFalse(matcher.matches("A"))
+        assertFalse(matcher.matches("B"))
+    }
+
+    @Test
+    fun `String matchers chained with OR should match`() {
+        val matcher = StringMatcher(contains = "A").or(StringMatcher(contains = "B"))
+        
+        assertTrue(matcher.matches("AB"))
+        assertTrue(matcher.matches("A"))
+        assertTrue(matcher.matches("B"))
+    }
+
+    @Test
     fun `Deserializing string matcher should set correct properties`() {
         val value = """
             {
