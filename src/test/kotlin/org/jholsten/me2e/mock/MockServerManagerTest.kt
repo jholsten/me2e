@@ -44,10 +44,13 @@ internal class MockServerManagerTest {
         every { constructedWith<WireMockConfiguration>().port(any()) } returns configMock
         every { configMock.httpsPort(any()) } returns configMock
 
-        MockServerManager(mapOf())
+        val manager = mockServerManager()
 
         verify { constructedWith<WireMockConfiguration>().port(80) }
         verify { configMock.httpsPort(443) }
+        for (server in manager.mockServers.values) {
+            verify { server.initialize(any()) }
+        }
     }
 
     @Test
@@ -169,7 +172,42 @@ internal class MockServerManagerTest {
         assertEquals(listOf(mappedRequest3, mappedRequest2, mappedRequest1), requests)
     }
 
-    // TODO: Register stubs + resetAll
+    @Test
+    fun `Registering all stubs should register stubs of all mock servers`() {
+        val manager = mockServerManager()
+        manager.registerAllStubs()
+
+        for (service in manager.mockServers) {
+            verify { service.value.registerStubs() }
+        }
+    }
+
+    @Test
+    fun `Resetting should reset at all mock servers and wire mock`() {
+        every { anyConstructed<WireMockServer>().resetAll() } just runs
+
+        val manager = mockServerManager()
+        manager.resetAll()
+
+        for (service in manager.mockServers) {
+            verify { service.value.reset() }
+        }
+        verify { anyConstructed<WireMockServer>().resetAll() }
+    }
+
+    private fun mockServerManager(): MockServerManager {
+        val server1 = mockk<MockServer> {
+            every { registerStubs() } just runs
+            every { reset() } just runs
+            every { initialize(any()) } just runs
+        }
+        val server2 = mockk<MockServer> {
+            every { registerStubs() } just runs
+            every { reset() } just runs
+            every { initialize(any()) } just runs
+        }
+        return MockServerManager(mapOf("service-1" to server1, "service-2" to server2))
+    }
 
     private fun mockedLoggedRequest(hostname: String, loggedDate: Date): LoggedRequest {
         val request = mockk<LoggedRequest>()

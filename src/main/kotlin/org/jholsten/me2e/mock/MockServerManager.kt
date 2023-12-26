@@ -23,7 +23,7 @@ class MockServerManager(
     /**
      * Mock servers mocking third-party services.
      */
-    private val mockServers: Map<String, MockServer>,
+    val mockServers: Map<String, MockServer>,
 ) {
     companion object {
         private const val HTTP_PORT = 80
@@ -42,6 +42,10 @@ class MockServerManager(
             .notMatchedRenderer(MockServerStubNotMatchedRenderer())
     )
 
+    init {
+        initializeMockServers()
+    }
+
     /**
      * Initializes all mock server instances and starts mocked HTTP server.
      * Waits at most 5 seconds until the HTTP server is running.
@@ -52,7 +56,6 @@ class MockServerManager(
     fun start() {
         check(!isRunning) { "Mock server is already running" }
         assertPortsAreAvailable()
-        initializeMockServers()
         registerAllStubs()
         startHTTPMockServer()
     }
@@ -138,7 +141,7 @@ class MockServerManager(
     }
 
     /**
-     * Initializes all mock servers by registered their stubs at the [WireMockServer] instance.
+     * Initializes all mock servers by setting the reference to this [WireMockServer] instance.
      */
     private fun initializeMockServers() {
         logger.info("Initializing ${mockServers.size} mock servers...")
