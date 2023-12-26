@@ -7,9 +7,14 @@ import com.github.tomakehurst.wiremock.stubbing.ServeEvent
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import com.github.tomakehurst.wiremock.verification.LoggedRequest
 import io.mockk.*
+import org.jholsten.me2e.mock.exception.VerificationException
 import org.jholsten.me2e.mock.stubbing.MockServerStub
+import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequestMatcher
+import org.jholsten.me2e.mock.stubbing.request.StringMatcher.Companion.equalTo
+import org.jholsten.me2e.mock.verification.MockServerVerification.Companion.receivedRequest
 import org.jholsten.me2e.request.mapper.HttpRequestMapper
 import org.jholsten.me2e.request.model.HttpRequest
+import org.jholsten.util.assertDoesNotThrow
 import java.util.*
 import kotlin.test.*
 
@@ -76,9 +81,18 @@ internal class MockServerTest {
     fun `Retrieving requests received should return all requests for hostname`() {
         server.initialize(wireMockServer)
         every { wireMockServer.isRunning } returns true
-        val request1 = mockedLoggedRequest(server.hostname, Date(100))
-        val request2 = mockedLoggedRequest(server.hostname, Date(50))
-        val request3 = mockedLoggedRequest("another-host.de", Date(25))
+        val request1 = mockk<LoggedRequest> {
+            every { host } returns server.hostname
+            every { loggedDate } returns Date(100)
+        }
+        val request2 = mockk<LoggedRequest> {
+            every { host } returns server.hostname
+            every { loggedDate } returns Date(50)
+        }
+        val request3 = mockk<LoggedRequest>() {
+            every { host } returns "another-host.de"
+            every { loggedDate } returns Date(25)
+        }
         val events = listOf(
             ServeEvent(request1, mockk<StubMapping>(), mockk<ResponseDefinition>()),
             ServeEvent(request2, mockk<StubMapping>(), mockk<ResponseDefinition>()),
@@ -111,10 +125,114 @@ internal class MockServerTest {
         assertFailsWith<IllegalStateException> { server.requestsReceived }
     }
 
-    private fun mockedLoggedRequest(hostname: String, loggedDate: Date): LoggedRequest {
-        val request = mockk<LoggedRequest>()
-        every { request.host } returns hostname
-        every { request.loggedDate } returns loggedDate
-        return request
+    @Test
+    fun `Verifying received request should succeed`() {
+        server.initialize(wireMockServer)
+        every { wireMockServer.isRunning } returns true
+        val request1 = mockk<LoggedRequest> {
+            every { host } returns server.hostname
+            every { loggedDate } returns Date(100)
+        }
+        val request2 = mockk<LoggedRequest> {
+            every { host } returns server.hostname
+            every { loggedDate } returns Date(50)
+        }
+        val events = listOf(
+            ServeEvent(request1, mockk<StubMapping>(), mockk<ResponseDefinition>()),
+            ServeEvent(request2, mockk<StubMapping>(), mockk<ResponseDefinition>()),
+        )
+        every { wireMockServer.allServeEvents } returns events
+        mockkConstructor(MockServerStubRequestMatcher::class)
+        every { anyConstructed<MockServerStubRequestMatcher>().matches(request1) } returns true
+        every { anyConstructed<MockServerStubRequestMatcher>().matches(request2) } returns false
+
+        assertDoesNotThrow {
+            server.verify(
+                receivedRequest(1)
+                    .withPath(equalTo("/some-path"))
+            )
+        }
+    }
+
+    @Test
+    fun `Verifying request with exact times should fail if expected request was not received`() {
+        server.initialize(wireMockServer)
+        every { wireMockServer.isRunning } returns true
+        every { wireMockServer.allServeEvents } returns listOf()
+
+        assertFailsWith<VerificationException> {
+            server.verify(
+                receivedRequest(1)
+                    .withPath(equalTo("/some-path"))
+            )
+        }
+        assertFailsWith<VerificationException> {
+            server.verify(receivedRequest(1))
+        }
+    }
+
+    @Test
+    fun `Verifying request should fail if expected request was not received at least once`() {
+        server.initialize(wireMockServer)
+        every { wireMockServer.isRunning } returns true
+        every { wireMockServer.allServeEvents } returns listOf()
+
+        assertFailsWith<VerificationException> {
+            server.verify(
+                receivedRequest()
+                    .withPath(equalTo("/some-path"))
+            )
+        }
+        assertFailsWith<VerificationException> {
+            server.verify(receivedRequest())
+        }
+    }
+
+    @Test
+    fun `Verifying request should fail if other requests were received`() {
+        server.initialize(wireMockServer)
+        every { wireMockServer.isRunning } returns true
+        val request1 = mockk<LoggedRequest> {
+            every { host } returns server.hostname
+            every { loggedDate } returns Date(100)
+        }
+        val request2 = mockk<LoggedRequest> {
+            every { host } returns server.hostname
+            every { loggedDate } returns Date(50)
+        }
+        val request3 = mockk<LoggedRequest> {
+            every { host } returns server.hostname
+            every { loggedDate } returns Date(50)
+        }
+        val events = listOf(
+            ServeEvent(request1, mockk<StubMapping>(), mockk<ResponseDefinition>()),
+            ServeEvent(request2, mockk<StubMapping>(), mockk<ResponseDefinition>()),
+            ServeEvent(request3, mockk<StubMapping>(), mockk<ResponseDefinition>()),
+        )
+        every { wireMockServer.allServeEvents } returns events
+        mockkConstructor(MockServerStubRequestMatcher::class)
+        every { anyConstructed<MockServerStubRequestMatcher>().matches(request1) } returns true
+        every { anyConstructed<MockServerStubRequestMatcher>().matches(request2) } returns true
+        every { anyConstructed<MockServerStubRequestMatcher>().matches(request3) } returns false
+
+        val request1Verification = receivedRequest().withPath(equalTo("/some-path"))
+        val request2Verification = receivedRequest().withPath(equalTo("/other-path"))
+        assertDoesNotThrow { server.verify(request1Verification) }
+        assertDoesNotThrow { server.verify(request2Verification) }
+        assertFailsWith<VerificationException> { server.verify(request1Verification.andNoOther()) }
+        assertFailsWith<VerificationException> { server.verify(request2Verification.andNoOther()) }
+    }
+
+    @Test
+    fun `Verifying request should fail if mock server is not initialized`() {
+        assertFailsWith<IllegalStateException> { server.verify(receivedRequest()) }
+    }
+
+    @Test
+    fun `Verifying request should fail if mock server is not running`() {
+        server.initialize(wireMockServer)
+        every { wireMockServer.isRunning } returns false
+
+        assertFailsWith<IllegalStateException> { server.verify(receivedRequest()) }
     }
 }
