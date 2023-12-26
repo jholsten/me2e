@@ -74,7 +74,9 @@ internal abstract class HttpRequestMapper {
 
     @Named("mapBody")
     fun mapBody(request: com.github.tomakehurst.wiremock.http.Request): HttpRequestBody? {
-        request.body ?: return null
+        if (request.body == null || request.body.isEmpty()) {
+            return null
+        }
         return HttpRequestBody(
             content = request.bodyAsString,
             contentType = request.contentTypeHeader()?.let { return@let MediaTypeMapper.INSTANCE.toInternalDto(it) },
