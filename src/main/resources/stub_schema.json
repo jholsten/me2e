@@ -4,6 +4,10 @@
   "description": "Stub definition for the Me2e Library",
   "type": "object",
   "properties": {
+    "name": {
+      "type": "string",
+      "description": "Optional identifier of this stub. Needs to be unique for one mock server."
+    },
     "request": {
       "$id": "#/properties/request",
       "$ref": "#/definitions/request"

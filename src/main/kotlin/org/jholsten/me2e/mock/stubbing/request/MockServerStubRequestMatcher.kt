@@ -47,27 +47,6 @@ class MockServerStubRequestMatcher(
     @JsonProperty("body-patterns")
     val bodyPatterns: List<StringMatcher>? = null,
 ) {
-    class Builder(
-        val method: HttpMethod,
-        val path: StringMatcher,
-    ) {
-        private var headers: Map<String, StringMatcher>? = null
-        private var queryParameters: Map<String, StringMatcher>? = null
-        private var bodyPatterns: List<StringMatcher>? = null
-
-        fun withHeaders(headers: Map<String, StringMatcher>): Builder = apply {
-            this.headers = headers
-        }
-
-        fun withQueryParameters(queryParameters: Map<String, StringMatcher>): Builder = apply {
-            this.queryParameters = queryParameters
-        }
-
-        fun withBodyPatterns(bodyPatterns: List<StringMatcher>): Builder = apply {
-            this.bodyPatterns = bodyPatterns
-        }
-    }
-
     /**
      * Returns whether the given WireMock request matches the requirements of this stub request.
      * @param request Actual request that was executed.

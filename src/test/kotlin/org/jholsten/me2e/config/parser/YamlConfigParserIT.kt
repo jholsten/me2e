@@ -46,7 +46,7 @@ internal class YamlConfigParserIT {
         assertDatabaseAsExpected(config.environment.containers)
     }
 
-    private fun assertMockServersAsExpected(config: TestConfig){
+    private fun assertMockServersAsExpected(config: TestConfig) {
         assertEquals(1, config.environment.mockServers.size)
         assertPaymentServiceAsExpected(config.environment.mockServers)
     }
@@ -134,6 +134,7 @@ internal class YamlConfigParserIT {
             hostname = "payment.example.com",
             stubs = listOf(
                 MockServerStub(
+                    name = "request-stub",
                     request = MockServerStubRequestMatcher(
                         hostname = "payment.example.com",
                         method = HttpMethod.POST,
@@ -145,9 +146,10 @@ internal class YamlConfigParserIT {
                         body = MockServerStubResponseBody(
                             jsonContent = JsonNodeFactory.instance.objectNode()
                                 .put("id", 123)
-                                .set<ObjectNode>("items", JsonNodeFactory.instance.arrayNode()
-                                    .add(JsonNodeFactory.instance.objectNode().put("name", "A").put("value", 42))
-                                    .add(JsonNodeFactory.instance.objectNode().put("name", "B").put("value", 1))
+                                .set<ObjectNode>(
+                                    "items", JsonNodeFactory.instance.arrayNode()
+                                        .add(JsonNodeFactory.instance.objectNode().put("name", "A").put("value", 42))
+                                        .add(JsonNodeFactory.instance.objectNode().put("name", "B").put("value", 1))
                                 ),
                         ),
                         headers = mapOf("Content-Type" to listOf("application/json")),
@@ -157,7 +159,12 @@ internal class YamlConfigParserIT {
         )
     }
 
-    private fun assertMockServerAsExpected(mockServers: Map<String, MockServer>, name: String, hostname: String, stubs: List<MockServerStub>) {
+    private fun assertMockServerAsExpected(
+        mockServers: Map<String, MockServer>,
+        name: String,
+        hostname: String,
+        stubs: List<MockServerStub>
+    ) {
         val mockServer = mockServers[name]
         assertNotNull(mockServer)
         assertEquals(name, mockServer.name)

@@ -11,6 +11,11 @@ import org.jholsten.me2e.mock.stubbing.response.MockServerStubResponseMapper
  */
 class MockServerStub(
     /**
+     * Optional unique name of this stub.
+     */
+    val name: String? = null,
+
+    /**
      * Request to which the stub should respond.
      */
     val request: MockServerStubRequestMatcher,

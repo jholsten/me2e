@@ -40,6 +40,7 @@ class MockServerDeserializerIT {
             hostname = "example.com",
             stubs = listOf(
                 MockServerStub(
+                    name = "request-stub",
                     request = MockServerStubRequestMatcher(
                         hostname = "example.com",
                         method = HttpMethod.POST,
@@ -51,9 +52,10 @@ class MockServerDeserializerIT {
                         body = MockServerStubResponseBody(
                             jsonContent = JsonNodeFactory.instance.objectNode()
                                 .put("id", 123)
-                                .set<ObjectNode>("items", JsonNodeFactory.instance.arrayNode()
-                                    .add(JsonNodeFactory.instance.objectNode().put("name", "A").put("value", 42))
-                                    .add(JsonNodeFactory.instance.objectNode().put("name", "B").put("value", 1))
+                                .set<ObjectNode>(
+                                    "items", JsonNodeFactory.instance.arrayNode()
+                                        .add(JsonNodeFactory.instance.objectNode().put("name", "A").put("value", 42))
+                                        .add(JsonNodeFactory.instance.objectNode().put("name", "B").put("value", 1))
                                 ),
                         ),
                         headers = mapOf("Content-Type" to listOf("application/json")),
@@ -66,17 +68,19 @@ class MockServerDeserializerIT {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = [
-        """
+    @ValueSource(
+        strings = [
+            """
             name: mock-server
             hostname: example.com
         """,
-        """
+            """
             name: mock-server
             hostname: example.com
             stubs:
         """,
-    ])
+        ]
+    )
     fun `Deserializing mock server without stubs should succeed`(contents: String) {
         val mockServer = yamlMapper.readValue(contents, MockServer::class.java)
 
