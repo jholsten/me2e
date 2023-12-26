@@ -4,17 +4,22 @@ import com.github.tomakehurst.wiremock.http.JvmProxyConfigurer
 import org.apache.hc.client5.http.classic.methods.HttpGet
 import org.apache.hc.client5.http.classic.methods.HttpPost
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
+import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.HttpEntity
+import org.apache.hc.core5.http.io.entity.StringEntity
 import org.jholsten.me2e.mock.exception.VerificationException
 import org.jholsten.me2e.mock.stubbing.MockServerStub
 import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequestMatcher
 import org.jholsten.me2e.mock.stubbing.request.StringMatcher
+import org.jholsten.me2e.mock.stubbing.request.StringMatcher.Companion.containing
 import org.jholsten.me2e.mock.stubbing.request.StringMatcher.Companion.equalTo
 import org.jholsten.me2e.mock.stubbing.response.MockServerStubResponse
 import org.jholsten.me2e.mock.stubbing.response.MockServerStubResponseBody
 import org.jholsten.me2e.mock.verification.MockServerVerification.Companion.receivedRequest
 import org.jholsten.me2e.request.model.HttpMethod
 import org.jholsten.me2e.request.model.HttpRequest
+import org.jholsten.me2e.request.model.HttpRequestBody
+import org.jholsten.me2e.request.model.MediaType
 import org.jholsten.util.assertDoesNotThrow
 import kotlin.test.*
 
@@ -101,6 +106,37 @@ class MockServerIT {
     }
 
     @Test
+    fun `Mock server should respond with stubbed response for request with body`() {
+        val expectedReceivedRequest = HttpRequest(
+            url = "http://example.com/search?id=123",
+            method = HttpMethod.POST,
+            body = HttpRequestBody("{\"some-key\": \"some-value\"}", MediaType.JSON_UTF8)
+        )
+
+        val request = HttpPost("http://example.com/search?id=123")
+        request.entity = StringEntity("{\"some-key\": \"some-value\"}", ContentType.APPLICATION_JSON)
+        val response = client.execute(request)
+
+        assertEquals(200, response?.code)
+        assertEquals("A Response", encodeResponseBody(response?.entity))
+        assertEquals("text/plain", response?.getFirstHeader("Content-Type")?.value)
+        assertEquals(1, exampleServer.requestsReceived.size)
+        assertEquals(expectedReceivedRequest.url, exampleServer.requestsReceived.first().url)
+        assertEquals(expectedReceivedRequest.method, exampleServer.requestsReceived.first().method)
+        assertEquals(expectedReceivedRequest.body?.asString(), exampleServer.requestsReceived.first().body?.asString())
+        assertDoesNotThrow {
+            exampleServer.verify(
+                receivedRequest(1)
+                    .withPath(equalTo("/search"))
+                    .withMethod(HttpMethod.POST)
+                    .withQueryParameter("id", equalTo("123"))
+                    .withRequestBody(containing("some-key").and(containing("some-value")))
+                    .andNoOther()
+            )
+        }
+    }
+
+    @Test
     fun `Mock server verification should fail if expected request was not received`() {
         val response = client.execute(HttpGet("http://example.com"))
 
@@ -150,7 +186,7 @@ class MockServerIT {
             .withPath(equalTo("/search"))
             .withMethod(HttpMethod.POST)
             .withQueryParameter("id", equalTo("123"))
-        
+
         assertDoesNotThrow { exampleServer.verify(request1Verification) }
         assertDoesNotThrow { exampleServer.verify(request2Verification) }
         assertFailsWith<VerificationException> {
