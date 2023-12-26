@@ -2,13 +2,8 @@ package org.jholsten.me2e.mock.stubbing.request
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import org.junit.jupiter.api.DynamicTest
-import org.junit.jupiter.api.TestFactory
-import org.junit.jupiter.api.TestInstance
-import java.util.stream.Stream
 import kotlin.test.*
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class StringMatcherTest {
 
     @Test
@@ -163,16 +158,13 @@ internal class StringMatcherTest {
         assertFalse(matcher.matches("B"))
     }
 
-    @TestFactory
-    fun `String matchers chained with OR should match`(): Stream<DynamicTest> {
-        return stringMatcherTestFactory(
-            constructorMatcher = StringMatcher(contains = "A").or(StringMatcher(contains = "B")),
-            staticMethodMatcher = StringMatcher.contains("A").or(StringMatcher.contains("B"))
-        ) { matcher ->
-            assertTrue(matcher.matches("AB"))
-            assertTrue(matcher.matches("A"))
-            assertTrue(matcher.matches("B"))
-        }
+    @Test
+    fun `String matchers chained with OR should match`() {
+        val matcher = StringMatcher(contains = "A").or(StringMatcher(contains = "B"))
+        
+        assertTrue(matcher.matches("AB"))
+        assertTrue(matcher.matches("A"))
+        assertTrue(matcher.matches("B"))
     }
 
     @Test
@@ -197,33 +189,5 @@ internal class StringMatcherTest {
         assertEquals("ABC", result.contains)
         assertEquals("999", result.notContains)
         assertTrue(result.ignoreCase)
-    }
-
-    private fun stringMatcherTestFactory(
-        constructorMatcher: StringMatcher,
-        staticMethodMatcher: StringMatcher,
-        test: (matcher: StringMatcher) -> Unit,
-    ): Stream<DynamicTest> {
-        val inputs = listOf(
-            StringMatcherProvider(StringMatcherProvider.Type.CONSTRUCTOR, constructorMatcher),
-            StringMatcherProvider(StringMatcherProvider.Type.STATIC_METHOD, staticMethodMatcher),
-        )
-        return inputs.stream().map { provider ->
-            DynamicTest.dynamicTest("with ${provider.type}") { test(provider.matcher) }
-        }
-    }
-
-    class StringMatcherProvider(val type: Type, val matcher: StringMatcher) {
-        enum class Type {
-            CONSTRUCTOR,
-            STATIC_METHOD;
-
-            override fun toString(): String {
-                return when (this) {
-                    CONSTRUCTOR -> "Constructor invocation"
-                    STATIC_METHOD -> "Static Method invocation"
-                }
-            }
-        }
     }
 }
