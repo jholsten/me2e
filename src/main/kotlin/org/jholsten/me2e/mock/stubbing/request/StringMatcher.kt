@@ -63,7 +63,7 @@ open class StringMatcher(
          * to the given [regexPattern].
          */
         @JvmStatic
-        fun matches(regexPattern: String): StringMatcher {
+        fun matching(regexPattern: String): StringMatcher {
             return StringMatcher(matches = regexPattern)
         }
 
@@ -72,7 +72,7 @@ open class StringMatcher(
          * conform to the given [regexPattern].
          */
         @JvmStatic
-        fun notMatches(regexPattern: String): StringMatcher {
+        fun notMatching(regexPattern: String): StringMatcher {
             return StringMatcher(notMatches = regexPattern)
         }
 
@@ -81,7 +81,7 @@ open class StringMatcher(
          * exactly the given [value].
          */
         @JvmStatic
-        fun contains(value: String): StringMatcher {
+        fun containing(value: String): StringMatcher {
             return StringMatcher(contains = value)
         }
 
@@ -90,7 +90,7 @@ open class StringMatcher(
          * the given [value] while ignoring case sensitivity.
          */
         @JvmStatic
-        fun containsIgnoreCase(value: String): StringMatcher {
+        fun containingIgnoreCase(value: String): StringMatcher {
             return StringMatcher(contains = value, ignoreCase = true)
         }
 
@@ -99,7 +99,7 @@ open class StringMatcher(
          * contain exactly the given [value].
          */
         @JvmStatic
-        fun notContains(value: String): StringMatcher {
+        fun notContaining(value: String): StringMatcher {
             return StringMatcher(notContains = value)
         }
     }

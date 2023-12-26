@@ -197,15 +197,15 @@ internal class StringMatcherTest {
             return Stream.of(
                 Arguments.of("equalTo", StringMatcher(equals = value), StringMatcher.equalTo(value)),
                 Arguments.of("equalToIgnoreCase", StringMatcher(equals = value, ignoreCase = true), StringMatcher.equalToIgnoreCase(value)),
-                Arguments.of("matches", StringMatcher(matches = value), StringMatcher.matches(value)),
-                Arguments.of("notMatches", StringMatcher(notMatches = value), StringMatcher.notMatches(value)),
-                Arguments.of("contains", StringMatcher(contains = value), StringMatcher.contains(value)),
+                Arguments.of("matching", StringMatcher(matches = value), StringMatcher.matching(value)),
+                Arguments.of("notMatching", StringMatcher(notMatches = value), StringMatcher.notMatching(value)),
+                Arguments.of("containing", StringMatcher(contains = value), StringMatcher.containing(value)),
                 Arguments.of(
-                    "containsIgnoreCase",
+                    "containingIgnoreCase",
                     StringMatcher(contains = value, ignoreCase = true),
-                    StringMatcher.containsIgnoreCase(value)
+                    StringMatcher.containingIgnoreCase(value)
                 ),
-                Arguments.of("notContains", StringMatcher(notContains = value), StringMatcher.notContains(value)),
+                Arguments.of("notContaining", StringMatcher(notContains = value), StringMatcher.notContaining(value)),
             )
         }
     }
