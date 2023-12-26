@@ -32,14 +32,6 @@ internal class StringMatcherTest {
     }
 
     @Test
-    fun `String matcher with equals for url should match`() {
-        val matcher = StringMatcher(equals = "/search")
-
-        assertTrue(matcher.matches("/search", isUrl = true))
-        assertTrue(matcher.matches("/search?name=dog", isUrl = true))
-    }
-
-    @Test
     fun `String matcher with pattern should match`() {
         val matcher = StringMatcher(matches = "^[A-Z0-9._-]{7}\$", ignoreCase = false)
 
@@ -61,14 +53,6 @@ internal class StringMatcherTest {
         assertTrue(matcher.matches("A.1-2_3"))
         assertTrue(matcher.matches("a.1-2_3"))
         assertFalse(matcher.matches("nope"))
-    }
-
-    @Test
-    fun `String matcher with pattern for url should match`() {
-        val matcher = StringMatcher(matches = "/[0-9]{3}")
-
-        assertTrue(matcher.matches("/123", isUrl = true))
-        assertTrue(matcher.matches("/123?name=dog", isUrl = true))
     }
 
     @Test

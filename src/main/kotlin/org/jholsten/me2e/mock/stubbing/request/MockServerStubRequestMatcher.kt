@@ -107,7 +107,11 @@ class MockServerStubRequestMatcher(
             return true
         }
 
-        return this.path.matches(actualUrl, isUrl = true)
+        val actualPath = when {
+            actualUrl.contains("?") -> actualUrl.substring(0, actualUrl.indexOf("?"))
+            else -> actualUrl
+        }
+        return this.path.matches(actualPath)
     }
 
     internal fun headersMatch(headers: HttpHeaders?): Boolean {

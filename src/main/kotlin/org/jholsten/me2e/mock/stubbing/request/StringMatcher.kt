@@ -122,19 +122,13 @@ open class StringMatcher(
 
     /**
      * Returns whether the given string conforms to all of the requirements of this matcher.
-     * @param isUrl Whether the given value is a URL. If true, the value is stripped so that only the path remains.
      */
-    internal open fun matches(value: String, isUrl: Boolean = false): Boolean {
-        val strippedValue = when {
-            isUrl -> if (value.contains("?")) value.substring(0, value.indexOf("?")) else value
-            else -> value
-        }
-
-        if (!matchesEqual(strippedValue)) {
+    internal open fun matches(value: String): Boolean {
+        if (!matchesEqual(value)) {
             return false
-        } else if (!matchesPattern(strippedValue)) {
+        } else if (!matchesPattern(value)) {
             return false
-        } else if (!matchesContains(strippedValue)) {
+        } else if (!matchesContains(value)) {
             return false
         }
 

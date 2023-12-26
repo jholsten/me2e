@@ -8,7 +8,7 @@ class LogicalAnd internal constructor(
     private val matcher1: StringMatcher,
     private val matcher2: StringMatcher,
 ) : StringMatcher() {
-    override fun matches(value: String, isUrl: Boolean): Boolean {
+    override fun matches(value: String): Boolean {
         return matcher1.matches(value) && matcher2.matches(value)
     }
 }
