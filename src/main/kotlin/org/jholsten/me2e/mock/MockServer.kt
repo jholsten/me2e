@@ -3,9 +3,13 @@ package org.jholsten.me2e.mock
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.stubbing.ServeEvent
 import org.jholsten.me2e.mock.stubbing.MockServerStub
 import org.jholsten.me2e.config.utils.MockServerDeserializer
+import org.jholsten.me2e.mock.exception.VerificationException
 import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequestMapper.Companion.METADATA_MOCK_SERVER_NAME_KEY
+import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequestMatcher
+import org.jholsten.me2e.mock.verification.MockServerVerification
 import org.jholsten.me2e.request.mapper.HttpRequestMapper
 import org.jholsten.me2e.request.model.HttpRequest
 
@@ -58,6 +62,7 @@ class MockServer(
      */
     fun reset() {
         checkNotNull(wireMockServer) { "Mock server needs to be initialized" }
+        // TODO: Hostname (+ warn when parsing)
         val metadataMatcher = WireMock.matchingJsonPath("$.$METADATA_MOCK_SERVER_NAME_KEY", WireMock.equalTo(name))
         wireMockServer!!.removeStubsByMetadata(metadataMatcher)
         wireMockServer!!.removeServeEventsForStubsMatchingMetadata(metadataMatcher)
@@ -84,4 +89,28 @@ class MockServer(
             return wireMockServer!!.allServeEvents.filter { it.request.host == hostname }
         }
 
+    /**
+     * Verifies that this mock server instance received requests which match the given pattern.
+     * @throws IllegalStateException if the HTTP mock server is not initialized.
+     * @throws VerificationException if mock server did not receive the expected number of requests
+     */
+    fun verify(verification: MockServerVerification) {
+        checkNotNull(wireMockServer) { "Mock server needs to be initialized" }
+        val matcher = MockServerStubRequestMatcher(
+            hostname = hostname,
+            method = verification.method,
+            path = verification.path,
+            headers = verification.headers,
+            queryParameters = verification.queryParameters,
+            bodyPatterns = verification.requestBodyPattern?.let { listOf(it) },
+        )
+
+        val matchResults = wireMockRequestsReceived.filter { matcher.matches(it.request) }
+
+        if (verification.times != null && verification.times != matchResults.size) {
+            throw VerificationException("Expected ${verification.times} number of requests to match the following patterns, but received ${matchResults.size}.")
+        } else if (verification.noOther && wireMockRequestsReceived.size != matchResults.size) {
+            throw VerificationException("Expected $name to only receive requests matching the following pattern, but received ${wireMockRequestsReceived.size - matchResults.size} other requests.")
+        }
+    }
 }
