@@ -52,6 +52,7 @@ internal class MockServerManagerIT {
                 request = MockServerStubRequestMatcher(
                     hostname = "example.com",
                     method = HttpMethod.GET,
+                    path = StringMatcher(equals = "/"),
                 ),
                 response = MockServerStubResponse(
                     code = 200,
