@@ -26,7 +26,7 @@ class HttpRequest internal constructor(
     /**
      * Optional request body of this request.
      */
-    val body: HttpRequestBody?,
+    val body: HttpRequestBody? = null,
 ) {
     /**
      * Returns new builder instance initialized with the properties of this HTTP request.
