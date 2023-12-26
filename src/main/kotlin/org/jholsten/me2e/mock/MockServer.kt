@@ -69,9 +69,19 @@ class MockServer(
      */
     val requestsReceived: List<HttpRequest>
         get() {
-            check(wireMockServer != null && wireMockServer!!.isRunning) { "Received requests can only be retrieved when mock server is running" }
-            val events = wireMockServer!!.allServeEvents.filter { it.request.host == hostname }.toMutableList()
+            val events = wireMockRequestsReceived.toMutableList()
             events.sortBy { it.request.loggedDate }
             return events.map { HttpRequestMapper.INSTANCE.toInternalDto(it.request) }
         }
+
+    /**
+     * Returns all requests as [ServeEvent] instances that this mock server received.
+     * @throws IllegalStateException if the HTTP mock server is not initialized or not running.
+     */
+    private val wireMockRequestsReceived: List<ServeEvent>
+        get() {
+            check(wireMockServer != null && wireMockServer!!.isRunning) { "Received requests can only be retrieved when mock server is running" }
+            return wireMockServer!!.allServeEvents.filter { it.request.host == hostname }
+        }
+
 }
