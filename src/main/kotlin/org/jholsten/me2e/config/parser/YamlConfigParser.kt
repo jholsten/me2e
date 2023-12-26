@@ -2,6 +2,7 @@ package org.jholsten.me2e.config.parser
 
 import org.jholsten.me2e.config.model.TestConfig
 import org.jholsten.me2e.config.utils.ConfigSchemaValidator
+import org.jholsten.me2e.config.utils.ConfigValidator
 import org.jholsten.me2e.parsing.YamlParser
 import org.jholsten.me2e.parsing.utils.DeserializerFactory
 
@@ -10,6 +11,6 @@ import org.jholsten.me2e.parsing.utils.DeserializerFactory
  */
 internal class YamlConfigParser : ConfigParser, YamlParser<TestConfig>(
     schemaValidator = ConfigSchemaValidator(DeserializerFactory.getYamlMapper()),
-    additionalValueValidators = listOf(), // TODO
+    additionalValueValidators = listOf(ConfigValidator()),
     clazz = TestConfig::class.java
 )

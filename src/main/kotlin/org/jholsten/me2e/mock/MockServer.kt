@@ -62,7 +62,6 @@ class MockServer(
      */
     fun reset() {
         checkNotNull(wireMockServer) { "Mock server needs to be initialized" }
-        // TODO: Hostname (+ warn when parsing)
         val metadataMatcher = WireMock.matchingJsonPath("$.$METADATA_MOCK_SERVER_NAME_KEY", WireMock.equalTo(name))
         wireMockServer!!.removeStubsByMetadata(metadataMatcher)
         wireMockServer!!.removeServeEventsForStubsMatchingMetadata(metadataMatcher)

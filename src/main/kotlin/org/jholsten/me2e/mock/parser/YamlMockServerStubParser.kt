@@ -13,7 +13,6 @@ internal class YamlMockServerStubParser(
     yamlMapper: ObjectMapper,
 ) : MockServerStubParser, YamlParser<MockServerStub>(
     schemaValidator = MockServerStubSchemaValidator(DeserializerFactory.getYamlMapper()),
-    additionalValueValidators = listOf(), // TODO
     clazz = MockServerStub::class.java,
     yamlMapper = yamlMapper
 )

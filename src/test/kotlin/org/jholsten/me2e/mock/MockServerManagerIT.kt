@@ -169,14 +169,16 @@ internal class MockServerManagerIT {
         val manager = startManager()
 
         val response1 = client.execute(HttpGet("http://example.com"))
-        val response2 = client.execute(HttpGet("http://localhost"))
+        val response2 = client.execute(HttpGet("http://example.com/not-stubbed"))
+        val response3 = client.execute(HttpGet("http://localhost"))
 
         assertTrue(manager.isRunning)
-        assertEquals(404, response2.code)
         assertEquals(200, response1.code)
+        assertEquals(404, response2.code)
+        assertEquals(404, response3.code)
         assertEquals("Some Response", encodeResponseBody(response1?.entity))
-        assertEquals(2, manager.requestsReceived.size)
-        assertEquals(1, exampleServer.requestsReceived.size)
+        assertEquals(3, manager.requestsReceived.size)
+        assertEquals(2, exampleServer.requestsReceived.size)
         assertEquals(0, googleServer.requestsReceived.size)
 
         manager.resetAll()
