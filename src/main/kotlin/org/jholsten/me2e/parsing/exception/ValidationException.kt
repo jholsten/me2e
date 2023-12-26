@@ -7,6 +7,14 @@ package org.jholsten.me2e.parsing.exception
  *  - value is not one of the enum values
  *  - value cannot be deserialized to the given type
  */
-class ValidationException(
-    val validationErrors: List<String>,
-) : ParseException("Validation failed: $validationErrors")
+class ValidationException : ParseException {
+    val validationErrors: List<String>
+
+    internal constructor(validationErrors: List<String>) : super("Validation failed: $validationErrors") {
+        this.validationErrors = validationErrors
+    }
+
+    internal constructor(message: String) : super(message) {
+        this.validationErrors = listOf()
+    }
+}

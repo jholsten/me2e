@@ -4,7 +4,6 @@ import org.jholsten.me2e.config.model.TestConfig
 import org.jholsten.me2e.parsing.exception.ValidationException
 import org.jholsten.me2e.parsing.utils.Validator
 import org.jholsten.me2e.utils.logger
-import java.util.*
 
 /**
  * Additional validator which ensures that a parsed test configuration is valid.
@@ -14,19 +13,47 @@ internal class ConfigValidator : Validator<TestConfig> {
 
     override fun validate(value: TestConfig) {
         validateMockServers(value)
+        validateMockServerStubs(value)
     }
 
     private fun validateMockServers(testConfig: TestConfig) {
-        val hostnames = testConfig.environment.mockServers.values.map { it.hostname }
-            .groupingBy { it }.eachCount()
-        if (hostnames.any { it.value > 1 }) {
-            val duplicateHostnames = hostnames.filter { it.value > 1 }
-                .map { (hostname, count) -> "- $hostname ($count times)" }
+        val duplicateHostnames = testConfig.environment.mockServers.values.map { it.hostname }.getDuplicates()
+        if (duplicateHostnames.isNotEmpty()) {
             logger.warn(
                 "Detected different mock servers with the same hostnames:\n" +
-                    "${duplicateHostnames.joinToString("\n")}\n" +
-                    "This means that requests to this host names are assigned to multiple mock servers."
+                    "${duplicateHostnames.toStringList().joinToString("\n")}\n" +
+                    "This means that requests to these host names are assigned to multiple mock servers."
             )
         }
+    }
+
+    private fun validateMockServerStubs(testConfig: TestConfig) {
+        val duplicateStubNames = testConfig.environment.mockServers.values
+            .map { it.name to it.stubs.mapNotNull { stub -> stub.name }.getDuplicates() }
+            .filter { it.second.isNotEmpty() }
+        if (duplicateStubNames.isNotEmpty()) {
+            throwVerificationExceptionForDuplicateStubNames(duplicateStubNames)
+        }
+    }
+
+    private fun throwVerificationExceptionForDuplicateStubNames(duplicateStubNames: List<Pair<String, Map<String, Int>>>) {
+        val stringBuilder = StringBuilder()
+        stringBuilder.appendLine("Detected request stubs with duplicate names for at least one mock server:")
+        for ((mockServerName, duplicateNames) in duplicateStubNames) {
+            stringBuilder.appendLine("Mock server \"$mockServerName\":")
+            val duplicateNameLines = duplicateNames.toStringList(indent = 2)
+            for (line in duplicateNameLines) {
+                stringBuilder.appendLine(line)
+            }
+        }
+        throw ValidationException(stringBuilder.toString())
+    }
+
+    private fun List<String>.getDuplicates(): Map<String, Int> {
+        return this.groupingBy { it }.eachCount().filter { it.value > 1 }
+    }
+
+    private fun Map<String, Int>.toStringList(indent: Int = 0): List<String> {
+        return this.map { (value, count) -> "${" ".repeat(indent)}- $value ($count times)" }
     }
 }
