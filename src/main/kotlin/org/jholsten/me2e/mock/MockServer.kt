@@ -113,11 +113,11 @@ class MockServer(
         val matchResults = wireMockRequestsReceived.filter { matcher.matches(it.request) }
 
         if (verification.times != null && verification.times != matchResults.size) {
-            throw VerificationException("Expected ${verification.times} number of requests to match the following patterns, but received ${matchResults.size}.")
+            throw VerificationException.forTimesNotMatching(name, verification.times, matcher, matchResults, wireMockRequestsReceived)
         } else if (verification.times == null && matchResults.isEmpty()) {
-            throw VerificationException("Expected at least one request to match the following patterns.")
+            throw VerificationException.forNotReceivedAtLeastOnce(name, matcher, matchResults, wireMockRequestsReceived)
         } else if (verification.noOther && wireMockRequestsReceived.size != matchResults.size) {
-            throw VerificationException("Expected $name to only receive requests matching the following pattern, but received ${wireMockRequestsReceived.size - matchResults.size} other requests.")
+            throw VerificationException.forOtherRequests(name, matcher, matchResults, wireMockRequestsReceived)
         }
     }
 }
