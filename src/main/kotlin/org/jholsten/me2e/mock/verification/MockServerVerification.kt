@@ -32,12 +32,22 @@ class MockServerVerification internal constructor(
         }
     }
 
+    internal var stubName: String? = null
     internal var method: HttpMethod? = null
     internal var path: StringMatcher? = null
     internal var headers: MutableMap<String, StringMatcher>? = null
     internal var queryParameters: MutableMap<String, StringMatcher>? = null
     internal var requestBodyPattern: StringMatcher? = null
     internal var noOther: Boolean = false
+
+    /**
+     * Matches if the request pattern defined for the stub with the given name
+     * matches the incoming request.
+     * This can be used as a shortcut to setting the values of the expected stub.
+     */
+    fun matchingStub(stubName: String) = apply {
+        this.stubName = stubName
+    }
 
     /**
      * HTTP method that the expected incoming request should have.

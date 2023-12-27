@@ -5,7 +5,9 @@ import org.apache.hc.client5.http.classic.methods.HttpGet
 import org.apache.hc.client5.http.classic.methods.HttpPost
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
 import org.apache.hc.core5.http.ContentType
+import org.apache.hc.core5.http.Header
 import org.apache.hc.core5.http.HttpEntity
+import org.apache.hc.core5.http.HttpHeaders
 import org.apache.hc.core5.http.io.entity.StringEntity
 import org.jholsten.me2e.mock.exception.VerificationException
 import org.jholsten.me2e.mock.stubbing.MockServerStub
@@ -47,6 +49,7 @@ class MockServerIT {
                 )
             ),
             MockServerStub(
+                name = "request-stub",
                 request = MockServerStubRequestMatcher(
                     hostname = "example.com",
                     method = HttpMethod.GET,
@@ -110,11 +113,13 @@ class MockServerIT {
         val expectedReceivedRequest = HttpRequest(
             url = "http://example.com/search?id=123",
             method = HttpMethod.POST,
-            body = HttpRequestBody("{\"some-key\": \"some-value\"}", MediaType.JSON_UTF8)
+            body = HttpRequestBody("{\"some-key\": \"some-value\"}", MediaType.JSON_UTF8),
+            headers = mapOf("header1" to listOf("headerValue")),
         )
 
         val request = HttpPost("http://example.com/search?id=123")
         request.entity = StringEntity("{\"some-key\": \"some-value\"}", ContentType.APPLICATION_JSON)
+        request.setHeader("header1", "headerValue")
         val response = client.execute(request)
 
         assertEquals(200, response?.code)
@@ -131,7 +136,36 @@ class MockServerIT {
                     .withMethod(HttpMethod.POST)
                     .withQueryParameter("id", equalTo("123"))
                     .withRequestBody(containing("some-key").and(containing("some-value")))
+                    .withHeader("header1", equalTo("headerValue"))
                     .andNoOther()
+            )
+        }
+    }
+
+    @Test
+    fun `Mock server verification should succeed for named stub`() {
+        val response = client.execute(HttpGet("http://example.com"))
+
+        assertEquals(200, response.code)
+        assertEquals(1, exampleServer.requestsReceived.size)
+        assertDoesNotThrow {
+            exampleServer.verify(
+                receivedRequest(1)
+                    .matchingStub("request-stub")
+            )
+        }
+    }
+
+    @Test
+    fun `Mock server verification should fail for non-existing named stub`() {
+        val response = client.execute(HttpGet("http://example.com"))
+
+        assertEquals(200, response.code)
+        assertEquals(1, exampleServer.requestsReceived.size)
+        assertFailsWith<IllegalArgumentException> {
+            exampleServer.verify(
+                receivedRequest(1)
+                    .matchingStub("non-existing")
             )
         }
     }

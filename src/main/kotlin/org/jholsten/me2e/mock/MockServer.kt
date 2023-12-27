@@ -95,14 +95,20 @@ class MockServer(
      */
     fun verify(verification: MockServerVerification) {
         checkNotNull(wireMockServer) { "Mock server needs to be initialized" }
-        val matcher = MockServerStubRequestMatcher(
-            hostname = hostname,
-            method = verification.method,
-            path = verification.path,
-            headers = verification.headers,
-            queryParameters = verification.queryParameters,
-            bodyPatterns = verification.requestBodyPattern?.let { listOf(it) },
-        )
+        val matcher = if (verification.stubName != null) {
+            val stub = this.stubs.firstOrNull { it.name == verification.stubName }
+            requireNotNull(stub) { "No stub with name ${verification.stubName} exists" }
+            stub.request
+        } else {
+            MockServerStubRequestMatcher(
+                hostname = hostname,
+                method = verification.method,
+                path = verification.path,
+                headers = verification.headers,
+                queryParameters = verification.queryParameters,
+                bodyPatterns = verification.requestBodyPattern?.let { listOf(it) },
+            )
+        }
 
         val matchResults = wireMockRequestsReceived.filter { matcher.matches(it.request) }
 
