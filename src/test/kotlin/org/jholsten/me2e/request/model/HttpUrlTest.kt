@@ -1,8 +1,11 @@
 package org.jholsten.me2e.request.model
 
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertNotSame
 
 internal class HttpUrlTest {
     @Test
@@ -150,5 +153,45 @@ internal class HttpUrlTest {
         assertFailsWith<IllegalArgumentException> {
             HttpUrl.Builder().withPort(-1).build()
         }
+    }
+
+    @ParameterizedTest
+    @ValueSource(
+        strings = [
+            "https://example.com",
+            "https://example.com:8080",
+            "https://example.com/search",
+            "https://example.com?query=value1&query=value2",
+            "https://example.com#page=42",
+            "http://example.com:8080/search?query=value1&query=value2&param=other-value#page=42",
+        ]
+    )
+    fun `Building new builder for URL should result in the original URL`(urlValue: String) {
+        val url = HttpUrl(urlValue)
+        val result = url.newBuilder().build()
+
+        assertEquals(url.value, result.value)
+        assertNotSame(url, result)
+    }
+
+    @Test
+    fun `Modifying URL builder should succeed`() {
+        val url = HttpUrl("https://example.com:8080/search?query=value1&param=other-value#page=42")
+        val result = url.newBuilder()
+            .withScheme(HttpUrl.Scheme.HTTP)
+            .withHost("google.com")
+            .withPort(90)
+            .withPath("/other")
+            .withQueryParameter("query", "value2")
+            .withQueryParameter("new", "val")
+            .withFragment("number=12")
+            .build()
+
+        assertEquals("http://google.com:90/other?query=value1&query=value2&param=other-value&new=val#number=12", result.value)
+    }
+
+    @Test
+    fun `Generating builder for invalid URL should fail`() {
+        assertFailsWith<IllegalArgumentException> { HttpUrl("invalid").newBuilder() }
     }
 }

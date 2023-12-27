@@ -1,5 +1,6 @@
 package org.jholsten.me2e.request.model
 
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.apache.commons.lang3.StringUtils
 
 /**
@@ -8,13 +9,32 @@ import org.apache.commons.lang3.StringUtils
 class HttpUrl(
     val value: String,
 ) {
-    class Builder {
+    fun newBuilder(): Builder {
+        return Builder(this)
+    }
+
+    class Builder() {
         private var scheme: Scheme? = null
         private var host: String? = null
         private var port: Int? = null
         private var path: String? = null
         private var queryParameters: MutableMap<String, MutableList<String>> = mutableMapOf()
         private var fragment: String? = null
+
+        internal constructor(httpUrl: HttpUrl) : this() {
+            val url = httpUrl.value.toHttpUrlOrNull() ?: throw IllegalArgumentException("Invalid url format")
+            this.scheme = Scheme.parse(url.scheme)
+            this.host = url.host
+            this.port = when {
+                url.port != -1 && httpUrl.value.contains(":${url.port}") -> url.port
+                else -> null
+            }
+            this.path = url.encodedPath
+            this.fragment = url.fragment
+            for (key in url.queryParameterNames) {
+                this.queryParameters[key] = url.queryParameterValues(key).filterNotNull().toMutableList()
+            }
+        }
 
         fun withScheme(scheme: Scheme) = apply {
             this.scheme = scheme
@@ -84,6 +104,17 @@ class HttpUrl(
 
     enum class Scheme {
         HTTP, HTTPS;
+
+        companion object {
+            @JvmStatic
+            fun parse(value: String): Scheme {
+                return when (value.lowercase()) {
+                    "http" -> HTTP
+                    "https" -> HTTPS
+                    else -> throw IllegalArgumentException("Unknown scheme $value")
+                }
+            }
+        }
 
         override fun toString(): String {
             return when (this) {
