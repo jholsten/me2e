@@ -2,6 +2,7 @@ package org.jholsten.me2e.config.parser
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.databind.node.ObjectNode
+import org.jholsten.me2e.config.model.RequestConfig
 import org.jholsten.me2e.config.model.TestConfig
 import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.container.database.DatabaseContainer
@@ -18,6 +19,7 @@ import org.jholsten.me2e.parsing.exception.InvalidFormatException
 import org.jholsten.me2e.parsing.exception.ParseException
 import org.jholsten.me2e.request.model.HttpMethod
 import org.jholsten.util.RecursiveComparison
+import java.io.FileNotFoundException
 import kotlin.test.*
 
 internal class YamlConfigParserIT {
@@ -27,6 +29,15 @@ internal class YamlConfigParserIT {
         val config = YamlConfigParser().parseFile("me2e-config-test.yaml")
         assertContainersAsExpected(config)
         assertMockServersAsExpected(config)
+        assertRequestConfigAsExpected(RequestConfig(10, 15, 20), config)
+    }
+
+    @Test
+    fun `Parsing valid YAML config without optional fields should succeed`() {
+        val config = YamlConfigParser().parseFile("me2e-config-minimal.yaml")
+        assertContainersAsExpected(config)
+        assertEquals(0, config.environment.mockServers.size)
+        assertRequestConfigAsExpected(RequestConfig(10, 10, 10), config)
     }
 
     @Test
@@ -39,6 +50,11 @@ internal class YamlConfigParserIT {
         assertFailsWith<ParseException> { YamlConfigParser().parseFile("me2e-config-invalid-docker-compose.yaml") }
     }
 
+    @Test
+    fun `Parsing non-existent YAML config should fail`() {
+        assertFailsWith<FileNotFoundException> { YamlConfigParser().parseFile("non-existent.yaml") }
+    }
+
     private fun assertContainersAsExpected(config: TestConfig) {
         assertEquals(3, config.environment.containers.size)
         assertApiGatewayAsExpected(config.environment.containers)
@@ -49,6 +65,10 @@ internal class YamlConfigParserIT {
     private fun assertMockServersAsExpected(config: TestConfig) {
         assertEquals(1, config.environment.mockServers.size)
         assertPaymentServiceAsExpected(config.environment.mockServers)
+    }
+
+    private fun assertRequestConfigAsExpected(expectedRequestConfig: RequestConfig, testConfig: TestConfig) {
+        RecursiveComparison.assertEquals(expectedRequestConfig, testConfig.requests)
     }
 
     private fun assertApiGatewayAsExpected(containers: Map<String, Container>) {

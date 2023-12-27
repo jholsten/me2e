@@ -4,6 +4,9 @@
   "description": "Test Configuration for the Me2e Library",
   "type": "object",
   "properties": {
+    "requests": {
+      "$ref": "#/definitions/requests"
+    },
     "environment": {
       "$id": "#/properties/environment",
       "type": "object",
@@ -32,6 +35,29 @@
     "environment"
   ],
   "definitions": {
+    "requests": {
+      "$id": "#/definitions/requests",
+      "description": "Configuration of HTTP requests to Microservice containers.",
+      "type": "object",
+      "properties": {
+        "connect-timeout": {
+          "type": "integer",
+          "description": "Connect timeout in seconds. Default: 10",
+          "default": "10"
+        },
+        "read-timeout": {
+          "type": "integer",
+          "description": "Read timeout in seconds. Default: 10",
+          "default": "10"
+        },
+        "write-timeout": {
+          "type": "integer",
+          "description": "Write timeout in seconds. Default: 10",
+          "default": "10"
+        }
+      },
+      "additionalProperties": false
+    },
     "mock-server": {
       "$id": "#/definitions/mock-server",
       "type": "object",
@@ -51,7 +77,9 @@
         }
       },
       "additionalProperties": false,
-      "required": ["hostname"]
+      "required": [
+        "hostname"
+      ]
     }
   }
 }

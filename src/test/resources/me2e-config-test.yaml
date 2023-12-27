@@ -1,3 +1,8 @@
+requests:
+  connect-timeout: 10
+  read-timeout: 15
+  write-timeout: 20
+
 environment:
   docker-compose: docker-compose.yml
   mock-servers:
