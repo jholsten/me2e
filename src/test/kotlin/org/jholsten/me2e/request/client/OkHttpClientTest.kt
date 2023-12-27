@@ -188,10 +188,6 @@ internal class OkHttpClientTest {
         val httpClient = builder.build()
 
         assertEquals("https://google.com/", httpClient.baseUrl)
-        assertEquals(interceptors, httpClient.getRequestInterceptors())
-        assertEquals(5, httpClient.getConnectTimeout())
-        assertEquals(6, httpClient.getReadTimeout())
-        assertEquals(7, httpClient.getWriteTimeout())
         verify { anyConstructed<okhttp3.OkHttpClient.Builder>().connectTimeout(5, TimeUnit.MILLISECONDS) }
         verify { anyConstructed<okhttp3.OkHttpClient.Builder>().readTimeout(6, TimeUnit.MILLISECONDS) }
         verify { anyConstructed<okhttp3.OkHttpClient.Builder>().writeTimeout(7, TimeUnit.MILLISECONDS) }
@@ -215,17 +211,13 @@ internal class OkHttpClientTest {
             .build()
 
         assertEquals("https://google.com/", httpClient.baseUrl)
-        assertEquals(0, httpClient.getRequestInterceptors().size)
-        assertEquals(10000, httpClient.getConnectTimeout())
-        assertEquals(10000, httpClient.getReadTimeout())
-        assertEquals(10000, httpClient.getWriteTimeout())
         verify { anyConstructed<okhttp3.OkHttpClient.Builder>().connectTimeout(10000, TimeUnit.MILLISECONDS) }
         verify { anyConstructed<okhttp3.OkHttpClient.Builder>().readTimeout(10000, TimeUnit.MILLISECONDS) }
         verify { anyConstructed<okhttp3.OkHttpClient.Builder>().writeTimeout(10000, TimeUnit.MILLISECONDS) }
     }
 
     @Test
-    fun `Configuring existing instance should change okhttp3 configuration`() {
+    fun `Setting request interceptors for existing instance should change okhttp3 configuration`() {
         val httpClient = OkHttpClient.Builder()
             .withBaseUrl("https://google.com/")
             .build()
@@ -252,43 +244,12 @@ internal class OkHttpClientTest {
         }
         every { OkHttpRequestInterceptor.fromRequestInterceptor(any()) } returns mappedInterceptor
 
-        httpClient.configure()
-            .setConnectTimeout(5, TimeUnit.MILLISECONDS)
-            .setReadTimeout(6, TimeUnit.MILLISECONDS)
-            .setWriteTimeout(7, TimeUnit.MILLISECONDS)
-        for (interceptor in interceptors) {
-            httpClient.configure().addRequestInterceptor(interceptor)
-        }
+        httpClient.setRequestInterceptors(interceptors)
 
         assertEquals("https://google.com/", httpClient.baseUrl)
-        assertEquals(interceptors, httpClient.getRequestInterceptors())
-        assertEquals(5, httpClient.getConnectTimeout())
-        assertEquals(6, httpClient.getReadTimeout())
-        assertEquals(7, httpClient.getWriteTimeout())
-        verify { anyConstructed<okhttp3.OkHttpClient.Builder>().connectTimeout(5, TimeUnit.MILLISECONDS) }
-        verify { anyConstructed<okhttp3.OkHttpClient.Builder>().readTimeout(6, TimeUnit.MILLISECONDS) }
-        verify { anyConstructed<okhttp3.OkHttpClient.Builder>().writeTimeout(7, TimeUnit.MILLISECONDS) }
         for (interceptor in interceptors) {
             verify { OkHttpRequestInterceptor.fromRequestInterceptor(interceptor) }
         }
-    }
-
-    @Test
-    fun `Configuring existing instance should change part of okhttp3 configuration`() {
-        val httpClient = OkHttpClient.Builder()
-            .withBaseUrl("https://google.com/")
-            .withReadTimeout(6, TimeUnit.MILLISECONDS)
-            .build()
-
-        httpClient.configure().setConnectTimeout(5, TimeUnit.MILLISECONDS)
-
-        assertEquals("https://google.com/", httpClient.baseUrl)
-        assertEquals(5, httpClient.getConnectTimeout())
-        assertEquals(6, httpClient.getReadTimeout())
-        assertEquals(10000, httpClient.getWriteTimeout())
-        verify { anyConstructed<okhttp3.OkHttpClient.Builder>().connectTimeout(5, TimeUnit.MILLISECONDS) }
-        verify { anyConstructed<okhttp3.OkHttpClient.Builder>().readTimeout(6, TimeUnit.MILLISECONDS) }
-        verify { anyConstructed<okhttp3.OkHttpClient.Builder>().writeTimeout(10000, TimeUnit.MILLISECONDS) }
     }
 
     @Test
@@ -585,10 +546,12 @@ internal class OkHttpClientTest {
 
     private fun okHttpResponseWithoutBody(): Response {
         return Response.Builder()
-            .request(Request.Builder()
-                .get().url("https://google.com")
-                .header("Name", "Value")
-                .build())
+            .request(
+                Request.Builder()
+                    .get().url("https://google.com")
+                    .header("Name", "Value")
+                    .build()
+            )
             .protocol(Protocol.HTTP_1_1)
             .message("Message")
             .code(200)
@@ -597,10 +560,12 @@ internal class OkHttpClientTest {
 
     private fun okHttpResponseWithBody(): Response {
         return Response.Builder()
-            .request(Request.Builder()
-                .get().url("https://google.com")
-                .header("Name", "Value")
-                .build())
+            .request(
+                Request.Builder()
+                    .get().url("https://google.com")
+                    .header("Name", "Value")
+                    .build()
+            )
             .protocol(Protocol.HTTP_1_1)
             .message("Message")
             .code(200)

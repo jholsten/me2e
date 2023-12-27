@@ -12,30 +12,9 @@ import java.util.concurrent.TimeUnit
 interface HttpClient {
 
     /**
-     * Changes the configuration of the HTTP client after its instantiation.
-     * Returns [Configurator] instance to configure the client's properties.
+     * Sets the given interceptors for all outgoing requests.
      */
-    fun configure(): Configurator
-
-    /**
-     * Returns list of request interceptors used for this HTTP client.
-     */
-    fun getRequestInterceptors(): List<RequestInterceptor>
-
-    /**
-     * Returns configured connect timeout in milliseconds.
-     */
-    fun getConnectTimeout(): Long
-
-    /**
-     * Returns configured read timeout in milliseconds.
-     */
-    fun getReadTimeout(): Long
-
-    /**
-     * Returns configured write timeout in milliseconds.
-     */
-    fun getWriteTimeout(): Long
+    fun setRequestInterceptors(interceptors: List<RequestInterceptor>)
 
     /**
      * Executes an HTTP GET request to the given path.
@@ -56,7 +35,12 @@ interface HttpClient {
      * @param headers Map of header names along with the associated values to set.
      * @return Response returned by the service.
      */
-    fun post(path: String, body: HttpRequestBody, queryParams: Map<String, String> = mapOf(), headers: Map<String, List<String>> = mapOf()): HttpResponse
+    fun post(
+        path: String,
+        body: HttpRequestBody,
+        queryParams: Map<String, String> = mapOf(),
+        headers: Map<String, List<String>> = mapOf()
+    ): HttpResponse
 
     /**
      * Executes an HTTP PUT request to the given path.
@@ -67,7 +51,12 @@ interface HttpClient {
      * @param headers Map of header names along with the associated values to set.
      * @return Response returned by the service.
      */
-    fun put(path: String, body: HttpRequestBody, queryParams: Map<String, String> = mapOf(), headers: Map<String, List<String>> = mapOf()): HttpResponse
+    fun put(
+        path: String,
+        body: HttpRequestBody,
+        queryParams: Map<String, String> = mapOf(),
+        headers: Map<String, List<String>> = mapOf()
+    ): HttpResponse
 
     /**
      * Executes an HTTP PATCH request to the given path.
@@ -78,7 +67,12 @@ interface HttpClient {
      * @param headers Map of header names along with the associated values to set.
      * @return Response returned by the service.
      */
-    fun patch(path: String, body: HttpRequestBody, queryParams: Map<String, String> = mapOf(), headers: Map<String, List<String>> = mapOf()): HttpResponse
+    fun patch(
+        path: String,
+        body: HttpRequestBody,
+        queryParams: Map<String, String> = mapOf(),
+        headers: Map<String, List<String>> = mapOf()
+    ): HttpResponse
 
     /**
      * Executes an HTTP DELETE request to the given path.
@@ -89,7 +83,12 @@ interface HttpClient {
      * @param headers Map of header names along with the associated values to set.
      * @return Response returned by the service.
      */
-    fun delete(path: String, body: HttpRequestBody? = null, queryParams: Map<String, String> = mapOf(), headers: Map<String, List<String>> = mapOf()): HttpResponse
+    fun delete(
+        path: String,
+        body: HttpRequestBody? = null,
+        queryParams: Map<String, String> = mapOf(),
+        headers: Map<String, List<String>> = mapOf()
+    ): HttpResponse
 
     /**
      * Executes the given HTTP request.
@@ -105,6 +104,12 @@ interface HttpClient {
          * Sets the base URL of the client.
          */
         fun withBaseUrl(baseUrl: String): Builder
+
+        /**
+         * Sets the given interceptors for all outgoing requests.
+         * @param interceptors Request interceptor to set
+         */
+        fun setRequestInterceptors(interceptors: List<RequestInterceptor>): Builder
 
         /**
          * Adds the given interceptor for all outgoing requests.
@@ -134,54 +139,34 @@ interface HttpClient {
     }
 
     /**
-     * Configurator for changing the HTTP client configuration after its instantiation.
-     */
-    interface Configurator {
-        /**
-         * Adds the given interceptor for all outgoing requests.
-         * @param interceptor Request interceptor to add
-         */
-        fun addRequestInterceptor(interceptor: RequestInterceptor): Configurator
-
-        /**
-         * Sets the given connect timeout for new connections. The default value is 10 seconds.
-         */
-        fun setConnectTimeout(timeout: Long, unit: TimeUnit): Configurator
-
-        /**
-         * Sets the given read timeout for new connections. The default value is 10 seconds.
-         */
-        fun setReadTimeout(timeout: Long, unit: TimeUnit): Configurator
-
-        /**
-         * Sets the given write timeout for new connections. The default value is 10 seconds.
-         */
-        fun setWriteTimeout(timeout: Long, unit: TimeUnit): Configurator
-    }
-
-    /**
      * Configuration of the HTTP client.
      */
     interface Configuration {
         /**
+         * Sets the given interceptors for all outgoing requests.
+         * @param interceptors Request interceptor to set
+         */
+        fun setRequestInterceptors(interceptors: List<RequestInterceptor>): Configuration
+
+        /**
          * Adds the given interceptor for all outgoing requests.
          * @param interceptor Request interceptor to add
          */
-        fun addRequestInterceptor(interceptor: RequestInterceptor)
+        fun addRequestInterceptor(interceptor: RequestInterceptor): Configuration
 
         /**
          * Sets the given connect timeout for new connections. The default value is 10 seconds.
          */
-        fun setConnectTimeout(timeout: Long, unit: TimeUnit)
+        fun setConnectTimeout(timeout: Long, unit: TimeUnit): Configuration
 
         /**
          * Sets the given read timeout for new connections. The default value is 10 seconds.
          */
-        fun setReadTimeout(timeout: Long, unit: TimeUnit)
+        fun setReadTimeout(timeout: Long, unit: TimeUnit): Configuration
 
         /**
          * Sets the given write timeout for new connections. The default value is 10 seconds.
          */
-        fun setWriteTimeout(timeout: Long, unit: TimeUnit)
+        fun setWriteTimeout(timeout: Long, unit: TimeUnit): Configuration
     }
 }

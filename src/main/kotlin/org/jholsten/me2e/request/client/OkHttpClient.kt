@@ -1,7 +1,6 @@
 package org.jholsten.me2e.request.client
 
 import okhttp3.ResponseBody
-import okhttp3.internal.toImmutableList
 import org.jholsten.me2e.request.interceptor.OkHttpRequestInterceptor
 import org.jholsten.me2e.request.interceptor.RequestInterceptor
 import org.jholsten.me2e.request.mapper.HttpRequestMapper
@@ -21,30 +20,15 @@ class OkHttpClient private constructor(
      * Base URL to set for all requests.
      */
     val baseUrl: String,
+
     /**
      * Configuration of the HTTP client.
      */
     private val configuration: Configuration,
 ) : HttpClient {
 
-    override fun configure(): Configurator {
-        return Configurator(configuration)
-    }
-
-    override fun getRequestInterceptors(): List<RequestInterceptor> {
-        return configuration.requestInterceptors.toImmutableList()
-    }
-
-    override fun getConnectTimeout(): Long {
-        return configuration.connectTimeout
-    }
-
-    override fun getReadTimeout(): Long {
-        return configuration.readTimeout
-    }
-
-    override fun getWriteTimeout(): Long {
-        return configuration.writeTimeout
+    override fun setRequestInterceptors(interceptors: List<RequestInterceptor>) {
+        configuration.setRequestInterceptors(interceptors).apply()
     }
 
     override fun get(path: String, queryParams: Map<String, String>, headers: Map<String, List<String>>): HttpResponse {
@@ -57,7 +41,12 @@ class OkHttpClient private constructor(
         return execute(request)
     }
 
-    override fun post(path: String, body: HttpRequestBody, queryParams: Map<String, String>, headers: Map<String, List<String>>): HttpResponse {
+    override fun post(
+        path: String,
+        body: HttpRequestBody,
+        queryParams: Map<String, String>,
+        headers: Map<String, List<String>>
+    ): HttpResponse {
         val request = HttpRequest.Builder()
             .withUrl(baseUrl, relativePath = path, queryParams = queryParams)
             .withMethod(HttpMethod.POST)
@@ -68,7 +57,12 @@ class OkHttpClient private constructor(
         return execute(request)
     }
 
-    override fun put(path: String, body: HttpRequestBody, queryParams: Map<String, String>, headers: Map<String, List<String>>): HttpResponse {
+    override fun put(
+        path: String,
+        body: HttpRequestBody,
+        queryParams: Map<String, String>,
+        headers: Map<String, List<String>>
+    ): HttpResponse {
         val request = HttpRequest.Builder()
             .withUrl(baseUrl, relativePath = path, queryParams = queryParams)
             .withMethod(HttpMethod.PUT)
@@ -79,7 +73,12 @@ class OkHttpClient private constructor(
         return execute(request)
     }
 
-    override fun patch(path: String, body: HttpRequestBody, queryParams: Map<String, String>, headers: Map<String, List<String>>): HttpResponse {
+    override fun patch(
+        path: String,
+        body: HttpRequestBody,
+        queryParams: Map<String, String>,
+        headers: Map<String, List<String>>
+    ): HttpResponse {
         val request = HttpRequest.Builder()
             .withUrl(baseUrl, relativePath = path, queryParams = queryParams)
             .withMethod(HttpMethod.PATCH)
@@ -90,7 +89,12 @@ class OkHttpClient private constructor(
         return execute(request)
     }
 
-    override fun delete(path: String, body: HttpRequestBody?, queryParams: Map<String, String>, headers: Map<String, List<String>>): HttpResponse {
+    override fun delete(
+        path: String,
+        body: HttpRequestBody?,
+        queryParams: Map<String, String>,
+        headers: Map<String, List<String>>
+    ): HttpResponse {
         val request = HttpRequest.Builder()
             .withUrl(baseUrl, relativePath = path, queryParams = queryParams)
             .withMethod(HttpMethod.DELETE)
@@ -122,6 +126,10 @@ class OkHttpClient private constructor(
             this.baseUrl = baseUrl
         }
 
+        override fun setRequestInterceptors(interceptors: List<RequestInterceptor>) = apply {
+            configuration.setRequestInterceptors(interceptors)
+        }
+
         override fun addRequestInterceptor(interceptor: RequestInterceptor) = apply {
             configuration.addRequestInterceptor(interceptor)
         }
@@ -148,29 +156,7 @@ class OkHttpClient private constructor(
         }
     }
 
-    class Configurator internal constructor(val configuration: Configuration) : HttpClient.Configurator {
-        override fun addRequestInterceptor(interceptor: RequestInterceptor) = apply {
-            configuration.addRequestInterceptor(interceptor)
-            configuration.apply()
-        }
-
-        override fun setConnectTimeout(timeout: Long, unit: TimeUnit) = apply {
-            configuration.setConnectTimeout(timeout, unit)
-            configuration.apply()
-        }
-
-        override fun setReadTimeout(timeout: Long, unit: TimeUnit) = apply {
-            configuration.setReadTimeout(timeout, unit)
-            configuration.apply()
-        }
-
-        override fun setWriteTimeout(timeout: Long, unit: TimeUnit) = apply {
-            configuration.setWriteTimeout(timeout, unit)
-            configuration.apply()
-        }
-    }
-
-    class Configuration : HttpClient.Configuration {
+    internal class Configuration : HttpClient.Configuration {
         /**
          * Configured client which executes the requests.
          */
@@ -179,7 +165,7 @@ class OkHttpClient private constructor(
         /**
          * List of request interceptors to use for outgoing requests.
          */
-        val requestInterceptors: MutableList<RequestInterceptor> = mutableListOf()
+        var requestInterceptors: MutableList<RequestInterceptor> = mutableListOf()
 
         /**
          * Connect timeout in milliseconds.
@@ -196,19 +182,23 @@ class OkHttpClient private constructor(
          */
         var writeTimeout: Long = 10000
 
-        override fun addRequestInterceptor(interceptor: RequestInterceptor) {
+        override fun setRequestInterceptors(interceptors: List<RequestInterceptor>) = apply {
+            requestInterceptors = interceptors.toMutableList()
+        }
+
+        override fun addRequestInterceptor(interceptor: RequestInterceptor) = apply {
             requestInterceptors.add(interceptor)
         }
 
-        override fun setConnectTimeout(timeout: Long, unit: TimeUnit) {
+        override fun setConnectTimeout(timeout: Long, unit: TimeUnit) = apply {
             connectTimeout = checkTimeout(timeout, unit)
         }
 
-        override fun setReadTimeout(timeout: Long, unit: TimeUnit) {
+        override fun setReadTimeout(timeout: Long, unit: TimeUnit) = apply {
             readTimeout = checkTimeout(timeout, unit)
         }
 
-        override fun setWriteTimeout(timeout: Long, unit: TimeUnit) {
+        override fun setWriteTimeout(timeout: Long, unit: TimeUnit) = apply {
             writeTimeout = checkTimeout(timeout, unit)
         }
 
