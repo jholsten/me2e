@@ -24,8 +24,7 @@
             "^[a-zA-Z0-9._-]+$": {
               "$ref": "#/definitions/mock-server"
             }
-          },
-          "additionalProperties": false
+          }
         }
       },
       "additionalProperties": false
@@ -34,6 +33,7 @@
   "required": [
     "environment"
   ],
+  "additionalProperties": false,
   "definitions": {
     "requests": {
       "$id": "#/definitions/requests",
