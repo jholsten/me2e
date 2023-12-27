@@ -1,5 +1,6 @@
 package org.jholsten.me2e.config.utils
 
+import org.jholsten.me2e.config.model.RequestConfig
 import org.jholsten.me2e.config.model.TestConfig
 import org.jholsten.me2e.config.model.TestEnvironmentConfig
 import org.jholsten.me2e.container.microservice.MicroserviceContainer
@@ -24,6 +25,7 @@ internal class ConfigValidatorTest {
                             "api-gateway" to MicroserviceContainer(
                                 name = "api-gateway",
                                 image = "service:latest",
+                                requestConfig = RequestConfig(),
                             ),
                         ),
                         mockServers = mapOf(

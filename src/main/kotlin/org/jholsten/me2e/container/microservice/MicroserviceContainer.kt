@@ -1,5 +1,7 @@
 package org.jholsten.me2e.container.microservice
 
+import com.fasterxml.jackson.annotation.JacksonInject
+import org.jholsten.me2e.config.model.RequestConfig
 import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.container.model.ContainerType
 import org.jholsten.me2e.request.model.HttpResponse
@@ -12,6 +14,8 @@ class MicroserviceContainer(
     name: String,
     image: String,
     environment: Map<String, String>? = null,
+    @JacksonInject("requestConfig")
+    requestConfig: RequestConfig,
 ) : Container(
     name = name,
     image = image,

@@ -10,17 +10,17 @@ class RequestConfig(
      * Connect timeout in seconds.
      */
     @JsonProperty("connect-timeout")
-    val connectTimeout: Int,
+    val connectTimeout: Long = 10,
 
     /**
      * Read timeout in seconds.
      */
     @JsonProperty("read-timeout")
-    val readTimeout: Int,
+    val readTimeout: Long = 10,
 
     /**
      * Write timeout in seconds.
      */
     @JsonProperty("write-timeout")
-    val writeTimeout: Int,
+    val writeTimeout: Long = 10,
 )

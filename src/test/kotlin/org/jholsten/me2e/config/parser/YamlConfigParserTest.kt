@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import com.networknt.schema.JsonSchemaFactory
 import io.mockk.*
+import org.jholsten.me2e.config.model.RequestConfig
 import org.jholsten.me2e.parsing.exception.ParseException
 import org.jholsten.me2e.parsing.exception.InvalidFormatException
 import org.jholsten.me2e.parsing.exception.ValidationException
@@ -114,6 +115,7 @@ internal class YamlConfigParserTest {
                     "api-gateway" to MicroserviceContainer(
                         name = "api-gateway",
                         image = "service:latest",
+                        requestConfig = RequestConfig()
                     ),
                 ),
             ),
