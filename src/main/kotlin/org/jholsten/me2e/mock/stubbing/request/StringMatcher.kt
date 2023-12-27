@@ -1,43 +1,46 @@
 package org.jholsten.me2e.mock.stubbing.request
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
+import org.jholsten.me2e.utils.toJson
 
 /**
  * Pattern to match string values.
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 open class StringMatcher(
     /**
      * Matches only if the string is exactly equal to the defined one.
      */
-    internal val equals: String? = null,
+    val equals: String? = null,
 
     /**
      * Matches if the string conforms to the defined regex pattern.
      */
-    internal val matches: String? = null,
+    val matches: String? = null,
 
     /**
      * Matches if the string does not conform to the defined regex pattern.
      */
     @JsonProperty("not-matches")
-    internal val notMatches: String? = null,
+    val notMatches: String? = null,
 
     /**
      * Matches if the string contains the defined one.
      */
-    internal val contains: String? = null,
+    val contains: String? = null,
 
     /**
      * Matches if the string does not contain the defined one.
      */
     @JsonProperty("not-contains")
-    internal val notContains: String? = null,
+    val notContains: String? = null,
 
     /**
      * Whether to disable case sensitivity for the string matching.
      */
     @JsonProperty("ignore-case")
-    internal val ignoreCase: Boolean = false,
+    val ignoreCase: Boolean = false,
 ) {
     companion object {
         /**
@@ -172,16 +175,5 @@ open class StringMatcher(
         return true
     }
 
-    override fun toString(): String {
-        return """
-            {
-                "equals": $equals,
-                "matches": $matches,
-                "notMatches": $notMatches,
-                "contains": $contains,
-                "notContains": $notContains,
-                "ignoreCase": $ignoreCase
-            }
-        """.trimIndent()
-    }
+    override fun toString(): String = toJson(this)
 }

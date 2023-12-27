@@ -1,16 +1,19 @@
 package org.jholsten.me2e.mock.stubbing.request
 
 import com.fasterxml.jackson.annotation.JacksonInject
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.github.tomakehurst.wiremock.http.HttpHeaders
 import com.github.tomakehurst.wiremock.http.Request
 import com.github.tomakehurst.wiremock.http.RequestMethod
 import org.jholsten.me2e.request.model.HttpMethod
+import org.jholsten.me2e.utils.toJson
 
 /**
  * Definition of the request to which the stub should respond.
  * Matches the request depending on certain patterns.
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 class MockServerStubRequestMatcher(
     /**
      * Hostname of the third-party service to be mocked.
@@ -134,16 +137,5 @@ class MockServerStubRequestMatcher(
         return this.bodyPatterns.all { it.matches(body) }
     }
 
-    override fun toString(): String {
-        return """
-            {
-                "hostname": $hostname,
-                "method": $method,
-                "path": $path,
-                "headers": $headers,
-                "queryParameters": $queryParameters,
-                "bodyPatterns": $bodyPatterns
-            }
-        """.trimIndent()
-    }
+    override fun toString(): String = toJson(this)
 }
