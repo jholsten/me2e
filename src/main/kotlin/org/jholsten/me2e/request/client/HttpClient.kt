@@ -109,7 +109,7 @@ interface HttpClient {
          * Sets the given interceptors for all outgoing requests.
          * @param interceptors Request interceptor to set
          */
-        fun setRequestInterceptors(interceptors: List<RequestInterceptor>): Builder
+        fun withRequestInterceptors(interceptors: List<RequestInterceptor>): Builder
 
         /**
          * Adds the given interceptor for all outgoing requests.

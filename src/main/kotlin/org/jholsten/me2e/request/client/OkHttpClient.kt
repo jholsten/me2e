@@ -126,7 +126,7 @@ class OkHttpClient private constructor(
             this.baseUrl = baseUrl
         }
 
-        override fun setRequestInterceptors(interceptors: List<RequestInterceptor>) = apply {
+        override fun withRequestInterceptors(interceptors: List<RequestInterceptor>) = apply {
             configuration.setRequestInterceptors(interceptors)
         }
 
