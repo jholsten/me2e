@@ -7,121 +7,143 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotSame
 
-internal class HttpUrlTest {
+internal class UrlTest {
     @Test
     fun `Building minimal URL should succeed`() {
-        val httpUrl = HttpUrl.Builder()
-            .withScheme(HttpUrl.Scheme.HTTP)
+        val url = Url.Builder()
+            .withScheme(Url.Scheme.HTTP)
             .withHost("example.com")
             .build()
 
-        assertEquals("http://example.com", httpUrl.value)
+        assertEquals("http://example.com", url.value)
+    }
+
+    @Test
+    fun `Building URL with host with trailing slashes should succeed`() {
+        val url = Url.Builder()
+            .withScheme(Url.Scheme.HTTP)
+            .withHost("example.com//")
+            .withPath("/search")
+            .build()
+
+        assertEquals("http://example.com/search", url.value)
     }
 
     @Test
     fun `Building URL with port should succeed`() {
-        val httpUrl = HttpUrl.Builder()
-            .withScheme(HttpUrl.Scheme.HTTP)
+        val url = Url.Builder()
+            .withScheme(Url.Scheme.HTTP)
             .withHost("example.com")
             .withPort(8080)
             .build()
 
-        assertEquals("http://example.com:8080", httpUrl.value)
+        assertEquals("http://example.com:8080", url.value)
     }
 
     @Test
     fun `Building URL with path should succeed`() {
-        val httpUrl = HttpUrl.Builder()
-            .withScheme(HttpUrl.Scheme.HTTP)
+        val url = Url.Builder()
+            .withScheme(Url.Scheme.HTTP)
             .withHost("example.com")
             .withPath("/search")
             .build()
 
-        assertEquals("http://example.com/search", httpUrl.value)
+        assertEquals("http://example.com/search", url.value)
     }
 
     @Test
     fun `Building URL with path with multiple parts should succeed`() {
-        val httpUrl = HttpUrl.Builder()
-            .withScheme(HttpUrl.Scheme.HTTP)
+        val url = Url.Builder()
+            .withScheme(Url.Scheme.HTTP)
             .withHost("example.com")
             .withPath("/search/some/value")
             .build()
 
-        assertEquals("http://example.com/search/some/value", httpUrl.value)
+        assertEquals("http://example.com/search/some/value", url.value)
     }
 
     @Test
     fun `Building URL with path without leading slash should succeed`() {
-        val httpUrl = HttpUrl.Builder()
-            .withScheme(HttpUrl.Scheme.HTTP)
+        val url = Url.Builder()
+            .withScheme(Url.Scheme.HTTP)
             .withHost("example.com")
             .withPath("search")
             .build()
 
-        assertEquals("http://example.com/search", httpUrl.value)
+        assertEquals("http://example.com/search", url.value)
     }
 
     @Test
     fun `Building URL with path only consisting of slash should succeed`() {
-        val httpUrl = HttpUrl.Builder()
-            .withScheme(HttpUrl.Scheme.HTTP)
+        val url = Url.Builder()
+            .withScheme(Url.Scheme.HTTP)
             .withHost("example.com")
             .withPath("/")
             .build()
 
-        assertEquals("http://example.com", httpUrl.value)
+        assertEquals("http://example.com", url.value)
+    }
+
+    @Test
+    fun `Building URL with path with multiple leading slashes should succeed`() {
+        val url = Url.Builder()
+            .withScheme(Url.Scheme.HTTP)
+            .withHost("example.com")
+            .withPath("//search")
+            .build()
+
+        assertEquals("http://example.com/search", url.value)
     }
 
     @Test
     fun `Building URL with query parameter should succeed`() {
-        val httpUrl = HttpUrl.Builder()
-            .withScheme(HttpUrl.Scheme.HTTP)
+        val url = Url.Builder()
+            .withScheme(Url.Scheme.HTTP)
             .withHost("example.com")
             .withQueryParameter("key", "value")
             .build()
 
-        assertEquals("http://example.com?key=value", httpUrl.value)
+        assertEquals("http://example.com?key=value", url.value)
     }
 
     @Test
     fun `Building URL with multiple query parameters should succeed`() {
-        val httpUrl = HttpUrl.Builder()
-            .withScheme(HttpUrl.Scheme.HTTP)
+        val url = Url.Builder()
+            .withScheme(Url.Scheme.HTTP)
             .withHost("example.com")
             .withQueryParameter("query", "value1")
             .withQueryParameter("query", "value2")
             .build()
 
-        assertEquals("http://example.com?query=value1&query=value2", httpUrl.value)
+        assertEquals("http://example.com?query=value1&query=value2", url.value)
     }
 
     @Test
     fun `Building URL with multiple query parameters as list should succeed`() {
-        val httpUrl = HttpUrl.Builder()
-            .withScheme(HttpUrl.Scheme.HTTP)
+        val url = Url.Builder()
+            .withScheme(Url.Scheme.HTTP)
             .withHost("example.com")
             .withQueryParameter("query", listOf("value1", "value2"))
             .build()
 
-        assertEquals("http://example.com?query=value1&query=value2", httpUrl.value)
+        assertEquals("http://example.com?query=value1&query=value2", url.value)
     }
 
     @Test
     fun `Building URL with fragment should succeed`() {
-        val httpUrl = HttpUrl.Builder()
-            .withScheme(HttpUrl.Scheme.HTTP)
+        val url = Url.Builder()
+            .withScheme(Url.Scheme.HTTP)
             .withHost("example.com")
             .withFragment("page=42")
             .build()
 
-        assertEquals("http://example.com#page=42", httpUrl.value)
+        assertEquals("http://example.com#page=42", url.value)
     }
 
     @Test
     fun `Building URL with all optional values should succeed`() {
-        val httpUrl = HttpUrl.Builder()
-            .withScheme(HttpUrl.Scheme.HTTP)
+        val url = Url.Builder()
+            .withScheme(Url.Scheme.HTTP)
             .withHost("example.com")
             .withPort(8080)
             .withPath("/search")
@@ -131,27 +153,27 @@ internal class HttpUrlTest {
             .withFragment("page=42")
             .build()
 
-        assertEquals("http://example.com:8080/search?query=value1&query=value2&param=other-value#page=42", httpUrl.value)
+        assertEquals("http://example.com:8080/search?query=value1&query=value2&param=other-value#page=42", url.value)
     }
 
     @Test
     fun `Building URL without scheme should fail`() {
         assertFailsWith<IllegalArgumentException> {
-            HttpUrl.Builder().withHost("example.com").build()
+            Url.Builder().withHost("example.com").build()
         }
     }
 
     @Test
     fun `Building URL without host should fail`() {
         assertFailsWith<IllegalArgumentException> {
-            HttpUrl.Builder().withScheme(HttpUrl.Scheme.HTTPS).build()
+            Url.Builder().withScheme(Url.Scheme.HTTPS).build()
         }
     }
 
     @Test
     fun `Building URL with invalid port number should fail`() {
         assertFailsWith<IllegalArgumentException> {
-            HttpUrl.Builder().withPort(-1).build()
+            Url.Builder().withPort(-1).build()
         }
     }
 
@@ -167,7 +189,7 @@ internal class HttpUrlTest {
         ]
     )
     fun `Building new builder for URL should result in the original URL`(urlValue: String) {
-        val url = HttpUrl(urlValue)
+        val url = Url(urlValue)
         val result = url.newBuilder().build()
 
         assertEquals(url.value, result.value)
@@ -176,9 +198,9 @@ internal class HttpUrlTest {
 
     @Test
     fun `Modifying URL builder should succeed`() {
-        val url = HttpUrl("https://example.com:8080/search?query=value1&param=other-value#page=42")
+        val url = Url("https://example.com:8080/search?query=value1&param=other-value#page=42")
         val result = url.newBuilder()
-            .withScheme(HttpUrl.Scheme.HTTP)
+            .withScheme(Url.Scheme.HTTP)
             .withHost("google.com")
             .withPort(90)
             .withPath("/other")
@@ -192,6 +214,6 @@ internal class HttpUrlTest {
 
     @Test
     fun `Generating builder for invalid URL should fail`() {
-        assertFailsWith<IllegalArgumentException> { HttpUrl("invalid").newBuilder() }
+        assertFailsWith<IllegalArgumentException> { Url("invalid").newBuilder() }
     }
 }

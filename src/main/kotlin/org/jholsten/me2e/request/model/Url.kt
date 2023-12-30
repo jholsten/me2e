@@ -1,25 +1,37 @@
 package org.jholsten.me2e.request.model
 
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
-import org.apache.commons.lang3.StringUtils
 
 /**
- *
+ * Model representing an absolute URL.
  */
 class HttpUrl(
+    /**
+     * URL that this instance represents.
+     */
     val value: String,
 ) {
+    /**
+     * Returns a new [Builder] instance initialized with the URL in [value].
+     */
     fun newBuilder(): Builder {
         return Builder(this)
+    }
+
+    /**
+     * Appends the given [relativeUrl] to this base URL.
+     * @return New instance with the absolute URL
+     */
+    fun withRelativeUrl(relativeUrl: HttpRelativeUrl): HttpUrl {
+        val url = this.toString() + relativeUrl.toString()
+        return HttpUrl(url)
     }
 
     class Builder() {
         private var scheme: Scheme? = null
         private var host: String? = null
         private var port: Int? = null
-        private var path: String? = null
-        private var queryParameters: MutableMap<String, MutableList<String>> = mutableMapOf()
-        private var fragment: String? = null
+        private val relativeUrlBuilder = HttpRelativeUrl.Builder()
 
         internal constructor(httpUrl: HttpUrl) : this() {
             val url = httpUrl.value.toHttpUrlOrNull() ?: throw IllegalArgumentException("Invalid url format")
@@ -29,46 +41,71 @@ class HttpUrl(
                 url.port != -1 && httpUrl.value.contains(":${url.port}") -> url.port
                 else -> null
             }
-            this.path = url.encodedPath
-            this.fragment = url.fragment
+            relativeUrlBuilder.withPath(url.encodedPath)
+            relativeUrlBuilder.withFragment(url.fragment)
             for (key in url.queryParameterNames) {
-                this.queryParameters[key] = url.queryParameterValues(key).filterNotNull().toMutableList()
+                relativeUrlBuilder.withQueryParameter(key, url.queryParameterValues(key).filterNotNull())
             }
         }
 
+        /**
+         * Sets the given URL [scheme] for this URL.
+         */
         fun withScheme(scheme: Scheme) = apply {
             this.scheme = scheme
         }
 
+        /**
+         * Sets the given [host] for this URL.
+         */
         fun withHost(host: String) = apply {
             this.host = host
         }
 
+        /**
+         * Sets the given [port] to use to connect to the web server.
+         * This only needs to be set if it differs from the default HTTP (80) or HTTPS (443) port.
+         */
         fun withPort(port: Int) = apply {
             require(port in 1..65535) { "Port number needs to be between 1 and 65535" }
             this.port = port
         }
 
+        /**
+         * Sets the given [path] for this URL.
+         * Examples:
+         * - `/search`
+         * - `/account/groups`
+         */
         fun withPath(path: String) = apply {
-            this.path = path
+            this.relativeUrlBuilder.withPath(path)
         }
 
+        /**
+         * Sets the given list of values as query parameters for the given [key].
+         * Overwrites all values which were previously set.
+         */
         fun withQueryParameter(key: String, values: List<String>) = apply {
-            this.queryParameters[key] = values.toMutableList()
+            this.relativeUrlBuilder.withQueryParameter(key, values)
         }
 
+        /**
+         * Adds the given query parameter value to the list of values for the given [key].
+         */
         fun withQueryParameter(key: String, value: String) = apply {
-            if (queryParameters.containsKey(key)) {
-                this.queryParameters[key]!!.add(value)
-            } else {
-                this.queryParameters[key] = mutableListOf(value)
-            }
+            this.relativeUrlBuilder.withQueryParameter(key, value)
         }
 
+        /**
+         * Sets the given [fragment] for this URL.
+         */
         fun withFragment(fragment: String) = apply {
-            this.fragment = fragment
+            this.relativeUrlBuilder.withFragment(fragment)
         }
 
+        /**
+         * Builds an instance of the [HttpUrl] by constructing an absolute URL from the set values.
+         */
         fun build(): HttpUrl {
             requireNotNull(scheme) { "Scheme cannot be null" }
             requireNotNull(host) { "Host cannot be null" }
@@ -78,28 +115,12 @@ class HttpUrl(
             if (port != null) {
                 stringBuilder.append(":$port")
             }
-            val strippedPath = path?.let { StringUtils.stripStart(path, "/") }
-            if (!strippedPath.isNullOrBlank()) {
-                stringBuilder.append("/$strippedPath")
-            }
-            if (queryParameters.isNotEmpty()) {
-                stringBuilder.append("?")
-                val queryParameterList = queryParameters.flatMap { (key, values) ->
-                    MutableList(values.size) { key }.zip(values)
-                }
-                for ((index, queryParamPair) in queryParameterList.withIndex()) {
-                    if (index > 0) {
-                        stringBuilder.append("&")
-                    }
-                    val (key, value) = queryParamPair
-                    stringBuilder.append("$key=$value")
-                }
-            }
-            if (fragment != null) {
-                stringBuilder.append("#$fragment")
-            }
-            return HttpUrl(stringBuilder.toString())
+            return HttpUrl(stringBuilder.toString()).withRelativeUrl(relativeUrlBuilder.build())
         }
+    }
+
+    override fun toString(): String {
+        return this.value
     }
 
     enum class Scheme {
