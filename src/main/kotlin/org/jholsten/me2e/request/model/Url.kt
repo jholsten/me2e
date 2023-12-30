@@ -121,6 +121,13 @@ class Url(
         }
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (other is Url) {
+            return this.value == other.value
+        }
+        return false
+    }
+
     override fun toString(): String {
         return this.value
     }

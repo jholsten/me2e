@@ -90,6 +90,13 @@ class RelativeUrl(
         }
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (other is RelativeUrl) {
+            return this.value == other.value
+        }
+        return false
+    }
+
     override fun toString(): String {
         return this.value
     }
