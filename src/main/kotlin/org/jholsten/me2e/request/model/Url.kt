@@ -1,11 +1,12 @@
 package org.jholsten.me2e.request.model
 
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import org.apache.commons.lang3.StringUtils
 
 /**
  * Model representing an absolute URL.
  */
-class HttpUrl(
+class Url(
     /**
      * URL that this instance represents.
      */
@@ -22,18 +23,18 @@ class HttpUrl(
      * Appends the given [relativeUrl] to this base URL.
      * @return New instance with the absolute URL
      */
-    fun withRelativeUrl(relativeUrl: HttpRelativeUrl): HttpUrl {
-        val url = this.toString() + relativeUrl.toString()
-        return HttpUrl(url)
+    fun withRelativeUrl(relativeUrl: RelativeUrl): Url {
+        val url = StringUtils.stripEnd(this.toString(), "/") + relativeUrl.toString()
+        return Url(url)
     }
 
     class Builder() {
         private var scheme: Scheme? = null
         private var host: String? = null
         private var port: Int? = null
-        private val relativeUrlBuilder = HttpRelativeUrl.Builder()
+        private val relativeUrlBuilder = RelativeUrl.Builder()
 
-        internal constructor(httpUrl: HttpUrl) : this() {
+        internal constructor(httpUrl: Url) : this() {
             val url = httpUrl.value.toHttpUrlOrNull() ?: throw IllegalArgumentException("Invalid url format")
             this.scheme = Scheme.parse(url.scheme)
             this.host = url.host
@@ -104,18 +105,19 @@ class HttpUrl(
         }
 
         /**
-         * Builds an instance of the [HttpUrl] by constructing an absolute URL from the set values.
+         * Builds an instance of the [Url] by constructing an absolute URL from the set values.
          */
-        fun build(): HttpUrl {
+        fun build(): Url {
             requireNotNull(scheme) { "Scheme cannot be null" }
-            requireNotNull(host) { "Host cannot be null" }
             val stringBuilder = StringBuilder()
             stringBuilder.append("$scheme://")
-            stringBuilder.append(host)
+            val strippedHost = host?.let { StringUtils.stripEnd(host, "/") }
+            require(!strippedHost.isNullOrBlank()) { "Host cannot be null or blank" }
+            stringBuilder.append(strippedHost)
             if (port != null) {
                 stringBuilder.append(":$port")
             }
-            return HttpUrl(stringBuilder.toString()).withRelativeUrl(relativeUrlBuilder.build())
+            return Url(stringBuilder.toString()).withRelativeUrl(relativeUrlBuilder.build())
         }
     }
 
