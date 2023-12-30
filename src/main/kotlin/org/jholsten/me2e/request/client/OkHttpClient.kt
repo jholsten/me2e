@@ -5,10 +5,7 @@ import org.jholsten.me2e.request.interceptor.OkHttpRequestInterceptor
 import org.jholsten.me2e.request.interceptor.RequestInterceptor
 import org.jholsten.me2e.request.mapper.HttpRequestMapper
 import org.jholsten.me2e.request.mapper.HttpResponseMapper
-import org.jholsten.me2e.request.model.HttpMethod
-import org.jholsten.me2e.request.model.HttpRequest
-import org.jholsten.me2e.request.model.HttpRequestBody
-import org.jholsten.me2e.request.model.HttpResponse
+import org.jholsten.me2e.request.model.*
 import java.util.concurrent.TimeUnit
 
 /**
@@ -19,7 +16,7 @@ class OkHttpClient private constructor(
     /**
      * Base URL to set for all requests.
      */
-    val baseUrl: String,
+    val baseUrl: Url,
 
     /**
      * Configuration of the HTTP client.
@@ -27,13 +24,28 @@ class OkHttpClient private constructor(
     private val configuration: Configuration,
 ) : HttpClient {
 
+    /*
+    TODO: Desired interface:
+
+    val relativeUrl = HttpRelativeUrl.Builder().withPath("/search").withQueryParam(...).build()
+    // HttpRelativeUrl.empty() for using base url
+
+    fun get(relativeUrl: HttpRelativeUrl) {
+        // Why not store properties directly in HttpUrl? Because of flexibility/extensibility (e.g. username/password)
+        val url = baseUrl.withRelativeUrl(relativeUrl).build()
+
+        // How to avoid code duplicates? Use RelativeUrl.Builder in HttpUrl!
+    }
+     */
+
     override fun setRequestInterceptors(interceptors: List<RequestInterceptor>) {
         configuration.setRequestInterceptors(interceptors).apply()
     }
 
-    override fun get(path: String, queryParams: Map<String, String>, headers: Map<String, List<String>>): HttpResponse {
+    // TODO: Change datatype of headers and add Builder
+    override fun get(relativeUrl: RelativeUrl, headers: Map<String, List<String>>): HttpResponse {
         val request = HttpRequest.Builder()
-            .withUrl(baseUrl, relativePath = path, queryParams = queryParams)
+            .withUrl(baseUrl.withRelativeUrl(relativeUrl))
             .withMethod(HttpMethod.GET)
             .withHeaders(headers)
             .build()
@@ -41,14 +53,9 @@ class OkHttpClient private constructor(
         return execute(request)
     }
 
-    override fun post(
-        path: String,
-        body: HttpRequestBody,
-        queryParams: Map<String, String>,
-        headers: Map<String, List<String>>
-    ): HttpResponse {
+    override fun post(relativeUrl: RelativeUrl, body: HttpRequestBody, headers: Map<String, List<String>>): HttpResponse {
         val request = HttpRequest.Builder()
-            .withUrl(baseUrl, relativePath = path, queryParams = queryParams)
+            .withUrl(baseUrl.withRelativeUrl(relativeUrl))
             .withMethod(HttpMethod.POST)
             .withHeaders(headers)
             .withBody(body)
@@ -57,14 +64,9 @@ class OkHttpClient private constructor(
         return execute(request)
     }
 
-    override fun put(
-        path: String,
-        body: HttpRequestBody,
-        queryParams: Map<String, String>,
-        headers: Map<String, List<String>>
-    ): HttpResponse {
+    override fun put(relativeUrl: RelativeUrl, body: HttpRequestBody, headers: Map<String, List<String>>): HttpResponse {
         val request = HttpRequest.Builder()
-            .withUrl(baseUrl, relativePath = path, queryParams = queryParams)
+            .withUrl(baseUrl.withRelativeUrl(relativeUrl))
             .withMethod(HttpMethod.PUT)
             .withHeaders(headers)
             .withBody(body)
@@ -73,14 +75,9 @@ class OkHttpClient private constructor(
         return execute(request)
     }
 
-    override fun patch(
-        path: String,
-        body: HttpRequestBody,
-        queryParams: Map<String, String>,
-        headers: Map<String, List<String>>
-    ): HttpResponse {
+    override fun patch(relativeUrl: RelativeUrl, body: HttpRequestBody, headers: Map<String, List<String>>): HttpResponse {
         val request = HttpRequest.Builder()
-            .withUrl(baseUrl, relativePath = path, queryParams = queryParams)
+            .withUrl(baseUrl.withRelativeUrl(relativeUrl))
             .withMethod(HttpMethod.PATCH)
             .withHeaders(headers)
             .withBody(body)
@@ -89,14 +86,9 @@ class OkHttpClient private constructor(
         return execute(request)
     }
 
-    override fun delete(
-        path: String,
-        body: HttpRequestBody?,
-        queryParams: Map<String, String>,
-        headers: Map<String, List<String>>
-    ): HttpResponse {
+    override fun delete(relativeUrl: RelativeUrl, body: HttpRequestBody?, headers: Map<String, List<String>>): HttpResponse {
         val request = HttpRequest.Builder()
-            .withUrl(baseUrl, relativePath = path, queryParams = queryParams)
+            .withUrl(baseUrl.withRelativeUrl(relativeUrl))
             .withMethod(HttpMethod.DELETE)
             .withHeaders(headers)
             .withBody(body)
@@ -119,10 +111,10 @@ class OkHttpClient private constructor(
     }
 
     class Builder : HttpClient.Builder {
-        private var baseUrl: String? = null
+        private var baseUrl: Url? = null
         private val configuration: Configuration = Configuration()
 
-        override fun withBaseUrl(baseUrl: String) = apply {
+        override fun withBaseUrl(baseUrl: Url) = apply {
             this.baseUrl = baseUrl
         }
 

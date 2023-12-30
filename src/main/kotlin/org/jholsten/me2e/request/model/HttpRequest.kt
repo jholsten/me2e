@@ -1,8 +1,6 @@
 package org.jholsten.me2e.request.model
 
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.internal.toImmutableMap
-import org.apache.commons.lang3.StringUtils
 
 /**
  * Model representing an HTTP request.
@@ -11,7 +9,7 @@ class HttpRequest internal constructor(
     /**
      * URL of this request.
      */
-    val url: String,
+    val url: Url,
 
     /**
      * HTTP method of this request.
@@ -36,8 +34,8 @@ class HttpRequest internal constructor(
         return Builder(this)
     }
 
-    class Builder constructor() {
-        private var url: String? = null
+    class Builder() {
+        private var url: Url? = null
         private var method: HttpMethod? = null
         private var headers: MutableMap<String, List<String>> = mutableMapOf()
         private var body: HttpRequestBody? = null
@@ -50,25 +48,10 @@ class HttpRequest internal constructor(
         }
 
         /**
-         * Builds the URL from base URL, relative path and optional query parameters.
-         * Example:
-         * ```
-         * withUrl(baseUrl="https://google.com", relativePath="/search", queryParams=mapOf("name" to "dog")
-         * // Generates: "https://google.com/search?name=dog"
-         * ```
-         * The base URL and relative path are normalized, so that they can include leading and trailing
-         * slashes, which will be removed when constructing the URL.
+         * Sets the given absolute URL for this request.
          */
-        fun withUrl(baseUrl: String, relativePath: String, queryParams: Map<String, String> = mapOf()) = apply {
-            val normalizedBaseUrl = StringUtils.stripEnd(baseUrl, "/")
-            val normalizedRelativePath = StringUtils.stripStart(relativePath, "/")
-            val url = "$normalizedBaseUrl/$normalizedRelativePath"
-            val urlBuilder = url.toHttpUrlOrNull()?.newBuilder() ?: throw IllegalArgumentException("Invalid url format: '$url'")
-            for (param in queryParams) {
-                urlBuilder.addQueryParameter(name = param.key, value = param.value)
-            }
-
-            this.url = urlBuilder.build().toString()
+        fun withUrl(url: Url) = apply {
+            this.url = url
         }
 
         fun withMethod(method: HttpMethod) = apply {

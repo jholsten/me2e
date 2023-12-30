@@ -166,7 +166,7 @@ internal class HttpResponseTest {
 
     private fun httpRequest(): HttpRequest {
         return HttpRequest(
-            url = "https://google.com/",
+            url = Url("https://google.com/"),
             method = HttpMethod.GET,
             body = null,
         )

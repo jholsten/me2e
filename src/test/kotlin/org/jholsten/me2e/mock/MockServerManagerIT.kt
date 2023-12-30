@@ -16,10 +16,7 @@ import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequestMatcher
 import org.jholsten.me2e.mock.stubbing.request.StringMatcher
 import org.jholsten.me2e.mock.stubbing.response.MockServerStubResponse
 import org.jholsten.me2e.mock.stubbing.response.MockServerStubResponseBody
-import org.jholsten.me2e.request.model.HttpMethod
-import org.jholsten.me2e.request.model.HttpRequest
-import org.jholsten.me2e.request.model.HttpRequestBody
-import org.jholsten.me2e.request.model.MediaType
+import org.jholsten.me2e.request.model.*
 import kotlin.test.*
 import kotlin.test.Test
 
@@ -91,7 +88,7 @@ internal class MockServerManagerIT {
     @Test
     fun `Mock server should respond with stubbed response`() {
         val expectedReceivedRequest = HttpRequest(
-            url = "http://example.com/search",
+            url = Url("http://example.com/search"),
             method = HttpMethod.POST,
             body = HttpRequestBody("{\"id\": 123}", MediaType.JSON_UTF8),
         )

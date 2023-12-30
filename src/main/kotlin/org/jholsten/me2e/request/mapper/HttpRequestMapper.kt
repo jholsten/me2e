@@ -22,19 +22,19 @@ internal abstract class HttpRequestMapper {
         val INSTANCE: HttpRequestMapper = Mappers.getMapper(HttpRequestMapper::class.java)
     }
 
-    @Mapping(target = "url", expression = "java(okHttpRequest.url().toString())")
+    @Mapping(target = "url", expression = "java(new Url(okHttpRequest.url().toString()))")
     @Mapping(target = "method", source = "okHttpRequest", qualifiedByName = ["mapHttpMethod"])
     @Mapping(target = "headers", source = "okHttpRequest", qualifiedByName = ["mapHeaders"])
     @Mapping(target = "body", source = "okHttpRequest", qualifiedByName = ["mapBody"])
     abstract fun toInternalDto(okHttpRequest: Request): HttpRequest
 
-    @Mapping(target = "url", source = "absoluteUrl")
+    @Mapping(target = "url", expression = "java(new Url(request.getAbsoluteUrl()))")
     @Mapping(target = "method", source = "request.method", qualifiedByName = ["mapHttpMethod"])
     @Mapping(target = "headers", source = "request.headers", qualifiedByName = ["mapHeaders"])
     @Mapping(target = "body", source = "request", qualifiedByName = ["mapBody"])
     abstract fun toInternalDto(request: com.github.tomakehurst.wiremock.http.Request): HttpRequest
 
-    @Mapping(target = "url", expression = "java(HttpUrl.parse(request.getUrl()))")
+    @Mapping(target = "url", expression = "java(HttpUrl.parse(request.getUrl().toString()))")
     @Mapping(target = "headers", source = "request.headers", qualifiedByName = ["mapHeadersToOkHttp"])
     @Mapping(target = "body", source = "body", qualifiedByName = ["mapBodyToOkHttp"])
     @Mapping(target = "tags\$okhttp", ignore = true)

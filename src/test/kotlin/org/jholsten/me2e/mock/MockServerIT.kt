@@ -18,10 +18,7 @@ import org.jholsten.me2e.mock.stubbing.request.StringMatcher.Companion.equalTo
 import org.jholsten.me2e.mock.stubbing.response.MockServerStubResponse
 import org.jholsten.me2e.mock.stubbing.response.MockServerStubResponseBody
 import org.jholsten.me2e.mock.verification.MockServerVerification.Companion.receivedRequest
-import org.jholsten.me2e.request.model.HttpMethod
-import org.jholsten.me2e.request.model.HttpRequest
-import org.jholsten.me2e.request.model.HttpRequestBody
-import org.jholsten.me2e.request.model.MediaType
+import org.jholsten.me2e.request.model.*
 import org.jholsten.util.assertDoesNotThrow
 import kotlin.test.*
 
@@ -85,7 +82,7 @@ class MockServerIT {
     @Test
     fun `Mock server should respond with stubbed response`() {
         val expectedReceivedRequest = HttpRequest(
-            url = "http://example.com/search?id=123",
+            url = Url("http://example.com/search?id=123"),
             method = HttpMethod.POST,
         )
 
@@ -111,7 +108,7 @@ class MockServerIT {
     @Test
     fun `Mock server should respond with stubbed response for request with body`() {
         val expectedReceivedRequest = HttpRequest(
-            url = "http://example.com/search?id=123",
+            url = Url("http://example.com/search?id=123"),
             method = HttpMethod.POST,
             body = HttpRequestBody("{\"some-key\": \"some-value\"}", MediaType.JSON_UTF8),
             headers = mapOf("header1" to listOf("headerValue")),

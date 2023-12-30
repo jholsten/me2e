@@ -178,7 +178,7 @@ internal class OkHttpClientTest {
         every { OkHttpRequestInterceptor.fromRequestInterceptor(any()) } returns mappedInterceptor
 
         val builder = OkHttpClient.Builder()
-            .withBaseUrl("https://google.com/")
+            .withBaseUrl(Url("https://google.com/"))
             .withConnectTimeout(5, TimeUnit.MILLISECONDS)
             .withReadTimeout(6, TimeUnit.MILLISECONDS)
             .withWriteTimeout(7, TimeUnit.MILLISECONDS)
@@ -187,7 +187,7 @@ internal class OkHttpClientTest {
         }
         val httpClient = builder.build()
 
-        assertEquals("https://google.com/", httpClient.baseUrl)
+        assertEquals("https://google.com/", httpClient.baseUrl.value)
         verify { anyConstructed<okhttp3.OkHttpClient.Builder>().connectTimeout(5, TimeUnit.MILLISECONDS) }
         verify { anyConstructed<okhttp3.OkHttpClient.Builder>().readTimeout(6, TimeUnit.MILLISECONDS) }
         verify { anyConstructed<okhttp3.OkHttpClient.Builder>().writeTimeout(7, TimeUnit.MILLISECONDS) }
@@ -207,10 +207,10 @@ internal class OkHttpClientTest {
     @Test
     fun `Builder with default values should set correct configuration`() {
         val httpClient = OkHttpClient.Builder()
-            .withBaseUrl("https://google.com/")
+            .withBaseUrl(Url("https://google.com/"))
             .build()
 
-        assertEquals("https://google.com/", httpClient.baseUrl)
+        assertEquals("https://google.com/", httpClient.baseUrl.value)
         verify { anyConstructed<okhttp3.OkHttpClient.Builder>().connectTimeout(10000, TimeUnit.MILLISECONDS) }
         verify { anyConstructed<okhttp3.OkHttpClient.Builder>().readTimeout(10000, TimeUnit.MILLISECONDS) }
         verify { anyConstructed<okhttp3.OkHttpClient.Builder>().writeTimeout(10000, TimeUnit.MILLISECONDS) }
@@ -219,7 +219,7 @@ internal class OkHttpClientTest {
     @Test
     fun `Setting request interceptors for existing instance should change okhttp3 configuration`() {
         val httpClient = OkHttpClient.Builder()
-            .withBaseUrl("https://google.com/")
+            .withBaseUrl(Url("https://google.com/"))
             .build()
 
         val interceptors = listOf(
@@ -246,7 +246,7 @@ internal class OkHttpClientTest {
 
         httpClient.setRequestInterceptors(interceptors)
 
-        assertEquals("https://google.com/", httpClient.baseUrl)
+        assertEquals("https://google.com/", httpClient.baseUrl.value)
         for (interceptor in interceptors) {
             verify { OkHttpRequestInterceptor.fromRequestInterceptor(interceptor) }
         }
@@ -255,7 +255,7 @@ internal class OkHttpClientTest {
     @Test
     fun `Executing GET request should succeed`() {
         val httpRequest = HttpRequest(
-            url = "https://google.com/search?name=dog&id=1",
+            url = Url("https://google.com/search?name=dog&id=1"),
             method = HttpMethod.GET,
             headers = mapOf("Name" to listOf("Value")),
             body = null,
@@ -263,8 +263,11 @@ internal class OkHttpClientTest {
 
         executeRequestTest(httpRequest) { httpClient ->
             httpClient.get(
-                "/search",
-                queryParams = mapOf("name" to "dog", "id" to "1"),
+                RelativeUrl.Builder()
+                    .withPath("/search")
+                    .withQueryParameter("name", "dog")
+                    .withQueryParameter("id", "1")
+                    .build(),
                 headers = mapOf("Name" to listOf("Value")),
             )
         }
@@ -273,21 +276,21 @@ internal class OkHttpClientTest {
     @Test
     fun `Executing GET request without required arguments should succeed`() {
         val httpRequest = HttpRequest(
-            url = "https://google.com/search",
+            url = Url("https://google.com/search"),
             method = HttpMethod.GET,
             headers = mapOf(),
             body = null,
         )
 
         executeRequestTest(httpRequest) { httpClient ->
-            httpClient.get("/search")
+            httpClient.get(RelativeUrl.Builder().withPath("/search").build())
         }
     }
 
     @Test
     fun `Executing POST request should succeed`() {
         val httpRequest = HttpRequest(
-            url = "https://google.com/upload?name=dog&id=1",
+            url = Url("https://google.com/upload?name=dog&id=1"),
             method = HttpMethod.POST,
             headers = mapOf("Name" to listOf("Value")),
             body = HttpRequestBody("Hello World", MediaType.TEXT_PLAIN_UTF8),
@@ -295,8 +298,11 @@ internal class OkHttpClientTest {
 
         executeRequestTest(httpRequest) { httpClient ->
             httpClient.post(
-                "/upload",
-                queryParams = mapOf("name" to "dog", "id" to "1"),
+                RelativeUrl.Builder()
+                    .withPath("/upload")
+                    .withQueryParameter("name", "dog")
+                    .withQueryParameter("id", "1")
+                    .build(),
                 headers = mapOf("Name" to listOf("Value")),
                 body = HttpRequestBody("Hello World", MediaType.TEXT_PLAIN_UTF8),
             )
@@ -306,7 +312,7 @@ internal class OkHttpClientTest {
     @Test
     fun `Executing POST request without required arguments should succeed`() {
         val httpRequest = HttpRequest(
-            url = "https://google.com/upload",
+            url = Url("https://google.com/upload"),
             method = HttpMethod.POST,
             headers = mapOf(),
             body = HttpRequestBody("Hello World", MediaType.TEXT_PLAIN_UTF8),
@@ -314,7 +320,7 @@ internal class OkHttpClientTest {
 
         executeRequestTest(httpRequest) { httpClient ->
             httpClient.post(
-                "/upload",
+                RelativeUrl.Builder().withPath("/upload").build(),
                 body = HttpRequestBody("Hello World", MediaType.TEXT_PLAIN_UTF8),
             )
         }
@@ -323,7 +329,7 @@ internal class OkHttpClientTest {
     @Test
     fun `Executing PUT request should succeed`() {
         val httpRequest = HttpRequest(
-            url = "https://google.com/upload?name=dog&id=1",
+            url = Url("https://google.com/upload?name=dog&id=1"),
             method = HttpMethod.PUT,
             headers = mapOf("Name" to listOf("Value")),
             body = HttpRequestBody("Hello World", MediaType.TEXT_PLAIN_UTF8),
@@ -331,8 +337,11 @@ internal class OkHttpClientTest {
 
         executeRequestTest(httpRequest) { httpClient ->
             httpClient.put(
-                "/upload",
-                queryParams = mapOf("name" to "dog", "id" to "1"),
+                RelativeUrl.Builder()
+                    .withPath("/upload")
+                    .withQueryParameter("name", "dog")
+                    .withQueryParameter("id", "1")
+                    .build(),
                 headers = mapOf("Name" to listOf("Value")),
                 body = HttpRequestBody("Hello World", MediaType.TEXT_PLAIN_UTF8),
             )
@@ -342,7 +351,7 @@ internal class OkHttpClientTest {
     @Test
     fun `Executing PUT request without required arguments should succeed`() {
         val httpRequest = HttpRequest(
-            url = "https://google.com/upload",
+            url = Url("https://google.com/upload"),
             method = HttpMethod.PUT,
             headers = mapOf(),
             body = HttpRequestBody("Hello World", MediaType.TEXT_PLAIN_UTF8),
@@ -350,7 +359,7 @@ internal class OkHttpClientTest {
 
         executeRequestTest(httpRequest) { httpClient ->
             httpClient.put(
-                "/upload",
+                RelativeUrl.Builder().withPath("/upload").build(),
                 body = HttpRequestBody("Hello World", MediaType.TEXT_PLAIN_UTF8),
             )
         }
@@ -359,7 +368,7 @@ internal class OkHttpClientTest {
     @Test
     fun `Executing PATCH request should succeed`() {
         val httpRequest = HttpRequest(
-            url = "https://google.com/upload?name=dog&id=1",
+            url = Url("https://google.com/upload?name=dog&id=1"),
             method = HttpMethod.PATCH,
             headers = mapOf("Name" to listOf("Value")),
             body = HttpRequestBody("Hello World", MediaType.TEXT_PLAIN_UTF8),
@@ -367,8 +376,11 @@ internal class OkHttpClientTest {
 
         executeRequestTest(httpRequest) { httpClient ->
             httpClient.patch(
-                "/upload",
-                queryParams = mapOf("name" to "dog", "id" to "1"),
+                RelativeUrl.Builder()
+                    .withPath("/upload")
+                    .withQueryParameter("name", "dog")
+                    .withQueryParameter("id", "1")
+                    .build(),
                 headers = mapOf("Name" to listOf("Value")),
                 body = HttpRequestBody("Hello World", MediaType.TEXT_PLAIN_UTF8),
             )
@@ -378,7 +390,7 @@ internal class OkHttpClientTest {
     @Test
     fun `Executing PATCH request without required arguments should succeed`() {
         val httpRequest = HttpRequest(
-            url = "https://google.com/upload",
+            url = Url("https://google.com/upload"),
             method = HttpMethod.PATCH,
             headers = mapOf(),
             body = HttpRequestBody("Hello World", MediaType.TEXT_PLAIN_UTF8),
@@ -386,7 +398,7 @@ internal class OkHttpClientTest {
 
         executeRequestTest(httpRequest) { httpClient ->
             httpClient.patch(
-                "/upload",
+                RelativeUrl.Builder().withPath("/upload").build(),
                 body = HttpRequestBody("Hello World", MediaType.TEXT_PLAIN_UTF8),
             )
         }
@@ -395,7 +407,7 @@ internal class OkHttpClientTest {
     @Test
     fun `Executing DELETE request should succeed`() {
         val httpRequest = HttpRequest(
-            url = "https://google.com/image?name=dog&id=1",
+            url = Url("https://google.com/image?name=dog&id=1"),
             method = HttpMethod.DELETE,
             headers = mapOf("Name" to listOf("Value")),
             body = HttpRequestBody("Hello World", MediaType.TEXT_PLAIN_UTF8),
@@ -403,8 +415,11 @@ internal class OkHttpClientTest {
 
         executeRequestTest(httpRequest) { httpClient ->
             httpClient.delete(
-                "/image",
-                queryParams = mapOf("name" to "dog", "id" to "1"),
+                RelativeUrl.Builder()
+                    .withPath("/image")
+                    .withQueryParameter("name", "dog")
+                    .withQueryParameter("id", "1")
+                    .build(),
                 headers = mapOf("Name" to listOf("Value")),
                 body = HttpRequestBody("Hello World", MediaType.TEXT_PLAIN_UTF8),
             )
@@ -414,25 +429,25 @@ internal class OkHttpClientTest {
     @Test
     fun `Executing DELETE request without required arguments should succeed`() {
         val httpRequest = HttpRequest(
-            url = "https://google.com/image",
+            url = Url("https://google.com/image"),
             method = HttpMethod.DELETE,
             headers = mapOf(),
             body = null,
         )
 
         executeRequestTest(httpRequest) { httpClient ->
-            httpClient.delete("/image")
+            httpClient.delete(RelativeUrl.Builder().withPath("/image").build())
         }
     }
 
     @Test
     fun `Executing request without response body should succeed`() {
         val httpClient = OkHttpClient.Builder()
-            .withBaseUrl("https://google.com/")
+            .withBaseUrl(Url("https://google.com/"))
             .build()
 
         val httpRequest = HttpRequest(
-            url = "https://google.com/search?name=dog&id=1",
+            url = Url("https://google.com/search?name=dog&id=1"),
             method = HttpMethod.GET,
             headers = mapOf("Name" to listOf("Value")),
             body = null,
@@ -462,11 +477,11 @@ internal class OkHttpClientTest {
     @Test
     fun `Executing request with response body should succeed`() {
         val httpClient = OkHttpClient.Builder()
-            .withBaseUrl("https://google.com/")
+            .withBaseUrl(Url("https://google.com/"))
             .build()
 
         val httpRequest = HttpRequest(
-            url = "https://google.com/search?name=dog&id=1",
+            url = Url("https://google.com/search?name=dog&id=1"),
             method = HttpMethod.GET,
             headers = mapOf("Name" to listOf("Value")),
             body = null,
@@ -495,7 +510,7 @@ internal class OkHttpClientTest {
 
     private fun executeRequestTest(httpRequest: HttpRequest, requestFunction: (httpClient: OkHttpClient) -> HttpResponse) {
         val httpClient = OkHttpClient.Builder()
-            .withBaseUrl("https://google.com/")
+            .withBaseUrl(Url("https://google.com/"))
             .build()
 
         val okHttpRequest = okHttpRequestWithBody()
@@ -576,7 +591,7 @@ internal class OkHttpClientTest {
     private fun httpResponse(): HttpResponse {
         return HttpResponse(
             request = HttpRequest(
-                url = "https://google.com/",
+                url = Url("https://google.com/"),
                 method = HttpMethod.GET,
                 headers = mapOf("Name" to listOf("Value")),
                 body = null,

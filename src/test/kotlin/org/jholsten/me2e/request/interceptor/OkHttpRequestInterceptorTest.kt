@@ -10,6 +10,7 @@ import org.jholsten.me2e.request.mapper.HttpResponseMapper
 import org.jholsten.me2e.request.model.HttpMethod
 import org.jholsten.me2e.request.model.HttpRequest
 import org.jholsten.me2e.request.model.HttpResponse
+import org.jholsten.me2e.request.model.Url
 import org.jholsten.util.RecursiveComparison
 import org.slf4j.Logger
 import kotlin.test.AfterTest
@@ -125,7 +126,7 @@ internal class OkHttpRequestInterceptorTest {
 
     private fun httpRequest(): HttpRequest {
         return HttpRequest(
-            url = "https://google.com/",
+            url = Url("https://google.com/"),
             method = HttpMethod.GET,
             headers = mapOf("Name" to listOf("Value")),
             body = null,
@@ -134,10 +135,12 @@ internal class OkHttpRequestInterceptorTest {
 
     private fun okHttpResponse(): Response {
         return Response.Builder()
-            .request(Request.Builder()
-                .get().url("https://google.com")
-                .header("Name", "Value")
-                .build())
+            .request(
+                Request.Builder()
+                    .get().url("https://google.com")
+                    .header("Name", "Value")
+                    .build()
+            )
             .protocol(Protocol.HTTP_1_1)
             .message("Message")
             .code(200)
@@ -147,7 +150,7 @@ internal class OkHttpRequestInterceptorTest {
     private fun httpResponse(): HttpResponse {
         return HttpResponse(
             request = HttpRequest(
-                url = "https://google.com/",
+                url = Url("https://google.com/"),
                 method = HttpMethod.GET,
                 headers = mapOf("Name" to listOf("Value")),
                 body = null,

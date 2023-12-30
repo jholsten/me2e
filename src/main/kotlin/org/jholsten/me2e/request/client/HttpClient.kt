@@ -1,9 +1,7 @@
 package org.jholsten.me2e.request.client
 
 import org.jholsten.me2e.request.interceptor.RequestInterceptor
-import org.jholsten.me2e.request.model.HttpRequest
-import org.jholsten.me2e.request.model.HttpRequestBody
-import org.jholsten.me2e.request.model.HttpResponse
+import org.jholsten.me2e.request.model.*
 import java.util.concurrent.TimeUnit
 
 /**
@@ -17,78 +15,53 @@ interface HttpClient {
     fun setRequestInterceptors(interceptors: List<RequestInterceptor>)
 
     /**
-     * Executes an HTTP GET request to the given path.
-     * Sets the given headers and query params if provided.
-     * @param path Path to send the request to, relative to the service's base URL.
-     * @param queryParams Map of query parameter names along with the associated values to set.
+     * Executes an HTTP GET request to the given URL relative to the base URL.
+     * Sets the given headers if provided.
+     * @param relativeUrl URL of the request relative to the base URL.
      * @param headers Map of header names along with the associated values to set.
      * @return Response returned by the service.
      */
-    fun get(path: String, queryParams: Map<String, String> = mapOf(), headers: Map<String, List<String>> = mapOf()): HttpResponse
+    fun get(relativeUrl: RelativeUrl, headers: Map<String, List<String>> = mapOf()): HttpResponse
 
     /**
-     * Executes an HTTP POST request to the given path.
-     * Sets the given headers and query params if provided.
-     * @param path Path to send the request to, relative to the service's base URL.
+     * Executes an HTTP POST request to the given URL relative to the base URL.
+     * Sets the given headers if provided.
+     * @param relativeUrl URL of the request relative to the base URL.
      * @param body Request body to set in the request.
-     * @param queryParams Map of query parameter names along with the associated values to set.
      * @param headers Map of header names along with the associated values to set.
      * @return Response returned by the service.
      */
-    fun post(
-        path: String,
-        body: HttpRequestBody,
-        queryParams: Map<String, String> = mapOf(),
-        headers: Map<String, List<String>> = mapOf()
-    ): HttpResponse
+    fun post(relativeUrl: RelativeUrl, body: HttpRequestBody, headers: Map<String, List<String>> = mapOf()): HttpResponse
 
     /**
-     * Executes an HTTP PUT request to the given path.
-     * Sets the given headers and query params if provided.
-     * @param path Path to send the request to, relative to the service's base URL.
+     * Executes an HTTP PUT request to the given URl relative to the base URL.
+     * Sets the given headers if provided.
+     * @param relativeUrl URL of the request relative to the base URL.
      * @param body Request body to set in the request.
-     * @param queryParams Map of query parameter names along with the associated values to set.
      * @param headers Map of header names along with the associated values to set.
      * @return Response returned by the service.
      */
-    fun put(
-        path: String,
-        body: HttpRequestBody,
-        queryParams: Map<String, String> = mapOf(),
-        headers: Map<String, List<String>> = mapOf()
-    ): HttpResponse
+    fun put(relativeUrl: RelativeUrl, body: HttpRequestBody, headers: Map<String, List<String>> = mapOf()): HttpResponse
 
     /**
-     * Executes an HTTP PATCH request to the given path.
-     * Sets the given headers and query params if provided.
-     * @param path Path to send the request to, relative to the service's base URL.
+     * Executes an HTTP PATCH request to the given URL relative to the base URL.
+     * Sets the given headers if provided.
+     * @param relativeUrl URL of the request relative to the base URL.
      * @param body Request body to set in the request.
-     * @param queryParams Map of query parameter names along with the associated values to set.
      * @param headers Map of header names along with the associated values to set.
      * @return Response returned by the service.
      */
-    fun patch(
-        path: String,
-        body: HttpRequestBody,
-        queryParams: Map<String, String> = mapOf(),
-        headers: Map<String, List<String>> = mapOf()
-    ): HttpResponse
+    fun patch(relativeUrl: RelativeUrl, body: HttpRequestBody, headers: Map<String, List<String>> = mapOf()): HttpResponse
 
     /**
-     * Executes an HTTP DELETE request to the given path.
-     * Sets the given headers and query params if provided.
-     * @param path Path to send the request to, relative to the service's base URL.
+     * Executes an HTTP DELETE request to the given URL relative to the base URL.
+     * Sets the given headers if provided.
+     * @param relativeUrl URL of the request relative to the base URL.
      * @param body Request body to set in the request.
-     * @param queryParams Map of query parameter names along with the associated values to set.
      * @param headers Map of header names along with the associated values to set.
      * @return Response returned by the service.
      */
-    fun delete(
-        path: String,
-        body: HttpRequestBody? = null,
-        queryParams: Map<String, String> = mapOf(),
-        headers: Map<String, List<String>> = mapOf()
-    ): HttpResponse
+    fun delete(relativeUrl: RelativeUrl, body: HttpRequestBody? = null, headers: Map<String, List<String>> = mapOf()): HttpResponse
 
     /**
      * Executes the given HTTP request.
@@ -103,7 +76,7 @@ interface HttpClient {
         /**
          * Sets the base URL of the client.
          */
-        fun withBaseUrl(baseUrl: String): Builder
+        fun withBaseUrl(baseUrl: Url): Builder
 
         /**
          * Sets the given interceptors for all outgoing requests.

@@ -51,16 +51,18 @@ class OkHttpClientIT {
     @EnumSource(HttpMethod::class, names = ["GET", "DELETE", "OPTIONS"])
     fun `Executing request without body should succeed`(httpMethod: HttpMethod) {
         val httpClient = OkHttpClient.Builder()
-            .withBaseUrl(wireMockServer.baseUrl())
+            .withBaseUrl(Url(wireMockServer.baseUrl()))
             .build()
 
         val headers = mapOf("Name" to listOf("Value"))
+        val url = Url(wireMockServer.baseUrl()).withRelativeUrl(
+            RelativeUrl.Builder().withPath("/search").withQueryParameter("id", "123").build()
+        )
         val request = HttpRequest.Builder()
-            .withUrl(wireMockServer.baseUrl(), "/search", queryParams = mapOf("id" to "123"))
+            .withUrl(url)
             .withMethod(httpMethod)
             .withHeaders(headers)
             .build()
-
         val response = httpClient.execute(request)
 
         assertResponseAsExpected(response)
@@ -76,14 +78,17 @@ class OkHttpClientIT {
     @EnumSource(HttpMethod::class, names = ["PUT", "POST", "PATCH", "DELETE"])
     fun `Executing request with body should succeed`(httpMethod: HttpMethod) {
         val httpClient = OkHttpClient.Builder()
-            .withBaseUrl(wireMockServer.baseUrl())
+            .withBaseUrl(Url(wireMockServer.baseUrl()))
             .build()
 
 
         val headers = mapOf("Name" to listOf("Value"))
+        val url = Url(wireMockServer.baseUrl()).withRelativeUrl(
+            RelativeUrl.Builder().withPath("/search").withQueryParameter("id", "123").build()
+        )
         val body = HttpRequestBody("Some Request", MediaType.TEXT_PLAIN_UTF8)
         val request = HttpRequest.Builder()
-            .withUrl(wireMockServer.baseUrl(), "/search", queryParams = mapOf("id" to "123"))
+            .withUrl(url)
             .withMethod(httpMethod)
             .withHeaders(headers)
             .withBody(body)
@@ -112,14 +117,17 @@ class OkHttpClientIT {
         }
 
         val httpClient = OkHttpClient.Builder()
-            .withBaseUrl(wireMockServer.baseUrl())
+            .withBaseUrl(Url(wireMockServer.baseUrl()))
             .withRequestInterceptors(listOf(interceptor))
             .build()
 
 
         val headers = mapOf("Name" to listOf("Value"))
+        val url = Url(wireMockServer.baseUrl()).withRelativeUrl(
+            RelativeUrl.Builder().withPath("/search").withQueryParameter("id", "123").build()
+        )
         val request = HttpRequest.Builder()
-            .withUrl(wireMockServer.baseUrl(), "/search", queryParams = mapOf("id" to "123"))
+            .withUrl(url)
             .withMethod(HttpMethod.GET)
             .withHeaders(headers)
             .build()
