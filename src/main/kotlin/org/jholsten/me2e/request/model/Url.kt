@@ -18,6 +18,7 @@ class Url(
 
     /**
      * Returns a new [Builder] instance initialized with the URL in [value].
+     * This allows to create new instances with partly modified properties.
      */
     fun newBuilder(): Builder {
         return Builder(this)
