@@ -48,9 +48,10 @@ internal class ConfigSchemaValidatorIT {
 
         val e = assertFailsWith<ValidationException> { validator.validate(value) }
 
-        assertEquals(1, e.validationErrors.size)
+        assertEquals(2, e.validationErrors.size)
         assertNotNull(e.message)
         assertTrue(e.message!!.contains("environment"))
+        assertTrue(e.message!!.contains("other"))
     }
 
     @Test
