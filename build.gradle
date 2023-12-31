@@ -110,7 +110,9 @@ java {
     }
 }
 
-tasks.named("test") {
+test {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
+    // Show log output while running tests
+    testLogging.showStandardStreams = true
 }

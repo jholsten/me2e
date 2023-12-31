@@ -31,7 +31,7 @@ test:
   before_script:
     - chmod +x ./gradlew
   script:
-    - ./gradlew check
+    - ./gradlew test
   artifacts:
     when: always
     reports:
