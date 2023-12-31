@@ -100,4 +100,8 @@ class RelativeUrl(
     override fun toString(): String {
         return this.value
     }
+
+    override fun hashCode(): Int {
+        return value.hashCode()
+    }
 }

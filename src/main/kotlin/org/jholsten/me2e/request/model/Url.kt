@@ -25,6 +25,7 @@ class Url(
      */
     fun withRelativeUrl(relativeUrl: RelativeUrl): Url {
         val url = StringUtils.stripEnd(this.toString(), "/") + relativeUrl.toString()
+
         return Url(url)
     }
 
@@ -130,6 +131,10 @@ class Url(
 
     override fun toString(): String {
         return this.value
+    }
+
+    override fun hashCode(): Int {
+        return value.hashCode()
     }
 
     enum class Scheme {
