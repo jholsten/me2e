@@ -12,6 +12,10 @@ class Url(
      */
     val value: String,
 ) {
+    init {
+        assertUrlIsValid()
+    }
+
     /**
      * Returns a new [Builder] instance initialized with the URL in [value].
      */
@@ -22,11 +26,12 @@ class Url(
     /**
      * Appends the given [relativeUrl] to this base URL.
      * @return New instance with the absolute URL
+     * @throws IllegalArgumentException if format of generated absolute URL is invalid
      */
     fun withRelativeUrl(relativeUrl: RelativeUrl): Url {
-        val url = StringUtils.stripEnd(this.toString(), "/") + relativeUrl.toString()
-
-        return Url(url)
+        val url = Url(StringUtils.stripEnd(this.toString(), "/") + relativeUrl.toString())
+        url.assertUrlIsValid()
+        return url
     }
 
     class Builder() {
@@ -36,7 +41,7 @@ class Url(
         private val relativeUrlBuilder = RelativeUrl.Builder()
 
         internal constructor(httpUrl: Url) : this() {
-            val url = httpUrl.value.toHttpUrlOrNull() ?: throw IllegalArgumentException("Invalid url format")
+            val url = httpUrl.value.toHttpUrlOrNull() ?: throw IllegalArgumentException("Invalid URL format")
             this.scheme = Scheme.parse(url.scheme)
             this.host = url.host
             this.port = when {
@@ -120,6 +125,10 @@ class Url(
             }
             return Url(stringBuilder.toString()).withRelativeUrl(relativeUrlBuilder.build())
         }
+    }
+
+    private fun assertUrlIsValid() {
+        requireNotNull(value.toHttpUrlOrNull()) { "Invalid URL format" }
     }
 
     override fun equals(other: Any?): Boolean {

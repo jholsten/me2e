@@ -1,6 +1,7 @@
 package org.jholsten.me2e.request.model
 
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.ValueSource
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -215,5 +216,25 @@ internal class UrlTest {
     @Test
     fun `Generating builder for invalid URL should fail`() {
         assertFailsWith<IllegalArgumentException> { Url("invalid").newBuilder() }
+    }
+
+    @ParameterizedTest(name = "[{index}] Value \"{0}\"")
+    @ValueSource(strings = ["invalid", "", "https://", "/search"])
+    fun `Instantiating invalid URL should fail`(value: String) {
+        val e = assertFailsWith<IllegalArgumentException> { Url(value) }
+        assertEquals("Invalid URL format", e.message)
+    }
+
+    @ParameterizedTest(name = "[{index}] Relative URL \"{0}\"")
+    @CsvSource(
+        "/search, https://example.com/search",
+        "search, https://example.com/search",
+        "//search, https://example.com/search",
+        "/search?q=1&q=2#p=42, https://example.com/search?q=1&q=2#p=42",
+        "?q=1, https://example.com?q=1",
+        "#p=42, https://example.com#p=42"
+    )
+    fun `Appending relative URL should succeed`(relativeUrl: String, expectedUrl: String) {
+        assertEquals(expectedUrl, Url("https://example.com").withRelativeUrl(RelativeUrl(relativeUrl)).value)
     }
 }

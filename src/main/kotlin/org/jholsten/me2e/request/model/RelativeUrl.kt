@@ -9,9 +9,22 @@ import org.apache.commons.lang3.StringUtils
 class RelativeUrl(
     /**
      * Relative URL that this instance represents.
+     * If the relative URL contains a path (i.e. it does not start with `?` or `#`),
+     * a leading slash is automatically prepended on initialization.
      */
-    val value: String,
+    value: String,
 ) {
+    val value: String
+
+    init {
+        if (value.isBlank()) {
+            this.value = ""
+        } else if (!value.startsWith("?") && !value.startsWith("#")) {
+            this.value = "/${StringUtils.stripStart(value, "/")}"
+        } else {
+            this.value = value
+        }
+    }
 
     class Builder {
         private var path: String? = null
