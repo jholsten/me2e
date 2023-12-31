@@ -124,6 +124,15 @@ interface HttpClient {
     }
 
     /**
+     * Executes an HTTP DELETE request to the given URL relative to the base URL.
+     * @param relativeUrl URL of the request relative to the base URL.
+     * @return Response returned by the service.
+     */
+    fun delete(relativeUrl: RelativeUrl): HttpResponse {
+        return delete(relativeUrl, null, mapOf())
+    }
+
+    /**
      * Executes the given HTTP request.
      * @param request HTTP request to execute.
      */
