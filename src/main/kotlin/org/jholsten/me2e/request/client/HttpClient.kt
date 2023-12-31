@@ -21,7 +21,7 @@ interface HttpClient {
      * @param headers Map of header names along with the associated values to set.
      * @return Response returned by the service.
      */
-    fun get(relativeUrl: RelativeUrl, headers: Map<String, List<String>>): HttpResponse
+    fun get(relativeUrl: RelativeUrl, headers: HttpHeaders): HttpResponse
 
     /**
      * Executes an HTTP GET request to the given URL relative to the base URL.
@@ -29,7 +29,7 @@ interface HttpClient {
      * @return Response returned by the service.
      */
     fun get(relativeUrl: RelativeUrl): HttpResponse {
-        return get(relativeUrl, mapOf())
+        return get(relativeUrl, HttpHeaders.empty())
     }
 
     /**
@@ -40,7 +40,7 @@ interface HttpClient {
      * @param headers Map of header names along with the associated values to set.
      * @return Response returned by the service.
      */
-    fun post(relativeUrl: RelativeUrl, body: HttpRequestBody, headers: Map<String, List<String>>): HttpResponse
+    fun post(relativeUrl: RelativeUrl, body: HttpRequestBody, headers: HttpHeaders): HttpResponse
 
     /**
      * Executes an HTTP POST request to the given URL relative to the base URL.
@@ -49,7 +49,7 @@ interface HttpClient {
      * @return Response returned by the service.
      */
     fun post(relativeUrl: RelativeUrl, body: HttpRequestBody): HttpResponse {
-        return post(relativeUrl, body, mapOf())
+        return post(relativeUrl, body, HttpHeaders.empty())
     }
 
     /**
@@ -60,7 +60,7 @@ interface HttpClient {
      * @param headers Map of header names along with the associated values to set.
      * @return Response returned by the service.
      */
-    fun put(relativeUrl: RelativeUrl, body: HttpRequestBody, headers: Map<String, List<String>>): HttpResponse
+    fun put(relativeUrl: RelativeUrl, body: HttpRequestBody, headers: HttpHeaders): HttpResponse
 
     /**
      * Executes an HTTP PUT request to the given URl relative to the base URL.
@@ -69,7 +69,7 @@ interface HttpClient {
      * @return Response returned by the service.
      */
     fun put(relativeUrl: RelativeUrl, body: HttpRequestBody): HttpResponse {
-        return put(relativeUrl, body, mapOf())
+        return put(relativeUrl, body, HttpHeaders.empty())
     }
 
     /**
@@ -80,7 +80,7 @@ interface HttpClient {
      * @param headers Map of header names along with the associated values to set.
      * @return Response returned by the service.
      */
-    fun patch(relativeUrl: RelativeUrl, body: HttpRequestBody, headers: Map<String, List<String>>): HttpResponse
+    fun patch(relativeUrl: RelativeUrl, body: HttpRequestBody, headers: HttpHeaders): HttpResponse
 
     /**
      * Executes an HTTP PATCH request to the given URL relative to the base URL.
@@ -89,7 +89,7 @@ interface HttpClient {
      * @return Response returned by the service.
      */
     fun patch(relativeUrl: RelativeUrl, body: HttpRequestBody): HttpResponse {
-        return patch(relativeUrl, body, mapOf())
+        return patch(relativeUrl, body, HttpHeaders.empty())
     }
 
     /**
@@ -100,7 +100,7 @@ interface HttpClient {
      * @param headers Map of header names along with the associated values to set.
      * @return Response returned by the service.
      */
-    fun delete(relativeUrl: RelativeUrl, body: HttpRequestBody?, headers: Map<String, List<String>>): HttpResponse
+    fun delete(relativeUrl: RelativeUrl, body: HttpRequestBody?, headers: HttpHeaders): HttpResponse
 
     /**
      * Executes an HTTP DELETE request to the given URL relative to the base URL.
@@ -109,7 +109,7 @@ interface HttpClient {
      * @return Response returned by the service.
      */
     fun delete(relativeUrl: RelativeUrl, body: HttpRequestBody?): HttpResponse {
-        return delete(relativeUrl, body, mapOf())
+        return delete(relativeUrl, body, HttpHeaders.empty())
     }
 
     /**
@@ -119,7 +119,7 @@ interface HttpClient {
      * @param headers Map of header names along with the associated values to set.
      * @return Response returned by the service.
      */
-    fun delete(relativeUrl: RelativeUrl, headers: Map<String, List<String>>): HttpResponse {
+    fun delete(relativeUrl: RelativeUrl, headers: HttpHeaders): HttpResponse {
         return delete(relativeUrl, null, headers)
     }
 
@@ -129,7 +129,7 @@ interface HttpClient {
      * @return Response returned by the service.
      */
     fun delete(relativeUrl: RelativeUrl): HttpResponse {
-        return delete(relativeUrl, null, mapOf())
+        return delete(relativeUrl, null, HttpHeaders.empty())
     }
 
     /**

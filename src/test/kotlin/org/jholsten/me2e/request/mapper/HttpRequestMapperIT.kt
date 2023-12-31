@@ -21,7 +21,7 @@ internal class HttpRequestMapperIT {
         val expected = HttpRequest(
             url = Url("https://google.com/"),
             method = HttpMethod.GET,
-            headers = mapOf("Name" to listOf("Value")),
+            headers = HttpHeaders(mapOf("Name" to listOf("Value"))),
             body = null,
         )
 
@@ -41,7 +41,7 @@ internal class HttpRequestMapperIT {
         val expected = HttpRequest(
             url = Url("https://google.com/"),
             method = HttpMethod.POST,
-            headers = mapOf("Name" to listOf("Value")),
+            headers = HttpHeaders(mapOf("Name" to listOf("Value"))),
             body = HttpRequestBody(
                 content = "{\"name\": \"value\"}",
                 contentType = MediaType("application/json"),
@@ -57,7 +57,7 @@ internal class HttpRequestMapperIT {
             HttpRequest(
                 url = Url("https://google.com/"),
                 method = HttpMethod.GET,
-                headers = mapOf("Name" to listOf("Value")),
+                headers = HttpHeaders(mapOf("Name" to listOf("Value"))),
                 body = null,
             )
         )
@@ -76,7 +76,7 @@ internal class HttpRequestMapperIT {
             HttpRequest(
                 url = Url("https://google.com/"),
                 method = HttpMethod.POST,
-                headers = mapOf("Name" to listOf("Value")),
+                headers = HttpHeaders(mapOf("Name" to listOf("Value"))),
                 body = HttpRequestBody(
                     content = "{\"name\": \"value\"}",
                     contentType = MediaType("application/json"),

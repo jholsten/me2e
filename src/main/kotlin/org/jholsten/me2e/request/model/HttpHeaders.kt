@@ -31,7 +31,7 @@ class HttpHeaders internal constructor(
      * header with the given key does not exist.
      */
     operator fun get(key: String): List<String>? {
-        return values[key] // TODO: Case Insensitive
+        return values[key]
     }
 
     /**

@@ -13,13 +13,13 @@ internal class HttpRequestTest {
         val request = HttpRequest.Builder()
             .withUrl(Url("https://google.com/search"))
             .withMethod(HttpMethod.POST)
-            .withHeaders(mapOf("Authorization" to listOf("Bearer 123")))
+            .withHeaders(HttpHeaders(mapOf("Authorization" to listOf("Bearer 123"))))
             .withBody(body)
             .build()
 
         assertEquals("https://google.com/search", request.url.value)
         assertEquals(HttpMethod.POST, request.method)
-        assertEquals(mapOf("Authorization" to listOf("Bearer 123")), request.headers)
+        assertEquals(HttpHeaders(mapOf("Authorization" to listOf("Bearer 123"))), request.headers)
         assertEquals(body, request.body)
     }
 
@@ -34,12 +34,12 @@ internal class HttpRequestTest {
 
         assertEquals("https://google.com/search", request.url.value)
         assertEquals(HttpMethod.GET, request.method)
-        assertEquals(mapOf("Name" to listOf("Value"), "Authorization" to listOf("Bearer 123")), request.headers)
+        assertEquals(HttpHeaders(mapOf("Name" to listOf("Value"), "Authorization" to listOf("Bearer 123"))), request.headers)
         assertNull(request.body)
     }
 
     @Test
-    fun `Request builder should not add the same header value twice`() {
+    fun `Request builder should add the same header value twice`() {
         val request = HttpRequest.Builder()
             .withUrl(Url("https://google.com/search"))
             .withMethod(HttpMethod.GET)
@@ -49,7 +49,7 @@ internal class HttpRequestTest {
 
         assertEquals("https://google.com/search", request.url.value)
         assertEquals(HttpMethod.GET, request.method)
-        assertEquals(mapOf("Name" to listOf("Value")), request.headers)
+        assertEquals(HttpHeaders(mapOf("Name" to listOf("Value", "Value"))), request.headers)
         assertNull(request.body)
     }
 
@@ -64,7 +64,7 @@ internal class HttpRequestTest {
 
         assertEquals("https://google.com/search", request.url.value)
         assertEquals(HttpMethod.GET, request.method)
-        assertEquals(mapOf("Name" to listOf("Value", "AnotherValue")), request.headers)
+        assertEquals(HttpHeaders(mapOf("Name" to listOf("Value", "AnotherValue"))), request.headers)
         assertNull(request.body)
     }
 
@@ -73,7 +73,7 @@ internal class HttpRequestTest {
         val request = HttpRequest(
             url = Url("https://google.com/"),
             method = HttpMethod.POST,
-            headers = mapOf("Name" to listOf("Value")),
+            headers = HttpHeaders(mapOf("Name" to listOf("Value"))),
             body = HttpRequestBody("content", MediaType.TEXT_PLAIN_UTF8),
         )
 
@@ -86,7 +86,7 @@ internal class HttpRequestTest {
     fun `Request builder should fail without url`() {
         val builder = HttpRequest.Builder()
             .withMethod(HttpMethod.GET)
-            .withHeaders(mapOf("Name" to listOf("Value")))
+            .withHeaders(HttpHeaders(mapOf("Name" to listOf("Value"))))
 
         assertFailsWith<IllegalArgumentException> {
             builder.build()
@@ -97,7 +97,7 @@ internal class HttpRequestTest {
     fun `Request builder should fail without method`() {
         val builder = HttpRequest.Builder()
             .withUrl(Url("https://google.com/search"))
-            .withHeaders(mapOf("Name" to listOf("Value")))
+            .withHeaders(HttpHeaders(mapOf("Name" to listOf("Value"))))
 
         assertFailsWith<IllegalArgumentException> {
             builder.build()
@@ -110,7 +110,7 @@ internal class HttpRequestTest {
         val builder = HttpRequest.Builder()
             .withUrl(Url("https://google.com/search"))
             .withMethod(method)
-            .withHeaders(mapOf("Name" to listOf("Value")))
+            .withHeaders(HttpHeaders(mapOf("Name" to listOf("Value"))))
 
         assertFailsWith<IllegalArgumentException> {
             builder.build()
@@ -123,7 +123,7 @@ internal class HttpRequestTest {
         val builder = HttpRequest.Builder()
             .withUrl(Url("https://google.com/search"))
             .withMethod(method)
-            .withHeaders(mapOf("Name" to listOf("Value")))
+            .withHeaders(HttpHeaders(mapOf("Name" to listOf("Value"))))
             .withBody(HttpRequestBody("content", MediaType.TEXT_PLAIN_UTF8))
 
         assertFailsWith<IllegalArgumentException> {

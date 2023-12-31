@@ -4,6 +4,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.Response
 import okhttp3.ResponseBody
 import okhttp3.ResponseBody.Companion.toResponseBody
+import org.jholsten.me2e.request.model.HttpHeaders
 import org.jholsten.me2e.request.model.HttpRequest
 import org.jholsten.me2e.request.model.HttpResponse
 import org.jholsten.me2e.request.model.HttpResponseBody
@@ -24,7 +25,7 @@ internal abstract class HttpResponseMapper {
     @Mapping(target = "protocol", expression = "java(okHttpResponse.protocol().toString())")
     @Mapping(target = "message", expression = "java(okHttpResponse.message().toString())")
     @Mapping(target = "code", expression = "java(okHttpResponse.code())")
-    @Mapping(target = "headers", expression = "java(okHttpResponse.headers().toMultimap())")
+    @Mapping(target = "headers", source = "okHttpResponse", qualifiedByName = ["mapHeaders"])
     @Mapping(target = "body", source = "okHttpResponse", qualifiedByName = ["mapResponseBody"])
     abstract fun toInternalDto(okHttpResponse: Response): HttpResponse
 
@@ -37,6 +38,11 @@ internal abstract class HttpResponseMapper {
     @Named("mapRequest")
     fun mapRequest(okHttpResponse: Response): HttpRequest {
         return HttpRequestMapper.INSTANCE.toInternalDto(okHttpResponse.request)
+    }
+
+    @Named("mapHeaders")
+    fun mapHeaders(okHttpResponse: Response): HttpHeaders {
+        return HttpRequestMapper.INSTANCE.mapHeaders(okHttpResponse.headers)
     }
 
     @Named("mapResponseBody")

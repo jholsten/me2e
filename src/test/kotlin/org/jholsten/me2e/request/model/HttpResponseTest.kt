@@ -17,7 +17,7 @@ internal class HttpResponseTest {
             .withProtocol("http/1.1")
             .withMessage("Hello World")
             .withCode(200)
-            .withHeaders(mapOf("Name" to listOf("Value")))
+            .withHeaders(HttpHeaders(mapOf("Name" to listOf("Value"))))
             .withBody(body)
             .build()
 
@@ -25,7 +25,7 @@ internal class HttpResponseTest {
         assertEquals("http/1.1", httpResponse.protocol)
         assertEquals("Hello World", httpResponse.message)
         assertEquals(200, httpResponse.code)
-        assertEquals(mapOf("Name" to listOf("Value")), httpResponse.headers)
+        assertEquals(HttpHeaders(mapOf("Name" to listOf("Value"))), httpResponse.headers)
         assertEquals(body, httpResponse.body)
     }
 
@@ -45,12 +45,12 @@ internal class HttpResponseTest {
         assertEquals("http/1.1", httpResponse.protocol)
         assertEquals("Hello World", httpResponse.message)
         assertEquals(200, httpResponse.code)
-        assertEquals(mapOf("Name" to listOf("Value"), "Authorization" to listOf("Bearer 123")), httpResponse.headers)
+        assertEquals(HttpHeaders(mapOf("Name" to listOf("Value"), "Authorization" to listOf("Bearer 123"))), httpResponse.headers)
         assertNull(httpResponse.body)
     }
 
     @Test
-    fun `Response builder should not add the same header value twice`() {
+    fun `Response builder should add the same header value twice`() {
         val httpRequest = httpRequest()
         val httpResponse = HttpResponse.Builder()
             .withRequest(httpRequest)
@@ -65,7 +65,7 @@ internal class HttpResponseTest {
         assertEquals("http/1.1", httpResponse.protocol)
         assertEquals("Hello World", httpResponse.message)
         assertEquals(200, httpResponse.code)
-        assertEquals(mapOf("Name" to listOf("Value")), httpResponse.headers)
+        assertEquals(HttpHeaders(mapOf("Name" to listOf("Value", "Value"))), httpResponse.headers)
         assertNull(httpResponse.body)
     }
 
@@ -85,7 +85,7 @@ internal class HttpResponseTest {
         assertEquals("http/1.1", httpResponse.protocol)
         assertEquals("Hello World", httpResponse.message)
         assertEquals(200, httpResponse.code)
-        assertEquals(mapOf("Name" to listOf("Value", "AnotherValue")), httpResponse.headers)
+        assertEquals(HttpHeaders(mapOf("Name" to listOf("Value", "AnotherValue"))), httpResponse.headers)
         assertNull(httpResponse.body)
     }
 
@@ -96,7 +96,7 @@ internal class HttpResponseTest {
             protocol = "http/1.1",
             message = "Hello World",
             code = 200,
-            headers = mapOf("Name" to listOf("Value")),
+            headers = HttpHeaders(mapOf("Name" to listOf("Value"))),
             body = HttpResponseBody(
                 contentType = MediaType("application/json"),
                 content = byteArrayOf(123, 34, 110, 97, 109, 101, 34, 58, 32, 34, 118, 97, 108, 117, 101, 34, 125),
@@ -115,7 +115,7 @@ internal class HttpResponseTest {
             .withProtocol("http/1.1")
             .withMessage("Hello World")
             .withCode(200)
-            .withHeaders(mapOf("Name" to listOf("Value")))
+            .withHeaders(HttpHeaders(mapOf("Name" to listOf("Value"))))
 
         assertFailsWith<IllegalArgumentException> {
             builder.build()
@@ -129,7 +129,7 @@ internal class HttpResponseTest {
             .withRequest(httpRequest)
             .withMessage("Hello World")
             .withCode(200)
-            .withHeaders(mapOf("Name" to listOf("Value")))
+            .withHeaders(HttpHeaders(mapOf("Name" to listOf("Value"))))
 
         assertFailsWith<IllegalArgumentException> {
             builder.build()
@@ -143,7 +143,7 @@ internal class HttpResponseTest {
             .withRequest(httpRequest)
             .withProtocol("http/1.1")
             .withCode(200)
-            .withHeaders(mapOf("Name" to listOf("Value")))
+            .withHeaders(HttpHeaders(mapOf("Name" to listOf("Value"))))
 
         assertFailsWith<IllegalArgumentException> {
             builder.build()
@@ -157,7 +157,7 @@ internal class HttpResponseTest {
             .withRequest(httpRequest)
             .withProtocol("http/1.1")
             .withMessage("Hello World")
-            .withHeaders(mapOf("Name" to listOf("Value")))
+            .withHeaders(HttpHeaders(mapOf("Name" to listOf("Value"))))
 
         assertFailsWith<IllegalArgumentException> {
             builder.build()

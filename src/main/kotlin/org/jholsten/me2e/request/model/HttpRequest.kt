@@ -1,7 +1,5 @@
 package org.jholsten.me2e.request.model
 
-import okhttp3.internal.toImmutableMap
-
 /**
  * Model representing an HTTP request.
  */
@@ -19,7 +17,7 @@ class HttpRequest internal constructor(
     /**
      * Headers of this request.
      */
-    val headers: Map<String, List<String>> = mapOf(),
+    val headers: HttpHeaders = HttpHeaders.empty(),
 
     /**
      * Optional request body of this request.
@@ -37,13 +35,13 @@ class HttpRequest internal constructor(
     class Builder() {
         private var url: Url? = null
         private var method: HttpMethod? = null
-        private var headers: MutableMap<String, List<String>> = mutableMapOf()
+        private var headerBuilder: HttpHeaders.Builder = HttpHeaders.Builder()
         private var body: HttpRequestBody? = null
 
         internal constructor(httpRequest: HttpRequest) : this() {
             this.url = httpRequest.url
             this.method = httpRequest.method
-            this.headers = httpRequest.headers.toMutableMap()
+            this.headerBuilder = httpRequest.headers.newBuilder()
             this.body = httpRequest.body
         }
 
@@ -58,16 +56,12 @@ class HttpRequest internal constructor(
             this.method = method
         }
 
-        fun withHeaders(headers: Map<String, List<String>>) = apply {
-            this.headers = headers.toMutableMap()
+        fun withHeaders(headers: HttpHeaders) = apply {
+            this.headerBuilder = headers.newBuilder()
         }
 
         fun addHeader(key: String, value: String) = apply {
-            val values = this.headers.getOrDefault(key, listOf()).toMutableList()
-            if (!values.contains(value)) {
-                values.add(value)
-                this.headers[key] = values
-            }
+            this.headerBuilder.add(key, value)
         }
 
         fun withBody(body: HttpRequestBody?) = apply {
@@ -86,7 +80,7 @@ class HttpRequest internal constructor(
             return HttpRequest(
                 url = url,
                 method = method,
-                headers = headers.toImmutableMap(),
+                headers = headerBuilder.build(),
                 body = body,
             )
         }

@@ -31,13 +31,13 @@ internal class HttpResponseMapperIT {
             request = HttpRequest(
                 url = Url("https://google.com/"),
                 method = HttpMethod.GET,
-                headers = mapOf("Name" to listOf("Value")),
+                headers = HttpHeaders(mapOf("Name" to listOf("Value"))),
                 body = null,
             ),
             protocol = "http/1.1",
             message = "Message",
             code = 200,
-            headers = mapOf("Authorization" to listOf("Bearer 123")),
+            headers = HttpHeaders(mapOf("Authorization" to listOf("Bearer 123"))),
             body = null,
         )
 
@@ -67,13 +67,13 @@ internal class HttpResponseMapperIT {
             request = HttpRequest(
                 url = Url("https://google.com/"),
                 method = HttpMethod.GET,
-                headers = mapOf("Name" to listOf("Value")),
+                headers = HttpHeaders(mapOf("Name" to listOf("Value"))),
                 body = null,
             ),
             protocol = "http/1.1",
             message = "Message",
             code = 200,
-            headers = mapOf("Authorization" to listOf("Bearer 123")),
+            headers = HttpHeaders(mapOf("Authorization" to listOf("Bearer 123"))),
             body = HttpResponseBody(
                 contentType = MediaType("application/json"),
                 content = byteArrayOf(123, 34, 110, 97, 109, 101, 34, 58, 32, 34, 118, 97, 108, 117, 101, 34, 125),
@@ -129,13 +129,13 @@ internal class HttpResponseMapperIT {
                 request = HttpRequest(
                     url = Url("https://google.com/"),
                     method = HttpMethod.GET,
-                    headers = mapOf("Name" to listOf("Value")),
+                    headers = HttpHeaders(mapOf("Name" to listOf("Value"))),
                     body = null,
                 ),
                 protocol = "http/1.1",
                 message = "Message",
                 code = 200,
-                headers = mapOf("Authorization" to listOf("Bearer 123")),
+                headers = HttpHeaders(mapOf("Authorization" to listOf("Bearer 123"))),
                 body = null,
             )
         )
@@ -163,13 +163,13 @@ internal class HttpResponseMapperIT {
                 request = HttpRequest(
                     url = Url("https://google.com/"),
                     method = HttpMethod.GET,
-                    headers = mapOf("Name" to listOf("Value")),
+                    headers = HttpHeaders(mapOf("Name" to listOf("Value"))),
                     body = null,
                 ),
                 protocol = "http/1.1",
                 message = "Message",
                 code = 200,
-                headers = mapOf("Authorization" to listOf("Bearer 123")),
+                headers = HttpHeaders(mapOf("Authorization" to listOf("Bearer 123"))),
                 body = HttpResponseBody(
                     contentType = MediaType("application/json"),
                     content = byteArrayOf(123, 34, 110, 97, 109, 101, 34, 58, 32, 34, 118, 97, 108, 117, 101, 34, 125),

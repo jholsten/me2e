@@ -54,7 +54,7 @@ class OkHttpClientIT {
             .withBaseUrl(Url(wireMockServer.baseUrl()))
             .build()
 
-        val headers = mapOf("Name" to listOf("Value"))
+        val headers = HttpHeaders(mapOf("Name" to listOf("Value")))
         val url = Url(wireMockServer.baseUrl()).withRelativeUrl(
             RelativeUrl.Builder().withPath("/search").withQueryParameter("id", "123").build()
         )
@@ -82,7 +82,7 @@ class OkHttpClientIT {
             .build()
 
 
-        val headers = mapOf("Name" to listOf("Value"))
+        val headers = HttpHeaders(mapOf("Name" to listOf("Value")))
         val url = Url(wireMockServer.baseUrl()).withRelativeUrl(
             RelativeUrl.Builder().withPath("/search").withQueryParameter("id", "123").build()
         )
@@ -122,7 +122,7 @@ class OkHttpClientIT {
             .build()
 
 
-        val headers = mapOf("Name" to listOf("Value"))
+        val headers = HttpHeaders(mapOf("Name" to listOf("Value")))
         val url = Url(wireMockServer.baseUrl()).withRelativeUrl(
             RelativeUrl.Builder().withPath("/search").withQueryParameter("id", "123").build()
         )
@@ -138,7 +138,7 @@ class OkHttpClientIT {
         assertRequestWasSent(
             url = wireMockServer.url("/search?id=123"),
             method = HttpMethod.GET,
-            headers = headers.plus("Authorization" to listOf("Bearer 123")),
+            headers = headers.newBuilder().add("Authorization", "Bearer 123").build(),
             body = null,
         )
     }
@@ -147,11 +147,11 @@ class OkHttpClientIT {
         assertEquals(200, response.code)
         assertNotNull(response.body)
         assertEquals("Some Response", response.body!!.asString())
-        assertTrue(response.headers.containsKey("content-type"))
-        assertEquals(listOf("text/plain"), response.headers["content-type"])
+        assertTrue("Content-Type" in response.headers)
+        assertEquals(listOf("text/plain"), response.headers["Content-Type"])
     }
 
-    private fun assertRequestWasSent(url: String, method: HttpMethod, headers: Map<String, List<String>>, body: HttpRequestBody?) {
+    private fun assertRequestWasSent(url: String, method: HttpMethod, headers: HttpHeaders, body: HttpRequestBody?) {
         assertEquals(1, wireMockServer.allServeEvents.size)
         val request = wireMockServer.allServeEvents.first().request
         assertEquals(url, request.absoluteUrl)

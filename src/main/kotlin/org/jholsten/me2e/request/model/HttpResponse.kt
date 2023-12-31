@@ -31,7 +31,7 @@ class HttpResponse internal constructor(
     /**
      * HTTP headers set in this response.
      */
-    val headers: Map<String, List<String>> = mapOf(),
+    val headers: HttpHeaders = HttpHeaders.empty(),
 
     /**
      * Response body of this response.
@@ -52,7 +52,7 @@ class HttpResponse internal constructor(
         private var protocol: String? = null
         private var message: String? = null
         private var code: Int? = null
-        private var headers: MutableMap<String, List<String>> = mutableMapOf()
+        private var headersBuilder: HttpHeaders.Builder = HttpHeaders.Builder()
         private var body: HttpResponseBody? = null
 
         internal constructor(httpResponse: HttpResponse) : this() {
@@ -60,7 +60,7 @@ class HttpResponse internal constructor(
             this.protocol = httpResponse.protocol
             this.message = httpResponse.message
             this.code = httpResponse.code
-            this.headers = httpResponse.headers.toMutableMap()
+            this.headersBuilder = httpResponse.headers.newBuilder()
             this.body = httpResponse.body
         }
 
@@ -80,16 +80,12 @@ class HttpResponse internal constructor(
             this.code = code
         }
 
-        fun withHeaders(headers: Map<String, List<String>>) = apply {
-            this.headers = headers.toMutableMap()
+        fun withHeaders(headers: HttpHeaders) = apply {
+            this.headersBuilder = headers.newBuilder()
         }
 
         fun addHeader(key: String, value: String) = apply {
-            val values = this.headers.getOrDefault(key, listOf()).toMutableList()
-            if (!values.contains(value)) {
-                values.add(value)
-                this.headers[key] = values
-            }
+            headersBuilder.add(key, value)
         }
 
         fun withBody(body: HttpResponseBody?) = apply {
@@ -106,7 +102,7 @@ class HttpResponse internal constructor(
                 protocol = protocol,
                 message = message,
                 code = code,
-                headers = headers.toImmutableMap(),
+                headers = headersBuilder.build(),
                 body = body,
             )
         }

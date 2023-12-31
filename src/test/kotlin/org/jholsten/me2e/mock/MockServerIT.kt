@@ -111,7 +111,7 @@ class MockServerIT {
             url = Url("http://example.com/search?id=123"),
             method = HttpMethod.POST,
             body = HttpRequestBody("{\"some-key\": \"some-value\"}", MediaType.JSON_UTF8),
-            headers = mapOf("header1" to listOf("headerValue")),
+            headers = HttpHeaders(mapOf("header1" to listOf("headerValue"))),
         )
 
         val request = HttpPost("http://example.com/search?id=123")

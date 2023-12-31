@@ -7,10 +7,7 @@ import okhttp3.Request
 import okhttp3.Response
 import org.jholsten.me2e.request.mapper.HttpRequestMapper
 import org.jholsten.me2e.request.mapper.HttpResponseMapper
-import org.jholsten.me2e.request.model.HttpMethod
-import org.jholsten.me2e.request.model.HttpRequest
-import org.jholsten.me2e.request.model.HttpResponse
-import org.jholsten.me2e.request.model.Url
+import org.jholsten.me2e.request.model.*
 import org.jholsten.util.RecursiveComparison
 import org.slf4j.Logger
 import kotlin.test.AfterTest
@@ -128,7 +125,7 @@ internal class OkHttpRequestInterceptorTest {
         return HttpRequest(
             url = Url("https://google.com/"),
             method = HttpMethod.GET,
-            headers = mapOf("Name" to listOf("Value")),
+            headers = HttpHeaders(mapOf("Name" to listOf("Value"))),
             body = null,
         )
     }
@@ -152,7 +149,7 @@ internal class OkHttpRequestInterceptorTest {
             request = HttpRequest(
                 url = Url("https://google.com/"),
                 method = HttpMethod.GET,
-                headers = mapOf("Name" to listOf("Value")),
+                headers = HttpHeaders(mapOf("Name" to listOf("Value"))),
                 body = null,
             ),
             protocol = "http/1.1",

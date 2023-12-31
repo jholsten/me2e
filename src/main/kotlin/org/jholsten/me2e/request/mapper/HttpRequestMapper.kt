@@ -1,6 +1,5 @@
 package org.jholsten.me2e.request.mapper
 
-import com.github.tomakehurst.wiremock.http.HttpHeaders
 import com.github.tomakehurst.wiremock.http.RequestMethod
 import okhttp3.Headers
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -8,6 +7,7 @@ import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okio.Buffer
+import org.jholsten.me2e.request.model.HttpHeaders
 import org.jholsten.me2e.request.model.HttpMethod
 import org.jholsten.me2e.request.model.HttpRequest
 import org.jholsten.me2e.request.model.HttpRequestBody
@@ -52,13 +52,22 @@ internal abstract class HttpRequestMapper {
     }
 
     @Named("mapHeaders")
-    fun mapHeaders(okHttpRequest: Request): Map<String, List<String>> {
-        return okHttpRequest.headers.toMultimap()
+    fun mapHeaders(okHttpRequest: Request): HttpHeaders {
+        return mapHeaders(okHttpRequest.headers)
     }
 
     @Named("mapHeaders")
-    fun mapHeaders(headers: HttpHeaders): Map<String, List<String>> {
-        return headers.all().associate { it.key() to it.values() }
+    fun mapHeaders(headers: Headers): HttpHeaders {
+        val builder = HttpHeaders.Builder()
+        for (i in 0 until headers.size) {
+            builder.add(headers.name(i), headers.value(i))
+        }
+        return builder.build()
+    }
+
+    @Named("mapHeaders")
+    fun mapHeaders(headers: com.github.tomakehurst.wiremock.http.HttpHeaders): HttpHeaders {
+        return HttpHeaders(headers.all().associate { it.key() to it.values() })
     }
 
     @Named("mapBody")
@@ -84,7 +93,7 @@ internal abstract class HttpRequestMapper {
     }
 
     @Named("mapHeadersToOkHttp")
-    fun mapHeadersToOkHttp(headers: Map<String, List<String>>): Headers {
+    fun mapHeadersToOkHttp(headers: HttpHeaders): Headers {
         val builder = Headers.Builder()
         for (header in headers.entries) {
             header.value.forEach { builder.add(header.key, it) }

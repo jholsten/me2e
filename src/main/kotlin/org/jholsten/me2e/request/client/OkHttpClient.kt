@@ -42,8 +42,7 @@ class OkHttpClient private constructor(
         configuration.setRequestInterceptors(interceptors).apply()
     }
 
-    // TODO: Change datatype of headers and add Builder
-    override fun get(relativeUrl: RelativeUrl, headers: Map<String, List<String>>): HttpResponse {
+    override fun get(relativeUrl: RelativeUrl, headers: HttpHeaders): HttpResponse {
         val request = HttpRequest.Builder()
             .withUrl(baseUrl.withRelativeUrl(relativeUrl))
             .withMethod(HttpMethod.GET)
@@ -53,7 +52,7 @@ class OkHttpClient private constructor(
         return execute(request)
     }
 
-    override fun post(relativeUrl: RelativeUrl, body: HttpRequestBody, headers: Map<String, List<String>>): HttpResponse {
+    override fun post(relativeUrl: RelativeUrl, body: HttpRequestBody, headers: HttpHeaders): HttpResponse {
         val request = HttpRequest.Builder()
             .withUrl(baseUrl.withRelativeUrl(relativeUrl))
             .withMethod(HttpMethod.POST)
@@ -64,7 +63,7 @@ class OkHttpClient private constructor(
         return execute(request)
     }
 
-    override fun put(relativeUrl: RelativeUrl, body: HttpRequestBody, headers: Map<String, List<String>>): HttpResponse {
+    override fun put(relativeUrl: RelativeUrl, body: HttpRequestBody, headers: HttpHeaders): HttpResponse {
         val request = HttpRequest.Builder()
             .withUrl(baseUrl.withRelativeUrl(relativeUrl))
             .withMethod(HttpMethod.PUT)
@@ -75,7 +74,7 @@ class OkHttpClient private constructor(
         return execute(request)
     }
 
-    override fun patch(relativeUrl: RelativeUrl, body: HttpRequestBody, headers: Map<String, List<String>>): HttpResponse {
+    override fun patch(relativeUrl: RelativeUrl, body: HttpRequestBody, headers: HttpHeaders): HttpResponse {
         val request = HttpRequest.Builder()
             .withUrl(baseUrl.withRelativeUrl(relativeUrl))
             .withMethod(HttpMethod.PATCH)
@@ -86,7 +85,7 @@ class OkHttpClient private constructor(
         return execute(request)
     }
 
-    override fun delete(relativeUrl: RelativeUrl, body: HttpRequestBody?, headers: Map<String, List<String>>): HttpResponse {
+    override fun delete(relativeUrl: RelativeUrl, body: HttpRequestBody?, headers: HttpHeaders): HttpResponse {
         val request = HttpRequest.Builder()
             .withUrl(baseUrl.withRelativeUrl(relativeUrl))
             .withMethod(HttpMethod.DELETE)
