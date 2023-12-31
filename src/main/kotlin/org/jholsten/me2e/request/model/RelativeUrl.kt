@@ -26,6 +26,17 @@ class RelativeUrl(
         }
     }
 
+    companion object {
+        /**
+         * Returns empty relative URL.
+         * This means that the base URL is used for the request.
+         */
+        @JvmStatic
+        fun empty(): RelativeUrl {
+            return RelativeUrl("")
+        }
+    }
+
     class Builder {
         private var path: String? = null
         private var queryParameters: MutableMap<String, MutableList<String>> = mutableMapOf()

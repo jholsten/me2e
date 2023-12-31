@@ -107,4 +107,9 @@ internal class RelativeUrlTest {
 
         assertEquals("/search?query=value1&query=value2&param=other-value#page=42", url.value)
     }
+
+    @Test
+    fun `Building empty relative URL should succeed`() {
+        assertEquals("", RelativeUrl.empty().value)
+    }
 }
