@@ -1,5 +1,6 @@
 package org.jholsten.me2e.request.model
 
+import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonNode
 import org.jholsten.me2e.parsing.exception.ParseException
 import org.jholsten.me2e.parsing.utils.DeserializerFactory
@@ -19,6 +20,7 @@ class HttpResponseBody internal constructor(
      */
     private val content: ByteArray?,
 ) {
+
     /**
      * Returns response body content as string or null, if no content is present.
      */
@@ -50,5 +52,37 @@ class HttpResponseBody internal constructor(
         } catch (e: Exception) {
             throw ParseException(e.message)
         }
+    }
+
+    /**
+     * Returns binary content parsed as object of the given type or null, if no content is present.
+     * @throws ParseException if content could not be parsed to instance of type [T].
+     */
+    fun <T> asObject(type: Class<T>): T? {
+        try {
+            return content?.let { DeserializerFactory.getObjectMapper().readValue(it, type) }
+        } catch (e: Exception) {
+            throw ParseException(e.message)
+        }
+    }
+
+    /**
+     * Returns binary content parsed as object of the given type or null, if no content is present.
+     * @throws ParseException if content could not be parsed to instance of type [T].
+     */
+    fun <T> asObject(type: TypeReference<T>): T? {
+        try {
+            return content?.let { DeserializerFactory.getObjectMapper().readValue(it, type) }
+        } catch (e: Exception) {
+            throw ParseException(e.message)
+        }
+    }
+
+    /**
+     * Returns binary content parsed as object of the given type or null, if no content is present.
+     * @throws ParseException if content could not be parsed to instance of type [T].
+     */
+    inline fun <reified T> asObject(): T? {
+        return asObject(object : TypeReference<T>() {})
     }
 }
