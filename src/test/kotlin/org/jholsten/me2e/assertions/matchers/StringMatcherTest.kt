@@ -1,4 +1,4 @@
-package org.jholsten.me2e.mock.stubbing.request
+package org.jholsten.me2e.assertions.matchers
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule

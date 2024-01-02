@@ -13,7 +13,7 @@ import org.apache.hc.core5.http.io.entity.StringEntity
 import org.jholsten.me2e.container.exception.ServiceStartupException
 import org.jholsten.me2e.mock.stubbing.MockServerStub
 import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequestMatcher
-import org.jholsten.me2e.mock.stubbing.request.StringMatcher
+import org.jholsten.me2e.assertions.matchers.StringMatcher
 import org.jholsten.me2e.mock.stubbing.response.MockServerStubResponse
 import org.jholsten.me2e.mock.stubbing.response.MockServerStubResponseBody
 import org.jholsten.me2e.request.model.*

@@ -1,4 +1,6 @@
-package org.jholsten.me2e.mock.stubbing.request
+package org.jholsten.me2e.assertions.matchers
+
+import org.jholsten.me2e.assertions.matchers.StringMatcher
 
 /**
  * Pattern to match multiple [StringMatcher] instances by combining them with a logical `OR`.
