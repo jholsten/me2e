@@ -110,9 +110,9 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      * ```
      * assertThat(response).jsonBody("title", contains("Automated Test Scripts"))
      * assertThat(response).jsonBody("authors[0].lastname", isEqualTo("Garousi"))
-     * assertThat(response).jsonBody("authors[0]", isEqualTo("{\"firstname":\"Vahid\",\"lastname\":\"Garousi\"}"))
+     * assertThat(response).jsonBody("authors[0]", isEqualTo("{\"firstname\":\"Vahid\",\"lastname\":\"Garousi\"}"))
      * assertThat(response).jsonBody("year", isEqualTo("2016"))
-     * assertThat(response).jsonBody("keywords[1]", isEqualTo("TestAutomation"))
+     * assertThat(response).jsonBody("keywords[1]", isEqualTo("Test Automation"))
      * assertThat(response).jsonBody("journal.title", isEqualTo("IEEE Software"))
      * ```
      * @throws AssertionFailure if assertion was not successful.
@@ -168,36 +168,3 @@ class AssertableResponse internal constructor(private val response: HttpResponse
         return null
     }
 }
-
-// TODO: Define one Class Assertions with all methods, e.g.
-/*
-isEqualTo(expected: String): StringMatcher
-isEqualTo(expected: Int): NumberMatcher
-isEqualTo(expected: Any): ValueMatcher
- */
-
-/*
-backend.get("/search")
-    .assertThat() // Or maybe: do not allow this and only enable the syntax below (as AssertJ)
-        .statusCode(isEqualTo(200))
-        .protocol(isEqualTo("http/1.1.")
-        .headers(contains("key").withValue("abc"))
-        .headers(contains("Content-Type").withValue("abc"))
-        .contentType(isEqualTo("JSON"))
-        .jsonBody("lastname", isEqualTo("Doe"))
-        .body(isEqualTo("Some Response")
-        .body(contains("file.txt"))
-
-backend.get(RelativeUrl("/search")).assertThat().conformsTo(specification)
-
-val response = backend.get("/search")
-
-assertThat(response).statusCode(isEqualTo(200))
-assertThat(response).conformsTo(specification)
-
-val specification = ResponseSpecification.Builder()
-    .expectStatusCode(isEqualTo(200))
-    .expectBody(isEqualTo("Some Response"))
-    .expectHeaders(contains("key").withValue("abc"))
-    .build()
- */
