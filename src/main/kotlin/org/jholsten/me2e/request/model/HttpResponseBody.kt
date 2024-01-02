@@ -1,5 +1,8 @@
 package org.jholsten.me2e.request.model
 
+import com.fasterxml.jackson.databind.JsonNode
+import org.jholsten.me2e.parsing.exception.ParseException
+import org.jholsten.me2e.parsing.utils.DeserializerFactory
 import java.util.*
 
 /**
@@ -35,5 +38,17 @@ class HttpResponseBody internal constructor(
      */
     fun asBase64(): String? {
         return content?.let { Base64.getEncoder().encodeToString(it) }
+    }
+
+    /**
+     * Returns binary content parsed as JSON node or null, if no content is present.
+     * @throws ParseException if content could not be parsed to JSON.
+     */
+    fun asJson(): JsonNode? {
+        try {
+            return content?.let { DeserializerFactory.getObjectMapper().readTree(it) }
+        } catch (e: Exception) {
+            throw ParseException(e.message)
+        }
     }
 }
