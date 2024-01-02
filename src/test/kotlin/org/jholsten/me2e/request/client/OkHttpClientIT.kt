@@ -4,6 +4,9 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import org.awaitility.Awaitility
 import org.awaitility.Durations
+import org.jholsten.me2e.assertions.Assertions.Companion.assertThat
+import org.jholsten.me2e.assertions.Assertions.Companion.containsKey
+import org.jholsten.me2e.assertions.Assertions.Companion.isEqualTo
 import org.jholsten.me2e.request.interceptor.RequestInterceptor
 import org.jholsten.me2e.request.model.*
 import org.junit.jupiter.api.AfterAll
@@ -149,6 +152,10 @@ class OkHttpClientIT {
         assertEquals("Some Response", response.body!!.asString())
         assertTrue("Content-Type" in response.headers)
         assertEquals(listOf("text/plain"), response.headers["Content-Type"])
+        assertThat(response).statusCode(isEqualTo(200))
+        assertThat(response).body(isEqualTo("Some Response"))
+        assertThat(response).contentType(isEqualTo("text/plain"))
+        assertThat(response).headers(containsKey("Content-Type").withValue("text/plain"))
     }
 
     private fun assertRequestWasSent(url: String, method: HttpMethod, headers: HttpHeaders, body: HttpRequestBody?) {
