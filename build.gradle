@@ -16,6 +16,9 @@ plugins {
 
     // Required for mapstruct
     id "org.jetbrains.kotlin.kapt" version "1.8.20"
+
+    // Apply Dokka Plugin to support generation of Kotlin documentation
+    id "org.jetbrains.dokka" version "1.6.0"
 }
 
 group = "org.jholsten"
@@ -108,6 +111,15 @@ dependencies {
 
     // Dependency for managing docker containers
     implementation "org.testcontainers:testcontainers:1.19.3"
+}
+
+// Configuration for documentation
+dokkaHtml {
+    dokkaSourceSets {
+        configureEach {
+            includeNonPublic.set(false)
+        }
+    }
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
