@@ -14,7 +14,7 @@ import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequestMatcher
 import de.m3y.kformat.Table.Hints
 import de.m3y.kformat.table
 import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequestMapper.Companion.METADATA_MATCHER_KEY
-import org.jholsten.me2e.assertions.matchers.StringMatcher
+import org.jholsten.me2e.mock.stubbing.request.StringMatcher
 import kotlin.math.max
 
 /**

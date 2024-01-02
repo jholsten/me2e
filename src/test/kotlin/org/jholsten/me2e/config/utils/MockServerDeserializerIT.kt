@@ -9,7 +9,7 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.jholsten.me2e.mock.MockServer
 import org.jholsten.me2e.mock.stubbing.MockServerStub
 import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequestMatcher
-import org.jholsten.me2e.assertions.matchers.StringMatcher
+import org.jholsten.me2e.mock.stubbing.request.StringMatcher
 import org.jholsten.me2e.mock.stubbing.response.MockServerStubResponse
 import org.jholsten.me2e.mock.stubbing.response.MockServerStubResponseBody
 import org.jholsten.me2e.parsing.exception.InvalidFormatException

@@ -10,7 +10,7 @@ import io.mockk.*
 import org.jholsten.me2e.mock.exception.VerificationException
 import org.jholsten.me2e.mock.stubbing.MockServerStub
 import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequestMatcher
-import org.jholsten.me2e.assertions.matchers.StringMatcher.Companion.equalTo
+import org.jholsten.me2e.mock.stubbing.request.StringMatcher.Companion.equalTo
 import org.jholsten.me2e.mock.verification.MockServerVerification.Companion.receivedRequest
 import org.jholsten.me2e.request.mapper.HttpRequestMapper
 import org.jholsten.me2e.request.model.HttpRequest

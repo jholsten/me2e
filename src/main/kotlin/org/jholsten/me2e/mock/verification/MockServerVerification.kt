@@ -1,6 +1,6 @@
 package org.jholsten.me2e.mock.verification
 
-import org.jholsten.me2e.assertions.matchers.StringMatcher
+import org.jholsten.me2e.mock.stubbing.request.StringMatcher
 import org.jholsten.me2e.request.model.HttpMethod
 
 /**

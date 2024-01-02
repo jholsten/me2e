@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.github.tomakehurst.wiremock.http.HttpHeaders
 import com.github.tomakehurst.wiremock.http.Request
 import com.github.tomakehurst.wiremock.http.RequestMethod
-import org.jholsten.me2e.assertions.matchers.StringMatcher
 import org.jholsten.me2e.request.model.HttpMethod
 import org.jholsten.me2e.utils.toJson
 

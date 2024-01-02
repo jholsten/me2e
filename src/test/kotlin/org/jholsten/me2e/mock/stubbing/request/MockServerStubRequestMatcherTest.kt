@@ -8,7 +8,6 @@ import com.github.tomakehurst.wiremock.http.HttpHeaders
 import com.github.tomakehurst.wiremock.http.Request
 import com.github.tomakehurst.wiremock.http.RequestMethod
 import com.github.tomakehurst.wiremock.verification.LoggedRequest
-import org.jholsten.me2e.assertions.matchers.StringMatcher
 import org.jholsten.me2e.request.model.HttpMethod
 import org.jholsten.util.RecursiveComparison
 import java.util.*

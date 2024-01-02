@@ -1,4 +1,4 @@
-package org.jholsten.me2e.assertions.matchers
+package org.jholsten.me2e.mock.stubbing.request
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
@@ -6,7 +6,6 @@ import org.jholsten.me2e.utils.toJson
 
 /**
  * Pattern to match string values.
- * TODO: Path parameters
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 open class StringMatcher(
