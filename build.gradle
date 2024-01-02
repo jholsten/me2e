@@ -99,8 +99,15 @@ dependencies {
 
     // Dependency for awaiting events
     implementation "org.awaitility:awaitility:4.1.0"
+
+    // Dependency for logging
     implementation 'org.slf4j:slf4j-jdk14:2.0.9'
+
+    // Dependency for formatting tables
     implementation "de.m3y.kformat:kformat:0.10"
+
+    // Dependency for managing docker containers
+    implementation "org.testcontainers:testcontainers:1.19.3"
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
