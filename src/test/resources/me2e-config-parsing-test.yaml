@@ -1,7 +1,7 @@
 docker:
   docker-compose-version: V1
   build-images: true
-  remove-images: true
+  remove-images: ALL
   remove-volumes: false
   health-timeout: 30
 

@@ -1,6 +1,7 @@
 package org.jholsten.me2e.config.model
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import org.jholsten.me2e.container.docker.DockerComposeRemoveImagesStrategy
 import org.jholsten.me2e.container.docker.DockerComposeVersion
 
 /**
@@ -16,24 +17,24 @@ class DockerConfig(
     /**
      * Whether to always build images before starting containers.
      *
-     * Applies `--build` in `docker-compose up` (see [Docker Documentation](https://docs.docker.com/engine/reference/commandline/compose_up/#options).
+     * Applies `--build` in `docker compose up` (see [Docker Documentation](https://docs.docker.com/engine/reference/commandline/compose_up/#options).
      */
     @JsonProperty("build-images")
     val buildImages: Boolean = false,
 
     /**
      * Whether to remove images used by services after containers shut down.
-     * If true, removes only images that don't have a custom tag.
      *
-     * Applies `--rmi=local` in `docker-compose down` (see [Docker Documentation](https://docs.docker.com/engine/reference/commandline/compose_down/#options).
+     * If not set to [DockerComposeRemoveImagesStrategy.NONE], applies `--rmi=local` or `--rmi=all` in `docker compose down`
+     * (see [Docker Documentation](https://docs.docker.com/engine/reference/commandline/compose_down/#options).
      */
     @JsonProperty("remove-images")
-    val removeImages: Boolean = false,
+    val removeImages: DockerComposeRemoveImagesStrategy = DockerComposeRemoveImagesStrategy.NONE,
 
     /**
      * Whether to remove volumes after containers shut down.
      *
-     * Applies `--volumes` in `docker-compose down` (see [Docker Documentation](https://docs.docker.com/engine/reference/commandline/compose_down/#options).
+     * Applies `--volumes` in `docker compose down` (see [Docker Documentation](https://docs.docker.com/engine/reference/commandline/compose_down/#options).
      */
     @JsonProperty("remove-volumes")
     val removeVolumes: Boolean = true,

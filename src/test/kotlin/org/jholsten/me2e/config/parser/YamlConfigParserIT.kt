@@ -9,6 +9,7 @@ import org.jholsten.me2e.config.model.TestConfig
 import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.container.database.DatabaseContainer
 import org.jholsten.me2e.container.database.DatabaseManagementSystem
+import org.jholsten.me2e.container.docker.DockerComposeRemoveImagesStrategy
 import org.jholsten.me2e.container.microservice.MicroserviceContainer
 import org.jholsten.me2e.container.model.ContainerType
 import org.jholsten.me2e.mock.MockServer
@@ -36,7 +37,7 @@ internal class YamlConfigParserIT {
             DockerConfig(
                 dockerComposeVersion = DockerComposeVersion.V1,
                 buildImages = true,
-                removeImages = true,
+                removeImages = DockerComposeRemoveImagesStrategy.ALL,
                 removeVolumes = false,
                 healthTimeout = 30,
             ), config

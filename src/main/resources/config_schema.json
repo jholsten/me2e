@@ -57,9 +57,14 @@
           "default": false
         },
         "remove-images": {
-          "type": "boolean",
-          "description": "Whether to remove images used by services after containers shut down. If true, removes only images that don't have a custom tag. Default: false",
-          "default": false
+          "type": "string",
+          "description": "Whether to remove images used by services after containers shut down. Default: NONE",
+          "enum": [
+            "NONE",
+            "ALL",
+            "LOCAL"
+          ],
+          "default": "NONE"
         },
         "remove-volumes": {
           "type": "boolean",
