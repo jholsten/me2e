@@ -1,3 +1,10 @@
+docker:
+  docker-compose-version: V1
+  build-images: true
+  remove-images: true
+  remove-volumes: false
+  health-timeout: 30
+
 requests:
   connect-timeout: 10
   read-timeout: 15

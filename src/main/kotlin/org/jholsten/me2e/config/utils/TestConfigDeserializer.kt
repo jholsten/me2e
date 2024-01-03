@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
+import org.jholsten.me2e.config.model.DockerConfig
 import org.jholsten.me2e.config.model.RequestConfig
 import org.jholsten.me2e.config.model.TestConfig
 import org.jholsten.me2e.config.model.TestEnvironmentConfig
@@ -26,7 +27,10 @@ class TestConfigDeserializer : JsonDeserializer<TestConfig>() {
         injectRequestConfig(requestConfig)
 
         val environmentConfig = mapper.treeToValue(node.get("environment"), TestEnvironmentConfig::class.java)
+
+        val dockerConfig = deserializeDockerConfig(node.get("docker"))
         return TestConfig(
+            docker = dockerConfig,
             requests = requestConfig,
             environment = environmentConfig,
         )
@@ -41,5 +45,12 @@ class TestConfigDeserializer : JsonDeserializer<TestConfig>() {
 
     private fun injectRequestConfig(requestConfig: RequestConfig) {
         mapper.setInjectableValues(InjectableValues.Std().addValue("requestConfig", requestConfig))
+    }
+
+    private fun deserializeDockerConfig(dockerConfigNode: JsonNode?): DockerConfig {
+        if (dockerConfigNode == null) {
+            return DockerConfig()
+        }
+        return mapper.treeToValue(dockerConfigNode, DockerConfig::class.java)
     }
 }

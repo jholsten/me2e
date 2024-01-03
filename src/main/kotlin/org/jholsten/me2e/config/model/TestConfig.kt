@@ -9,6 +9,11 @@ import org.jholsten.me2e.config.utils.TestConfigDeserializer
 @JsonDeserialize(using = TestConfigDeserializer::class)
 class TestConfig(
     /**
+     * Configuration for Docker/Docker-Compose.
+     */
+    val docker: DockerConfig = DockerConfig(),
+
+    /**
      * Configuration for all HTTP requests to [org.jholsten.me2e.container.microservice.MicroserviceContainer] instances.
      */
     val requests: RequestConfig = RequestConfig(),

@@ -2,6 +2,7 @@ package org.jholsten.me2e.config.parser
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.databind.node.ObjectNode
+import org.jholsten.me2e.config.model.DockerConfig
 import org.jholsten.me2e.config.model.RequestConfig
 import org.jholsten.me2e.config.model.TestConfig
 import org.jholsten.me2e.container.Container
@@ -30,6 +31,15 @@ internal class YamlConfigParserIT {
         assertContainersAsExpected(config)
         assertMockServersAsExpected(config)
         assertRequestConfigAsExpected(RequestConfig(10, 15, 20), config)
+        assertDockerConfigAsExpected(
+            DockerConfig(
+                dockerComposeVersion = DockerConfig.DockerComposeVersion.V1,
+                buildImages = true,
+                removeImages = true,
+                removeVolumes = false,
+                healthTimeout = 30,
+            ), config
+        )
     }
 
     @Test
@@ -65,6 +75,10 @@ internal class YamlConfigParserIT {
     private fun assertMockServersAsExpected(config: TestConfig) {
         assertEquals(1, config.environment.mockServers.size)
         assertPaymentServiceAsExpected(config.environment.mockServers)
+    }
+
+    private fun assertDockerConfigAsExpected(expectedDockerConfig: DockerConfig, testConfig: TestConfig) {
+        RecursiveComparison.assertEquals(expectedDockerConfig, testConfig.docker)
     }
 
     private fun assertRequestConfigAsExpected(expectedRequestConfig: RequestConfig, testConfig: TestConfig) {
