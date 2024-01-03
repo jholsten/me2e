@@ -18,7 +18,7 @@ import org.jholsten.me2e.utils.logger
  * Deserializes services in `docker-compose` file to [Container] instances.
  * Also, it sets the name of the specified mock servers to the corresponding key.
  */
-class TestEnvironmentConfigDeserializer: JsonDeserializer<TestEnvironmentConfig>() {
+class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironmentConfig>() {
     companion object {
         /**
          * Label key for specifying the container type of a service
@@ -89,6 +89,7 @@ class TestEnvironmentConfigDeserializer: JsonDeserializer<TestEnvironmentConfig>
             node.put("type", labels[CONTAINER_TYPE_KEY])
             node.put("system", labels[DATABASE_TYPE_KEY])
             node.put("public", labels[IS_PUBLIC_KEY])
+            node.put("hasHealthcheck", node.has("healthcheck"))
             result[entry.key] = mapper.treeToValue(node, Container::class.java)
         }
         return result

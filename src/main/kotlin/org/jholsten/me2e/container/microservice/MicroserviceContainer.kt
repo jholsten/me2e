@@ -18,6 +18,7 @@ class MicroserviceContainer(
     ports: ContainerPortList = ContainerPortList(),
     @JacksonInject("requestConfig")
     requestConfig: RequestConfig,
+    hasHealthcheck: Boolean = false,
 ) : Container(
     name = name,
     image = image,
@@ -25,6 +26,7 @@ class MicroserviceContainer(
     environment = environment,
     public = public,
     ports = ports,
+    hasHealthcheck = hasHealthcheck,
 ) {
     
     /**

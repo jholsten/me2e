@@ -54,6 +54,11 @@ open class Container(
      * Ports that should be exposed to localhost.
      */
     val ports: ContainerPortList = ContainerPortList(),
+
+    /**
+     * Whether there is a healthcheck defined for this container in the Docker-Compose file.
+     */
+    val hasHealthcheck: Boolean = false,
 ) {
     @JsonDeserialize(using = ContainerPortListDeserializer::class)
     class ContainerPortList(ports: List<ContainerPort> = listOf()) : ArrayList<ContainerPort>(ports) {

@@ -98,6 +98,7 @@ internal class YamlConfigParserIT {
                 "DB_USER" to "user",
             ),
             public = true,
+            hasHealthcheck = true,
             containerPorts = listOf(1234, 80, 1200, 1201, 1202),
         )
     }
@@ -112,6 +113,7 @@ internal class YamlConfigParserIT {
                 "ADMIN_PASSWORD" to "secret",
             ),
             public = true,
+            hasHealthcheck = false,
             containerPorts = listOf(),
         )
     }
@@ -127,6 +129,7 @@ internal class YamlConfigParserIT {
                 "DB_USER" to "user",
             ),
             public = false,
+            hasHealthcheck = false,
             containerPorts = listOf(),
             databaseSystem = DatabaseManagementSystem.POSTGRESQL,
         )
@@ -139,6 +142,7 @@ internal class YamlConfigParserIT {
         image: String,
         environment: Map<String, String>?,
         public: Boolean,
+        hasHealthcheck: Boolean,
         containerPorts: List<Int>,
         databaseSystem: DatabaseManagementSystem? = null,
     ) {
@@ -154,6 +158,7 @@ internal class YamlConfigParserIT {
         assertEquals(image, container.image)
         assertEquals(environment, container.environment)
         assertEquals(public, container.public)
+        assertEquals(hasHealthcheck, container.hasHealthcheck)
         assertEquals(containerPorts.size, container.ports.size)
         for (i in containerPorts.indices) {
             assertEquals(containerPorts[i], container.ports[i].internal)

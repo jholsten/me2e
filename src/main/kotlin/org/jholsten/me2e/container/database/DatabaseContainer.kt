@@ -14,6 +14,7 @@ class DatabaseContainer(
     public: Boolean = false,
     ports: ContainerPortList = ContainerPortList(),
     val system: DatabaseManagementSystem,
+    hasHealthcheck: Boolean = false,
 ) : Container(
     name = name,
     image = image,
@@ -21,6 +22,7 @@ class DatabaseContainer(
     environment = environment,
     public = public,
     ports = ports,
+    hasHealthcheck = hasHealthcheck,
 ) {
     /**
      * TODO: Desired interface:

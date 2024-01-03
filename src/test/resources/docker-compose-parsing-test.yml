@@ -8,6 +8,8 @@ services:
     environment:
       DB_PASSWORD: 123
       DB_USER: user
+    healthcheck:
+      test: curl --fail http://localhost:1234/health || exit 1
     labels:
       "org.jholsten.me2e.container-type": "MICROSERVICE"
       "org.jholsten.me2e.is-public": "true"
