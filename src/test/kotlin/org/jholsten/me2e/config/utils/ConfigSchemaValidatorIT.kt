@@ -19,7 +19,7 @@ internal class ConfigSchemaValidatorIT {
         val validator = ConfigSchemaValidator(YAML_MAPPER)
         val value = """
             environment:
-              docker-compose: docker-compose.yml
+              docker-compose: docker-compose-parsing-test.yml
         """.trimIndent()
 
         assertDoesNotThrow { validator.validate(value) }
@@ -31,7 +31,7 @@ internal class ConfigSchemaValidatorIT {
         val value = """
             {
               "environment": {
-                "docker-compose": "docker-compose.yml"
+                "docker-compose": "docker-compose-parsing-test.yml"
               }
             }
         """.trimIndent()
@@ -59,7 +59,7 @@ internal class ConfigSchemaValidatorIT {
         val validator = ConfigSchemaValidator(YAML_MAPPER)
         val value = """
             environment:
-              docker-compose: docker-compose.yml
+              docker-compose: docker-compose-parsing-test.yml
               mock-servers:
                 payment-service:
                   hostname: example.com

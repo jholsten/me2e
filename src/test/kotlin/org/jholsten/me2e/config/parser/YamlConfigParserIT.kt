@@ -26,7 +26,7 @@ internal class YamlConfigParserIT {
 
     @Test
     fun `Parsing valid YAML config should succeed`() {
-        val config = YamlConfigParser().parseFile("me2e-config-test.yaml")
+        val config = YamlConfigParser().parseFile("me2e-config-parsing-test.yaml")
         assertContainersAsExpected(config)
         assertMockServersAsExpected(config)
         assertRequestConfigAsExpected(RequestConfig(10, 15, 20), config)

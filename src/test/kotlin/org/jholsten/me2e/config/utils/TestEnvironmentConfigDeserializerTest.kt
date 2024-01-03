@@ -18,7 +18,7 @@ import kotlin.test.*
 class TestEnvironmentConfigDeserializerTest {
 
     private val contents = """
-        docker-compose: docker-compose.yml
+        docker-compose: docker-compose-parsing-test.yml
         mock-servers:
             mock-server:
                 hostname: mock.example.com
@@ -79,7 +79,7 @@ class TestEnvironmentConfigDeserializerTest {
         mockReadingDockerCompose(dockerComposeContents)
 
         val parser = prepareParser(contents)
-        val config =  TestEnvironmentConfigDeserializer().deserialize(parser, yamlMapper.deserializationContext)
+        val config = TestEnvironmentConfigDeserializer().deserialize(parser, yamlMapper.deserializationContext)
 
         assertKeysAsExpected(listOf("api-gateway", "auth-server", "database"), config.containers)
         assertKeysAsExpected(listOf("mock-server"), config.mockServers)
@@ -92,11 +92,11 @@ class TestEnvironmentConfigDeserializerTest {
 
     @Test
     fun `Deserializing environment config without mock servers should succeed`() {
-        val contents = "docker-compose: docker-compose.yml"
+        val contents = "docker-compose: docker-compose-parsing-test.yml"
         mockReadingDockerCompose(dockerComposeContents)
 
         val parser = prepareParser(contents)
-        val config =  TestEnvironmentConfigDeserializer().deserialize(parser, yamlMapper.deserializationContext)
+        val config = TestEnvironmentConfigDeserializer().deserialize(parser, yamlMapper.deserializationContext)
 
         assertKeysAsExpected(listOf("api-gateway", "auth-server", "database"), config.containers)
 
@@ -121,7 +121,7 @@ class TestEnvironmentConfigDeserializerTest {
         mockReadingDockerCompose(dockerComposeContents)
 
         val parser = prepareParser(contents)
-        val config =  TestEnvironmentConfigDeserializer().deserialize(parser, yamlMapper.deserializationContext)
+        val config = TestEnvironmentConfigDeserializer().deserialize(parser, yamlMapper.deserializationContext)
 
         assertKeysAsExpected(listOf("api-gateway"), config.containers)
         assertKeysAsExpected(listOf("mock-server"), config.mockServers)
@@ -154,17 +154,19 @@ class TestEnvironmentConfigDeserializerTest {
         mockReadingDockerCompose(dockerComposeContents)
 
         val parser = prepareParser(contents)
-        val config =  TestEnvironmentConfigDeserializer().deserialize(parser, yamlMapper.deserializationContext)
+        val config = TestEnvironmentConfigDeserializer().deserialize(parser, yamlMapper.deserializationContext)
 
         assertKeysAsExpected(listOf("api-gateway"), config.containers)
         assertKeysAsExpected(listOf("mock-server"), config.mockServers)
 
         val expectedService = expectedApiGateway()
-            .set<ObjectNode>("environment", JsonNodeFactory.instance.objectNode()
-                .put("DB_USER", "user")
+            .set<ObjectNode>(
+                "environment", JsonNodeFactory.instance.objectNode()
+                    .put("DB_USER", "user")
             )
-            .set<ObjectNode>("labels", JsonNodeFactory.instance.objectNode()
-                .put("org.jholsten.me2e.is-public", "true")
+            .set<ObjectNode>(
+                "labels", JsonNodeFactory.instance.objectNode()
+                    .put("org.jholsten.me2e.is-public", "true")
             )
             .put("type", null as String?)
         verify { mockedMapper.treeToValue(expectedService, Container::class.java) }
@@ -213,13 +215,15 @@ class TestEnvironmentConfigDeserializerTest {
         return JsonNodeFactory.instance.objectNode()
             .put("image", "api-gateway-service:latest")
             .set<ObjectNode>("ports", JsonNodeFactory.instance.arrayNode().add(1234).add("1235:80"))
-            .set<ObjectNode>("environment", JsonNodeFactory.instance.objectNode()
-                .put("DB_PASSWORD", 123)
-                .put("DB_USER", "user")
+            .set<ObjectNode>(
+                "environment", JsonNodeFactory.instance.objectNode()
+                    .put("DB_PASSWORD", 123)
+                    .put("DB_USER", "user")
             )
-            .set<ObjectNode>("labels", JsonNodeFactory.instance.objectNode()
-                .put("org.jholsten.me2e.container-type", "MICROSERVICE")
-                .put("org.jholsten.me2e.is-public", "true")
+            .set<ObjectNode>(
+                "labels", JsonNodeFactory.instance.objectNode()
+                    .put("org.jholsten.me2e.container-type", "MICROSERVICE")
+                    .put("org.jholsten.me2e.is-public", "true")
             )
             .put("name", "api-gateway")
             .put("type", "MICROSERVICE")
@@ -230,9 +234,10 @@ class TestEnvironmentConfigDeserializerTest {
     private fun expectedAuthServer(): ObjectNode {
         return JsonNodeFactory.instance.objectNode()
             .put("image", "auth-server:1.3.0")
-            .set<ObjectNode>("labels", JsonNodeFactory.instance.objectNode()
-                .put("org.jholsten.me2e.container-type", "MICROSERVICE")
-                .put("org.jholsten.me2e.is-public", "true")
+            .set<ObjectNode>(
+                "labels", JsonNodeFactory.instance.objectNode()
+                    .put("org.jholsten.me2e.container-type", "MICROSERVICE")
+                    .put("org.jholsten.me2e.is-public", "true")
             )
             .put("name", "auth-server")
             .put("type", "MICROSERVICE")
@@ -243,13 +248,15 @@ class TestEnvironmentConfigDeserializerTest {
     private fun expectedDatabase(): ObjectNode {
         return JsonNodeFactory.instance.objectNode()
             .put("image", "postgres:12")
-            .set<ObjectNode>("environment", JsonNodeFactory.instance.objectNode()
-                .put("DB_PASSWORD", "123")
-                .put("DB_USER", "user")
+            .set<ObjectNode>(
+                "environment", JsonNodeFactory.instance.objectNode()
+                    .put("DB_PASSWORD", "123")
+                    .put("DB_USER", "user")
             )
-            .set<ObjectNode>("labels", JsonNodeFactory.instance.objectNode()
-                .put("org.jholsten.me2e.container-type", "DATABASE")
-                .put("org.jholsten.me2e.database-type", "POSTGRESQL")
+            .set<ObjectNode>(
+                "labels", JsonNodeFactory.instance.objectNode()
+                    .put("org.jholsten.me2e.container-type", "DATABASE")
+                    .put("org.jholsten.me2e.database-type", "POSTGRESQL")
             )
             .put("name", "database")
             .put("type", "DATABASE")

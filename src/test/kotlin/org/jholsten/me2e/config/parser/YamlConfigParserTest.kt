@@ -31,7 +31,7 @@ internal class YamlConfigParserTest {
 
     private val contents = """
             environment:
-              docker-compose: docker-compose.yml
+              docker-compose: docker-compose-parsing-test.yml
         """.trimIndent()
 
     @BeforeTest
