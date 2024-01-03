@@ -11,12 +11,16 @@ class DatabaseContainer(
     name: String,
     image: String,
     environment: Map<String, String>? = null,
+    public: Boolean = false,
+    ports: ContainerPortList = ContainerPortList(),
     val system: DatabaseManagementSystem,
 ) : Container(
     name = name,
     image = image,
     type = ContainerType.DATABASE,
     environment = environment,
+    public = public,
+    ports = ports,
 ) {
     /**
      * TODO: Desired interface:
