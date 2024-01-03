@@ -2,7 +2,6 @@ package org.jholsten.me2e.manager
 
 import org.jholsten.me2e.config.model.ConfigFormat
 import org.jholsten.me2e.config.model.TestConfig
-import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.container.microservice.MicroserviceContainer
 
 /**
@@ -30,7 +29,7 @@ class Me2eTestManager private constructor(builder: Builder) {
         @Suppress("UNCHECKED_CAST")
         microservices = config.environment.containers.filterValues { it is MicroserviceContainer } as Map<String, MicroserviceContainer>
     }
-    
+
     class Builder {
         var config: TestConfig? = null
         var format: ConfigFormat = ConfigFormat.YAML
@@ -47,18 +46,5 @@ class Me2eTestManager private constructor(builder: Builder) {
         fun build(): Me2eTestManager {
             return Me2eTestManager(this)
         }
-    }
-
-    /**
-     * Starts containers with the given names.
-     * @return Started container instances
-     */
-    fun start(containerNames: List<String> = this.containerNames): List<Container> {
-        val containers = containerNames.map { config.environment.containers[it] ?: throw IllegalArgumentException("Container $it is unknown") }
-        for (container in containers) {
-            container.start()
-        }
-
-        return containers
     }
 }

@@ -3,10 +3,12 @@ package org.jholsten.me2e.container
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.github.dockerjava.api.model.Container as DockerContainer
 import org.jholsten.me2e.config.utils.ContainerPortListDeserializer
 import org.jholsten.me2e.container.database.DatabaseContainer
 import org.jholsten.me2e.container.microservice.MicroserviceContainer
 import org.jholsten.me2e.container.model.ContainerType
+import org.testcontainers.containers.ContainerState
 
 
 /**
@@ -20,10 +22,12 @@ import org.jholsten.me2e.container.model.ContainerType
     defaultImpl = Container::class,
     visible = true,
 )
-@JsonSubTypes(value = [
-    JsonSubTypes.Type(value = MicroserviceContainer::class, name = "MICROSERVICE"),
-    JsonSubTypes.Type(value = DatabaseContainer::class, name = "DATABASE"),
-])
+@JsonSubTypes(
+    value = [
+        JsonSubTypes.Type(value = MicroserviceContainer::class, name = "MICROSERVICE"),
+        JsonSubTypes.Type(value = DatabaseContainer::class, name = "DATABASE"),
+    ]
+)
 open class Container(
     /**
      * Unique name of this container.
@@ -62,6 +66,21 @@ open class Container(
 ) {
     @JsonDeserialize(using = ContainerPortListDeserializer::class)
     class ContainerPortList(ports: List<ContainerPort> = listOf()) : ArrayList<ContainerPort>(ports) {
+        /**
+         * Returns the first [ContainerPort] instance for which the internal port is equal to the given [port]
+         * or `null`, if no such instance exists in this list.
+         */
+        fun findByInternalPort(port: Int): ContainerPort? {
+            return this.firstOrNull { it.internal == port }
+        }
+
+        /**
+         * Returns the first [ContainerPort] instance for which an external port is set or `null`, if no such
+         * instance exists in this list.
+         */
+        fun findFirstExposed(): ContainerPort? {
+            return this.firstOrNull { it.external != null }
+        }
     }
 
     /**
@@ -79,12 +98,43 @@ open class Container(
          */
         var external: Int? = null,
     )
+
     /**
-     * Starts this container and assigns the specified ports.
-     * If a healthcheck is defined, it waits until the container is "healthy".
+     * Wrapper for the reference to the corresponding [DockerContainer] and [ContainerState].
      */
-    fun start() {
-        // TODO
+    class DockerContainerReference(
+        /**
+         * Container which contains static and dynamic information about the Docker container.
+         */
+        val container: DockerContainer,
+        /**
+         * State which enables to execute commands in the Docker container.
+         */
+        val state: ContainerState,
+    )
+
+    /**
+     * Reference to the Docker container which represents this container instance.
+     * Is initialized as soon as the docker compose is started.
+     */
+    private var dockerContainer: DockerContainerReference? = null
+
+    /**
+     * Initializes the container by setting the corresponding [DockerContainer] and [ContainerState] instance
+     * after the Docker container was started.
+     */
+    internal fun initialize(dockerContainer: DockerContainer, dockerContainerState: ContainerState) {
+        this.dockerContainer = DockerContainerReference(dockerContainer, dockerContainerState)
+
+        // TODO: Prettify
+        for (port in dockerContainer.ports) {
+            if (port.privatePort != null) {
+                val internalPort = this.ports.findByInternalPort(port.privatePort!!)
+                if (internalPort != null) {
+                    internalPort.external = port.publicPort
+                }
+            }
+        }
     }
 
     /**
