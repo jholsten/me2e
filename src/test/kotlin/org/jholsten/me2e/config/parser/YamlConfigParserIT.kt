@@ -2,6 +2,7 @@ package org.jholsten.me2e.config.parser
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.databind.node.ObjectNode
+import org.jholsten.me2e.container.docker.DockerComposeVersion
 import org.jholsten.me2e.config.model.DockerConfig
 import org.jholsten.me2e.config.model.RequestConfig
 import org.jholsten.me2e.config.model.TestConfig
@@ -33,7 +34,7 @@ internal class YamlConfigParserIT {
         assertRequestConfigAsExpected(RequestConfig(10, 15, 20), config)
         assertDockerConfigAsExpected(
             DockerConfig(
-                dockerComposeVersion = DockerConfig.DockerComposeVersion.V1,
+                dockerComposeVersion = DockerComposeVersion.V1,
                 buildImages = true,
                 removeImages = true,
                 removeVolumes = false,

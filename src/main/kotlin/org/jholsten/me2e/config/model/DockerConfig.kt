@@ -1,6 +1,7 @@
 package org.jholsten.me2e.config.model
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import org.jholsten.me2e.container.docker.DockerComposeVersion
 
 /**
  * Configuration for Docker/Docker-Compose.
@@ -44,10 +45,4 @@ class DockerConfig(
     @JsonProperty("health-timeout")
     val healthTimeout: Long = 10,
 ) {
-    /**
-     * Supported Docker-Compose versions.
-     */
-    enum class DockerComposeVersion {
-        V1, V2
-    }
 }
