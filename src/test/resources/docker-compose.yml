@@ -1,0 +1,25 @@
+services:
+  backend-api:
+    image: gitlab.informatik.uni-bremen.de:5005/master-thesis1/test-system/backend-api:latest
+    ports:
+      - 8000:8000
+    environment:
+      DB_PASSWORD: 123
+      DB_USER: user
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --fail http://localhost:8000/health || exit 1" ]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+    labels:
+      "org.jholsten.me2e.container-type": "MICROSERVICE"
+      "org.jholsten.me2e.is-public": "true"
+
+  database:
+    image: postgres:12
+    environment:
+      DB_PASSWORD: 123
+      DB_USER: user
+    labels:
+      "org.jholsten.me2e.container-type": "DATABASE"
+      "org.jholsten.me2e.database-type": "POSTGRESQL"

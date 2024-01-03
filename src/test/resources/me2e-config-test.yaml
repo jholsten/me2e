@@ -1,0 +1,7 @@
+environment:
+  docker-compose: docker-compose.yml
+  mock-servers:
+    payment-service:
+      hostname: payment.example.com
+      stubs:
+        - request_stub.json
