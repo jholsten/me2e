@@ -52,18 +52,18 @@ open class Container(
 
     /**
      * Ports that should be exposed to localhost.
-     * Only applicable if [public] is true.
      */
-    val ports: ExposedPortsList = ExposedPortsList(),
+    val ports: ContainerPortList = ContainerPortList(),
 ) {
     @JsonDeserialize(using = ContainerPortListDeserializer::class)
-    class ExposedPortsList(ports: List<ExposedPort> = listOf()) : ArrayList<ExposedPort>(ports) {  }
+    class ContainerPortList(ports: List<ContainerPort> = listOf()) : ArrayList<ContainerPort>(ports) {
+    }
 
     /**
      * Representation of a port mapping from container-internal port
      * to port that is accessible from localhost.
      */
-    class ExposedPort (
+    class ContainerPort(
         /**
          * Container-internal port to be exposed.
          */

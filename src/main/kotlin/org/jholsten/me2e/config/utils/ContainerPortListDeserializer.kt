@@ -9,14 +9,14 @@ import org.jholsten.me2e.container.Container
 /**
  * Custom deserializer for extracting container ports from list of ports specified in Docker-Compose file.
  */
-class ContainerPortListDeserializer: JsonDeserializer<Container.ExposedPortsList>() {
-    override fun deserialize(p: JsonParser, ctxt: DeserializationContext): Container.ExposedPortsList {
+class ContainerPortListDeserializer : JsonDeserializer<Container.ContainerPortList>() {
+    override fun deserialize(p: JsonParser, ctxt: DeserializationContext): Container.ContainerPortList {
         val containerPorts = mutableListOf<Int>()
         val node = p.readValueAsTree<ArrayNode>()
         for (entry in node.elements()) {
             containerPorts.addAll(extractContainerPorts(entry.asText()))
         }
-        return Container.ExposedPortsList(containerPorts.map { Container.ExposedPort(internal = it) })
+        return Container.ContainerPortList(containerPorts.map { Container.ContainerPort(internal = it) })
     }
 
     /**
