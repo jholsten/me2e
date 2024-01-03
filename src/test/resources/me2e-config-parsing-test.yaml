@@ -4,7 +4,7 @@ requests:
   write-timeout: 20
 
 environment:
-  docker-compose: docker-compose.yml
+  docker-compose: docker-compose-parsing-test.yml
   mock-servers:
     payment-service:
       hostname: payment.example.com

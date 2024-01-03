@@ -1,2 +1,2 @@
 environment:
-  docker-compose: docker-compose.yml
+  docker-compose: docker-compose-parsing-test.yml
