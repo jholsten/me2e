@@ -23,8 +23,12 @@ class HttpResponseBody internal constructor(
 
     /**
      * Returns response body content as string or null, if no content is present.
+     * Removes enclosing quotes if present.
      */
     fun asString(): String? {
+        if (content?.isEnclosedInQuotes() == true) {
+            return content.decodeToString(startIndex = 1, endIndex = content.size - 1)
+        }
         return content?.decodeToString()
     }
 
@@ -84,5 +88,13 @@ class HttpResponseBody internal constructor(
      */
     inline fun <reified T> asObject(): T? {
         return asObject(object : TypeReference<T>() {})
+    }
+
+    /**
+     * Returns whether the content of the byte array is enclosed in quotation marks (`"`).
+     */
+    private fun ByteArray.isEnclosedInQuotes(): Boolean {
+        val quote = "\"".encodeToByteArray().first()
+        return this.isNotEmpty() && this.first() == quote && this.last() == quote
     }
 }

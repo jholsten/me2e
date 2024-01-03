@@ -2,6 +2,7 @@ package org.jholsten.me2e.request.model
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
+import com.fasterxml.jackson.databind.node.MissingNode
 import org.jholsten.me2e.parsing.exception.ParseException
 import org.jholsten.util.RecursiveComparison
 import kotlin.test.*
@@ -32,6 +33,32 @@ internal class HttpResponseBodyTest {
         )
 
         assertEquals("abcäÄöÖüÜèé%&~'", body.asString())
+        assertEquals(MediaType.TEXT_PLAIN_UTF8, body.contentType)
+    }
+
+    @Test
+    fun `Content with enclosing quotes should be decoded as string without quotes`() {
+        val body = HttpResponseBody(
+            contentType = MediaType.TEXT_PLAIN_UTF8,
+            content = byteArrayOf(
+                34, 79, 75, 34
+            ),
+        )
+
+        assertEquals("OK", body.asString())
+        assertEquals(MediaType.TEXT_PLAIN_UTF8, body.contentType)
+    }
+
+    @Test
+    fun `Content with single quote should be decoded as string with quote`() {
+        val body = HttpResponseBody(
+            contentType = MediaType.TEXT_PLAIN_UTF8,
+            content = byteArrayOf(
+                34, 79, 75
+            ),
+        )
+
+        assertEquals("\"OK", body.asString())
         assertEquals(MediaType.TEXT_PLAIN_UTF8, body.contentType)
     }
 
@@ -142,7 +169,7 @@ internal class HttpResponseBodyTest {
     }
 
     @Test
-    fun `Empty content should be returned as null`() {
+    fun `Null content should be returned as null`() {
         val body = HttpResponseBody(
             contentType = MediaType.TEXT_PLAIN_UTF8,
             content = null,
@@ -154,6 +181,23 @@ internal class HttpResponseBodyTest {
         assertNull(body.asJson())
         assertNull(body.asObject(Object::class.java))
         assertEquals(MediaType.TEXT_PLAIN_UTF8, body.contentType)
+    }
+
+    @Test
+    fun `Empty content should be returned as empty`() {
+        val body = HttpResponseBody(
+            contentType = MediaType.TEXT_PLAIN_UTF8,
+            content = byteArrayOf(),
+        )
+
+        RecursiveComparison.assertEquals(byteArrayOf(), body.asBinary())
+        assertEquals("", body.asString())
+        assertEquals("", body.asBase64())
+        assertFailsWith<ParseException> { body.asObject<Any>() }
+        val json = body.asJson()
+        assertNotNull(json)
+        assertTrue(json.isMissingNode)
+        assertTrue(json.isEmpty)
     }
 
     data class BodyClass(val first: String, val second: String)
