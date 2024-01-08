@@ -36,6 +36,8 @@ class TestEnvironmentConfigDeserializerTest {
                 environment:
                   DB_PASSWORD: 123
                   DB_USER: user
+                healthcheck:
+                  test: curl --fail http://localhost:1234/health || exit 1
                 labels:
                   "org.jholsten.me2e.container-type": "MICROSERVICE"
                   "org.jholsten.me2e.is-public": "true"
@@ -117,6 +119,8 @@ class TestEnvironmentConfigDeserializerTest {
                     environment:
                       DB_PASSWORD: 123
                       DB_USER: user
+                    healthcheck:
+                      test: curl --fail http://localhost:1234/health || exit 1
         """.trimIndent()
         mockReadingDockerCompose(dockerComposeContents)
 
@@ -147,6 +151,8 @@ class TestEnvironmentConfigDeserializerTest {
                     environment:
                       - "DB_PASSWORD: 123"
                       - "DB_USER=user"
+                    healthcheck:
+                      test: curl --fail http://localhost:1234/health || exit 1
                     labels:
                       - "org.jholsten.me2e.container-type: MICROSERVICE"
                       - "org.jholsten.me2e.is-public=true"
@@ -221,6 +227,10 @@ class TestEnvironmentConfigDeserializerTest {
                     .put("DB_USER", "user")
             )
             .set<ObjectNode>(
+                "healthcheck", JsonNodeFactory.instance.objectNode()
+                    .put("test", "curl --fail http://localhost:1234/health || exit 1")
+            )
+            .set<ObjectNode>(
                 "labels", JsonNodeFactory.instance.objectNode()
                     .put("org.jholsten.me2e.container-type", "MICROSERVICE")
                     .put("org.jholsten.me2e.is-public", "true")
@@ -229,6 +239,7 @@ class TestEnvironmentConfigDeserializerTest {
             .put("type", "MICROSERVICE")
             .put("system", null as String?)
             .put("public", "true")
+            .put("hasHealthcheck", true)
     }
 
     private fun expectedAuthServer(): ObjectNode {
@@ -243,6 +254,7 @@ class TestEnvironmentConfigDeserializerTest {
             .put("type", "MICROSERVICE")
             .put("system", null as String?)
             .put("public", "true")
+            .put("hasHealthcheck", false)
     }
 
     private fun expectedDatabase(): ObjectNode {
@@ -262,6 +274,7 @@ class TestEnvironmentConfigDeserializerTest {
             .put("type", "DATABASE")
             .put("system", "POSTGRESQL")
             .put("public", null as String?)
+            .put("hasHealthcheck", false)
     }
 
     private fun expectedMockServer(): ObjectNode {
