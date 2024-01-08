@@ -40,13 +40,12 @@ class TestEnvironmentConfigDeserializerTest {
                   test: curl --fail http://localhost:1234/health || exit 1
                 labels:
                   "org.jholsten.me2e.container-type": "MICROSERVICE"
-                  "org.jholsten.me2e.is-public": "true"
 
             auth-server:
                 image: auth-server:1.3.0
                 labels:
                   "org.jholsten.me2e.container-type": "MICROSERVICE"
-                  "org.jholsten.me2e.is-public": "true"
+                  "org.jholsten.me2e.url": "http://auth-server"
 
             database:
                 image: postgres:12
@@ -133,7 +132,7 @@ class TestEnvironmentConfigDeserializerTest {
         val expectedService = expectedApiGateway()
             .put("type", null as String?)
             .put("system", null as String?)
-            .put("public", null as String?)
+            .put("url", null as String?)
         expectedService.remove("labels")
         verify { mockedMapper.treeToValue(expectedService, Container::class.java) }
         verify { mockedMapper.treeToValue(expectedMockServer(), MockServer::class.java) }
@@ -155,7 +154,6 @@ class TestEnvironmentConfigDeserializerTest {
                       test: curl --fail http://localhost:1234/health || exit 1
                     labels:
                       - "org.jholsten.me2e.container-type: MICROSERVICE"
-                      - "org.jholsten.me2e.is-public=true"
         """.trimIndent()
         mockReadingDockerCompose(dockerComposeContents)
 
@@ -172,7 +170,6 @@ class TestEnvironmentConfigDeserializerTest {
             )
             .set<ObjectNode>(
                 "labels", JsonNodeFactory.instance.objectNode()
-                    .put("org.jholsten.me2e.is-public", "true")
             )
             .put("type", null as String?)
         verify { mockedMapper.treeToValue(expectedService, Container::class.java) }
@@ -233,12 +230,11 @@ class TestEnvironmentConfigDeserializerTest {
             .set<ObjectNode>(
                 "labels", JsonNodeFactory.instance.objectNode()
                     .put("org.jholsten.me2e.container-type", "MICROSERVICE")
-                    .put("org.jholsten.me2e.is-public", "true")
             )
             .put("name", "api-gateway")
             .put("type", "MICROSERVICE")
             .put("system", null as String?)
-            .put("public", "true")
+            .put("url", null as String?)
             .put("hasHealthcheck", true)
     }
 
@@ -248,12 +244,12 @@ class TestEnvironmentConfigDeserializerTest {
             .set<ObjectNode>(
                 "labels", JsonNodeFactory.instance.objectNode()
                     .put("org.jholsten.me2e.container-type", "MICROSERVICE")
-                    .put("org.jholsten.me2e.is-public", "true")
+                    .put("org.jholsten.me2e.url", "http://auth-server")
             )
             .put("name", "auth-server")
             .put("type", "MICROSERVICE")
             .put("system", null as String?)
-            .put("public", "true")
+            .put("url", "http://auth-server")
             .put("hasHealthcheck", false)
     }
 
@@ -273,7 +269,7 @@ class TestEnvironmentConfigDeserializerTest {
             .put("name", "database")
             .put("type", "DATABASE")
             .put("system", "POSTGRESQL")
-            .put("public", null as String?)
+            .put("url", null as String?)
             .put("hasHealthcheck", false)
     }
 

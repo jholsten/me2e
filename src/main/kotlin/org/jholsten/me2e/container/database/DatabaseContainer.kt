@@ -11,7 +11,6 @@ class DatabaseContainer(
     name: String,
     image: String,
     environment: Map<String, String>? = null,
-    public: Boolean = false,
     ports: ContainerPortList = ContainerPortList(),
     val system: DatabaseManagementSystem,
     hasHealthcheck: Boolean = false,
@@ -20,7 +19,6 @@ class DatabaseContainer(
     image = image,
     type = ContainerType.DATABASE,
     environment = environment,
-    public = public,
     ports = ports,
     hasHealthcheck = hasHealthcheck,
 ) {

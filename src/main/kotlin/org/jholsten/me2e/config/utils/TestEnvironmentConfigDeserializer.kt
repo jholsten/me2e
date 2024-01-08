@@ -26,9 +26,9 @@ class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironmentConfig
         private const val CONTAINER_TYPE_KEY = "org.jholsten.me2e.container-type"
 
         /**
-         * Label key for specifying whether a container should be publicly accessible
+         * Label key for specifying the URL of a microservice.
          */
-        private const val IS_PUBLIC_KEY = "org.jholsten.me2e.is-public"
+        private const val URL_KEY = "org.jholsten.me2e.url"
 
         /**
          * Label key for specifying the database type (i.e. Database Management System) of a service.
@@ -88,7 +88,7 @@ class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironmentConfig
             node.put("name", entry.key)
             node.put("type", labels[CONTAINER_TYPE_KEY])
             node.put("system", labels[DATABASE_TYPE_KEY])
-            node.put("public", labels[IS_PUBLIC_KEY])
+            node.put("url", labels[URL_KEY])
             node.put("hasHealthcheck", node.has("healthcheck"))
             result[entry.key] = mapper.treeToValue(node, Container::class.java)
         }
@@ -98,7 +98,7 @@ class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironmentConfig
     private fun getImageLabels(labelsNode: JsonNode?): Map<String, String?> {
         return mapOf(
             CONTAINER_TYPE_KEY to labelsNode?.get(CONTAINER_TYPE_KEY)?.textValue(),
-            IS_PUBLIC_KEY to labelsNode?.get(IS_PUBLIC_KEY)?.textValue(),
+            URL_KEY to labelsNode?.get(URL_KEY)?.textValue(),
             DATABASE_TYPE_KEY to labelsNode?.get(DATABASE_TYPE_KEY)?.textValue(),
         )
     }

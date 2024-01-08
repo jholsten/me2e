@@ -50,11 +50,6 @@ open class Container(
     val environment: Map<String, String>? = null,
 
     /**
-     * Whether this container should be accessible from localhost.
-     */
-    val public: Boolean = false,
-
-    /**
      * Ports that should be exposed to localhost.
      */
     val ports: ContainerPortList = ContainerPortList(),

@@ -13,7 +13,6 @@ services:
       retries: 10
     labels:
       "org.jholsten.me2e.container-type": "MICROSERVICE"
-      "org.jholsten.me2e.is-public": "true"
 
   database:
     image: postgres:12

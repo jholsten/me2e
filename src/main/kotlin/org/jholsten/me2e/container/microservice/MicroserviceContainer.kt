@@ -14,7 +14,7 @@ class MicroserviceContainer(
     name: String,
     image: String,
     environment: Map<String, String>? = null,
-    public: Boolean = false,
+    url: String? = null,
     ports: ContainerPortList = ContainerPortList(),
     @JacksonInject("requestConfig")
     requestConfig: RequestConfig,
@@ -24,7 +24,6 @@ class MicroserviceContainer(
     image = image,
     type = ContainerType.MICROSERVICE,
     environment = environment,
-    public = public,
     ports = ports,
     hasHealthcheck = hasHealthcheck,
 ) {
