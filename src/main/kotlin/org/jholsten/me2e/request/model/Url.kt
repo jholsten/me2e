@@ -129,7 +129,7 @@ class Url(
     }
 
     private fun assertUrlIsValid() {
-        requireNotNull(value.toHttpUrlOrNull()) { "Invalid URL format" }
+        requireNotNull(value.toHttpUrlOrNull()) { "Invalid URL format: $value" }
     }
 
     override fun equals(other: Any?): Boolean {

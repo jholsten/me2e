@@ -118,7 +118,7 @@ open class Container(
      * Initializes the container by setting the corresponding [DockerContainer] and [ContainerState] instance
      * after the Docker container was started.
      */
-    internal fun initialize(dockerContainer: DockerContainer, dockerContainerState: ContainerState) {
+    internal open fun initialize(dockerContainer: DockerContainer, dockerContainerState: ContainerState) {
         this.dockerContainer = DockerContainerReference(dockerContainer, dockerContainerState)
 
         // TODO: Prettify
