@@ -1,14 +1,12 @@
 package org.jholsten.me2e.container.microservice
 
 import com.fasterxml.jackson.annotation.JacksonInject
+import com.github.dockerjava.api.model.Container as DockerContainer
 import org.jholsten.me2e.config.model.RequestConfig
 import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.container.model.ContainerType
 import org.jholsten.me2e.request.client.OkHttpClient
-import org.jholsten.me2e.request.model.HttpHeaders
-import org.jholsten.me2e.request.model.HttpResponse
-import org.jholsten.me2e.request.model.RelativeUrl
-import org.jholsten.me2e.request.model.Url
+import org.jholsten.me2e.request.model.*
 import org.testcontainers.containers.ContainerState
 import java.util.concurrent.TimeUnit
 
@@ -45,11 +43,11 @@ class MicroserviceContainer(
      */
     private var httpClient: OkHttpClient? = null
 
-    override fun initialize(dockerContainer: com.github.dockerjava.api.model.Container, dockerContainerState: ContainerState) {
+    override fun initialize(dockerContainer: DockerContainer, dockerContainerState: ContainerState) {
         super.initialize(dockerContainer, dockerContainerState)
         if (url == null) {
             val exposedPort = ports.findFirstExposed()
-            requireNotNull(exposedPort) { "Microservices need at least one exposed port." }
+            requireNotNull(exposedPort) { "Microservice $name needs at least one exposed port or a URL defined." }
             url = "http://localhost:${exposedPort.external}"
         }
 
@@ -75,27 +73,76 @@ class MicroserviceContainer(
      */
 
     /**
-     * Sends a GET request over HTTP to this microservice.
-     * TODO
+     * Executes an HTTP GET request to this microservice. Sets the given headers if provided.
+     * @param relativeUrl URL of the request relative to the microservice's base URL.
+     * @param headers Map of header names along with the associated values to set.
+     * @return Response returned by the service.
      */
-    fun get(relativeUrl: RelativeUrl, headers: HttpHeaders): HttpResponse {
-        checkNotNull(httpClient) { "HTTP client was not properly initialized." }
+    @JvmOverloads
+    fun get(relativeUrl: RelativeUrl, headers: HttpHeaders = HttpHeaders.empty()): HttpResponse {
+        assertThatHttpClientIsInitialized()
         return httpClient!!.get(relativeUrl, headers)
     }
 
-    fun get(relativeUrl: RelativeUrl): HttpResponse {
+    /**
+     * Executes an HTTP POST request to this microservice. Sets the given headers if provided.
+     * @param relativeUrl URL of the request relative to the microservice's base URL.
+     * @param body Request body to set in the request.
+     * @param headers Map of header names along with the associated values to set.
+     * @return Response returned by the service.
+     */
+    @JvmOverloads
+    fun post(relativeUrl: RelativeUrl, body: HttpRequestBody, headers: HttpHeaders = HttpHeaders.empty()): HttpResponse {
+        assertThatHttpClientIsInitialized()
+        return httpClient!!.post(relativeUrl, body, headers)
+    }
+
+    /**
+     * Executes an HTTP PUT request to this microservice. Sets the given headers if provided.
+     * @param relativeUrl URL of the request relative to the microservice's base URL.
+     * @param body Request body to set in the request.
+     * @param headers Map of header names along with the associated values to set.
+     * @return Response returned by the service.
+     */
+    @JvmOverloads
+    fun put(relativeUrl: RelativeUrl, body: HttpRequestBody, headers: HttpHeaders = HttpHeaders.empty()): HttpResponse {
+        assertThatHttpClientIsInitialized()
+        return httpClient!!.put(relativeUrl, body, headers)
+    }
+
+    /**
+     * Executes an HTTP PATCH request to this microservice. Sets the given headers if provided.
+     * @param relativeUrl URL of the request relative to the microservice's base URL.
+     * @param body Request body to set in the request.
+     * @param headers Map of header names along with the associated values to set.
+     * @return Response returned by the service.
+     */
+    @JvmOverloads
+    fun patch(relativeUrl: RelativeUrl, body: HttpRequestBody, headers: HttpHeaders = HttpHeaders.empty()): HttpResponse {
+        assertThatHttpClientIsInitialized()
+        return httpClient!!.patch(relativeUrl, body, headers)
+    }
+
+    /**
+     * Executes an HTTP DELETE request to this microservice. Sets the given headers if provided.
+     * @param relativeUrl URL of the request relative to the microservice's base URL.
+     * @param body Request body to set in the request.
+     * @param headers Map of header names along with the associated values to set.
+     * @return Response returned by the service.
+     */
+    @JvmOverloads
+    fun delete(relativeUrl: RelativeUrl, body: HttpRequestBody? = null, headers: HttpHeaders = HttpHeaders.empty()): HttpResponse {
+        assertThatHttpClientIsInitialized()
+        return httpClient!!.delete(relativeUrl, body, headers)
+    }
+
+    private fun assertThatHttpClientIsInitialized() {
         checkNotNull(httpClient) { "HTTP client was not properly initialized." }
-        return httpClient!!.get(relativeUrl, HttpHeaders.empty())
     }
 
     /**
      * TODO: Desired interface:
      * @Microservice("backend")
      * private val backend: MicroserviceContainer
-     *
-     * backend.get(...)
-     *  .expect()
-     *      .statusCode(200)
-     *      .responseBody(...)
      */
 }
