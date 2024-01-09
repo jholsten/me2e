@@ -117,17 +117,16 @@ open class Container(
     /**
      * Initializes the container by setting the corresponding [DockerContainer] and [ContainerState] instance
      * after the Docker container was started.
+     * Maps external ports to internal container ports.
      */
     internal open fun initialize(dockerContainer: DockerContainer, dockerContainerState: ContainerState) {
         this.dockerContainer = DockerContainerReference(dockerContainer, dockerContainerState)
 
-        // TODO: Prettify
-        for (port in dockerContainer.ports) {
-            if (port.privatePort != null) {
-                val internalPort = this.ports.findByInternalPort(port.privatePort!!)
-                if (internalPort != null) {
-                    internalPort.external = port.publicPort
-                }
+        val dockerPorts = dockerContainer.ports.filter { it.privatePort != null }
+        for (port in dockerPorts) {
+            val internalPort = this.ports.findByInternalPort(port.privatePort!!)
+            if (internalPort != null) {
+                internalPort.external = port.publicPort
             }
         }
     }
