@@ -5,6 +5,7 @@ import org.apache.commons.lang3.RandomStringUtils
 import org.jholsten.me2e.config.model.DockerConfig
 import org.jholsten.me2e.container.database.DatabaseContainer
 import org.jholsten.me2e.container.docker.DockerCompose
+import org.jholsten.me2e.container.exception.ServiceShutdownException
 import org.jholsten.me2e.container.exception.ServiceStartupException
 import org.jholsten.me2e.container.healthcheck.exception.ServiceNotHealthyException
 import org.jholsten.me2e.container.microservice.MicroserviceContainer
@@ -67,6 +68,19 @@ class ContainerManager(
         registerHealthChecks()
         startDockerCompose()
         initializeContainers()
+    }
+
+    /**
+     * Stops the Docker-Compose environment. It is not necessary to stop the environment manually, as it is automatically shut
+     * down as soon as the tests finish running.
+     * @throws ServiceShutdownException if Docker-Compose could not be stopped.
+     */
+    fun stop() {
+        try {
+            environment.stop()
+        } catch (e: Exception) {
+            throw ServiceShutdownException("Unable to stop Docker-Compose: ${e.message}")
+        }
     }
 
     /**

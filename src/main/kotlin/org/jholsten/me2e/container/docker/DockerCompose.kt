@@ -123,6 +123,18 @@ internal class DockerCompose(
         }
     }
 
+    /**
+     * Stops the Docker-Compose container.
+     * @see DockerComposeV1.stop
+     * @see DockerComposeV2.stop
+     */
+    fun stop() {
+        when (this.version) {
+            DockerComposeVersion.V1 -> v1.stop()
+            DockerComposeVersion.V2 -> v2.stop()
+        }
+    }
+
     private fun DockerComposeRemoveImagesStrategy.toV1(): DockerComposeV1.RemoveImages? {
         return when (this) {
             DockerComposeRemoveImagesStrategy.NONE -> null

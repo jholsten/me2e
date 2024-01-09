@@ -109,6 +109,25 @@ open class Container(
     )
 
     /**
+     * Returns whether the container is currently up and running.
+     */
+    val isRunning: Boolean
+        get() = dockerContainer?.state?.isRunning == true
+
+    /**
+     * Returns whether the container is currently healthy.
+     * Always returns false if there is no healthcheck specified for this container.
+     */
+    val isHealthy: Boolean
+        get() {
+            return try {
+                dockerContainer?.state?.isHealthy == true
+            } catch (e: Exception) {
+                false
+            }
+        }
+
+    /**
      * Reference to the Docker container which represents this container instance.
      * Is initialized as soon as the docker compose is started.
      */

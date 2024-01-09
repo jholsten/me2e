@@ -17,8 +17,8 @@ services:
   database:
     image: postgres:12
     environment:
-      DB_PASSWORD: 123
-      DB_USER: user
+      POSTGRES_PASSWORD: 123
+      POSTGRES_USER: user
     labels:
       "org.jholsten.me2e.container-type": "DATABASE"
       "org.jholsten.me2e.database-type": "POSTGRESQL"
