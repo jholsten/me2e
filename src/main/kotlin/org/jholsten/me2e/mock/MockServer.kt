@@ -36,6 +36,12 @@ class MockServer(
 ) {
 
     /**
+     * Returns whether the mock server is currently up and running.
+     */
+    val isRunning: Boolean
+        get() = wireMockServer?.isRunning == true
+
+    /**
      * Mock server instance that handles incoming requests
      */
     private var wireMockServer: WireMockServer? = null

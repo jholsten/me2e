@@ -5,9 +5,7 @@ import org.apache.hc.client5.http.classic.methods.HttpGet
 import org.apache.hc.client5.http.classic.methods.HttpPost
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
 import org.apache.hc.core5.http.ContentType
-import org.apache.hc.core5.http.Header
 import org.apache.hc.core5.http.HttpEntity
-import org.apache.hc.core5.http.HttpHeaders
 import org.apache.hc.core5.http.io.entity.StringEntity
 import org.jholsten.me2e.mock.exception.VerificationException
 import org.jholsten.me2e.mock.stubbing.MockServerStub
@@ -69,6 +67,7 @@ class MockServerIT {
     fun beforeTest() {
         manager.start()
         assertTrue(manager.isRunning)
+        assertTrue(exampleServer.isRunning)
         JvmProxyConfigurer.configureFor(manager.httpPort)
     }
 
@@ -76,6 +75,7 @@ class MockServerIT {
     fun afterTest() {
         manager.stop()
         assertFalse(manager.isRunning)
+        assertFalse(exampleServer.isRunning)
         JvmProxyConfigurer.restorePrevious()
     }
 
