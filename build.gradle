@@ -19,6 +19,10 @@ plugins {
 
     // Apply Dokka Plugin to support generation of Kotlin documentation
     id "org.jetbrains.dokka" version "1.6.0"
+
+
+    id "io.freefair.aspectj.post-compile-weaving" version "8.4"
+    //id 'org.aspectj.aspectjweaver' version '1.9.7'
 }
 
 group = "org.jholsten"
@@ -111,6 +115,14 @@ dependencies {
 
     // Dependency for managing docker containers
     implementation "org.testcontainers:testcontainers:1.19.3"
+
+    // Dependency for registering and testing annotation processors
+    annotationProcessor "com.google.auto.service:auto-service:1.1.1"
+    compileOnly "com.google.auto.service:auto-service:1.1.1"
+    testImplementation "com.google.testing.compile:compile-testing:0.21.0"
+
+    implementation "org.aspectj:aspectjrt:1.9.20"
+    implementation 'org.aspectj:aspectjweaver:1.9.20'
 }
 
 // Configuration for documentation
@@ -134,4 +146,24 @@ test {
     useJUnitPlatform()
     // Show log output while running tests
     testLogging.showStandardStreams = true
+    //jvmArgs("-javaagent:${agent.singleFile}")
+}
+
+
+compileJava {
+    ajc {
+        options {
+            aspectpath.setFrom configurations.aspect
+            compilerArgs = []
+        }
+    }
+}
+
+compileKotlin {
+    ajc {
+        options {
+            aspectpath.setFrom configurations.aspect
+            compilerArgs = []
+        }
+    }
 }
