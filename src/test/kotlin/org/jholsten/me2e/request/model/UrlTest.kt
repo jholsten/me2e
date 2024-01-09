@@ -222,7 +222,7 @@ internal class UrlTest {
     @ValueSource(strings = ["invalid", "", "https://", "/search"])
     fun `Instantiating invalid URL should fail`(value: String) {
         val e = assertFailsWith<IllegalArgumentException> { Url(value) }
-        assertEquals("Invalid URL format", e.message)
+        assertEquals("Invalid URL format: $value", e.message)
     }
 
     @ParameterizedTest(name = "[{index}] Relative URL \"{0}\"")
