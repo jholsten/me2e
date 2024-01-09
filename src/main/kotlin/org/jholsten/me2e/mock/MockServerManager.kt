@@ -7,7 +7,7 @@ import org.awaitility.Awaitility
 import org.awaitility.Durations
 import org.awaitility.core.ConditionTimeoutException
 import org.jholsten.me2e.container.exception.ServiceStartupException
-import org.jholsten.me2e.container.healthcheck.exception.ServiceNotHealthyException
+import org.jholsten.me2e.container.exception.ServiceNotHealthyException
 import org.jholsten.me2e.mock.stubbing.MockServerStubNotMatchedRenderer
 import org.jholsten.me2e.request.mapper.HttpRequestMapper
 import org.jholsten.me2e.request.model.HttpRequest

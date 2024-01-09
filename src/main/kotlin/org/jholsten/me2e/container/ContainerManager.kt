@@ -7,7 +7,7 @@ import org.jholsten.me2e.container.database.DatabaseContainer
 import org.jholsten.me2e.container.docker.DockerCompose
 import org.jholsten.me2e.container.exception.ServiceShutdownException
 import org.jholsten.me2e.container.exception.ServiceStartupException
-import org.jholsten.me2e.container.healthcheck.exception.ServiceNotHealthyException
+import org.jholsten.me2e.container.exception.ServiceNotHealthyException
 import org.jholsten.me2e.container.microservice.MicroserviceContainer
 import org.jholsten.me2e.utils.filterValuesIsInstance
 import org.testcontainers.DockerClientFactory

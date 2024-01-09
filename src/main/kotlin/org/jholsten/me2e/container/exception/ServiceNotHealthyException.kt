@@ -1,4 +1,4 @@
-package org.jholsten.me2e.container.healthcheck.exception
+package org.jholsten.me2e.container.exception
 
 /**
  * Exception that occurs when a service is not healthy within the specified timespan.

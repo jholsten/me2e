@@ -9,7 +9,7 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import com.github.tomakehurst.wiremock.verification.LoggedRequest
 import io.mockk.*
 import org.jholsten.me2e.container.exception.ServiceStartupException
-import org.jholsten.me2e.container.healthcheck.exception.ServiceNotHealthyException
+import org.jholsten.me2e.container.exception.ServiceNotHealthyException
 import org.jholsten.me2e.mock.stubbing.MockServerStubNotMatchedRenderer
 import org.jholsten.me2e.request.mapper.HttpRequestMapper
 import org.jholsten.me2e.request.model.HttpRequest
