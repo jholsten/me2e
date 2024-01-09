@@ -20,3 +20,11 @@ internal inline fun <reified T> toJson(obj: T): String {
     val writer = DeserializerFactory.getObjectMapper().writerWithDefaultPrettyPrinter()
     return writer.writeValueAsString(obj)
 }
+
+/**
+ * Returns Map containing all values that are instances of the specified type [T].
+ */
+internal inline fun <K, reified T> Map<K, *>.filterValuesIsInstance(): Map<K, T> {
+    @Suppress("UNCHECKED_CAST")
+    return this.filterValues { it is T } as Map<K, T>
+}

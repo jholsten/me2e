@@ -3,9 +3,12 @@ package org.jholsten.me2e.container
 import com.github.dockerjava.api.model.Container as DockerContainer
 import org.apache.commons.lang3.RandomStringUtils
 import org.jholsten.me2e.config.model.DockerConfig
+import org.jholsten.me2e.container.database.DatabaseContainer
 import org.jholsten.me2e.container.docker.DockerCompose
 import org.jholsten.me2e.container.exception.ServiceStartupException
 import org.jholsten.me2e.container.healthcheck.exception.ServiceNotHealthyException
+import org.jholsten.me2e.container.microservice.MicroserviceContainer
+import org.jholsten.me2e.utils.filterValuesIsInstance
 import org.testcontainers.DockerClientFactory
 import org.testcontainers.containers.ContainerLaunchException
 import org.testcontainers.containers.wait.strategy.Wait
@@ -31,6 +34,16 @@ class ContainerManager(
      */
     val containers: Map<String, Container>,
 ) {
+    /**
+     * [containers] with container type [org.jholsten.me2e.container.model.ContainerType.MICROSERVICE].
+     */
+    val microservices: Map<String, MicroserviceContainer> = containers.filterValuesIsInstance<String, MicroserviceContainer>()
+
+    /**
+     * [containers] with container type [org.jholsten.me2e.container.model.ContainerType.DATABASE].
+     */
+    val databases: Map<String, DatabaseContainer> = containers.filterValuesIsInstance<String, DatabaseContainer>()
+
     /**
      * Identifier of the services to start. Will be used as a prefix for all container names.
      */
