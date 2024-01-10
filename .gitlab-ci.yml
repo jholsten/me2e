@@ -40,7 +40,7 @@ test:
     - cat /root/.docker/config.json
     - docker run --rm -v $PWD:$PWD -w $PWD
       -v /var/run/docker.sock:/var/run/docker.sock
-      -v /root/.docker:/root/.docker
+      --mount source=/root/.docker,target=/root/.docker
       --add-host=host.docker.internal:host-gateway
       -e GRADLE_USER_HOME=$CI_PROJECT_DIR/.gradle
       $CI_REGISTRY_IMAGE:test
