@@ -37,7 +37,11 @@ test:
     - chmod +x ./gradlew
   script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker run --rm -v $PWD:$PWD -w $PWD -v /var/run/docker.sock:/var/run/docker.sock --add-host=host.docker.internal:host-gateway $CI_REGISTRY_IMAGE:test
+    - docker run --rm -v $PWD:$PWD -w $PWD
+      -v /var/run/docker.sock:/var/run/docker.sock
+      -v /root/.docker/config.json:/root/.docker/config.json
+      --add-host=host.docker.internal:host-gateway
+      $CI_REGISTRY_IMAGE:test
   artifacts:
     when: always
     reports:
