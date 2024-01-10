@@ -28,7 +28,7 @@ build:
 # Runs JUnit tests
 test:
   stage: test
-  image: $CI_REGISTRY_IMAGE:latest
+  image: $CI_REGISTRY_IMAGE:test
   before_script:
     - chmod +x ./gradlew
   script:
