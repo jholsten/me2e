@@ -25,7 +25,7 @@ build:
   script:
     - ./gradlew --build-cache assemble
 
-# Runs JUnit tests
+# Runs JUnit tests inside Docker container (required to have access to Docker and Docker-Compose)
 test:
   stage: test
   image: docker:20.10.20
@@ -37,11 +37,11 @@ test:
     - chmod +x ./gradlew
   script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker run --rm -v $PWD:$PWD -w $PWD -v /var/run/docker.sock:/var/run/docker.sock $CI_REGISTRY_IMAGE:test
+    - docker run --rm -v $PWD:$PWD -w $PWD -v /var/run/docker.sock:/var/run/docker.sock --add-host=host.docker.internal:host-gateway $CI_REGISTRY_IMAGE:test
   artifacts:
     when: always
     reports:
-      junit: /app/build/test-results/test/**/TEST-*.xml
+      junit: build/test-results/test/**/TEST-*.xml
 
 # Publishes package to GitLab Package Registry:
 publish-package:
