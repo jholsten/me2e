@@ -47,7 +47,6 @@ test:
       -v /var/run/docker.sock:/var/run/docker.sock
       -v $CI_PROJECT_DIR/config.json:/root/.docker/config.json
       --add-host=host.docker.internal:host-gateway
-      -e DOCKER_AUTH_CONFIG=DOCKER_AUTH_CONFIG
       -e GRADLE_USER_HOME=$CI_PROJECT_DIR/.gradle
       $CI_REGISTRY_IMAGE:test
   artifacts:
