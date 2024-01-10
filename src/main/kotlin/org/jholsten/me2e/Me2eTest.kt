@@ -36,8 +36,8 @@ open class Me2eTest {
         val mockServerManager = MockServerManager(mockServers = config.environment.mockServers)
 
         init {
-            mockServerManager.start()
             containerManager.start()
+            mockServerManager.start()
         }
     }
 
