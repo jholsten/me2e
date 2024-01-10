@@ -1,6 +1,6 @@
 variables:
   DOCKER_TLS_CERTDIR: ""
-  GRADLE_USER_HOME: $CI_PROJECT_DIR/.gradle
+  GRADLE_USER_HOME: $PWD/.gradle
 
 stages:
   - build
