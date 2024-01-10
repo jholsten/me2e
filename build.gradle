@@ -111,6 +111,9 @@ dependencies {
 
     // Dependency for managing docker containers
     implementation "org.testcontainers:testcontainers:1.19.3"
+
+    // Dependency for scanning annotations
+    implementation "io.github.classgraph:classgraph:4.8.165"
 }
 
 // Configuration for documentation
