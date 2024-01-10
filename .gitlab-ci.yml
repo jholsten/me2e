@@ -1,6 +1,6 @@
 variables:
   DOCKER_TLS_CERTDIR: ""
-  GRADLE_USER_HOME: $PWD/.gradle
+  GRADLE_USER_HOME: $CI_PROJECT_DIR/.gradle
 
 stages:
   - build
@@ -42,6 +42,7 @@ test:
       -v /var/run/docker.sock:/var/run/docker.sock
       -v /root/.docker:/root/.docker
       --add-host=host.docker.internal:host-gateway
+      -e GRADLE_USER_HOME=$CI_PROJECT_DIR/.gradle
       $CI_REGISTRY_IMAGE:test
   artifacts:
     when: always
