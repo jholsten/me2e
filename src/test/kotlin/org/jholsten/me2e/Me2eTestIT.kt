@@ -4,6 +4,7 @@ import org.jholsten.me2e.config.model.ConfigFormat
 import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.container.injection.InjectContainer
 import org.jholsten.me2e.container.microservice.MicroserviceContainer
+import org.junit.jupiter.api.AfterAll
 import kotlin.test.*
 
 @Me2eTestConfig(
@@ -21,7 +22,17 @@ class Me2eTestIT : Me2eTest() {
     @InjectContainer
     private lateinit var database: Container
 
+    companion object {
+        @JvmStatic
+        @AfterAll
+        fun afterAll() {
+            mockServerManager.stop()
+            containerManager.stop()
+        }
+    }
+
     // TODO: Inject Mockserver
+    // TODO: Add annotation processor for verifying datatype + superclass
 
     @Test
     fun `Initializing test class should start environment and inject containers`() {
