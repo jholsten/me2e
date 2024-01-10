@@ -28,7 +28,7 @@ build:
 test:
   stage: test
   script:
-    - docker run -v /var/run/docker.sock:/var/run/docker.sock $CI_REGISTRY_IMAGE:test
+    - docker run --rm -v $PWD:$PWD -w $PWD -v /var/run/docker.sock:/var/run/docker.sock $CI_REGISTRY_IMAGE:test
   artifacts:
     when: always
     reports:
