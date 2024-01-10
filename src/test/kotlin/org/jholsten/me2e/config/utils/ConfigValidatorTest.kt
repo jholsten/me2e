@@ -21,6 +21,7 @@ internal class ConfigValidatorTest {
             validator.validate(
                 TestConfig(
                     environment = TestEnvironmentConfig(
+                        dockerCompose = "docker-compose.yml",
                         containers = mapOf(
                             "api-gateway" to MicroserviceContainer(
                                 name = "api-gateway",
@@ -58,6 +59,7 @@ internal class ConfigValidatorTest {
             validator.validate(
                 TestConfig(
                     environment = TestEnvironmentConfig(
+                        dockerCompose = "docker-compose.yml",
                         containers = mapOf(),
                         mockServers = mapOf(),
                     )
@@ -72,6 +74,7 @@ internal class ConfigValidatorTest {
             validator.validate(
                 TestConfig(
                     environment = TestEnvironmentConfig(
+                        dockerCompose = "docker-compose.yml",
                         containers = mapOf(),
                         mockServers = mapOf(
                             "example-service-1" to MockServer(
@@ -97,6 +100,7 @@ internal class ConfigValidatorTest {
             validator.validate(
                 TestConfig(
                     environment = TestEnvironmentConfig(
+                        dockerCompose = "docker-compose.yml",
                         containers = mapOf(),
                         mockServers = mapOf(
                             "example-service" to MockServer(

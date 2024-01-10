@@ -44,6 +44,7 @@ internal class Me2eTestManagerTest {
     private fun testConfig(): TestConfig {
         return TestConfig(
             environment = TestEnvironmentConfig(
+                dockerCompose = "any-file",
                 containers = mapOf(
                     "gateway-service" to MicroserviceContainer(
                         name = "gateway-service",

@@ -47,8 +47,8 @@ internal class YamlConfigParserTest {
 
     @Test
     fun `Parsing valid YAML config should succeed`() {
-        val config = testConfig()
         val filename = "any-file"
+        val config = testConfig(filename)
         mockDeserializationAndValidation(config)
 
         val result = YamlConfigParser().parseFile(filename)
@@ -61,7 +61,7 @@ internal class YamlConfigParserTest {
     @Test
     fun `Parsing invalid YAML should fail`() {
         val filename = "any-file"
-        mockDeserializationAndValidation(testConfig())
+        mockDeserializationAndValidation(testConfig(filename))
         every { anyConstructed<ConfigSchemaValidator>().validate(any()) } throws InvalidFormatException("Some validation error")
 
         assertFailsWith<InvalidFormatException> { YamlConfigParser().parseFile(filename) }
@@ -70,7 +70,7 @@ internal class YamlConfigParserTest {
     @Test
     fun `Parsing YAML with MismatchedInputException on deserialization should fail`() {
         val filename = "any-file"
-        mockDeserializationAndValidation(testConfig())
+        mockDeserializationAndValidation(testConfig(filename))
         val mismatchedInputException = MismatchedInputException.from(null as JsonParser?, "Some mismatched input")
         every { yamlMapper.readValue(contents, TestConfig::class.java) } throws mismatchedInputException
 
@@ -83,7 +83,7 @@ internal class YamlConfigParserTest {
     @Test
     fun `Parsing YAML with Exception on deserialization should fail`() {
         val filename = "any-file"
-        mockDeserializationAndValidation(testConfig())
+        mockDeserializationAndValidation(testConfig(filename))
         val exception = RuntimeException("Some error")
         every { yamlMapper.readValue(contents, TestConfig::class.java) } throws exception
 
@@ -108,9 +108,10 @@ internal class YamlConfigParserTest {
         every { yamlMapper.readTree(any<BufferedInputStream>()) } returns null
     }
 
-    private fun testConfig(): TestConfig {
+    private fun testConfig(dockerComposeFile: String): TestConfig {
         return TestConfig(
             environment = TestEnvironmentConfig(
+                dockerCompose = dockerComposeFile,
                 containers = mapOf(
                     "api-gateway" to MicroserviceContainer(
                         name = "api-gateway",

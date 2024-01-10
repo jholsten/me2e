@@ -44,8 +44,10 @@ class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironmentConfig
         mapper = p.codec as ObjectMapper
         val node = p.readValueAsTree<ObjectNode>()
         val fields = node.fields().asSequence().map { it.key to it.value }.toMap()
+        val dockerCompose = fields["docker-compose"]!!.textValue()
         return TestEnvironmentConfig(
-            containers = deserializeContainers(fields["docker-compose"]!!.textValue()),
+            dockerCompose = dockerCompose,
+            containers = deserializeContainers(dockerCompose),
             mockServers = fields["mock-servers"]?.let { deserializeMockServers(it) } ?: mapOf(),
         )
     }

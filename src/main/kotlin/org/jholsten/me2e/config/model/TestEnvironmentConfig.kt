@@ -11,6 +11,11 @@ import org.jholsten.me2e.mock.MockServer
 @JsonDeserialize(using = TestEnvironmentConfigDeserializer::class)
 class TestEnvironmentConfig(
     /**
+     * Path to Docker-Compose file. Needs to be located in `resources` folder.
+     */
+    val dockerCompose: String,
+
+    /**
      * Self-managed containers from Docker-Compose file.
      */
     val containers: Map<String, Container>,
