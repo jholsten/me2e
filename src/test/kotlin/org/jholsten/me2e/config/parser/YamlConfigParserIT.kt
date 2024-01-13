@@ -36,6 +36,7 @@ internal class YamlConfigParserIT {
         assertDockerConfigAsExpected(
             DockerConfig(
                 dockerComposeVersion = DockerComposeVersion.V1,
+                pullPolicy = DockerConfig.PullPolicy.ALWAYS,
                 buildImages = true,
                 removeImages = DockerComposeRemoveImagesStrategy.ALL,
                 removeVolumes = false,
@@ -47,7 +48,7 @@ internal class YamlConfigParserIT {
     @Test
     fun `Parsing valid YAML config without optional fields should succeed`() {
         val config = YamlConfigParser().parseFile("me2e-config-minimal.yaml")
-        assertContainersAsExpected(config)
+        assertContainersAsExpected(config, pullPolicy = DockerConfig.PullPolicy.MISSING)
         assertEquals(0, config.environment.mockServers.size)
         assertRequestConfigAsExpected(RequestConfig(10, 10, 10), config)
     }
@@ -67,11 +68,11 @@ internal class YamlConfigParserIT {
         assertFailsWith<FileNotFoundException> { YamlConfigParser().parseFile("non-existent.yaml") }
     }
 
-    private fun assertContainersAsExpected(config: TestConfig) {
+    private fun assertContainersAsExpected(config: TestConfig, pullPolicy: DockerConfig.PullPolicy? = null) {
         assertEquals(3, config.environment.containers.size)
-        assertApiGatewayAsExpected(config.environment.containers)
-        assertAuthServerAsExpected(config.environment.containers)
-        assertDatabaseAsExpected(config.environment.containers)
+        assertApiGatewayAsExpected(config.environment.containers, pullPolicy)
+        assertAuthServerAsExpected(config.environment.containers, pullPolicy)
+        assertDatabaseAsExpected(config.environment.containers, pullPolicy)
     }
 
     private fun assertMockServersAsExpected(config: TestConfig) {
@@ -87,7 +88,7 @@ internal class YamlConfigParserIT {
         RecursiveComparison.assertEquals(expectedRequestConfig, testConfig.requests)
     }
 
-    private fun assertApiGatewayAsExpected(containers: Map<String, Container>) {
+    private fun assertApiGatewayAsExpected(containers: Map<String, Container>, pullPolicy: DockerConfig.PullPolicy? = null) {
         assertContainerAsExpected(
             containers = containers,
             name = "api-gateway",
@@ -97,12 +98,13 @@ internal class YamlConfigParserIT {
                 "DB_PASSWORD" to "123",
                 "DB_USER" to "user",
             ),
+            pullPolicy = pullPolicy ?: DockerConfig.PullPolicy.ALWAYS,
             hasHealthcheck = true,
             containerPorts = listOf(1234, 80, 1200, 1201, 1202),
         )
     }
 
-    private fun assertAuthServerAsExpected(containers: Map<String, Container>) {
+    private fun assertAuthServerAsExpected(containers: Map<String, Container>, pullPolicy: DockerConfig.PullPolicy? = null) {
         assertContainerAsExpected(
             containers = containers,
             name = "auth-server",
@@ -111,12 +113,13 @@ internal class YamlConfigParserIT {
             environment = mapOf(
                 "ADMIN_PASSWORD" to "secret",
             ),
+            pullPolicy = pullPolicy ?: DockerConfig.PullPolicy.MISSING,
             hasHealthcheck = false,
             containerPorts = listOf(),
         )
     }
 
-    private fun assertDatabaseAsExpected(containers: Map<String, Container>) {
+    private fun assertDatabaseAsExpected(containers: Map<String, Container>, pullPolicy: DockerConfig.PullPolicy? = null) {
         assertContainerAsExpected(
             containers = containers,
             name = "database",
@@ -126,6 +129,7 @@ internal class YamlConfigParserIT {
                 "DB_PASSWORD" to "123",
                 "DB_USER" to "user",
             ),
+            pullPolicy = pullPolicy ?: DockerConfig.PullPolicy.ALWAYS,
             hasHealthcheck = false,
             containerPorts = listOf(),
             databaseSystem = DatabaseManagementSystem.POSTGRESQL,
@@ -138,6 +142,7 @@ internal class YamlConfigParserIT {
         type: ContainerType,
         image: String,
         environment: Map<String, String>?,
+        pullPolicy: DockerConfig.PullPolicy,
         hasHealthcheck: Boolean,
         containerPorts: List<Int>,
         databaseSystem: DatabaseManagementSystem? = null,
@@ -153,6 +158,7 @@ internal class YamlConfigParserIT {
         assertEquals(type, container.type)
         assertEquals(image, container.image)
         assertEquals(environment, container.environment)
+        assertEquals(pullPolicy, container.pullPolicy)
         assertEquals(hasHealthcheck, container.hasHealthcheck)
         assertEquals(containerPorts.size, container.ports.size)
         for (i in containerPorts.indices) {

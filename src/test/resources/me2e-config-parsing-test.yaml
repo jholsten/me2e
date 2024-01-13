@@ -1,5 +1,6 @@
 docker:
   docker-compose-version: V1
+  pull-policy: ALWAYS
   build-images: true
   remove-images: ALL
   remove-volumes: false

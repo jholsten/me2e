@@ -20,6 +20,7 @@ services:
     labels:
       "org.jholsten.me2e.container-type": "MICROSERVICE"
       "org.jholsten.me2e.url": "http://auth-server"
+      "org.jholsten.me2e.pull-policy": "MISSING"
 
   database:
     image: postgres:12
