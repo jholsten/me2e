@@ -163,4 +163,9 @@ open class Container(
     fun execute() {
         // TODO
     }
+
+    fun getLogs(): String {
+        checkNotNull(dockerContainer) { "Docker container is not properly initialized" }
+        return dockerContainer!!.state.logs
+    }
 }
