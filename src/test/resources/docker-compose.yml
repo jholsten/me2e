@@ -12,7 +12,7 @@ services:
       timeout: 3s
       retries: 10
     extra_hosts:
-      - "payment.example.com:host-gateway"
+      - "payment.example.com:172.17.0.1"
     labels:
       "org.jholsten.me2e.container-type": "MICROSERVICE"
       "org.jholsten.me2e.pull-policy": "ALWAYS"
