@@ -30,7 +30,7 @@ build:
 # Runs JUnit tests inside Docker container (required to have access to Docker and Docker-Compose)
 test:
   stage: test
-  image: docker:20.10.20
+  image: $CI_REGISTRY_IMAGE:test
   services:
     - name: docker:20.10.20-dind
       alias: docker
@@ -40,16 +40,9 @@ test:
   script:
     - docker login -u REGISTRY_TOKEN -p $REGISTRY_TOKEN $CI_REGISTRY
     - cat /root/.docker/config.json
-    - cp /root/.docker/config.json $CI_PROJECT_DIR/config.json
-    - cat $CI_PROJECT_DIR/config.json
-    - export DOCKER_AUTH_CONFIG=$(cat $CI_PROJECT_DIR/config.json)
-    - echo $DOCKER_AUTH_CONFIG
-    - docker run --rm -v $PWD:$PWD -w $PWD
-      -v /var/run/docker.sock:/var/run/docker.sock
-      -v $CI_PROJECT_DIR/config.json:/root/.docker/config.json
-      --add-host=host.docker.internal:host-gateway
-      -e GRADLE_USER_HOME=$CI_PROJECT_DIR/.gradle
-      $CI_REGISTRY_IMAGE:test
+    - ./gradlew test
+  variables:
+    TESTCONTAINERS_HOST_OVERRIDE: "host.docker.internal"
   artifacts:
     when: always
     reports:
