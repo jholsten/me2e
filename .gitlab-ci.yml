@@ -1,7 +1,7 @@
 variables:
   DOCKER_TLS_CERTDIR: ""
   GRADLE_USER_HOME: $CI_PROJECT_DIR/.gradle
-  #DOCKER_DRIVER: overlay2
+  DOCKER_DRIVER: overlay2
 
 stages:
   - build
@@ -40,6 +40,7 @@ test:
   script:
     - docker login -u REGISTRY_TOKEN -p $REGISTRY_TOKEN $CI_REGISTRY
     - cat /root/.docker/config.json
+    - cat /etc/hosts
     - ./gradlew test
   variables:
     TESTCONTAINERS_HOST_OVERRIDE: "host.docker.internal"
