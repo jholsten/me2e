@@ -88,7 +88,7 @@ class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironmentConfig
             convertListToMap(node, "environment")
             val labels = getImageLabels(node.get("labels"))
             node.put("name", entry.key)
-            node.put("type", labels[CONTAINER_TYPE_KEY])
+            node.put("type", labels[CONTAINER_TYPE_KEY] ?: "MISC")
             node.put("system", labels[DATABASE_TYPE_KEY])
             node.put("url", labels[URL_KEY])
             node.put("hasHealthcheck", node.has("healthcheck"))
