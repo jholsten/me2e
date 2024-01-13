@@ -11,8 +11,11 @@ services:
       interval: 3s
       timeout: 3s
       retries: 10
+    extra_hosts:
+      - "payment.example.com:host-gateway"
     labels:
       "org.jholsten.me2e.container-type": "MICROSERVICE"
+      "org.jholsten.me2e.pull-policy": "ALWAYS"
 
   database:
     image: postgres:12

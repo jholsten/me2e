@@ -65,6 +65,7 @@ class ContainerManager(
      * @throws ServiceNotHealthyException if at least one container did not become healthy within the specified timeout.
      */
     fun start() {
+        pullImages()
         registerHealthChecks()
         startDockerCompose()
         initializeContainers()
@@ -81,6 +82,19 @@ class ContainerManager(
         } catch (e: Exception) {
             throw ServiceShutdownException("Unable to stop Docker-Compose: ${e.message}")
         }
+    }
+
+    /**
+     * Pulls images for which the pull policy is set to [DockerConfig.PullPolicy.ALWAYS].
+     * For images with [DockerConfig.PullPolicy.MISSING], missing images are pulled automatically
+     * on `docker compose up`.
+     */
+    private fun pullImages() {
+        val servicesToPullAlways = containers.values
+            .filter { it.pullPolicy == DockerConfig.PullPolicy.ALWAYS }
+            .map { it.name }
+
+        environment.pull(servicesToPullAlways)
     }
 
     /**
@@ -113,8 +127,6 @@ class ContainerManager(
             }
             throw ServiceStartupException("Unable to start Docker Compose: ${e.message}")
         }
-
-        // TODO Login: https://github.com/testcontainers/testcontainers-java/issues/968
     }
 
     /**
