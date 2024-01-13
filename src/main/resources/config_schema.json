@@ -49,7 +49,17 @@
           "enum": [
             "V1",
             "V2"
-          ]
+          ],
+          "default": "V2"
+        },
+        "pull-policy": {
+          "type": "string",
+          "description": "Policy on pulling Docker images. Default: MISSING",
+          "enum": [
+            "ALWAYS",
+            "MISSING"
+          ],
+          "default": "MISSING"
         },
         "build-images": {
           "type": "boolean",

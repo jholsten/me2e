@@ -59,6 +59,11 @@ open class Container(
      * Whether there is a healthcheck defined for this container in the Docker-Compose file.
      */
     val hasHealthcheck: Boolean = false,
+
+    /**
+     * Pull policy for this Docker container.
+     */
+    val pullPolicy: DockerConfig.PullPolicy = DockerConfig.PullPolicy.MISSING,
 ) {
     @JsonDeserialize(using = ContainerPortListDeserializer::class)
     class ContainerPortList(ports: List<ContainerPort> = listOf()) : ArrayList<ContainerPort>(ports) {

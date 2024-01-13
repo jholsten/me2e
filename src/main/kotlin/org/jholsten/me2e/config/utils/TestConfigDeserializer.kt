@@ -23,12 +23,14 @@ class TestConfigDeserializer : JsonDeserializer<TestConfig>() {
         mapper = p.codec as ObjectMapper
         val node = p.readValueAsTree<ObjectNode>()
 
+        val injectableValues = InjectableValues.Std()
         val requestConfig = deserializeRequestConfig(node.get("requests"))
-        injectRequestConfig(requestConfig)
-
-        val environmentConfig = mapper.treeToValue(node.get("environment"), TestEnvironmentConfig::class.java)
+        injectRequestConfig(injectableValues, requestConfig)
 
         val dockerConfig = deserializeDockerConfig(node.get("docker"))
+        injectDockerConfig(injectableValues, dockerConfig)
+
+        val environmentConfig = mapper.treeToValue(node.get("environment"), TestEnvironmentConfig::class.java)
         return TestConfig(
             docker = dockerConfig,
             requests = requestConfig,
@@ -43,8 +45,12 @@ class TestConfigDeserializer : JsonDeserializer<TestConfig>() {
         return mapper.treeToValue(requestConfigNode, RequestConfig::class.java)
     }
 
-    private fun injectRequestConfig(requestConfig: RequestConfig) {
-        mapper.setInjectableValues(InjectableValues.Std().addValue("requestConfig", requestConfig))
+    private fun injectRequestConfig(injectableValues: InjectableValues.Std, requestConfig: RequestConfig) {
+        mapper.setInjectableValues(injectableValues.addValue("requestConfig", requestConfig))
+    }
+
+    private fun injectDockerConfig(injectableValues: InjectableValues.Std, dockerConfig: DockerConfig) {
+        mapper.setInjectableValues(injectableValues.addValue("dockerConfig", dockerConfig))
     }
 
     private fun deserializeDockerConfig(dockerConfigNode: JsonNode?): DockerConfig {

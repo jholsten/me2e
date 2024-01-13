@@ -20,6 +20,12 @@ class DockerConfig(
     val dockerComposeVersion: DockerComposeVersion = DockerComposeVersion.V2,
 
     /**
+     * Policy on pulling Docker images.
+     */
+    @JsonProperty("pull-policy")
+    val pullPolicy: PullPolicy = PullPolicy.MISSING,
+
+    /**
      * Whether to always build images before starting containers.
      *
      * Applies `--build` in `docker compose up` (see [Docker Documentation](https://docs.docker.com/engine/reference/commandline/compose_up/#options).
@@ -51,4 +57,16 @@ class DockerConfig(
     @JsonProperty("health-timeout")
     val healthTimeout: Long = 10,
 ) {
+
+    enum class PullPolicy {
+        /**
+         * Only pull missing Docker images.
+         */
+        MISSING,
+
+        /**
+         * Always pull the latest version of all Docker images.
+         */
+        ALWAYS,
+    }
 }

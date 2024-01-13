@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
+import org.jholsten.me2e.config.model.DockerConfig
 import org.jholsten.me2e.config.model.TestEnvironmentConfig
 import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.mock.MockServer
@@ -35,6 +36,11 @@ class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironmentConfig
          * Only applicable to services of type `DATABASE`.
          */
         private const val DATABASE_TYPE_KEY = "org.jholsten.me2e.database-type"
+
+        /**
+         * Label key for specifying the pull policy for this container.
+         */
+        private const val PULL_POLICY_KEY = "org.jholsten.me2e.pull-policy"
     }
 
     private val logger = logger(this)
@@ -45,9 +51,10 @@ class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironmentConfig
         val node = p.readValueAsTree<ObjectNode>()
         val fields = node.fields().asSequence().map { it.key to it.value }.toMap()
         val dockerCompose = fields["docker-compose"]!!.textValue()
+        val dockerConfig = ctxt.findInjectableValue("dockerConfig", null, null) as DockerConfig
         return TestEnvironmentConfig(
             dockerCompose = dockerCompose,
-            containers = deserializeContainers(dockerCompose),
+            containers = deserializeContainers(dockerConfig, dockerCompose),
             mockServers = fields["mock-servers"]?.let { deserializeMockServers(it) } ?: mapOf(),
         )
     }
@@ -71,16 +78,19 @@ class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironmentConfig
      * Deserializes services from the given Docker-Compose file to Map of `(containerName, Container)`.
      * Reads configuration properties from labels.
      */
-    private fun deserializeContainers(dockerComposeFile: String): Map<String, Container> {
+    private fun deserializeContainers(dockerConfig: DockerConfig, dockerComposeFile: String): Map<String, Container> {
         val dockerComposeContent = FileUtils.readFileContentsFromResources(dockerComposeFile)
         val dockerCompose = DeserializerFactory.getYamlMapper().readTree(dockerComposeContent)
         val serviceNode = dockerCompose.get("services")
         require(serviceNode != null) { "Docker-Compose needs to have services defined." }
         val services = serviceNode.fields()
-        return deserializeContainers(services)
+        return deserializeContainers(dockerConfig, services)
     }
 
-    private fun deserializeContainers(services: Iterator<MutableMap.MutableEntry<String, JsonNode>>): Map<String, Container> {
+    private fun deserializeContainers(
+        dockerConfig: DockerConfig,
+        services: Iterator<MutableMap.MutableEntry<String, JsonNode>>
+    ): Map<String, Container> {
         val result = mutableMapOf<String, Container>()
         for (entry in services) {
             val node = entry.value as ObjectNode
@@ -91,6 +101,7 @@ class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironmentConfig
             node.put("type", labels[CONTAINER_TYPE_KEY] ?: "MISC")
             node.put("system", labels[DATABASE_TYPE_KEY])
             node.put("url", labels[URL_KEY])
+            node.put("pullPolicy", labels[PULL_POLICY_KEY] ?: dockerConfig.pullPolicy.name)
             node.put("hasHealthcheck", node.has("healthcheck"))
             result[entry.key] = mapper.treeToValue(node, Container::class.java)
         }
@@ -102,6 +113,7 @@ class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironmentConfig
             CONTAINER_TYPE_KEY to labelsNode?.get(CONTAINER_TYPE_KEY)?.textValue(),
             URL_KEY to labelsNode?.get(URL_KEY)?.textValue(),
             DATABASE_TYPE_KEY to labelsNode?.get(DATABASE_TYPE_KEY)?.textValue(),
+            PULL_POLICY_KEY to labelsNode?.get(PULL_POLICY_KEY)?.textValue(),
         )
     }
 

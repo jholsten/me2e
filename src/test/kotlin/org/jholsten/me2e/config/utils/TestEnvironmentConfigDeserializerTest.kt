@@ -1,6 +1,7 @@
 package org.jholsten.me2e.config.utils
 
 import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -9,6 +10,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import io.mockk.*
+import org.jholsten.me2e.config.model.DockerConfig
 import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.mock.MockServer
 import org.jholsten.me2e.parsing.utils.DeserializerFactory
@@ -40,6 +42,7 @@ class TestEnvironmentConfigDeserializerTest {
                   test: curl --fail http://localhost:1234/health || exit 1
                 labels:
                   "org.jholsten.me2e.container-type": "MICROSERVICE"
+                  "org.jholsten.me2e.pull-policy": "ALWAYS"
 
             auth-server:
                 image: auth-server:1.3.0
@@ -62,6 +65,8 @@ class TestEnvironmentConfigDeserializerTest {
         .registerModule(KotlinModule.Builder().build())
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
+    private val mockedDeserializationContext = mockDeserializationContext()
+
     @BeforeTest
     fun beforeTest() {
         mockkObject(DeserializerFactory.Companion)
@@ -80,7 +85,7 @@ class TestEnvironmentConfigDeserializerTest {
         mockReadingDockerCompose(dockerComposeContents)
 
         val parser = prepareParser(contents)
-        val config = TestEnvironmentConfigDeserializer().deserialize(parser, yamlMapper.deserializationContext)
+        val config = TestEnvironmentConfigDeserializer().deserialize(parser, mockedDeserializationContext)
 
         assertKeysAsExpected(listOf("api-gateway", "auth-server", "database"), config.containers)
         assertKeysAsExpected(listOf("mock-server"), config.mockServers)
@@ -97,7 +102,7 @@ class TestEnvironmentConfigDeserializerTest {
         mockReadingDockerCompose(dockerComposeContents)
 
         val parser = prepareParser(contents)
-        val config = TestEnvironmentConfigDeserializer().deserialize(parser, yamlMapper.deserializationContext)
+        val config = TestEnvironmentConfigDeserializer().deserialize(parser, mockedDeserializationContext)
 
         assertKeysAsExpected(listOf("api-gateway", "auth-server", "database"), config.containers)
 
@@ -124,15 +129,16 @@ class TestEnvironmentConfigDeserializerTest {
         mockReadingDockerCompose(dockerComposeContents)
 
         val parser = prepareParser(contents)
-        val config = TestEnvironmentConfigDeserializer().deserialize(parser, yamlMapper.deserializationContext)
+        val config = TestEnvironmentConfigDeserializer().deserialize(parser, mockedDeserializationContext)
 
         assertKeysAsExpected(listOf("api-gateway"), config.containers)
         assertKeysAsExpected(listOf("mock-server"), config.mockServers)
 
         val expectedService = expectedApiGateway()
-            .put("type", null as String?)
+            .put("type", "MISC")
             .put("system", null as String?)
             .put("url", null as String?)
+            .put("pullPolicy", "MISSING")
         expectedService.remove("labels")
         verify { mockedMapper.treeToValue(expectedService, Container::class.java) }
         verify { mockedMapper.treeToValue(expectedMockServer(), MockServer::class.java) }
@@ -158,7 +164,7 @@ class TestEnvironmentConfigDeserializerTest {
         mockReadingDockerCompose(dockerComposeContents)
 
         val parser = prepareParser(contents)
-        val config = TestEnvironmentConfigDeserializer().deserialize(parser, yamlMapper.deserializationContext)
+        val config = TestEnvironmentConfigDeserializer().deserialize(parser, mockedDeserializationContext)
 
         assertKeysAsExpected(listOf("api-gateway"), config.containers)
         assertKeysAsExpected(listOf("mock-server"), config.mockServers)
@@ -171,7 +177,8 @@ class TestEnvironmentConfigDeserializerTest {
             .set<ObjectNode>(
                 "labels", JsonNodeFactory.instance.objectNode()
             )
-            .put("type", null as String?)
+            .put("type", "MISC")
+            .put("pullPolicy", "MISSING")
         verify { mockedMapper.treeToValue(expectedService, Container::class.java) }
         verify { mockedMapper.treeToValue(expectedMockServer(), MockServer::class.java) }
     }
@@ -183,7 +190,7 @@ class TestEnvironmentConfigDeserializerTest {
 
         val parser = prepareParser(contents)
         assertFailsWith<IllegalArgumentException> {
-            TestEnvironmentConfigDeserializer().deserialize(parser, yamlMapper.deserializationContext)
+            TestEnvironmentConfigDeserializer().deserialize(parser, mockedDeserializationContext)
         }
     }
 
@@ -195,6 +202,12 @@ class TestEnvironmentConfigDeserializerTest {
     private fun initializeMockedMapper() {
         every { mockedMapper.treeToValue(any<JsonNode>(), Container::class.java) } returns mockk<Container>()
         every { mockedMapper.treeToValue(any<JsonNode>(), MockServer::class.java) } returns mockk<MockServer>()
+    }
+
+    private fun mockDeserializationContext(dockerConfig: DockerConfig = DockerConfig()): DeserializationContext {
+        val mockedContext = mockk<DeserializationContext>()
+        every { mockedContext.findInjectableValue(any(), any(), any()) } returns dockerConfig
+        return mockedContext
     }
 
     /**
@@ -230,11 +243,13 @@ class TestEnvironmentConfigDeserializerTest {
             .set<ObjectNode>(
                 "labels", JsonNodeFactory.instance.objectNode()
                     .put("org.jholsten.me2e.container-type", "MICROSERVICE")
+                    .put("org.jholsten.me2e.pull-policy", "ALWAYS")
             )
             .put("name", "api-gateway")
             .put("type", "MICROSERVICE")
             .put("system", null as String?)
             .put("url", null as String?)
+            .put("pullPolicy", "ALWAYS")
             .put("hasHealthcheck", true)
     }
 
@@ -250,6 +265,7 @@ class TestEnvironmentConfigDeserializerTest {
             .put("type", "MICROSERVICE")
             .put("system", null as String?)
             .put("url", "http://auth-server")
+            .put("pullPolicy", "MISSING")
             .put("hasHealthcheck", false)
     }
 
@@ -270,6 +286,7 @@ class TestEnvironmentConfigDeserializerTest {
             .put("type", "DATABASE")
             .put("system", "POSTGRESQL")
             .put("url", null as String?)
+            .put("pullPolicy", "MISSING")
             .put("hasHealthcheck", false)
     }
 
