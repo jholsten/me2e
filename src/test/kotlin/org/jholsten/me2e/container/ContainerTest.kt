@@ -5,6 +5,7 @@ import com.github.dockerjava.api.model.Container as DockerContainer
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.unmockkAll
+import org.jholsten.me2e.config.model.DockerConfig
 import org.jholsten.me2e.container.model.ContainerType
 import org.jholsten.util.RecursiveComparison
 import org.testcontainers.containers.ContainerState
@@ -57,7 +58,7 @@ internal class ContainerTest {
             ContainerPort().withPrivatePort(null).withPublicPort(8002),
         )
 
-        container.initialize(dockerContainer, dockerContainerState)
+        container.initialize(DockerConfig(), dockerContainer, dockerContainerState)
 
         val expected = listOf(
             Container.ContainerPort(12345, 8000),

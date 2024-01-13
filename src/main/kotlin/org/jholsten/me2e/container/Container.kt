@@ -3,6 +3,7 @@ package org.jholsten.me2e.container
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import org.jholsten.me2e.config.model.DockerConfig
 import com.github.dockerjava.api.model.Container as DockerContainer
 import org.jholsten.me2e.config.utils.ContainerPortListDeserializer
 import org.jholsten.me2e.container.database.DatabaseContainer
@@ -138,7 +139,8 @@ open class Container(
      * after the Docker container was started.
      * Maps external ports to internal container ports.
      */
-    internal open fun initialize(dockerContainer: DockerContainer, dockerContainerState: ContainerState) {
+    @JvmSynthetic
+    internal open fun initialize(dockerConfig: DockerConfig, dockerContainer: DockerContainer, dockerContainerState: ContainerState) {
         this.dockerContainer = DockerContainerReference(dockerContainer, dockerContainerState)
 
         val dockerPorts = dockerContainer.ports.filter { it.privatePort != null }

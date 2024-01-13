@@ -125,7 +125,7 @@ class ContainerManager(
         val dockerContainers = getDockerContainers()
         for (container in containers.values) {
             val dockerContainerState = environment.getContainerByServiceName(container.name).get()
-            container.initialize(dockerContainers[container.name]!!, dockerContainerState)
+            container.initialize(dockerConfig, dockerContainers[container.name]!!, dockerContainerState)
         }
     }
 

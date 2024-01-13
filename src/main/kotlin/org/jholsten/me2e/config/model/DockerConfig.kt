@@ -9,6 +9,11 @@ import org.jholsten.me2e.container.docker.DockerComposeVersion
  */
 class DockerConfig(
     /**
+     * Host which is running the Docker Engine.
+     */
+    val dockerHost: String = System.getenv("TESTCONTAINERS_HOST_OVERRIDE") ?: "localhost",
+
+    /**
      * Docker-Compose version to use.
      */
     @JsonProperty("docker-compose-version")
