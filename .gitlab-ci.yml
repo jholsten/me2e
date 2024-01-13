@@ -39,6 +39,9 @@ test:
     - chmod +x ./gradlew
   script:
     - docker login -u REGISTRY_TOKEN -p $REGISTRY_TOKEN $CI_REGISTRY
+    - echo $HOSTNAME
+    - echo $CI_JOB_ID
+    - getent hosts $HOSTNAME
     - docker ps -a
     - docker info
     - docker network ls
