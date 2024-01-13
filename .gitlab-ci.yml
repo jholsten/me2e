@@ -39,6 +39,7 @@ test:
     - chmod +x ./gradlew
   script:
     - docker login -u REGISTRY_TOKEN -p $REGISTRY_TOKEN $CI_REGISTRY
+    - docker ps -a
     - cat /root/.docker/config.json
     - cat /etc/hosts
     - ./gradlew test
