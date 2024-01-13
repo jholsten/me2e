@@ -42,8 +42,8 @@ test:
     - cat /root/.docker/config.json
     - cat /etc/hosts
     - ./gradlew test
-  variables:
-    TESTCONTAINERS_HOST_OVERRIDE: "host.docker.internal"
+  #variables:
+  #  TESTCONTAINERS_HOST_OVERRIDE: "host.docker.internal"
   artifacts:
     when: always
     reports:
