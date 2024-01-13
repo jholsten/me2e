@@ -41,6 +41,7 @@ test:
     - docker login -u REGISTRY_TOKEN -p $REGISTRY_TOKEN $CI_REGISTRY
     - docker ps -a
     - docker info
+    - docker network ls
     - export DOCKER_HOST_IP=$(getent hosts docker | awk '{ print $1 }')
     - echo "Docker Host IP $DOCKER_HOST_IP"
     - cat /root/.docker/config.json
@@ -48,6 +49,7 @@ test:
     - ./gradlew test
   variables:
     TESTCONTAINERS_HOST_OVERRIDE: "host.docker.internal"
+    FF_NETWORK_PER_BUILD: "true"
   artifacts:
     when: always
     reports:
