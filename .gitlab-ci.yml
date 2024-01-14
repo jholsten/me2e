@@ -29,7 +29,6 @@ build:
     - ./gradlew --build-cache assemble
   cache:
     <<: *gradle_cache
-    policy: push
 
 # Runs JUnit tests inside Docker container (required to have access to Docker and Docker-Compose)
 test:
