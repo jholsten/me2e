@@ -1,17 +1,13 @@
 package org.jholsten.me2e.container
 
+import com.github.dockerjava.api.command.LogContainerCmd
 import com.github.dockerjava.api.model.ContainerPort
 import com.github.dockerjava.api.model.Container as DockerContainer
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.unmockkAll
+import io.mockk.*
 import org.jholsten.me2e.container.model.ContainerType
 import org.jholsten.util.RecursiveComparison
 import org.testcontainers.containers.ContainerState
-import kotlin.test.AfterTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNull
+import kotlin.test.*
 
 internal class ContainerTest {
 
@@ -29,6 +25,20 @@ internal class ContainerTest {
             )
         ),
     )
+
+    @BeforeTest
+    fun beforeTest() {
+        every { dockerContainerState.dockerClient } returns mockk {
+            every { logContainerCmd(any()) } returns mockk<LogContainerCmd> {
+                every { withFollowStream(any()) } returns this
+                every { withSince(any()) } returns this
+                every { withStdOut(any()) } returns this
+                every { withStdErr(any()) } returns this
+                every { exec(any()) } returns mockk()
+            }
+        }
+        every { dockerContainerState.containerId } returns "container-id"
+    }
 
     @AfterTest
     fun afterTest() {
