@@ -42,6 +42,7 @@ open class Me2eTest {
     }
 
     init {
+        @Suppress("LeakingThis")
         InjectionUtils(this).injectServices()
     }
 }
