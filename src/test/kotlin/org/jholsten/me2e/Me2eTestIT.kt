@@ -4,8 +4,12 @@ import org.jholsten.me2e.assertions.Assertions.Companion.assertThat
 import org.jholsten.me2e.assertions.Assertions.Companion.isEqualTo
 import org.jholsten.me2e.config.model.ConfigFormat
 import org.jholsten.me2e.container.Container
-import org.jholsten.me2e.container.injection.InjectContainer
+import org.jholsten.me2e.container.injection.InjectService
 import org.jholsten.me2e.container.microservice.MicroserviceContainer
+import org.jholsten.me2e.mock.MockServer
+import org.jholsten.me2e.mock.stubbing.request.StringMatcher.Companion.equalTo
+import org.jholsten.me2e.mock.verification.MockServerVerification.Companion.receivedRequest
+import org.jholsten.me2e.request.model.HttpMethod
 import org.jholsten.me2e.request.model.HttpRequestBody
 import org.jholsten.me2e.request.model.MediaType
 import org.jholsten.me2e.request.model.RelativeUrl
@@ -21,14 +25,20 @@ class Me2eTestIT : Me2eTest() {
 
     private val logger = logger(this)
 
-    @InjectContainer
+    @InjectService
     private lateinit var backendApi: MicroserviceContainer
 
-    @InjectContainer("backend-api")
+    @InjectService("backend-api")
     private lateinit var backendApiAlt: MicroserviceContainer
 
-    @InjectContainer
+    @InjectService
     private lateinit var database: Container
+
+    @InjectService
+    private lateinit var paymentService: MockServer
+
+    @InjectService("payment-service")
+    private lateinit var paymentServiceAlt: MockServer
 
     companion object {
         @JvmStatic
@@ -39,11 +49,10 @@ class Me2eTestIT : Me2eTest() {
         }
     }
 
-    // TODO: Inject Mockserver
     // TODO: Add annotation processor for verifying datatype + superclass
 
     @Test
-    fun `Initializing test class should start environment and inject containers`() {
+    fun `Initializing test class should start environment and inject services`() {
         assertEquals("me2e-config-test.yaml", configAnnotation.config)
         assertEquals(ConfigFormat.YAML, configAnnotation.format)
         for (container in containerManager.containers.values) {
@@ -59,6 +68,10 @@ class Me2eTestIT : Me2eTest() {
         assertSame(containerManager.containers["backend-api"], backendApiAlt)
         assertNotNull(database)
         assertSame(containerManager.containers["database"], database)
+        assertNotNull(paymentService)
+        assertSame(mockServerManager.mockServers["payment-service"], paymentService)
+        assertNotNull(paymentServiceAlt)
+        assertSame(mockServerManager.mockServers["payment-service"], paymentServiceAlt)
     }
 
     @Test
@@ -72,6 +85,13 @@ class Me2eTestIT : Me2eTest() {
         assertThat(response).jsonBody("items[0].value", isEqualTo("42"))
         assertThat(response).jsonBody("items[1].name", isEqualTo("B"))
         assertThat(response).jsonBody("items[1].value", isEqualTo("1"))
-        // TODO: Verify mock server
+
+        paymentService.verify(
+            receivedRequest()
+                .withPath(equalTo("/search"))
+                .withMethod(HttpMethod.POST)
+                .withRequestBody(equalTo("{\"id\": 123}"))
+                .andNoOther()
+        )
     }
 }

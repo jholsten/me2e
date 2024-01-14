@@ -42,6 +42,6 @@ open class Me2eTest {
     }
 
     init {
-        InjectionUtils(this).injectContainers()
+        InjectionUtils(this).injectServices()
     }
 }
