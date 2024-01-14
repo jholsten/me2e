@@ -51,7 +51,6 @@ test:
   variables:
     DOCKER_HOST: "tcp://docker:2375"
     TESTCONTAINERS_HOST_OVERRIDE: "docker"
-    FF_NETWORK_PER_BUILD: "true"
   artifacts:
     when: always
     reports:
