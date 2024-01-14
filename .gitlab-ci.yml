@@ -9,13 +9,15 @@ stages:
   - publish
 
 # Enable cache to save dependencies until gradle-wrapper properties changed:
-cache:
-  key:
-    files:
-      - gradle/wrapper/gradle-wrapper.properties
-  paths:
-    - .gradle/wrapper
-    - .gradle/caches
+default:
+  cache: &gradle_cache
+    key:
+      files:
+        - gradle/wrapper/gradle-wrapper.properties
+    paths:
+      - .gradle/wrapper
+      - .gradle/caches
+    policy: pull-push
 
 # Builds package and uploads cache
 build:
@@ -25,6 +27,9 @@ build:
     - chmod +x ./gradlew
   script:
     - ./gradlew --build-cache assemble
+  cache:
+    <<: *gradle_cache
+    policy: push
 
 # Runs JUnit tests inside Docker container (required to have access to Docker and Docker-Compose)
 test:
@@ -46,11 +51,14 @@ test:
     - ./gradlew test
   after_script:
     - echo "Storing Docker Image Cache..."
+    - mkdir -p docker
     - docker save $(docker images -q) -o docker/cache.tar
   cache:
-    key: build-cache
-    paths:
-      - docker/
+    - <<: *gradle_cache
+      policy: pull
+    - key: build-cache
+      paths:
+        - docker/
   variables:
     DOCKER_HOST: "tcp://docker:2375"
   artifacts:
