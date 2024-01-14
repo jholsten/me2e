@@ -131,4 +131,32 @@ internal class InjectServiceAnnotationProcessorTest {
         assertThat(compilation).hadErrorContaining(invalidFieldTypeMessage)
         assertThat(compilation).hadErrorContaining(invalidEnclosingClassMessage)
     }
+
+    @Test
+    fun `Compiling test class with invalid field types of inner class should fail`() {
+        val compilation = javac()
+            .withProcessors(InjectServiceAnnotationProcessor())
+            .compile(
+                JavaFileObjects.forSourceString(
+                    "com.example.E2ETest",
+                    """
+                    package com.example;
+                        
+                    import org.jholsten.me2e.Me2eTest;
+                    import org.jholsten.me2e.container.injection.InjectService;
+                    
+                    class E2ETest extends Me2eTest {
+                        @InjectService
+                        private InnerClass obj;
+                        
+                        class InnerClass { }
+                    }
+                    """.trimIndent()
+                )
+            )
+
+        assertThat(compilation).failed()
+        assertThat(compilation).hadErrorCount(1)
+        assertThat(compilation).hadErrorContaining(invalidFieldTypeMessage)
+    }
 }

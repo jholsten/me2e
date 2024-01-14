@@ -38,8 +38,12 @@ class InjectServiceAnnotationProcessor : AbstractProcessor() {
     }
 
     private fun assertThatFieldTypeIsValid(element: Element) {
-        val elementType = Class.forName(element.asType().toString())
-        if (!Container::class.java.isAssignableFrom(elementType) && !MockServer::class.java.isAssignableFrom(elementType)) {
+        val elementType = try {
+            Class.forName(element.asType().toString())
+        } catch (e: ClassNotFoundException) {
+            null
+        }
+        if (elementType == null || !(elementType.isOfType(Container::class.java) || elementType.isOfType(MockServer::class.java))) {
             processingEnv.messager.printMessage(
                 Diagnostic.Kind.ERROR,
                 "@${InjectService::class.java.name} annotation can only be applied to fields of type ${Container::class.java.name} and ${MockServer::class.java.name}",
@@ -58,5 +62,9 @@ class InjectServiceAnnotationProcessor : AbstractProcessor() {
                 element
             )
         }
+    }
+
+    private fun Class<*>.isOfType(clazz: Class<*>): Boolean {
+        return clazz.isAssignableFrom(this)
     }
 }
