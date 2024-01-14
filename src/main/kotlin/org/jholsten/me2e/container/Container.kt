@@ -7,9 +7,13 @@ import org.jholsten.me2e.config.model.DockerConfig
 import com.github.dockerjava.api.model.Container as DockerContainer
 import org.jholsten.me2e.config.utils.ContainerPortListDeserializer
 import org.jholsten.me2e.container.database.DatabaseContainer
+import org.jholsten.me2e.container.logging.LogConsumer
+import org.jholsten.me2e.container.logging.LogEntry
+import org.jholsten.me2e.container.logging.LogEntryList
 import org.jholsten.me2e.container.microservice.MicroserviceContainer
 import org.jholsten.me2e.container.model.ContainerType
 import org.testcontainers.containers.ContainerState
+import org.testcontainers.utility.LogUtils
 
 
 /**
@@ -134,10 +138,33 @@ open class Container(
         }
 
     /**
+     * Returns all log output from the container from start until now along with their timestamps.
+     */
+    val logs: LogEntryList
+        get() {
+            assertThatContainerIsInitialized()
+            return logConsumer.logs
+        }
+
+    /**
+     * Returns the ID of the associated Docker container.
+     */
+    val containerId: String
+        get() {
+            assertThatContainerIsInitialized()
+            return dockerContainer!!.state.containerId
+        }
+
+    /**
      * Reference to the Docker container which represents this container instance.
      * Is initialized as soon as the docker compose is started.
      */
     private var dockerContainer: DockerContainerReference? = null
+
+    /**
+     * Consumer which contains the currently recorded logs of this container.
+     */
+    private val logConsumer = LogConsumer()
 
     /**
      * Initializes the container by setting the corresponding [DockerContainer] and [ContainerState] instance
@@ -155,6 +182,7 @@ open class Container(
                 internalPort.external = port.publicPort
             }
         }
+        consumeLogs()
     }
 
     /**
@@ -164,8 +192,15 @@ open class Container(
         // TODO
     }
 
-    fun getLogs(): String {
+    /**
+     * Attaches the [logConsumer] to this container's log outputs.
+     * The consumer receives all previous and all future log frames and stores them in a local variable.
+     */
+    private fun consumeLogs() {
+        LogUtils.followOutput(dockerContainer!!.state.dockerClient, dockerContainer!!.state.containerId, logConsumer)
+    }
+
+    private fun assertThatContainerIsInitialized() {
         checkNotNull(dockerContainer) { "Docker container is not properly initialized" }
-        return dockerContainer!!.state.logs
     }
 }
