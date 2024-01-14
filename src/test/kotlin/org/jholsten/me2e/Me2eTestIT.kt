@@ -9,6 +9,7 @@ import org.jholsten.me2e.container.microservice.MicroserviceContainer
 import org.jholsten.me2e.request.model.HttpRequestBody
 import org.jholsten.me2e.request.model.MediaType
 import org.jholsten.me2e.request.model.RelativeUrl
+import org.jholsten.me2e.utils.logger
 import org.junit.jupiter.api.AfterAll
 import kotlin.test.*
 
@@ -17,6 +18,8 @@ import kotlin.test.*
     format = ConfigFormat.YAML,
 )
 class Me2eTestIT : Me2eTest() {
+
+    private val logger = logger(this)
 
     @InjectContainer
     private lateinit var backendApi: MicroserviceContainer
@@ -62,7 +65,7 @@ class Me2eTestIT : Me2eTest() {
     fun `Invoking mock server in container should succeed`() {
         val response = backendApi.post(RelativeUrl("/search"), HttpRequestBody(content = "{\"id\": 123}", MediaType.JSON_UTF8))
 
-        println(backendApi.getLogs())
+        logger.info(backendApi.getLogs())
         assertThat(response).statusCode(isEqualTo(200))
         assertThat(response).jsonBody("id", isEqualTo("123"))
         assertThat(response).jsonBody("items[0].name", isEqualTo("A"))
