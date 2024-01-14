@@ -49,6 +49,7 @@ test:
     - cat /etc/hosts
     - ./gradlew test
   variables:
+    DOCKER_HOST: "tcp://docker:2375"
     TESTCONTAINERS_HOST_OVERRIDE: "host.docker.internal"
     FF_NETWORK_PER_BUILD: "true"
   artifacts:
