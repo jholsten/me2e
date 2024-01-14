@@ -49,8 +49,6 @@ class Me2eTestIT : Me2eTest() {
         }
     }
 
-    // TODO: Add annotation processor for verifying datatype + superclass
-
     @Test
     fun `Initializing test class should start environment and inject services`() {
         assertEquals("me2e-config-test.yaml", configAnnotation.config)

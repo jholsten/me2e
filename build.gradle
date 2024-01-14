@@ -114,6 +114,11 @@ dependencies {
 
     // Dependency for scanning annotations
     implementation "io.github.classgraph:classgraph:4.8.165"
+
+    // Dependency for registering and testing annotation processors
+    implementation "com.google.auto.service:auto-service:1.1.1"
+    kapt "com.google.auto.service:auto-service:1.1.1"
+    testImplementation "com.google.testing.compile:compile-testing:0.21.0"
 }
 
 // Configuration for documentation
