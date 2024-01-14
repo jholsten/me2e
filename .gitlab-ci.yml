@@ -45,6 +45,7 @@ test:
     - export DOCKER_HOST_IP=$(getent hosts $HOSTNAME | awk '{ print $1 }')
     - echo $DOCKER_HOST_IP
     - hostname -I
+    - lsof -i :80
     - docker ps -a
     - docker info
     - docker network ls
