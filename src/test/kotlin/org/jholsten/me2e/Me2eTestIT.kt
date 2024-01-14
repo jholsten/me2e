@@ -78,7 +78,7 @@ class Me2eTestIT : Me2eTest() {
     fun `Invoking mock server in container should succeed`() {
         val response = backendApi.post(RelativeUrl("/search"), HttpRequestBody(content = "{\"id\": 123}", MediaType.JSON_UTF8))
 
-        logger.info(backendApi.logs.toString())
+        logger.info(backendApi.getLogs())
         assertThat(response).statusCode(isEqualTo(200))
         assertThat(response).jsonBody("id", isEqualTo("123"))
         assertThat(response).jsonBody("items[0].name", isEqualTo("A"))

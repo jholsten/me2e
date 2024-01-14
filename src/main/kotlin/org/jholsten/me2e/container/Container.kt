@@ -4,16 +4,18 @@ import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import org.jholsten.me2e.config.model.DockerConfig
-import com.github.dockerjava.api.model.Container as DockerContainer
 import org.jholsten.me2e.config.utils.ContainerPortListDeserializer
 import org.jholsten.me2e.container.database.DatabaseContainer
-import org.jholsten.me2e.container.logging.LogConsumer
-import org.jholsten.me2e.container.logging.LogEntry
-import org.jholsten.me2e.container.logging.LogEntryList
 import org.jholsten.me2e.container.microservice.MicroserviceContainer
 import org.jholsten.me2e.container.model.ContainerType
 import org.testcontainers.containers.ContainerState
+import org.testcontainers.containers.output.FrameConsumerResultCallback
+import org.testcontainers.containers.output.OutputFrame
+import org.testcontainers.containers.output.ToStringConsumer
+import org.testcontainers.containers.output.WaitingConsumer
 import org.testcontainers.utility.LogUtils
+import java.util.function.Consumer
+import com.github.dockerjava.api.model.Container as DockerContainer
 
 
 /**
@@ -138,16 +140,8 @@ open class Container(
         }
 
     /**
-     * Returns all log output from the container from start until now along with their timestamps.
-     */
-    val logs: LogEntryList
-        get() {
-            assertThatContainerIsInitialized()
-            return logConsumer.logs
-        }
-
-    /**
      * Returns the ID of the associated Docker container.
+     * @throws IllegalStateException if container is not initialized
      */
     val containerId: String
         get() {
@@ -160,11 +154,6 @@ open class Container(
      * Is initialized as soon as the docker compose is started.
      */
     private var dockerContainer: DockerContainerReference? = null
-
-    /**
-     * Consumer which contains the currently recorded logs of this container.
-     */
-    private val logConsumer = LogConsumer()
 
     /**
      * Initializes the container by setting the corresponding [DockerContainer] and [ContainerState] instance
@@ -182,7 +171,6 @@ open class Container(
                 internalPort.external = port.publicPort
             }
         }
-        consumeLogs()
     }
 
     /**
@@ -193,11 +181,49 @@ open class Container(
     }
 
     /**
-     * Attaches the [logConsumer] to this container's log outputs.
-     * The consumer receives all previous and all future log frames and stores them in a local variable.
+     * Returns all log output from the container from [since] until [until] along with their timestamps.
+     * To retrieve all log entries starting from the creation of the container, set [since] to `0`.
+     * To retrieve all log entries until now, set [until] to `null`.
+     * @see LogUtils.followOutput
+     * @throws IllegalStateException if container is not initialized
      */
-    private fun consumeLogs() {
-        LogUtils.followOutput(dockerContainer!!.state.dockerClient, dockerContainer!!.state.containerId, logConsumer)
+    @JvmOverloads
+    fun getLogs(since: Int = 0, until: Int? = null): String {
+        assertThatContainerIsInitialized()
+        val cmd = dockerContainer!!.state.dockerClient
+            .logContainerCmd(dockerContainer!!.state.containerId)
+            .withFollowStream(false)
+            .withTimestamps(true)
+            .withSince(since)
+            .withStdOut(true)
+            .withStdErr(true)
+
+        if (until != null) {
+            cmd.withUntil(until)
+        }
+
+        val toStringConsumer = ToStringConsumer()
+        val wait = WaitingConsumer()
+        val consumer = toStringConsumer.andThen(wait)
+
+        val callback = FrameConsumerResultCallback()
+        callback.addConsumer(OutputFrame.OutputType.STDOUT, consumer)
+        callback.addConsumer(OutputFrame.OutputType.STDERR, consumer)
+
+        cmd.exec(callback).use {
+            wait.waitUntilEnd()
+            return toStringConsumer.toUtf8String()
+        }
+    }
+
+    /**
+     * Attaches the given [consumer] to this container's log outputs.
+     * The consumer receives all previous and all future log frames.
+     * @throws IllegalStateException if container is not initialized
+     */
+    fun addLogConsumer(consumer: Consumer<OutputFrame>) {
+        assertThatContainerIsInitialized()
+        LogUtils.followOutput(dockerContainer!!.state.dockerClient, dockerContainer!!.state.containerId, consumer)
     }
 
     private fun assertThatContainerIsInitialized() {
