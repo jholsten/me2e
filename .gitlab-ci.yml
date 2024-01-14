@@ -37,8 +37,8 @@ test:
   before_script:
     - chmod +x ./gradlew
     - if [[ -f "docker/cache.tar" ]]; then
-      echo "Loading Docker Image Cache..."
-      docker load -i docker/cache.tar
+      echo "Loading Docker Image Cache...";
+      docker load -i docker/cache.tar;
       fi
   script:
     - docker login -u REGISTRY_TOKEN -p $REGISTRY_TOKEN $CI_REGISTRY
