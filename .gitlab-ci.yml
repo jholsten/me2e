@@ -54,7 +54,6 @@ test:
     - docker save $(docker images -q) -o docker/cache.tar
   cache:
     - <<: *gradle_cache
-      policy: pull
     - key: build-cache
       paths:
         - docker/
