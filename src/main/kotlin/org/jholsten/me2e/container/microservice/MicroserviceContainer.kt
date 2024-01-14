@@ -1,7 +1,6 @@
 package org.jholsten.me2e.container.microservice
 
 import com.fasterxml.jackson.annotation.JacksonInject
-import org.jholsten.me2e.config.model.DockerConfig
 import com.github.dockerjava.api.model.Container as DockerContainer
 import org.jholsten.me2e.config.model.RequestConfig
 import org.jholsten.me2e.container.Container
@@ -44,12 +43,12 @@ class MicroserviceContainer(
      */
     private var httpClient: OkHttpClient? = null
 
-    override fun initialize(dockerConfig: DockerConfig, dockerContainer: DockerContainer, dockerContainerState: ContainerState) {
-        super.initialize(dockerConfig, dockerContainer, dockerContainerState)
+    override fun initialize(dockerContainer: DockerContainer, dockerContainerState: ContainerState) {
+        super.initialize(dockerContainer, dockerContainerState)
         if (url == null) {
             val exposedPort = ports.findFirstExposed()
             requireNotNull(exposedPort) { "Microservice $name needs at least one exposed port or a URL defined." }
-            url = "http://${dockerConfig.dockerHost}:${exposedPort.external}"
+            url = "http://${dockerContainerState.host}:${exposedPort.external}"
         }
 
         this.httpClient = OkHttpClient.Builder()

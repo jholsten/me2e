@@ -145,7 +145,7 @@ open class Container(
      * Maps external ports to internal container ports.
      */
     @JvmSynthetic
-    internal open fun initialize(dockerConfig: DockerConfig, dockerContainer: DockerContainer, dockerContainerState: ContainerState) {
+    internal open fun initialize(dockerContainer: DockerContainer, dockerContainerState: ContainerState) {
         this.dockerContainer = DockerContainerReference(dockerContainer, dockerContainerState)
 
         val dockerPorts = dockerContainer.ports.filter { it.privatePort != null }

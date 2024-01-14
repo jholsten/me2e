@@ -25,7 +25,6 @@ build:
     - chmod +x ./gradlew
   script:
     - ./gradlew --build-cache assemble
-    - ./gradlew --stop
 
 # Runs JUnit tests inside Docker container (required to have access to Docker and Docker-Compose)
 test:
@@ -39,18 +38,10 @@ test:
     - chmod +x ./gradlew
   script:
     - docker login -u REGISTRY_TOKEN -p $REGISTRY_TOKEN $CI_REGISTRY
-    - echo $HOSTNAME
-    - echo $CI_JOB_ID
-    - getent hosts $HOSTNAME
-    - export DOCKER_HOST_IP=$(getent hosts $HOSTNAME | awk '{ print $1 }')
-    - echo $DOCKER_HOST_IP
-    - hostname -I
-    - cat /root/.docker/config.json
-    - cat /etc/hosts
+    - export RUNNER_IP=$(hostname -I)
     - ./gradlew test
   variables:
     DOCKER_HOST: "tcp://docker:2375"
-    TESTCONTAINERS_HOST_OVERRIDE: "docker"
   artifacts:
     when: always
     reports:

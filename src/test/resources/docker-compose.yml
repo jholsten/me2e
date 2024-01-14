@@ -12,7 +12,7 @@ services:
       timeout: 3s
       retries: 10
     extra_hosts:
-      - "payment.example.com:$DOCKER_HOST_IP"
+      - "payment.example.com:${RUNNER_IP:-host-gateway}"
     labels:
       "org.jholsten.me2e.container-type": "MICROSERVICE"
       "org.jholsten.me2e.pull-policy": "ALWAYS"
