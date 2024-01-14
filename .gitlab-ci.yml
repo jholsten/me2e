@@ -46,10 +46,8 @@ test:
       fi
   script:
     - docker login -u REGISTRY_TOKEN -p $REGISTRY_TOKEN $CI_REGISTRY
-    - echo $GRADLE_USER_HOME
-    - ls -l $CI_PROJECT_DIR/.gradle
     - export RUNNER_IP=$(hostname -I)
-    - ./gradlew test
+    - ./gradlew --build-cache test
   after_script:
     - echo "Storing Docker Image Cache..."
     - mkdir -p docker
