@@ -2,7 +2,7 @@ services:
   backend-api:
     image: gitlab.informatik.uni-bremen.de:5005/master-thesis1/test-system/backend-api:latest
     ports:
-      - 8000:8000
+      - 8000
     environment:
       DB_PASSWORD: 123
       DB_USER: user
@@ -12,7 +12,7 @@ services:
       timeout: 3s
       retries: 10
     extra_hosts:
-      - "payment.example.com:$DOCKER_HOST_IP"
+      - "payment.example.com:host-gateway"
     labels:
       "org.jholsten.me2e.container-type": "MICROSERVICE"
       "org.jholsten.me2e.pull-policy": "ALWAYS"

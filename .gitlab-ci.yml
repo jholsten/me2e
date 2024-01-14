@@ -47,10 +47,10 @@ test:
     - hostname -I
     - cat /root/.docker/config.json
     - cat /etc/hosts
-    - export TESTCONTAINERS_HOST_OVERRIDE=$DOCKER_HOST_IP
     - ./gradlew test
   variables:
     DOCKER_HOST: "tcp://docker:2375"
+    TESTCONTAINERS_HOST_OVERRIDE: "docker"
     FF_NETWORK_PER_BUILD: "true"
   artifacts:
     when: always
