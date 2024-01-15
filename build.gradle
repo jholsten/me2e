@@ -125,7 +125,6 @@ dependencies {
     implementation "org.postgresql:postgresql:42.7.1"
     implementation "org.mariadb.jdbc:mariadb-java-client:3.3.2"
     implementation "org.mongodb:mongodb-driver-sync:4.11.1"
-    implementation "com.microsoft.sqlserver:mssql-jdbc:12.4.2.jre11"
     implementation "org.mybatis:mybatis:3.5.7"
 }
 
