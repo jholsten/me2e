@@ -85,4 +85,18 @@ class MongoDBConnection(
             collection.drop()
         }
     }
+
+    class Builder : DatabaseConnection.Builder<Builder>() {
+        override fun self(): Builder = this
+
+        override fun build(): DatabaseConnection {
+            return MongoDBConnection(
+                host = requireNotNull(host),
+                port = requireNotNull(port),
+                database = requireNotNull(database),
+                username = username,
+                password = password,
+            )
+        }
+    }
 }
