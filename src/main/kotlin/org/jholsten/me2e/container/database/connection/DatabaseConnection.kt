@@ -26,12 +26,12 @@ abstract class DatabaseConnection protected constructor(
     /**
      * Username to use for logging in.
      */
-    val username: String,
+    val username: String?,
 
     /**
      * Password to use for logging in.
      */
-    val password: String,
+    val password: String?,
 
     /**
      * Database management system which contains the database.
