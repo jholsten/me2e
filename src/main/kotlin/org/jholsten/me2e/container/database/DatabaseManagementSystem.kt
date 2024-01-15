@@ -5,11 +5,11 @@ package org.jholsten.me2e.container.database
  * For all systems other than [OTHER], there are predefined commands for resetting the database state and inserting values.
  */
 enum class DatabaseManagementSystem {
-    ORACLE,
     MY_SQL,
-    MICROSOFT_SQL_SERVER,
+
+    //MICROSOFT_SQL_SERVER, // TODO
     POSTGRESQL,
-    MONGO_DB,
     MARIA_DB,
+    MONGO_DB,
     OTHER,
 }
