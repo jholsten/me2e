@@ -13,6 +13,10 @@ import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.Statement
 
+/**
+ * Representation of the connection to an SQL database.
+ * Allows to query and reset the state of a database instance.
+ */
 class SQLDatabaseConnection private constructor(
     /**
      * Hostname on which the database container is running.
