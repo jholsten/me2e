@@ -72,7 +72,7 @@ abstract class DatabaseConnection protected constructor(
         clear(tablesToClear)
     }
 
-    abstract class Builder<T : DatabaseConnection> {
+    abstract class Builder<SELF : Builder<SELF>> {
         protected var host: String? = null
         protected var port: Int? = null
         protected var database: String? = null
@@ -83,46 +83,54 @@ abstract class DatabaseConnection protected constructor(
         /**
          * Sets the hostname on which the database container is running.
          */
-        fun withHost(host: String) = apply {
+        fun withHost(host: String): SELF {
             this.host = host
+            return self()
         }
 
         /**
          * Sets the port on which the database container is running.
          */
-        fun withPort(port: Int) = apply {
+        fun withPort(port: Int): SELF {
             this.port = port
+            return self()
         }
 
         /**
          * Sets the name of the database to which the connection should be established.
          */
-        fun withDatabase(database: String) = apply {
+        fun withDatabase(database: String): SELF {
             this.database = database
+            return self()
         }
 
         /**
          * Sets the username to use for logging in.
          */
-        fun withUsername(username: String) = apply {
+        fun withUsername(username: String): SELF {
             this.username = username
+            return self()
         }
 
         /**
          * Sets the password to use for logging in.
          */
-        fun withPassword(password: String) = apply {
+        fun withPassword(password: String): SELF {
             this.password = password
+            return self()
         }
 
         /**
          * Sets the database management system which contains the database.
          */
-        fun withSystem(system: DatabaseManagementSystem) = apply {
+        fun withSystem(system: DatabaseManagementSystem): SELF {
             this.system = system
+            return self()
         }
 
-        abstract fun build(): T
+        protected abstract fun self(): SELF
+
+        abstract fun build(): DatabaseConnection
     }
 }
 

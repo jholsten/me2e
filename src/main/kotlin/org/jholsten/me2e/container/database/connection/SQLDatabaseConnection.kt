@@ -131,7 +131,7 @@ class SQLDatabaseConnection private constructor(
         }
     }
 
-    class Builder : DatabaseConnection.Builder<SQLDatabaseConnection>() {
+    class Builder : DatabaseConnection.Builder<Builder>() {
         private var schema: String? = null
 
         /**
@@ -142,6 +142,8 @@ class SQLDatabaseConnection private constructor(
         fun withSchema(schema: String) = apply {
             this.schema = schema
         }
+
+        override fun self(): Builder = this
 
         override fun build(): SQLDatabaseConnection {
             return when {
