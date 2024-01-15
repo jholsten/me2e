@@ -1,64 +1,129 @@
 package org.jholsten.me2e.container.database.connection
 
+import org.jholsten.me2e.container.database.DatabaseManagementSystem
 import org.jholsten.me2e.container.database.model.QueryResult
-import org.jholsten.me2e.container.database.model.SQLTableSpecification
-import org.jholsten.me2e.container.database.model.TableSpecification
 
 /**
  * Representation of the connection to an SQL or No-SQL database.
+ * Allows to query and reset the state of a database instance.
  */
-abstract class DatabaseConnection(
+abstract class DatabaseConnection protected constructor(
+    /**
+     * Hostname on which the database container is running.
+     */
+    val host: String,
+
+    /**
+     * Port on which the database container is running.
+     */
+    val port: Int,
+
+    /**
+     * Name of the database to which the connection should be established.
+     */
+    val database: String,
+
+    /**
+     * Username to use for logging in.
+     */
     val username: String,
+
+    /**
+     * Password to use for logging in.
+     */
     val password: String,
+
+    /**
+     * Database management system which contains the database.
+     */
+    val system: DatabaseManagementSystem,
 ) {
     /**
-     * Returns list of all tables of the database.
-     * In case of a No-SQL database, the collections are returned.
+     * Returns list of all tables of the database. Excludes system tables such as `pg_class` in PostgreSQL.
+     * In case of a No-SQL database, all collections are returned.
      */
-    abstract val tables: List<TableSpecification>
-
-    fun getAllFromTable(tableName: String): QueryResult {
-        return getAllFromTable(tableName.toTableSpecification())
-    }
-
-    abstract fun getAllFromTable(table: TableSpecification): QueryResult
+    abstract val tables: List<String>
 
     /**
-     * Truncates the given tables.
+     * Returns all entries which are currently stored in the table with the given name.
+     * @param tableName Name of the table for which entries are to be retrieved.
      */
-    abstract fun clear(tablesToClear: List<TableSpecification>)
-
-    @JvmName("clearTables")
-    fun clear(tablesToClear: List<String>) {
-        clear(tablesToClear.map { it.toTableSpecification() })
-    }
+    abstract fun getAllFromTable(tableName: String): QueryResult
 
     /**
-     * Truncates all tables.
+     * Truncates the tables with the given names.
+     * @param tablesToClear Table names which should be cleared.
+     */
+    abstract fun clear(tablesToClear: List<String>)
+
+    /**
+     * Truncates all tables of the connected database.
      */
     fun clearAll() {
         clear(tables)
     }
 
     /**
-     * Truncates all tables except the given [tablesToSkip].
+     * Truncates all tables except the tables with the given names.
+     * @param tablesToSkip Table names which should not be cleared.
      */
-    fun clearAllExcept(tablesToSkip: List<TableSpecification>) {
-        val tablesToClear = tables.filter { !tablesToSkip.contains(it) }
+    fun clearAllExcept(tablesToSkip: List<String>) {
+        val tablesToClear = tables.filter { table -> tablesToSkip.none { table.lowercase() == it.lowercase() } }
         clear(tablesToClear)
     }
 
-    private fun String.toTableSpecification(): TableSpecification {
-        return when {
-            this.contains(".") -> SQLTableSpecification(
-                name = this.substringBefore("."),
-                schema = this.substringAfter("."),
-            )
+    abstract class Builder<T : DatabaseConnection> {
+        protected var host: String? = null
+        protected var port: Int? = null
+        protected var database: String? = null
+        protected var username: String? = null
+        protected var password: String? = null
+        protected var system: DatabaseManagementSystem? = null
 
-            else -> TableSpecification(name = this)
+        /**
+         * Sets the hostname on which the database container is running.
+         */
+        fun withHost(host: String) = apply {
+            this.host = host
         }
-    }
 
+        /**
+         * Sets the port on which the database container is running.
+         */
+        fun withPort(port: Int) = apply {
+            this.port = port
+        }
+
+        /**
+         * Sets the name of the database to which the connection should be established.
+         */
+        fun withDatabase(database: String) = apply {
+            this.database = database
+        }
+
+        /**
+         * Sets the username to use for logging in.
+         */
+        fun withUsername(username: String) = apply {
+            this.username = username
+        }
+
+        /**
+         * Sets the password to use for logging in.
+         */
+        fun withPassword(password: String) = apply {
+            this.password = password
+        }
+
+        /**
+         * Sets the database management system which contains the database.
+         */
+        fun withSystem(system: DatabaseManagementSystem) = apply {
+            this.system = system
+        }
+
+        abstract fun build(): T
+    }
 }
 
 // For NoSQL: https://hibernate.org/ogm/

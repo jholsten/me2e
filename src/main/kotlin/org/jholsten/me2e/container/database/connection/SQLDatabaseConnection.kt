@@ -5,8 +5,6 @@ import org.apache.ibatis.jdbc.ScriptRunner
 import org.jholsten.me2e.container.database.DatabaseManagementSystem
 import org.jholsten.me2e.container.database.model.QueryResult
 import org.jholsten.me2e.container.database.exception.DatabaseException
-import org.jholsten.me2e.container.database.model.SQLTableSpecification
-import org.jholsten.me2e.container.database.model.TableSpecification
 import org.jholsten.me2e.parsing.utils.FileUtils
 import org.jholsten.me2e.utils.logger
 import java.io.File
@@ -15,14 +13,54 @@ import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.Statement
 
-class SQLDatabaseConnection(
-    val jdbcUrl: String,
+class SQLDatabaseConnection private constructor(
+    /**
+     * Hostname on which the database container is running.
+     */
+    host: String,
+
+    /**
+     * Port on which the database container is running.
+     */
+    port: Int,
+
+    /**
+     * Name of the database to which the connection should be established.
+     */
+    database: String,
+
+    /**
+     * Username to use for logging in.
+     */
     username: String,
+
+    /**
+     * Password to use for logging in.
+     */
     password: String,
-    val system: DatabaseManagementSystem,
-) : DatabaseConnection(username, password) {
+
+    /**
+     * Database management system which contains the database.
+     */
+    system: DatabaseManagementSystem,
+
+    /**
+     * Name of the schema to which this database belongs.
+     * In case of [DatabaseManagementSystem.MY_SQL] and [DatabaseManagementSystem.MARIA_DB], this is the name of the database.
+     * For [DatabaseManagementSystem.POSTGRESQL], the schema is different to the database and is set to `public` by default.
+     */
+    val schema: String = when (system) {
+        DatabaseManagementSystem.POSTGRESQL -> "public"
+        else -> database
+    },
+) : DatabaseConnection(host, port, database, username, password, system) {
 
     private val logger = logger(this)
+
+    /**
+     * JDBC URL to use for connecting to the database.
+     */
+    val jdbcUrl: String = "jdbc:${system.getJdbcDriverName()}://$host:$port/$database"
 
     /**
      * JDBC connection to the database.
@@ -31,12 +69,12 @@ class SQLDatabaseConnection(
         connect()
     }
 
-    override val tables: List<SQLTableSpecification>
+    override val tables: List<String>
         get() = fetchTables()
 
-    override fun getAllFromTable(table: TableSpecification): QueryResult {
+    override fun getAllFromTable(tableName: String): QueryResult {
         connection.createStatement().runWithAutoRollback { statement ->
-            statement.executeQuery("SELECT * FROM ${table.representation}").use { result ->
+            statement.executeQuery("SELECT * FROM ${getTableRepresentation(tableName)}").use { result ->
                 val columnNames = (1 until result.metaData.columnCount + 1).associateWith { result.metaData.getColumnName(it) }
                 val rows = mutableListOf<Map<String, Any?>>()
                 while (result.next()) {
@@ -78,7 +116,7 @@ class SQLDatabaseConnection(
         executeScript(FileUtils.getResourceAsFile(path))
     }
 
-    override fun clear(tablesToClear: List<TableSpecification>) {
+    override fun clear(tablesToClear: List<String>) {
         if (tablesToClear.isEmpty()) {
             return
         }
@@ -93,31 +131,60 @@ class SQLDatabaseConnection(
         }
     }
 
+    class Builder : DatabaseConnection.Builder<SQLDatabaseConnection>() {
+        private var schema: String? = null
+
+        /**
+         * Sets the name of the schema to which this database belongs.
+         * In case of [DatabaseManagementSystem.MY_SQL] and [DatabaseManagementSystem.MARIA_DB], this should be the name of the database.
+         * For [DatabaseManagementSystem.POSTGRESQL], the schema is different to the database and is set to `public` by default.
+         */
+        fun withSchema(schema: String) = apply {
+            this.schema = schema
+        }
+
+        override fun build(): SQLDatabaseConnection {
+            return when {
+                schema == null -> SQLDatabaseConnection(
+                    host = requireNotNull(host),
+                    port = requireNotNull(port),
+                    database = requireNotNull(database),
+                    username = requireNotNull(username),
+                    password = requireNotNull(password),
+                    system = requireNotNull(system),
+                )
+
+                else -> SQLDatabaseConnection(
+                    host = requireNotNull(host),
+                    port = requireNotNull(port),
+                    database = requireNotNull(database),
+                    username = requireNotNull(username),
+                    password = requireNotNull(password),
+                    system = requireNotNull(system),
+                    schema = schema!!,
+                )
+            }
+        }
+    }
+
     /**
-     * TODO: MySQL = db-Name, Postgres=public
-     * TODO: MySQL case sensitive
+     * Truncates the table with the given name.
      */
-    fun clearAllFromSchema(schema: String) {
-        clearAllFromSchemaExcept(schema, listOf())
-    }
-
-    fun clearAllFromSchemaExcept(schema: String, tablesToSkip: List<TableSpecification>) {
-        val tablesToClear = fetchTables(schema).filter { !tablesToSkip.contains(it) }
-        clear(tablesToClear)
-    }
-
-    private fun truncateTable(statement: Statement, table: TableSpecification) {
-        var command = "TRUNCATE TABLE ${table.representation}"
+    private fun truncateTable(statement: Statement, table: String) {
+        var command = "TRUNCATE TABLE ${getTableRepresentation(table)}"
         if (system == DatabaseManagementSystem.POSTGRESQL) {
             command += " CASCADE"
         }
         statement.executeUpdate(command)
     }
 
+    /**
+     * Established JDBC connection to the database and registers the
+     * corresponding driver for the [system].
+     */
     private fun connect(): Connection {
         registerDriver()
         val connection = DriverManager.getConnection(jdbcUrl, username, password)
-        connection.autoCommit = true
         logger.info("Established connection to database $jdbcUrl.")
         return connection
     }
@@ -136,22 +203,19 @@ class SQLDatabaseConnection(
         logger.info("Registered driver $driver for database system $system")
     }
 
-    private fun fetchTables(schema: String? = null): MutableList<SQLTableSpecification> {
+    /**
+     * Fetches the names of all tables belonging to the [database] and [schema].
+     */
+    private fun fetchTables(): MutableList<String> {
         connection.createStatement().runWithAutoRollback { statement ->
-            var query =
-                "SELECT table_name, table_schema FROM INFORMATION_SCHEMA.TABLES WHERE (table_type='TABLE' OR table_type='BASE TABLE')"
-            if (schema != null) {
-                query += " AND table_schema='$schema'"
-            }
-            statement.executeQuery(query).use { result ->
-                val tables = mutableListOf<SQLTableSpecification>()
+            statement.executeQuery(
+                """
+                SELECT table_name FROM INFORMATION_SCHEMA.TABLES WHERE (table_type='TABLE' OR table_type='BASE TABLE') AND table_schema='$schema'
+                """.trimIndent()
+            ).use { result ->
+                val tables = mutableListOf<String>()
                 while (result.next()) {
-                    tables.add(
-                        SQLTableSpecification(
-                            name = result.getString(1),
-                            schema = result.getString(2),
-                        )
-                    )
+                    tables.add(result.getString(1))
                 }
                 return tables
             }
@@ -173,6 +237,26 @@ class SQLDatabaseConnection(
     private fun enableForeignKeyChecks(statement: Statement) {
         if (system == DatabaseManagementSystem.MY_SQL || system == DatabaseManagementSystem.MARIA_DB) {
             statement.execute("SET @@foreign_key_checks = 1;")
+        }
+    }
+
+    /**
+     * Returns the representation of the given table to use for executing commands.
+     * Concatenates [schema] and [tableName] to the representation required by the [system].
+     */
+    private fun getTableRepresentation(tableName: String): String {
+        return when (this.system) {
+            DatabaseManagementSystem.POSTGRESQL -> "$database.$schema.$tableName"
+            else -> "$schema.$tableName"
+        }
+    }
+
+    private fun DatabaseManagementSystem.getJdbcDriverName(): String {
+        return when (this) {
+            DatabaseManagementSystem.POSTGRESQL -> "postgresql"
+            DatabaseManagementSystem.MY_SQL -> "mysql"
+            DatabaseManagementSystem.MARIA_DB -> "mysql"
+            else -> throw DatabaseException("Unsupported system: $system")
         }
     }
 

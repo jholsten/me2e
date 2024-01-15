@@ -6,8 +6,6 @@ package org.jholsten.me2e.container.database
  */
 enum class DatabaseManagementSystem {
     MY_SQL,
-
-    //MICROSOFT_SQL_SERVER, // TODO
     POSTGRESQL,
     MARIA_DB,
     MONGO_DB,

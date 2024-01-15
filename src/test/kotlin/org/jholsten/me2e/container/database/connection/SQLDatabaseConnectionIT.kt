@@ -2,8 +2,6 @@ package org.jholsten.me2e.container.database.connection
 
 import org.jholsten.me2e.container.database.DatabaseManagementSystem
 import org.jholsten.me2e.container.database.model.QueryResult
-import org.jholsten.me2e.container.database.model.SQLTableSpecification
-import org.jholsten.me2e.container.database.model.TableSpecification
 import org.jholsten.util.RecursiveComparison
 import org.jholsten.util.assertDoesNotThrow
 import org.junit.jupiter.api.AfterAll
@@ -64,26 +62,32 @@ internal class SQLDatabaseConnectionIT {
         @JvmStatic
         fun beforeAll() {
             postgreSQLContainer.start()
-            postgreSQLConnection = SQLDatabaseConnection(
-                jdbcUrl = "jdbc:postgresql://${postgreSQLContainer.host}:${postgreSQLContainer.getMappedPort(5432)}/testdb",
-                username = "user",
-                password = "123",
-                system = DatabaseManagementSystem.POSTGRESQL,
-            )
+            postgreSQLConnection = SQLDatabaseConnection.Builder()
+                .withHost(postgreSQLContainer.host)
+                .withPort(postgreSQLContainer.getMappedPort(5432))
+                .withDatabase("testdb")
+                .withUsername("user")
+                .withPassword("123")
+                .withSystem(DatabaseManagementSystem.POSTGRESQL)
+                .build()
             mySQLContainer.start()
-            mySQLConnection = SQLDatabaseConnection(
-                jdbcUrl = "jdbc:mysql://${mySQLContainer.host}:${mySQLContainer.getMappedPort(3306)}/testdb",
-                username = "user",
-                password = "123",
-                system = DatabaseManagementSystem.MY_SQL,
-            )
+            mySQLConnection = SQLDatabaseConnection.Builder()
+                .withHost(mySQLContainer.host)
+                .withPort(mySQLContainer.getMappedPort(3306))
+                .withDatabase("testdb")
+                .withUsername("user")
+                .withPassword("123")
+                .withSystem(DatabaseManagementSystem.MY_SQL)
+                .build()
             mariaDBContainer.start()
-            mariaDBConnection = SQLDatabaseConnection(
-                jdbcUrl = "jdbc:mysql://${mariaDBContainer.host}:${mariaDBContainer.getMappedPort(3306)}/testdb",
-                username = "user",
-                password = "123",
-                system = DatabaseManagementSystem.MARIA_DB,
-            )
+            mariaDBConnection = SQLDatabaseConnection.Builder()
+                .withHost(mariaDBContainer.host)
+                .withPort(mariaDBContainer.getMappedPort(3306))
+                .withDatabase("testdb")
+                .withUsername("user")
+                .withPassword("123")
+                .withSystem(DatabaseManagementSystem.MARIA_DB)
+                .build()
         }
 
         @AfterAll
@@ -101,27 +105,21 @@ internal class SQLDatabaseConnectionIT {
                         DatabaseArguments(
                             DatabaseManagementSystem.POSTGRESQL,
                             postgreSQLConnection,
-                            "public",
                             "database/postgres_script.sql",
-                            populate = { populatePostgreSQLDB() },
                         )
                     ),
                     Arguments.of(
                         DatabaseArguments(
                             DatabaseManagementSystem.MY_SQL,
                             mySQLConnection,
-                            "testdb",
                             "database/mysql_script.sql",
-                            populate = { populateMySQLDB(mySQLConnection) },
                         )
                     ),
                     Arguments.of(
                         DatabaseArguments(
                             DatabaseManagementSystem.MARIA_DB,
                             mariaDBConnection,
-                            "testdb",
                             "database/mysql_script.sql",
-                            populate = { populateMySQLDB(mariaDBConnection) },
                         )
                     ),
                 )
@@ -131,30 +129,9 @@ internal class SQLDatabaseConnectionIT {
         data class DatabaseArguments(
             val system: DatabaseManagementSystem,
             val connection: SQLDatabaseConnection,
-            val schema: String,
             val script: String,
-            val populate: () -> Unit,
         ) {
             override fun toString(): String = system.toString()
-        }
-
-        private fun populatePostgreSQLDB() {
-            val statement = postgreSQLConnection.connection.createStatement()
-            statement.executeUpdate("CREATE TABLE company(id INT PRIMARY KEY, name VARCHAR(255))")
-            statement.executeUpdate("CREATE TABLE employee(id INT PRIMARY KEY, name VARCHAR(255), company_id INT, FOREIGN KEY (company_id) REFERENCES company ON DELETE CASCADE)")
-            statement.executeUpdate("INSERT INTO company(id, name) VALUES (1, 'Company A'), (2, 'Company B')")
-            statement.executeUpdate("INSERT INTO employee(id, name, company_id) VALUES (1, 'Employee A.1', 1), (2, 'Employee A.2', 1), (3, 'Employee B.1', 2)")
-            statement.close()
-        }
-
-        private fun populateMySQLDB(connection: SQLDatabaseConnection) {
-            val statement = connection.connection.createStatement()
-            statement.execute("USE testdb;")
-            statement.executeUpdate("CREATE TABLE company(id INT PRIMARY KEY, name VARCHAR(255))")
-            statement.executeUpdate("CREATE TABLE employee(id INT PRIMARY KEY, name VARCHAR(255), company_id INT, FOREIGN KEY (company_id) REFERENCES company(id) ON DELETE CASCADE)")
-            statement.executeUpdate("INSERT INTO company(id, name) VALUES (1, 'Company A'), (2, 'Company B')")
-            statement.executeUpdate("INSERT INTO employee(id, name, company_id) VALUES (1, 'Employee A.1', 1), (2, 'Employee A.2', 1), (3, 'Employee B.1', 2)")
-            statement.close()
         }
     }
 
@@ -198,11 +175,23 @@ internal class SQLDatabaseConnectionIT {
         resetMySQLDB(mariaDBConnection)
     }
 
+    @Test
+    fun `JDBC URLs should be constructed correctly`() {
+        val postgreSQLUrl = "${postgreSQLContainer.host}:${postgreSQLContainer.getMappedPort(5432)}"
+        assertEquals("jdbc:postgresql://$postgreSQLUrl/testdb", postgreSQLConnection.jdbcUrl)
+
+        val mySQLUrl = "${mySQLContainer.host}:${mySQLContainer.getMappedPort(3306)}"
+        assertEquals("jdbc:mysql://$mySQLUrl/testdb", mySQLConnection.jdbcUrl)
+
+        val mariaDBUrl = "${mariaDBContainer.host}:${mariaDBContainer.getMappedPort(3306)}"
+        assertEquals("jdbc:mysql://$mariaDBUrl/testdb", mariaDBConnection.jdbcUrl)
+    }
+
     @ParameterizedTest(name = "[{index}] with {0}")
     @ArgumentsSource(DatabaseArgumentProvider::class)
     fun `Executing SQL script should succeed`(databaseArguments: DatabaseArguments) {
         databaseArguments.connection.executeScript(databaseArguments.script)
-        assertTablesExist(databaseArguments.connection, databaseArguments.schema)
+        assertTablesExist(databaseArguments.connection)
         RecursiveComparison.assertEquals(expectedCompanies, databaseArguments.connection.getAllFromTable("company"))
         RecursiveComparison.assertEquals(expectedEmployees, databaseArguments.connection.getAllFromTable("employee"))
     }
@@ -217,11 +206,11 @@ internal class SQLDatabaseConnectionIT {
     @ParameterizedTest(name = "[{index}] with {0}")
     @ArgumentsSource(DatabaseArgumentProvider::class)
     fun `Clearing database should succeed`(databaseArguments: DatabaseArguments) {
-        databaseArguments.populate()
+        populateDB(databaseArguments.system, databaseArguments.connection)
 
-        databaseArguments.connection.clearAllFromSchema(databaseArguments.schema)
+        databaseArguments.connection.clearAll()
 
-        assertTablesExist(databaseArguments.connection, databaseArguments.schema)
+        assertTablesExist(databaseArguments.connection)
         assertEquals(0, databaseArguments.connection.getAllFromTable("company").size)
         assertEquals(0, databaseArguments.connection.getAllFromTable("employee").size)
     }
@@ -229,11 +218,11 @@ internal class SQLDatabaseConnectionIT {
     @ParameterizedTest(name = "[{index}] with {0}")
     @ArgumentsSource(DatabaseArgumentProvider::class)
     fun `Clearing certain tables should succeed`(databaseArguments: DatabaseArguments) {
-        databaseArguments.populate()
+        populateDB(databaseArguments.system, databaseArguments.connection)
 
         databaseArguments.connection.clear(listOf("employee"))
 
-        assertTablesExist(databaseArguments.connection, databaseArguments.schema)
+        assertTablesExist(databaseArguments.connection)
         assertEquals(2, databaseArguments.connection.getAllFromTable("company").size)
         assertEquals(0, databaseArguments.connection.getAllFromTable("employee").size)
     }
@@ -241,11 +230,11 @@ internal class SQLDatabaseConnectionIT {
     @ParameterizedTest(name = "[{index}] with {0}")
     @ArgumentsSource(DatabaseArgumentProvider::class)
     fun `Clearing certain tables with empty list should not clean any tables`(databaseArguments: DatabaseArguments) {
-        databaseArguments.populate()
+        populateDB(databaseArguments.system, databaseArguments.connection)
 
         databaseArguments.connection.clear(listOf<String>())
 
-        assertTablesExist(databaseArguments.connection, databaseArguments.schema)
+        assertTablesExist(databaseArguments.connection)
         assertEquals(2, databaseArguments.connection.getAllFromTable("company").size)
         assertEquals(3, databaseArguments.connection.getAllFromTable("employee").size)
     }
@@ -253,11 +242,11 @@ internal class SQLDatabaseConnectionIT {
     @ParameterizedTest(name = "[{index}] with {0}")
     @ArgumentsSource(DatabaseArgumentProvider::class)
     fun `Clearing all tables from schema except should skip given tables`(databaseArguments: DatabaseArguments) {
-        databaseArguments.populate()
+        populateDB(databaseArguments.system, databaseArguments.connection)
 
-        databaseArguments.connection.clearAllFromSchemaExcept(databaseArguments.schema, listOf(TableSpecification("company")))
+        databaseArguments.connection.clearAllExcept(listOf("company"))
 
-        assertTablesExist(databaseArguments.connection, databaseArguments.schema)
+        assertTablesExist(databaseArguments.connection)
         assertEquals(2, databaseArguments.connection.getAllFromTable("company").size)
         assertEquals(0, databaseArguments.connection.getAllFromTable("employee").size)
     }
@@ -269,11 +258,27 @@ internal class SQLDatabaseConnectionIT {
         assertDoesNotThrow { databaseArguments.connection.tables }
     }
 
-    private fun assertTablesExist(connection: SQLDatabaseConnection, schema: String) {
-        val tables = connection.tables.filter { it.schema == schema }
+    private fun assertTablesExist(connection: SQLDatabaseConnection) {
+        val tables = connection.tables
         assertEquals(2, tables.size)
-        assertContains(tables, SQLTableSpecification(name = "company", schema = schema))
-        assertContains(tables, SQLTableSpecification(name = "employee", schema = schema))
+        assertContains(tables, "company")
+        assertContains(tables, "employee")
+    }
+
+    private fun populateDB(system: DatabaseManagementSystem, connection: SQLDatabaseConnection) {
+        val statement = connection.connection.createStatement()
+        if (system != DatabaseManagementSystem.POSTGRESQL) {
+            statement.execute("USE testdb;")
+        }
+        statement.executeUpdate("CREATE TABLE company(id INT PRIMARY KEY, name VARCHAR(255))")
+        if (system == DatabaseManagementSystem.POSTGRESQL) {
+            statement.executeUpdate("CREATE TABLE employee(id INT PRIMARY KEY, name VARCHAR(255), company_id INT, FOREIGN KEY (company_id) REFERENCES company ON DELETE CASCADE)")
+        } else {
+            statement.executeUpdate("CREATE TABLE employee(id INT PRIMARY KEY, name VARCHAR(255), company_id INT, FOREIGN KEY (company_id) REFERENCES company(id) ON DELETE CASCADE)")
+        }
+        statement.executeUpdate("INSERT INTO company(id, name) VALUES (1, 'Company A'), (2, 'Company B')")
+        statement.executeUpdate("INSERT INTO employee(id, name, company_id) VALUES (1, 'Employee A.1', 1), (2, 'Employee A.2', 1), (3, 'Employee B.1', 2)")
+        statement.close()
     }
 
     private fun resetPostgreSQLDB() {
