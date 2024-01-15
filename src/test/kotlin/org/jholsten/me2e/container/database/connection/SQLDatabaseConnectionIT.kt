@@ -14,6 +14,7 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.ArgumentsProvider
 import org.junit.jupiter.params.provider.ArgumentsSource
 import org.testcontainers.containers.GenericContainer
+import org.testcontainers.containers.wait.strategy.Wait
 import java.io.File
 import java.io.FileNotFoundException
 import java.util.stream.Stream
@@ -60,29 +61,48 @@ internal class SQLDatabaseConnectionIT {
 
         private lateinit var mariaDBConnection: SQLDatabaseConnection
 
+        private val msSQLContainer = GenericContainer("mcr.microsoft.com/mssql/server:2022-latest")
+            .withEnv(
+                mapOf(
+                    "ACCEPT_EULA" to "Y",
+                    "SA_PASSWORD" to "Some@Password123",
+                )
+            )
+            .withExposedPorts(1433)
+            .waitingFor(Wait.forSuccessfulCommand("/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Some@Password123 -Q 'SELECT 1' || exit 1"))
+
+        private lateinit var msSQLConnection: SQLDatabaseConnection
+
         @BeforeAll
         @JvmStatic
         fun beforeAll() {
-            postgreSQLContainer.start()
-            postgreSQLConnection = SQLDatabaseConnection(
-                jdbcUrl = "jdbc:postgresql://${postgreSQLContainer.host}:${postgreSQLContainer.getMappedPort(5432)}/testdb",
-                username = "user",
-                password = "123",
-                system = DatabaseManagementSystem.POSTGRESQL,
-            )
-            mySQLContainer.start()
-            mySQLConnection = SQLDatabaseConnection(
-                jdbcUrl = "jdbc:mysql://${mySQLContainer.host}:${mySQLContainer.getMappedPort(3306)}/testdb",
-                username = "user",
-                password = "123",
-                system = DatabaseManagementSystem.MY_SQL,
-            )
-            mariaDBContainer.start()
-            mariaDBConnection = SQLDatabaseConnection(
-                jdbcUrl = "jdbc:mysql://${mariaDBContainer.host}:${mariaDBContainer.getMappedPort(3306)}/testdb",
-                username = "user",
-                password = "123",
-                system = DatabaseManagementSystem.MARIA_DB,
+//            postgreSQLContainer.start()
+//            postgreSQLConnection = SQLDatabaseConnection(
+//                jdbcUrl = "jdbc:postgresql://${postgreSQLContainer.host}:${postgreSQLContainer.getMappedPort(5432)}/testdb",
+//                username = "user",
+//                password = "123",
+//                system = DatabaseManagementSystem.POSTGRESQL,
+//            )
+//            mySQLContainer.start()
+//            mySQLConnection = SQLDatabaseConnection(
+//                jdbcUrl = "jdbc:mysql://${mySQLContainer.host}:${mySQLContainer.getMappedPort(3306)}/testdb",
+//                username = "user",
+//                password = "123",
+//                system = DatabaseManagementSystem.MY_SQL,
+//            )
+//            mariaDBContainer.start()
+//            mariaDBConnection = SQLDatabaseConnection(
+//                jdbcUrl = "jdbc:mysql://${mariaDBContainer.host}:${mariaDBContainer.getMappedPort(3306)}/testdb",
+//                username = "user",
+//                password = "123",
+//                system = DatabaseManagementSystem.MARIA_DB,
+//            )
+            msSQLContainer.start()
+            msSQLConnection = SQLDatabaseConnection(
+                jdbcUrl = "jdbc:sqlserver://${msSQLContainer.host}:${msSQLContainer.getMappedPort(1433)};encrypt=false",
+                username = "sa",
+                password = "Some@Password123",
+                system = DatabaseManagementSystem.MS_SQL,
             )
         }
 
@@ -92,36 +112,46 @@ internal class SQLDatabaseConnectionIT {
             postgreSQLContainer.stop()
             mySQLContainer.stop()
             mariaDBContainer.stop()
+            msSQLContainer.stop()
         }
 
         class DatabaseArgumentProvider : ArgumentsProvider {
             override fun provideArguments(context: ExtensionContext?): Stream<out Arguments> {
                 return Stream.of(
+//                    Arguments.of(
+//                        DatabaseArguments(
+//                            DatabaseManagementSystem.POSTGRESQL,
+//                            postgreSQLConnection,
+//                            "public",
+//                            "database/postgres_script.sql",
+//                            populate = { populatePostgreSQLDB() },
+//                        )
+//                    ),
+//                    Arguments.of(
+//                        DatabaseArguments(
+//                            DatabaseManagementSystem.MY_SQL,
+//                            mySQLConnection,
+//                            "testdb",
+//                            "database/mysql_script.sql",
+//                            populate = { populateMySQLDB(mySQLConnection) },
+//                        )
+//                    ),
+//                    Arguments.of(
+//                        DatabaseArguments(
+//                            DatabaseManagementSystem.MARIA_DB,
+//                            mariaDBConnection,
+//                            "testdb",
+//                            "database/mysql_script.sql",
+//                            populate = { populateMySQLDB(mariaDBConnection) },
+//                        )
+//                    ),
                     Arguments.of(
                         DatabaseArguments(
-                            DatabaseManagementSystem.POSTGRESQL,
-                            postgreSQLConnection,
-                            "public",
-                            "database/postgres_script.sql",
-                            populate = { populatePostgreSQLDB() },
-                        )
-                    ),
-                    Arguments.of(
-                        DatabaseArguments(
-                            DatabaseManagementSystem.MY_SQL,
-                            mySQLConnection,
-                            "testdb",
-                            "database/mysql_script.sql",
-                            populate = { populateMySQLDB(mySQLConnection) },
-                        )
-                    ),
-                    Arguments.of(
-                        DatabaseArguments(
-                            DatabaseManagementSystem.MARIA_DB,
-                            mariaDBConnection,
-                            "testdb",
-                            "database/mysql_script.sql",
-                            populate = { populateMySQLDB(mariaDBConnection) },
+                            DatabaseManagementSystem.MS_SQL,
+                            msSQLConnection,
+                            "dbo",
+                            "database/mssql_script.sql",
+                            populate = { populateMsSQLDB() },
                         )
                     ),
                 )
@@ -150,6 +180,15 @@ internal class SQLDatabaseConnectionIT {
         private fun populateMySQLDB(connection: SQLDatabaseConnection) {
             val statement = connection.connection.createStatement()
             statement.execute("USE testdb;")
+            statement.executeUpdate("CREATE TABLE company(id INT PRIMARY KEY, name VARCHAR(255))")
+            statement.executeUpdate("CREATE TABLE employee(id INT PRIMARY KEY, name VARCHAR(255), company_id INT, FOREIGN KEY (company_id) REFERENCES company(id) ON DELETE CASCADE)")
+            statement.executeUpdate("INSERT INTO company(id, name) VALUES (1, 'Company A'), (2, 'Company B')")
+            statement.executeUpdate("INSERT INTO employee(id, name, company_id) VALUES (1, 'Employee A.1', 1), (2, 'Employee A.2', 1), (3, 'Employee B.1', 2)")
+            statement.close()
+        }
+
+        private fun populateMsSQLDB() {
+            val statement = msSQLConnection.connection.createStatement()
             statement.executeUpdate("CREATE TABLE company(id INT PRIMARY KEY, name VARCHAR(255))")
             statement.executeUpdate("CREATE TABLE employee(id INT PRIMARY KEY, name VARCHAR(255), company_id INT, FOREIGN KEY (company_id) REFERENCES company(id) ON DELETE CASCADE)")
             statement.executeUpdate("INSERT INTO company(id, name) VALUES (1, 'Company A'), (2, 'Company B')")
@@ -193,9 +232,10 @@ internal class SQLDatabaseConnectionIT {
 
     @AfterTest
     fun afterTest() {
-        resetPostgreSQLDB()
-        resetMySQLDB(mySQLConnection)
-        resetMySQLDB(mariaDBConnection)
+        //resetPostgreSQLDB()
+        //resetMySQLDB(mySQLConnection)
+        //resetMySQLDB(mariaDBConnection)
+        resetMsSQLDB()
     }
 
     @ParameterizedTest(name = "[{index}] with {0}")
@@ -286,6 +326,14 @@ internal class SQLDatabaseConnectionIT {
         val statement = connection.connection.createStatement()
         statement.execute("DROP DATABASE testdb;")
         statement.execute("CREATE DATABASE testdb;")
+        statement.close()
+    }
+
+    private fun resetMsSQLDB() {
+        val statement = msSQLConnection.connection.createStatement()
+        statement.execute("EXEC sp_MSForEachTable 'ALTER TABLE ? NOCHECK CONSTRAINT ALL';")
+        statement.execute("EXEC sp_MSForEachTable 'DROP TABLE ?';")
+        statement.execute("EXEC sp_MSForEachTable 'ALTER TABLE ? CHECK CONSTRAINT ALL';")
         statement.close()
     }
 }

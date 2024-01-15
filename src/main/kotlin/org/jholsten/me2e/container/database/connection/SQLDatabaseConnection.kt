@@ -117,7 +117,6 @@ class SQLDatabaseConnection(
     private fun connect(): Connection {
         registerDriver()
         val connection = DriverManager.getConnection(jdbcUrl, username, password)
-        connection.autoCommit = true
         logger.info("Established connection to database $jdbcUrl.")
         return connection
     }
@@ -130,10 +129,13 @@ class SQLDatabaseConnection(
             DatabaseManagementSystem.MY_SQL -> "com.mysql.cj.jdbc.Driver"
             DatabaseManagementSystem.POSTGRESQL -> "org.postgresql.Driver"
             DatabaseManagementSystem.MARIA_DB -> "org.mariadb.jdbc.Driver"
+            DatabaseManagementSystem.MS_SQL -> "com.microsoft.sqlserver.jdbc.SQLServerDriver"
             else -> throw DatabaseException("Unsupported system: $system")
         }
-        Class.forName(driver)
-        logger.info("Registered driver $driver for database system $system")
+        if (DriverManager.drivers().noneMatch { it.javaClass.name == driver }) {
+            Class.forName(driver)
+            logger.info("Registered driver $driver for database system $system")
+        }
     }
 
     private fun fetchTables(schema: String? = null): MutableList<SQLTableSpecification> {
@@ -167,12 +169,16 @@ class SQLDatabaseConnection(
     private fun disableForeignKeyChecks(statement: Statement) {
         if (system == DatabaseManagementSystem.MY_SQL || system == DatabaseManagementSystem.MARIA_DB) {
             statement.execute("SET @@foreign_key_checks = 0;")
+        } else if (system == DatabaseManagementSystem.MS_SQL) {
+            statement.execute("EXEC sp_MSForEachTable 'ALTER TABLE ? NOCHECK CONSTRAINT all';")
         }
     }
 
     private fun enableForeignKeyChecks(statement: Statement) {
         if (system == DatabaseManagementSystem.MY_SQL || system == DatabaseManagementSystem.MARIA_DB) {
             statement.execute("SET @@foreign_key_checks = 1;")
+        } else if (system == DatabaseManagementSystem.MS_SQL) {
+            statement.execute("EXEC sp_MSForEachTable 'ALTER TABLE ? CHECK CONSTRAINT ALL';")
         }
     }
 
