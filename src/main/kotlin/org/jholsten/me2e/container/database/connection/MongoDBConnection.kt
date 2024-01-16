@@ -82,7 +82,7 @@ class MongoDBConnection(
         logger.info("Clearing ${tablesToClear.size} collections...")
         for (table in tablesToClear) {
             val collection = connection.getCollection(table)
-            collection.drop()
+            collection.deleteMany(Document())
         }
     }
 
