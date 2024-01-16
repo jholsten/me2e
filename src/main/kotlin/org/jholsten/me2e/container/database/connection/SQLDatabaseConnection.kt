@@ -53,10 +53,7 @@ class SQLDatabaseConnection private constructor(
      * In case of [DatabaseManagementSystem.MY_SQL] and [DatabaseManagementSystem.MARIA_DB], this is the name of the database.
      * For [DatabaseManagementSystem.POSTGRESQL], the schema is different to the database and is set to `public` by default.
      */
-    val schema: String = when (system) {
-        DatabaseManagementSystem.POSTGRESQL -> "public"
-        else -> database
-    },
+    val schema: String,
 ) : DatabaseConnection(host, port, database, username, password, system) {
 
     private val logger = logger(this)
@@ -158,26 +155,23 @@ class SQLDatabaseConnection private constructor(
         override fun self(): Builder = this
 
         override fun build(): SQLDatabaseConnection {
-            return when {
-                schema == null -> SQLDatabaseConnection(
-                    host = requireNotNull(host),
-                    port = requireNotNull(port),
-                    database = requireNotNull(database),
-                    username = requireNotNull(username),
-                    password = requireNotNull(password),
-                    system = requireNotNull(system),
-                )
+            val schema = when (this.schema) {
+                null -> when (system) {
+                    DatabaseManagementSystem.POSTGRESQL -> "public"
+                    else -> database
+                }
 
-                else -> SQLDatabaseConnection(
-                    host = requireNotNull(host),
-                    port = requireNotNull(port),
-                    database = requireNotNull(database),
-                    username = requireNotNull(username),
-                    password = requireNotNull(password),
-                    system = requireNotNull(system),
-                    schema = schema!!,
-                )
+                else -> this.schema
             }
+            return SQLDatabaseConnection(
+                host = requireNotNull(host),
+                port = requireNotNull(port),
+                database = requireNotNull(database),
+                username = requireNotNull(username),
+                password = requireNotNull(password),
+                system = requireNotNull(system),
+                schema = requireNotNull(schema),
+            )
         }
     }
 
