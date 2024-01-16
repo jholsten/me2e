@@ -22,11 +22,30 @@ services:
       "org.jholsten.me2e.url": "http://auth-server"
       "org.jholsten.me2e.pull-policy": "MISSING"
 
-  database:
+  sql-database:
     image: postgres:12
     environment:
-      - DB_PASSWORD=123
-      - DB_USER=user
+      POSTGRES_DB: testdb
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: 123
     labels:
       - "org.jholsten.me2e.container-type=DATABASE"
-      - "org.jholsten.me2e.database-type=POSTGRESQL"
+      - "org.jholsten.me2e.database.system=POSTGRESQL"
+      - "org.jholsten.me2e.database.name=testdb"
+      - "org.jholsten.me2e.database.schema=public"
+      - "org.jholsten.me2e.database.username=user"
+      - "org.jholsten.me2e.database.password=123"
+      - "org.jholsten.me2e.database.init-script.init_1=database/init_1.sql"
+      - "org.jholsten.me2e.database.init-script.init_2=database/init_2.sql"
+
+  no-sql-database:
+    image: mongo:4.4.27
+    ports:
+      - 27017
+    environment:
+      MONGO_INITDB_DATABASE: testdb
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: 123
+    labels:
+      "org.jholsten.me2e.container-type": "DATABASE"
+      "org.jholsten.me2e.database.system": "MONGO_DB"

@@ -177,13 +177,13 @@ class SQLDatabaseConnection private constructor(
             }
 
             return SQLDatabaseConnection(
-                host = requireNotNull(host),
-                port = requireNotNull(port),
-                database = requireNotNull(database),
+                host = requireNotNull(host) { "Host cannot be null" },
+                port = requireNotNull(port) { "Port cannot be null" },
+                database = requireNotNull(database) { "Database cannot be null" },
                 username = username,
                 password = password,
-                system = requireNotNull(system),
-                schema = requireNotNull(schema),
+                system = requireNotNull(system) { "System cannot be null" },
+                schema = requireNotNull(schema) { "Schema cannot be null" },
             )
         }
     }

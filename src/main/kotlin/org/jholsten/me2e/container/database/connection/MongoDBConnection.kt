@@ -161,7 +161,7 @@ class MongoDBConnection private constructor(
         private var settings: MongoClientSettings? = null
 
         /**
-         * Reference to the Docker container which serves this database.
+         * Sets reference to the Docker container which serves this database.
          * Is required to run scripts.
          */
         fun withContainer(container: ContainerState?) = apply {
@@ -169,7 +169,7 @@ class MongoDBConnection private constructor(
         }
 
         /**
-         * Settings to use for the connection to Mongo DB.
+         * Sets settings to use for the connection to Mongo DB.
          * The connection string is set to [url] upon initialization.
          */
         fun withSettings(settings: MongoClientSettings) = apply {
@@ -180,9 +180,9 @@ class MongoDBConnection private constructor(
 
         override fun build(): MongoDBConnection {
             return MongoDBConnection(
-                host = requireNotNull(host),
-                port = requireNotNull(port),
-                database = requireNotNull(database),
+                host = requireNotNull(host) { "Host cannot be null" },
+                port = requireNotNull(port) { "Port cannot be null" },
+                database = requireNotNull(database) { "Database cannot be null" },
                 username = username,
                 password = password,
                 settings = settings,

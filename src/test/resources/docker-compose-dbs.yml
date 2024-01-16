@@ -1,0 +1,43 @@
+services:
+  sql-database:
+    image: postgres:12
+    ports:
+      - 5432
+    environment:
+      POSTGRES_DB: testdb
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: 123
+    healthcheck:
+      test: "pg_isready -d db_prod"
+      interval: 3s
+      timeout: 3s
+      retries: 10
+    labels:
+      "org.jholsten.me2e.container-type": "DATABASE"
+      "org.jholsten.me2e.database.system": "POSTGRESQL"
+      "org.jholsten.me2e.database.name": "testdb"
+      "org.jholsten.me2e.database.schema": "public"
+      "org.jholsten.me2e.database.username": "user"
+      "org.jholsten.me2e.database.password": "123"
+      "org.jholsten.me2e.database.init-script.init_postgres": "database/postgres_script.sql"
+
+  no-sql-database:
+    image: mongo:4.4.27
+    ports:
+      - 27017
+    environment:
+      MONGO_INITDB_DATABASE: testdb
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: 123
+    healthcheck:
+      test: "echo 'db.runCommand(\"ping\").ok' | mongo -u user -p 123 --quiet"
+      interval: 3s
+      timeout: 3s
+      retries: 10
+    labels:
+      "org.jholsten.me2e.container-type": "DATABASE"
+      "org.jholsten.me2e.database.system": "MONGO_DB"
+      "org.jholsten.me2e.database.name": "testdb"
+      "org.jholsten.me2e.database.username": "user"
+      "org.jholsten.me2e.database.password": "123"
+      "org.jholsten.me2e.database.init-script.init_postgres": "database/mongo_script_authenticated.sql"

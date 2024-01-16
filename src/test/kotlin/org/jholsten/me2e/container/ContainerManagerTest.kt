@@ -34,6 +34,11 @@ internal class ContainerManagerTest {
                 image = "postgres:12",
                 environment = mapOf("DB_PASSWORD" to "123", "DB_USER" to "user"),
                 system = DatabaseManagementSystem.POSTGRESQL,
+                database = "postgres",
+                schema = "public",
+                username = "user",
+                password = "123",
+                initializationScripts = mapOf(),
             ),
             "misc" to Container(
                 name = "misc",
@@ -75,6 +80,11 @@ internal class ContainerManagerTest {
                 image = "postgres:12",
                 environment = mapOf("DB_PASSWORD" to "123", "DB_USER" to "user"),
                 system = DatabaseManagementSystem.POSTGRESQL,
+                database = "postgres",
+                schema = "public",
+                username = "user",
+                password = "123",
+                initializationScripts = mapOf(),
             ),
         )
 

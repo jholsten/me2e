@@ -4,6 +4,8 @@ import com.github.dockerjava.api.model.Container as DockerContainer
 import org.apache.commons.lang3.RandomStringUtils
 import org.jholsten.me2e.config.model.DockerConfig
 import org.jholsten.me2e.container.database.DatabaseContainer
+import org.jholsten.me2e.container.database.connection.MongoDBConnection
+import org.jholsten.me2e.container.database.connection.SQLDatabaseConnection
 import org.jholsten.me2e.container.docker.DockerCompose
 import org.jholsten.me2e.container.exception.ServiceShutdownException
 import org.jholsten.me2e.container.exception.ServiceStartupException
@@ -72,16 +74,12 @@ class ContainerManager(
     }
 
     /**
-     * Stops the Docker-Compose environment. It is not necessary to stop the environment manually, as it is automatically shut
-     * down as soon as the tests finish running.
+     * Closes all database connections and stops the Docker-Compose environment.
      * @throws ServiceShutdownException if Docker-Compose could not be stopped.
      */
     fun stop() {
-        try {
-            environment.stop()
-        } catch (e: Exception) {
-            throw ServiceShutdownException("Unable to stop Docker-Compose: ${e.message}")
-        }
+        closeDatabaseConnections()
+        stopDockerCompose()
     }
 
     /**
@@ -130,6 +128,18 @@ class ContainerManager(
     }
 
     /**
+     * Stops the Docker-Compose environment.
+     * @throws ServiceShutdownException if Docker-Compose could not be stopped.
+     */
+    private fun stopDockerCompose() {
+        try {
+            environment.stop()
+        } catch (e: Exception) {
+            throw ServiceShutdownException("Unable to stop Docker-Compose: ${e.message}")
+        }
+    }
+
+    /**
      * Initializes containers after the Docker-Compose is started.
      * Sets corresponding [DockerContainer] and [org.testcontainers.containers.ContainerState] instances.
      */
@@ -151,5 +161,16 @@ class ContainerManager(
             .exec()
             .filter { container -> container.names.any { name -> name.startsWith("/$identifier") } }
             .associateBy { container -> container.labels["com.docker.compose.service"]!! }
+    }
+
+    private fun closeDatabaseConnections() {
+        val databaseConnections = databases.values.mapNotNull { it.connection }
+        for (connection in databaseConnections) {
+            if (connection is SQLDatabaseConnection) {
+                connection.connection.close()
+            } else if (connection is MongoDBConnection) {
+                connection.client.close()
+            }
+        }
     }
 }

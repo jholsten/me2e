@@ -69,10 +69,11 @@ internal class YamlConfigParserIT {
     }
 
     private fun assertContainersAsExpected(config: TestConfig, pullPolicy: DockerConfig.PullPolicy? = null) {
-        assertEquals(3, config.environment.containers.size)
+        assertEquals(4, config.environment.containers.size)
         assertApiGatewayAsExpected(config.environment.containers, pullPolicy)
         assertAuthServerAsExpected(config.environment.containers, pullPolicy)
-        assertDatabaseAsExpected(config.environment.containers, pullPolicy)
+        assertSQLDatabaseAsExpected(config.environment.containers, pullPolicy)
+        assertNoSQLDatabaseAsExpected(config.environment.containers, pullPolicy)
     }
 
     private fun assertMockServersAsExpected(config: TestConfig) {
@@ -119,20 +120,48 @@ internal class YamlConfigParserIT {
         )
     }
 
-    private fun assertDatabaseAsExpected(containers: Map<String, Container>, pullPolicy: DockerConfig.PullPolicy? = null) {
+    private fun assertSQLDatabaseAsExpected(containers: Map<String, Container>, pullPolicy: DockerConfig.PullPolicy? = null) {
         assertContainerAsExpected(
             containers = containers,
-            name = "database",
+            name = "sql-database",
             type = ContainerType.DATABASE,
             image = "postgres:12",
             environment = mapOf(
-                "DB_PASSWORD" to "123",
-                "DB_USER" to "user",
+                "POSTGRES_DB" to "testdb",
+                "POSTGRES_USER" to "user",
+                "POSTGRES_PASSWORD" to "123",
             ),
             pullPolicy = pullPolicy ?: DockerConfig.PullPolicy.ALWAYS,
             hasHealthcheck = false,
             containerPorts = listOf(),
             databaseSystem = DatabaseManagementSystem.POSTGRESQL,
+            database = "testdb",
+            schema = "public",
+            username = "user",
+            password = "123",
+            initializationScripts = mapOf("init_1" to "database/init_1.sql", "init_2" to "database/init_2.sql"),
+        )
+    }
+
+    private fun assertNoSQLDatabaseAsExpected(containers: Map<String, Container>, pullPolicy: DockerConfig.PullPolicy? = null) {
+        assertContainerAsExpected(
+            containers = containers,
+            name = "no-sql-database",
+            type = ContainerType.DATABASE,
+            image = "mongo:4.4.27",
+            environment = mapOf(
+                "MONGO_INITDB_DATABASE" to "testdb",
+                "MONGO_INITDB_ROOT_USERNAME" to "user",
+                "MONGO_INITDB_ROOT_PASSWORD" to "123",
+            ),
+            pullPolicy = pullPolicy ?: DockerConfig.PullPolicy.ALWAYS,
+            hasHealthcheck = false,
+            containerPorts = listOf(27017),
+            databaseSystem = DatabaseManagementSystem.MONGO_DB,
+            database = "testdb",
+            username = "user",
+            password = "123",
+            initializationScripts = mapOf(),
         )
     }
 
@@ -146,6 +175,11 @@ internal class YamlConfigParserIT {
         hasHealthcheck: Boolean,
         containerPorts: List<Int>,
         databaseSystem: DatabaseManagementSystem? = null,
+        database: String? = null,
+        schema: String? = null,
+        username: String? = null,
+        password: String? = null,
+        initializationScripts: Map<String, String>? = null,
     ) {
         val container = containers[name]
         assertNotNull(container)
@@ -166,6 +200,11 @@ internal class YamlConfigParserIT {
         }
         if (container is DatabaseContainer) {
             assertEquals(databaseSystem, container.system)
+            assertEquals(database, container.database)
+            assertEquals(schema, container.schema)
+            assertEquals(username, container.username)
+            assertEquals(password, container.password)
+            RecursiveComparison.assertEquals(initializationScripts, container.initializationScripts)
         }
     }
 

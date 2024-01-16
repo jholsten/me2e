@@ -57,7 +57,7 @@ class TestEnvironmentConfigDeserializerTest {
                   - DB_USER=user
                 labels:
                   - "org.jholsten.me2e.container-type=DATABASE"
-                  - "org.jholsten.me2e.database-type=POSTGRESQL"
+                  - "org.jholsten.me2e.database.system=POSTGRESQL"
     """.trimIndent()
 
     private val mockedMapper = spyk<ObjectMapper>()
@@ -136,7 +136,6 @@ class TestEnvironmentConfigDeserializerTest {
 
         val expectedService = expectedApiGateway()
             .put("type", "MISC")
-            .put("system", null as String?)
             .put("url", null as String?)
             .put("pullPolicy", "MISSING")
         expectedService.remove("labels")
@@ -181,6 +180,263 @@ class TestEnvironmentConfigDeserializerTest {
             .put("pullPolicy", "MISSING")
         verify { mockedMapper.treeToValue(expectedService, Container::class.java) }
         verify { mockedMapper.treeToValue(expectedMockServer(), MockServer::class.java) }
+    }
+
+    @Test
+    fun `Deserializing database properties with labels should succeed`() {
+        val dockerComposeContents = """
+            services:
+                database:
+                    image: postgres:12
+                    labels:
+                      - "org.jholsten.me2e.container-type=DATABASE"
+                      - "org.jholsten.me2e.database.system=POSTGRESQL"
+                      - "org.jholsten.me2e.database.name=testdb"
+                      - "org.jholsten.me2e.database.schema=public"
+                      - "org.jholsten.me2e.database.username=user"
+                      - "org.jholsten.me2e.database.password=123"
+                      - "org.jholsten.me2e.database.init-script.init_1=database/init_1.sql"
+                      - "org.jholsten.me2e.database.init-script.init_2=database/init_2.sql"
+        """.trimIndent()
+        mockReadingDockerCompose(dockerComposeContents)
+
+        val parser = prepareParser(contents)
+        val config = TestEnvironmentConfigDeserializer().deserialize(parser, mockedDeserializationContext)
+
+        assertKeysAsExpected(listOf("database"), config.containers)
+
+        val expectedDatabase = expectedDatabase()
+            .set<ObjectNode>(
+                "labels", JsonNodeFactory.instance.objectNode()
+                    .put("org.jholsten.me2e.container-type", "DATABASE")
+                    .put("org.jholsten.me2e.database.system", "POSTGRESQL")
+                    .put("org.jholsten.me2e.database.name", "testdb")
+                    .put("org.jholsten.me2e.database.schema", "public")
+                    .put("org.jholsten.me2e.database.username", "user")
+                    .put("org.jholsten.me2e.database.password", "123")
+                    .put("org.jholsten.me2e.database.init-script.init_1", "database/init_1.sql")
+                    .put("org.jholsten.me2e.database.init-script.init_2", "database/init_2.sql")
+            )
+            .put("pullPolicy", "MISSING")
+            .put("system", "POSTGRESQL")
+            .put("schema", "public")
+            .put("database", "testdb")
+            .put("username", "user")
+            .put("password", "123")
+            .set<ObjectNode>(
+                "initializationScripts", JsonNodeFactory.instance.objectNode()
+                    .put("init_1", "database/init_1.sql")
+                    .put("init_2", "database/init_2.sql")
+            )
+        expectedDatabase.remove("environment")
+
+        verify { mockedMapper.treeToValue(expectedDatabase, Container::class.java) }
+    }
+
+    @Test
+    fun `Deserializing database properties without labels should succeed for PostgreSQL`() {
+        val dockerComposeContents = """
+            services:
+                database:
+                    image: postgres:12
+                    environment:
+                        POSTGRES_DB: testdb
+                        POSTGRES_USER: user
+                        POSTGRES_PASSWORD: 123
+                    labels:
+                      - "org.jholsten.me2e.container-type=DATABASE"
+                      - "org.jholsten.me2e.database.system=POSTGRESQL"
+        """.trimIndent()
+        mockReadingDockerCompose(dockerComposeContents)
+
+        val parser = prepareParser(contents)
+        val config = TestEnvironmentConfigDeserializer().deserialize(parser, mockedDeserializationContext)
+
+        assertKeysAsExpected(listOf("database"), config.containers)
+
+        val expectedDatabase = expectedDatabase()
+            .set<ObjectNode>(
+                "environment", JsonNodeFactory.instance.objectNode()
+                    .put("POSTGRES_DB", "testdb")
+                    .put("POSTGRES_USER", "user")
+                    .put("POSTGRES_PASSWORD", 123)
+            )
+            .set<ObjectNode>(
+                "labels", JsonNodeFactory.instance.objectNode()
+                    .put("org.jholsten.me2e.container-type", "DATABASE")
+                    .put("org.jholsten.me2e.database.system", "POSTGRESQL")
+            )
+            .put("pullPolicy", "MISSING")
+            .put("system", "POSTGRESQL")
+            .put("schema", null as String?)
+            .put("database", "testdb")
+            .put("username", "user")
+            .put("password", "123")
+
+        verify { mockedMapper.treeToValue(expectedDatabase, Container::class.java) }
+    }
+
+    @Test
+    fun `Deserializing database properties without labels should succeed for MySQL`() {
+        val dockerComposeContents = """
+            services:
+                database:
+                    image: mysql:8.0
+                    environment:
+                        MYSQL_DATABASE: testdb
+                        MYSQL_USER: user
+                        MYSQL_PASSWORD: 123
+                    labels:
+                      - "org.jholsten.me2e.container-type=DATABASE"
+                      - "org.jholsten.me2e.database.system=MY_SQL"
+        """.trimIndent()
+        mockReadingDockerCompose(dockerComposeContents)
+
+        val parser = prepareParser(contents)
+        val config = TestEnvironmentConfigDeserializer().deserialize(parser, mockedDeserializationContext)
+
+        assertKeysAsExpected(listOf("database"), config.containers)
+
+        val expectedDatabase = expectedDatabase()
+            .put("image", "mysql:8.0")
+            .set<ObjectNode>(
+                "environment", JsonNodeFactory.instance.objectNode()
+                    .put("MYSQL_DATABASE", "testdb")
+                    .put("MYSQL_USER", "user")
+                    .put("MYSQL_PASSWORD", 123)
+            )
+            .set<ObjectNode>(
+                "labels", JsonNodeFactory.instance.objectNode()
+                    .put("org.jholsten.me2e.container-type", "DATABASE")
+                    .put("org.jholsten.me2e.database.system", "MY_SQL")
+            )
+            .put("pullPolicy", "MISSING")
+            .put("system", "MY_SQL")
+            .put("schema", null as String?)
+            .put("database", "testdb")
+            .put("username", "user")
+            .put("password", "123")
+
+        verify { mockedMapper.treeToValue(expectedDatabase, Container::class.java) }
+    }
+
+    @Test
+    fun `Deserializing database properties without labels should succeed for MariaDB`() {
+        val dockerComposeContents = """
+            services:
+                database:
+                    image: mariadb:11.2.2
+                    environment:
+                        MYSQL_DATABASE: testdb
+                        MYSQL_USER: user
+                        MYSQL_PASSWORD: 123
+                    labels:
+                      - "org.jholsten.me2e.container-type=DATABASE"
+                      - "org.jholsten.me2e.database.system=MARIA_DB"
+        """.trimIndent()
+        mockReadingDockerCompose(dockerComposeContents)
+
+        val parser = prepareParser(contents)
+        val config = TestEnvironmentConfigDeserializer().deserialize(parser, mockedDeserializationContext)
+
+        assertKeysAsExpected(listOf("database"), config.containers)
+
+        val expectedDatabase = expectedDatabase()
+            .put("image", "mariadb:11.2.2")
+            .set<ObjectNode>(
+                "environment", JsonNodeFactory.instance.objectNode()
+                    .put("MYSQL_DATABASE", "testdb")
+                    .put("MYSQL_USER", "user")
+                    .put("MYSQL_PASSWORD", 123)
+            )
+            .set<ObjectNode>(
+                "labels", JsonNodeFactory.instance.objectNode()
+                    .put("org.jholsten.me2e.container-type", "DATABASE")
+                    .put("org.jholsten.me2e.database.system", "MARIA_DB")
+            )
+            .put("pullPolicy", "MISSING")
+            .put("system", "MARIA_DB")
+            .put("schema", null as String?)
+            .put("database", "testdb")
+            .put("username", "user")
+            .put("password", "123")
+
+        verify { mockedMapper.treeToValue(expectedDatabase, Container::class.java) }
+    }
+
+    @Test
+    fun `Deserializing database properties without labels should succeed for MongoDB`() {
+        val dockerComposeContents = """
+            services:
+                database:
+                    image: mongo:4.4.27
+                    environment:
+                        MONGO_INITDB_DATABASE: testdb
+                        MONGO_INITDB_ROOT_USERNAME: user
+                        MONGO_INITDB_ROOT_PASSWORD: 123
+                    labels:
+                      - "org.jholsten.me2e.container-type=DATABASE"
+                      - "org.jholsten.me2e.database.system=MONGO_DB"
+        """.trimIndent()
+        mockReadingDockerCompose(dockerComposeContents)
+
+        val parser = prepareParser(contents)
+        val config = TestEnvironmentConfigDeserializer().deserialize(parser, mockedDeserializationContext)
+
+        assertKeysAsExpected(listOf("database"), config.containers)
+
+        val expectedDatabase = expectedDatabase()
+            .put("image", "mongo:4.4.27")
+            .set<ObjectNode>(
+                "environment", JsonNodeFactory.instance.objectNode()
+                    .put("MONGO_INITDB_DATABASE", "testdb")
+                    .put("MONGO_INITDB_ROOT_USERNAME", "user")
+                    .put("MONGO_INITDB_ROOT_PASSWORD", 123)
+            )
+            .set<ObjectNode>(
+                "labels", JsonNodeFactory.instance.objectNode()
+                    .put("org.jholsten.me2e.container-type", "DATABASE")
+                    .put("org.jholsten.me2e.database.system", "MONGO_DB")
+            )
+            .put("pullPolicy", "MISSING")
+            .put("system", "MONGO_DB")
+            .put("schema", null as String?)
+            .put("database", "testdb")
+            .put("username", "user")
+            .put("password", "123")
+
+        verify { mockedMapper.treeToValue(expectedDatabase, Container::class.java) }
+    }
+
+    @Test
+    fun `Deserializing database properties without labels should succeed for unknown system`() {
+        val dockerComposeContents = """
+            services:
+                database:
+                    image: unknown-db:latest
+                    labels:
+                      - "org.jholsten.me2e.container-type=DATABASE"
+                      - "org.jholsten.me2e.database.system=OTHER"
+        """.trimIndent()
+        mockReadingDockerCompose(dockerComposeContents)
+
+        val parser = prepareParser(contents)
+        val config = TestEnvironmentConfigDeserializer().deserialize(parser, mockedDeserializationContext)
+
+        assertKeysAsExpected(listOf("database"), config.containers)
+
+        val expectedDatabase = expectedDatabase()
+            .put("image", "unknown-db:latest")
+            .set<ObjectNode>(
+                "labels", JsonNodeFactory.instance.objectNode()
+                    .put("org.jholsten.me2e.container-type", "DATABASE")
+                    .put("org.jholsten.me2e.database.system", "OTHER")
+            )
+            .put("pullPolicy", "MISSING")
+            .put("system", "OTHER")
+        expectedDatabase.remove("environment")
+
+        verify { mockedMapper.treeToValue(expectedDatabase, Container::class.java) }
     }
 
     @Test
@@ -247,7 +503,6 @@ class TestEnvironmentConfigDeserializerTest {
             )
             .put("name", "api-gateway")
             .put("type", "MICROSERVICE")
-            .put("system", null as String?)
             .put("url", null as String?)
             .put("pullPolicy", "ALWAYS")
             .put("hasHealthcheck", true)
@@ -263,7 +518,6 @@ class TestEnvironmentConfigDeserializerTest {
             )
             .put("name", "auth-server")
             .put("type", "MICROSERVICE")
-            .put("system", null as String?)
             .put("url", "http://auth-server")
             .put("pullPolicy", "MISSING")
             .put("hasHealthcheck", false)
@@ -280,14 +534,19 @@ class TestEnvironmentConfigDeserializerTest {
             .set<ObjectNode>(
                 "labels", JsonNodeFactory.instance.objectNode()
                     .put("org.jholsten.me2e.container-type", "DATABASE")
-                    .put("org.jholsten.me2e.database-type", "POSTGRESQL")
+                    .put("org.jholsten.me2e.database.system", "POSTGRESQL")
             )
             .put("name", "database")
             .put("type", "DATABASE")
-            .put("system", "POSTGRESQL")
             .put("url", null as String?)
             .put("pullPolicy", "MISSING")
             .put("hasHealthcheck", false)
+            .put("system", "POSTGRESQL")
+            .put("schema", null as String?)
+            .put("database", null as String?)
+            .put("username", null as String?)
+            .put("password", null as String?)
+            .set("initializationScripts", JsonNodeFactory.instance.objectNode())
     }
 
     private fun expectedMockServer(): ObjectNode {

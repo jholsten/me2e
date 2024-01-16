@@ -24,4 +24,4 @@ services:
       POSTGRES_USER: user
     labels:
       "org.jholsten.me2e.container-type": "DATABASE"
-      "org.jholsten.me2e.database-type": "POSTGRESQL"
+      "org.jholsten.me2e.database.system": "POSTGRESQL"
