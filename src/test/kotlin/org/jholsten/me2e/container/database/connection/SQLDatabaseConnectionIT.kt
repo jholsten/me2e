@@ -189,6 +189,33 @@ internal class SQLDatabaseConnectionIT {
 
     @ParameterizedTest(name = "[{index}] with {0}")
     @ArgumentsSource(DatabaseArgumentProvider::class)
+    fun `Retrieving tables should return all database tables`(databaseArguments: DatabaseArguments) {
+        populateDB(databaseArguments.system, databaseArguments.connection)
+
+        val tables = databaseArguments.connection.tables
+
+        RecursiveComparison.assertEquals(listOf("company", "employee"), tables, ignoreCollectionOrder = true)
+    }
+
+    @ParameterizedTest(name = "[{index}] with {0}")
+    @ArgumentsSource(DatabaseArgumentProvider::class)
+    fun `Retrieving tables for empty database should return empty list`(databaseArguments: DatabaseArguments) {
+        val tables = databaseArguments.connection.tables
+
+        assertEquals(0, tables.size)
+    }
+
+    @ParameterizedTest(name = "[{index}] with {0}")
+    @ArgumentsSource(DatabaseArgumentProvider::class)
+    fun `Retrieving entries from table should return all rows`(databaseArguments: DatabaseArguments) {
+        populateDB(databaseArguments.system, databaseArguments.connection)
+
+        RecursiveComparison.assertEquals(expectedCompanies, databaseArguments.connection.getAllFromTable("company"))
+        RecursiveComparison.assertEquals(expectedEmployees, databaseArguments.connection.getAllFromTable("employee"))
+    }
+
+    @ParameterizedTest(name = "[{index}] with {0}")
+    @ArgumentsSource(DatabaseArgumentProvider::class)
     fun `Executing SQL script should succeed`(databaseArguments: DatabaseArguments) {
         databaseArguments.connection.executeScript(databaseArguments.script)
         assertTablesExist(databaseArguments.connection)
@@ -232,7 +259,7 @@ internal class SQLDatabaseConnectionIT {
     fun `Clearing certain tables with empty list should not clean any tables`(databaseArguments: DatabaseArguments) {
         populateDB(databaseArguments.system, databaseArguments.connection)
 
-        databaseArguments.connection.clear(listOf<String>())
+        databaseArguments.connection.clear(listOf())
 
         assertTablesExist(databaseArguments.connection)
         assertEquals(2, databaseArguments.connection.getAllFromTable("company").size)
@@ -260,9 +287,7 @@ internal class SQLDatabaseConnectionIT {
 
     private fun assertTablesExist(connection: SQLDatabaseConnection) {
         val tables = connection.tables
-        assertEquals(2, tables.size)
-        assertContains(tables, "company")
-        assertContains(tables, "employee")
+        RecursiveComparison.assertEquals(listOf("company", "employee"), tables, ignoreCollectionOrder = true)
     }
 
     private fun populateDB(system: DatabaseManagementSystem, connection: SQLDatabaseConnection) {
