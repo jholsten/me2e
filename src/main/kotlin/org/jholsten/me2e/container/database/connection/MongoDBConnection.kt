@@ -89,7 +89,7 @@ class MongoDBConnection(
     class Builder : DatabaseConnection.Builder<Builder>() {
         override fun self(): Builder = this
 
-        override fun build(): DatabaseConnection {
+        override fun build(): MongoDBConnection {
             return MongoDBConnection(
                 host = requireNotNull(host),
                 port = requireNotNull(port),

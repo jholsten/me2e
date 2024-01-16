@@ -137,6 +137,14 @@ class SQLDatabaseConnection private constructor(
 
     class Builder : DatabaseConnection.Builder<Builder>() {
         private var schema: String? = null
+        private var system: DatabaseManagementSystem? = null
+
+        /**
+         * Sets the database management system which contains the database.
+         */
+        fun withSystem(system: DatabaseManagementSystem) = apply {
+            this.system = system
+        }
 
         /**
          * Sets the name of the schema to which this database belongs.

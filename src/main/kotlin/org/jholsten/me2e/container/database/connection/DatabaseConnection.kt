@@ -78,7 +78,6 @@ abstract class DatabaseConnection protected constructor(
         protected var database: String? = null
         protected var username: String? = null
         protected var password: String? = null
-        protected var system: DatabaseManagementSystem? = null
 
         /**
          * Sets the hostname on which the database container is running.
@@ -120,20 +119,8 @@ abstract class DatabaseConnection protected constructor(
             return self()
         }
 
-        /**
-         * Sets the database management system which contains the database.
-         */
-        fun withSystem(system: DatabaseManagementSystem): SELF {
-            this.system = system
-            return self()
-        }
-
         protected abstract fun self(): SELF
 
         abstract fun build(): DatabaseConnection
     }
 }
-
-// For NoSQL: https://hibernate.org/ogm/
-// MongoDB: https://stackoverflow.com/questions/29370147/truncate-a-mongo-db-collection-from-java
-// Get all collections: https://stackoverflow.com/questions/4971329/list-of-all-collections-in-mongo-database-in-java
