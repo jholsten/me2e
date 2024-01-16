@@ -106,7 +106,7 @@ abstract class DatabaseConnection protected constructor(
         /**
          * Sets the username to use for logging in.
          */
-        fun withUsername(username: String): SELF {
+        fun withUsername(username: String?): SELF {
             this.username = username
             return self()
         }
@@ -114,7 +114,7 @@ abstract class DatabaseConnection protected constructor(
         /**
          * Sets the password to use for logging in.
          */
-        fun withPassword(password: String): SELF {
+        fun withPassword(password: String?): SELF {
             this.password = password
             return self()
         }

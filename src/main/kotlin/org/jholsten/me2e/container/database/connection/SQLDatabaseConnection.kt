@@ -36,12 +36,12 @@ class SQLDatabaseConnection private constructor(
     /**
      * Username to use for logging in.
      */
-    username: String,
+    username: String?,
 
     /**
      * Password to use for logging in.
      */
-    password: String,
+    password: String?,
 
     /**
      * Database management system which contains the database.
@@ -133,6 +133,8 @@ class SQLDatabaseConnection private constructor(
     }
 
     class Builder : DatabaseConnection.Builder<Builder>() {
+        private val logger = logger(this)
+
         private var schema: String? = null
         private var system: DatabaseManagementSystem? = null
 
@@ -148,27 +150,34 @@ class SQLDatabaseConnection private constructor(
          * In case of [DatabaseManagementSystem.MY_SQL] and [DatabaseManagementSystem.MARIA_DB], this should be the name of the database.
          * For [DatabaseManagementSystem.POSTGRESQL], the schema is different to the database and is set to `public` by default.
          */
-        fun withSchema(schema: String) = apply {
+        fun withSchema(schema: String?) = apply {
             this.schema = schema
         }
 
         override fun self(): Builder = this
 
         override fun build(): SQLDatabaseConnection {
-            val schema = when (this.schema) {
-                null -> when (system) {
-                    DatabaseManagementSystem.POSTGRESQL -> "public"
-                    else -> database
+            if (this.system == DatabaseManagementSystem.POSTGRESQL) {
+                this.schema = this.schema ?: "public"
+            } else {
+                if (schema != null) {
+                    logger.warn(
+                        """
+                        Setting a custom database schema is only applicable for PostgreSQL databases. 
+                        For other systems, the name of the database needs to be used as the schema. 
+                        Will set this value to database name '$database'.
+                        """.trimIndent()
+                    )
                 }
-
-                else -> this.schema
+                this.schema = this.database
             }
+
             return SQLDatabaseConnection(
                 host = requireNotNull(host),
                 port = requireNotNull(port),
                 database = requireNotNull(database),
-                username = requireNotNull(username),
-                password = requireNotNull(password),
+                username = username,
+                password = password,
                 system = requireNotNull(system),
                 schema = requireNotNull(schema),
             )
