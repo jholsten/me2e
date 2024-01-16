@@ -69,7 +69,7 @@ delete-docker-cache:
   stage: build
   when: manual
   script:
-    - rm docker/cache.tar
+    - rm docker/*
   cache:
     - key: build-cache
       paths:
