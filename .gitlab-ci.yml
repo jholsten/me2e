@@ -64,6 +64,17 @@ test:
     reports:
       junit: build/test-results/test/**/TEST-*.xml
 
+# Reset docker cache manually
+delete-docker-cache:
+  stage: build
+  when: manual
+  script:
+    - rm docker/cache.tar
+  cache:
+    - key: build-cache
+      paths:
+        - docker/
+
 # Publishes package to GitLab Package Registry:
 publish-package:
   stage: publish
