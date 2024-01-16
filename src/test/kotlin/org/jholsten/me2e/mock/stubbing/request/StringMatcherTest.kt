@@ -183,7 +183,7 @@ internal class StringMatcherTest {
     @ParameterizedTest(name = "[{index}] factory method {0}")
     @MethodSource("factoryComparisonProvider")
     fun `Factory method invocation should equal constructor invocation`(
-        method: String,
+        @Suppress("UNUSED_PARAMETER") method: String,
         constructorMatcher: StringMatcher,
         factoryMatcher: StringMatcher,
     ) {

@@ -132,6 +132,7 @@ internal class MongoDBConnectionTest {
 
     @ParameterizedTest(name = "[{index}] with authentication: {1}")
     @ArgumentsSource(DatabaseArgumentProvider::class)
+    @Suppress("UNUSED_PARAMETER")
     fun `Retrieving tables should return all database tables`(connection: MongoDBConnection, withAuthentication: Boolean) {
         populateDB(connection)
 
@@ -142,6 +143,7 @@ internal class MongoDBConnectionTest {
 
     @ParameterizedTest(name = "[{index}] with authentication: {1}")
     @ArgumentsSource(DatabaseArgumentProvider::class)
+    @Suppress("UNUSED_PARAMETER")
     fun `Retrieving tables for empty database should return empty list`(connection: MongoDBConnection, withAuthentication: Boolean) {
         val tables = connection.tables
 
@@ -150,6 +152,7 @@ internal class MongoDBConnectionTest {
 
     @ParameterizedTest(name = "[{index}] with authentication: {1}")
     @ArgumentsSource(DatabaseArgumentProvider::class)
+    @Suppress("UNUSED_PARAMETER")
     fun `Retrieving entries from table should return all rows`(connection: MongoDBConnection, withAuthentication: Boolean) {
         populateDB(connection)
 
@@ -161,6 +164,7 @@ internal class MongoDBConnectionTest {
 
     @ParameterizedTest(name = "[{index}] with authentication: {1}")
     @ArgumentsSource(DatabaseArgumentProvider::class)
+    @Suppress("UNUSED_PARAMETER")
     fun `Clearing database should succeed`(connection: MongoDBConnection, withAuthentication: Boolean) {
         populateDB(connection)
 
@@ -173,6 +177,7 @@ internal class MongoDBConnectionTest {
 
     @ParameterizedTest(name = "[{index}] with authentication: {1}")
     @ArgumentsSource(DatabaseArgumentProvider::class)
+    @Suppress("UNUSED_PARAMETER")
     fun `Clearing certain tables should succeed`(connection: MongoDBConnection, withAuthentication: Boolean) {
         populateDB(connection)
 
@@ -185,6 +190,7 @@ internal class MongoDBConnectionTest {
 
     @ParameterizedTest(name = "[{index}] with authentication: {1}")
     @ArgumentsSource(DatabaseArgumentProvider::class)
+    @Suppress("UNUSED_PARAMETER")
     fun `Clearing certain tables with empty list should not clean any tables`(connection: MongoDBConnection, withAuthentication: Boolean) {
         populateDB(connection)
 
@@ -197,6 +203,7 @@ internal class MongoDBConnectionTest {
 
     @ParameterizedTest(name = "[{index}] with authentication: {1}")
     @ArgumentsSource(DatabaseArgumentProvider::class)
+    @Suppress("UNUSED_PARAMETER")
     fun `Clearing all tables from schema except should skip given tables`(connection: MongoDBConnection, withAuthentication: Boolean) {
         populateDB(connection)
 
