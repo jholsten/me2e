@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import org.jholsten.me2e.assertions.AssertionFailure
 import org.jholsten.me2e.assertions.matchers.Assertable
 import org.jholsten.me2e.request.model.HttpResponse
-import java.util.regex.Pattern
 
 /**
  * Model for asserting that the properties of the given [response] are as expected.
@@ -140,10 +139,10 @@ class AssertableResponse internal constructor(private val response: HttpResponse
     }
 
     private fun findNode(root: JsonNode, key: String): JsonNode? {
-        val arrayKeyMatcher = Pattern.compile("(.*)\\[(\\d)\\]").matcher(key)
-        return if (arrayKeyMatcher.find()) {
-            val strippedKey = arrayKeyMatcher.group(1)
-            val arrayIndex = arrayKeyMatcher.group(2).toInt()
+        val arrayKeyMatcher = Regex("(.*)\\[(\\d)\\]").find(key)
+        return if (arrayKeyMatcher != null) {
+            val strippedKey = arrayKeyMatcher.groupValues[1]
+            val arrayIndex = arrayKeyMatcher.groupValues[2].toInt()
             findArrayNode(root, strippedKey, arrayIndex)
         } else {
             root.findByKey(key)

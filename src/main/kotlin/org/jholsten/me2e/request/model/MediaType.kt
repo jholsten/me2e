@@ -1,13 +1,11 @@
 package org.jholsten.me2e.request.model
 
-import java.util.regex.Pattern
-
 class MediaType(
     val value: String,
 ) {
     companion object {
         private const val TOKEN = "[0-9A-Za-z!#\$%&'*+.^_`|~-]+"
-        private val TYPE_REGEX = Pattern.compile("($TOKEN)/($TOKEN)")
+        private val TYPE_REGEX = Regex("($TOKEN)/($TOKEN)")
 
         @JvmStatic
         val JSON_UTF8 = MediaType("application/json; charset=utf-8")
@@ -27,10 +25,10 @@ class MediaType(
     val subtype: String
 
     init {
-        val typeMatcher = TYPE_REGEX.matcher(value)
-        require(typeMatcher.find()) { "Invalid media type \"$value\"" }
-        this.type = typeMatcher.group(1)
-        this.subtype = typeMatcher.group(2)
+        val typeMatcher = TYPE_REGEX.find(value)
+        requireNotNull(typeMatcher) { "Invalid media type \"$value\"" }
+        this.type = typeMatcher.groupValues[1]
+        this.subtype = typeMatcher.groupValues[2]
     }
 
     /**
