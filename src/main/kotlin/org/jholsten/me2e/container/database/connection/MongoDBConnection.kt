@@ -1,8 +1,11 @@
 package org.jholsten.me2e.container.database.connection
 
+import com.mongodb.ConnectionString
+import com.mongodb.MongoClientSettings
 import com.mongodb.client.MongoClient
 import com.mongodb.client.MongoClients
 import com.mongodb.client.MongoDatabase
+import org.bson.Document
 import org.jholsten.me2e.container.database.DatabaseManagementSystem
 import org.jholsten.me2e.container.database.model.QueryResult
 import org.jholsten.me2e.utils.logger
@@ -11,7 +14,7 @@ import org.jholsten.me2e.utils.logger
  * Representation of the connection to a Mongo-DB database.
  * Allows to query and reset the state of a database instance.
  */
-class MongoDBConnection(
+class MongoDBConnection private constructor(
     /**
      * Hostname on which the database container is running.
      */
@@ -36,6 +39,12 @@ class MongoDBConnection(
      * Password to use for logging in.
      */
     password: String? = null,
+
+    /**
+     * Settings to use for the connection to Mongo DB.
+     * The connection string is set to [url] upon initialization.
+     */
+    settings: MongoClientSettings?
 ) : DatabaseConnection(host, port, database, username, password, DatabaseManagementSystem.MONGO_DB) {
 
     private val logger = logger(this)
@@ -49,10 +58,21 @@ class MongoDBConnection(
     }
 
     /**
+     * Settings to use for the connection to Mongo DB.
+     */
+    val settings: MongoClientSettings by lazy {
+        val builder = when {
+            settings != null -> MongoClientSettings.builder(settings)
+            else -> MongoClientSettings.builder()
+        }
+        builder.applyConnectionString(ConnectionString(url)).build()
+    }
+
+    /**
      * Client which is connecting to the database.
      */
     val client: MongoClient by lazy {
-        MongoClients.create(url)
+        MongoClients.create(this.settings)
     }
 
     /**
@@ -87,6 +107,16 @@ class MongoDBConnection(
     }
 
     class Builder : DatabaseConnection.Builder<Builder>() {
+        private var settings: MongoClientSettings? = null
+
+        /**
+         * Settings to use for the connection to Mongo DB.
+         * The connection string is set to [url] upon initialization.
+         */
+        fun withSettings(settings: MongoClientSettings) = apply {
+            this.settings = settings
+        }
+
         override fun self(): Builder = this
 
         override fun build(): MongoDBConnection {
@@ -96,6 +126,7 @@ class MongoDBConnection(
                 database = requireNotNull(database),
                 username = username,
                 password = password,
+                settings = settings,
             )
         }
     }
