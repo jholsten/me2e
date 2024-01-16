@@ -92,7 +92,7 @@ abstract class DatabaseConnection protected constructor(
      * @throws DatabaseException if script could not be executed.
      */
     fun executeScript(path: String) {
-        executeScript(null, FileUtils.getResourceAsFile(path))
+        executeScript(null, path)
     }
 
     /**
