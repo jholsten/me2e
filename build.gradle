@@ -149,4 +149,5 @@ test {
     useJUnitPlatform()
     // Show log output while running tests
     testLogging.showStandardStreams = true
+    testLogging.showStackTraces = true
 }
