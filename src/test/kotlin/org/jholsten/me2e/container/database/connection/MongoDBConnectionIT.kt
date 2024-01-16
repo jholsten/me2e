@@ -3,7 +3,6 @@ package org.jholsten.me2e.container.database.connection
 import org.bson.Document
 import org.jholsten.me2e.container.database.model.QueryResult
 import org.jholsten.util.RecursiveComparison
-import org.jholsten.util.assertDoesNotThrow
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -21,7 +20,7 @@ import kotlin.test.AfterTest
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
-internal class MongoDBConnectionTest {
+internal class MongoDBConnectionIT {
 
     companion object {
         private val unsecuredContainer = GenericContainer("mongo:4.4.27")
