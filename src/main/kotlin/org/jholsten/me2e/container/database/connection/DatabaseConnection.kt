@@ -55,19 +55,34 @@ abstract class DatabaseConnection protected constructor(
 
     /**
      * Executes the given script.
+     * @param name Name of the script (for logging purposes).
+     * @param file File which contains the script.
      * @throws java.io.FileNotFoundException if file does not exist.
      * @throws DatabaseException if script could not be executed.
      */
-    abstract fun executeScript(file: File)
+    abstract fun executeScript(name: String?, file: File)
+
+    /**
+     * Executes the given script.
+     * @param file File which contains the script.
+     * @throws java.io.FileNotFoundException if file does not exist.
+     * @throws DatabaseException if script could not be executed.
+     */
+    fun executeScript(file: File) {
+        executeScript(null, file)
+    }
 
     /**
      * Executes the script on the given path.
      * Path needs to be located in `resources` folder.
+     * @param name Name of the script (for logging purposes).
+     * @param path Path to the file which contains the script. Needs to be located in `resources` folder.
      * @throws java.io.FileNotFoundException if file does not exist.
      * @throws DatabaseException if script could not be executed.
      */
-    fun executeScript(path: String) {
-        executeScript(FileUtils.getResourceAsFile(path))
+    @JvmOverloads
+    fun executeScript(name: String? = null, path: String) {
+        executeScript(name, FileUtils.getResourceAsFile(path))
     }
 
     /**

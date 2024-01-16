@@ -122,20 +122,21 @@ class MongoDBConnection private constructor(
      * @throws java.io.FileNotFoundException if file does not exist.
      * @throws DatabaseException if script could not be executed.
      */
-    override fun executeScript(file: File) {
+    override fun executeScript(name: String?, file: File) {
         checkNotNull(container) { "As scripts cannot be executed using the Java-MongoClient, the reference to the corresponding Docker container needs to be set." }
         checkNotNull(mongoShellCommand) { "Could not find Mongo on the PATH. Is it installed?" }
+        val scriptName = name?.let { "$name (located at ${file.path})" } ?: file.path
         if (!file.exists()) {
-            throw FileNotFoundException("File ${file.path} does not exist.")
+            throw FileNotFoundException("File $scriptName does not exist.")
         }
-        logger.info("Copying script ${file.path} to container...")
+        logger.info("Copying script $scriptName to container...")
         val destination = file.name
         container.copyFileToContainer(MountableFile.forHostPath(file.path), destination)
-        logger.info("Executing script ${file.path}...")
+        logger.info("Executing script $scriptName...")
         val command = arrayOf(mongoShellCommand, "--quiet", "<", destination)
         val result = container.execInContainer(*command)
         if (result.exitCode != 0) {
-            throw DatabaseException("Unable to execute script (executed command: ${command.joinToString(" ")}): ${result.stdout}")
+            throw DatabaseException("Unable to execute script $scriptName (executed command: ${command.joinToString(" ")}): ${result.stdout}")
         }
     }
 

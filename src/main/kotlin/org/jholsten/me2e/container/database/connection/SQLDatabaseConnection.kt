@@ -94,15 +94,16 @@ class SQLDatabaseConnection private constructor(
      * @throws java.io.FileNotFoundException if file does not exist.
      * @throws DatabaseException if script could not be executed.
      */
-    override fun executeScript(file: File) {
-        logger.info("Executing SQL script ${file.path}...")
+    override fun executeScript(name: String?, file: File) {
+        val scriptName = name?.let { "$name (located at ${file.path})" } ?: file.path
+        logger.info("Executing SQL script $scriptName...")
         try {
             val scriptRunner = ScriptRunner(connection)
             scriptRunner.setSendFullScript(false)
             scriptRunner.setStopOnError(true)
             scriptRunner.runScript(FileReader(file))
         } catch (e: RuntimeSqlException) {
-            throw DatabaseException("Unable to execute script: ${e.message}")
+            throw DatabaseException("Unable to execute script $scriptName: ${e.message}")
         }
     }
 
