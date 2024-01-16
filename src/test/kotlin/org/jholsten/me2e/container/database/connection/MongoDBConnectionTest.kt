@@ -2,7 +2,6 @@ package org.jholsten.me2e.container.database.connection
 
 import org.bson.Document
 import org.jholsten.me2e.container.database.model.QueryResult
-import org.jholsten.me2e.utils.logger
 import org.jholsten.util.RecursiveComparison
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -21,18 +20,18 @@ import kotlin.test.assertEquals
 internal class MongoDBConnectionTest {
 
     companion object {
-        private val unsecuredContainer = GenericContainer("mongo:7.0.5")
+        private val unsecuredContainer = GenericContainer("mongo:4.4.27")
             .withEnv(
                 mapOf(
                     "MONGO_INITDB_DATABASE" to "testdb",
                 )
             )
             .withExposedPorts(27017)
-        //.waitingFor(Wait.forSuccessfulCommand("echo 'db.runCommand(\"ping\").ok' | mongosh --quiet"))
+            .waitingFor(Wait.forSuccessfulCommand("echo 'db.runCommand(\"ping\").ok' | mongo --quiet"))
 
         private lateinit var unsecuredConnection: MongoDBConnection
 
-        private val securedContainer = GenericContainer("mongo:7.0.5")
+        private val securedContainer = GenericContainer("mongo:4.4.27")
             .withEnv(
                 mapOf(
                     "MONGO_INITDB_DATABASE" to "testdb",
@@ -41,37 +40,27 @@ internal class MongoDBConnectionTest {
                 )
             )
             .withExposedPorts(27017)
-        //.waitingFor(Wait.forSuccessfulCommand("echo 'db.runCommand(\"ping\").ok' | mongosh -u user -p 123 --quiet"))
+            .waitingFor(Wait.forSuccessfulCommand("echo 'db.runCommand(\"ping\").ok' | mongo -u user -p 123 --quiet"))
 
         private lateinit var securedConnection: MongoDBConnection
 
         @BeforeAll
         @JvmStatic
         fun beforeAll() {
-            try {
-                unsecuredContainer.start()
-                unsecuredConnection = MongoDBConnection.Builder()
-                    .withHost(unsecuredContainer.host)
-                    .withPort(unsecuredContainer.getMappedPort(27017))
-                    .withDatabase("testdb")
-                    .build()
-                securedContainer.start()
-                securedConnection = MongoDBConnection.Builder()
-                    .withHost(securedContainer.host)
-                    .withPort(securedContainer.getMappedPort(27017))
-                    .withDatabase("testdb")
-                    .withUsername("user")
-                    .withPassword("123")
-                    .build()
-            } catch (e: Exception) {
-                logger(this).info("GETTING LOGS FROM MONGO1...")
-                logger(this).info(unsecuredContainer.logs)
-                logger(this).info("LOGS RETRIEVED1")
-                logger(this).info("GETTING LOGS FROM MONGO2...")
-                logger(this).info(securedContainer.logs)
-                logger(this).info("LOGS RETRIEVED2")
-                throw e
-            }
+            unsecuredContainer.start()
+            unsecuredConnection = MongoDBConnection.Builder()
+                .withHost(unsecuredContainer.host)
+                .withPort(unsecuredContainer.getMappedPort(27017))
+                .withDatabase("testdb")
+                .build()
+            securedContainer.start()
+            securedConnection = MongoDBConnection.Builder()
+                .withHost(securedContainer.host)
+                .withPort(securedContainer.getMappedPort(27017))
+                .withDatabase("testdb")
+                .withUsername("user")
+                .withPassword("123")
+                .build()
         }
 
         @AfterAll
