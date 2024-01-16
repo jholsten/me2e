@@ -64,7 +64,12 @@ internal class MongoDBConnectionTest {
                     .withPassword("123")
                     .build()
             } catch (e: Exception) {
+                logger(this).info("GETTING LOGS FROM MONGO1...")
                 logger(this).info(unsecuredContainer.logs)
+                logger(this).info("LOGS RETRIEVED1")
+                logger(this).info("GETTING LOGS FROM MONGO2...")
+                logger(this).info(securedContainer.logs)
+                logger(this).info("LOGS RETRIEVED2")
                 throw e
             }
         }
