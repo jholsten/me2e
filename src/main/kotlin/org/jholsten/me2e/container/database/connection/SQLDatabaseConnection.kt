@@ -122,6 +122,20 @@ class SQLDatabaseConnection private constructor(
         }
     }
 
+    override fun reset() {
+        connection.createStatement().runWithAutoRollback { statement ->
+            if (system == DatabaseManagementSystem.POSTGRESQL) {
+                statement.execute("DROP SCHEMA public CASCADE; CREATE SCHEMA public;")
+            } else if (system == DatabaseManagementSystem.MY_SQL || system == DatabaseManagementSystem.MARIA_DB) {
+                statement.execute("DROP DATABASE $database;")
+                statement.execute("CREATE DATABASE $database;")
+            } else {
+                throw DatabaseException("Unsupported system: $system")
+            }
+            logger.info("Successfully reset database $database.")
+        }
+    }
+
     class Builder : DatabaseConnection.Builder<Builder>() {
         private val logger = logger(this)
 
@@ -275,7 +289,9 @@ class SQLDatabaseConnection private constructor(
         try {
             return block(this)
         } catch (e: Exception) {
-            connection.rollback()
+            if (!connection.autoCommit) {
+                connection.rollback()
+            }
             throw e
         } finally {
             this.close()

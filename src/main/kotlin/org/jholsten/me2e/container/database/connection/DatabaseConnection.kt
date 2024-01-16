@@ -80,9 +80,19 @@ abstract class DatabaseConnection protected constructor(
      * @throws java.io.FileNotFoundException if file does not exist.
      * @throws DatabaseException if script could not be executed.
      */
-    @JvmOverloads
-    fun executeScript(name: String? = null, path: String) {
+    fun executeScript(name: String?, path: String) {
         executeScript(name, FileUtils.getResourceAsFile(path))
+    }
+
+    /**
+     * Executes the script on the given path.
+     * Path needs to be located in `resources` folder.
+     * @param path Path to the file which contains the script. Needs to be located in `resources` folder.
+     * @throws java.io.FileNotFoundException if file does not exist.
+     * @throws DatabaseException if script could not be executed.
+     */
+    fun executeScript(path: String) {
+        executeScript(null, FileUtils.getResourceAsFile(path))
     }
 
     /**
@@ -106,6 +116,11 @@ abstract class DatabaseConnection protected constructor(
         val tablesToClear = tables.filter { table -> tablesToSkip.none { table.lowercase() == it.lowercase() } }
         clear(tablesToClear)
     }
+
+    /**
+     * Resets the whole database by deleting all tables, entries and sequences.
+     */
+    abstract fun reset()
 
     abstract class Builder<SELF : Builder<SELF>> {
         protected var host: String? = null

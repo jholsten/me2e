@@ -152,6 +152,10 @@ class MongoDBConnection private constructor(
         }
     }
 
+    override fun reset() {
+        connection.drop()
+    }
+
     class Builder : DatabaseConnection.Builder<Builder>() {
         private var container: ContainerState? = null
         private var settings: MongoClientSettings? = null

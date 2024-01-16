@@ -285,6 +285,16 @@ internal class SQLDatabaseConnectionIT {
         assertDoesNotThrow { databaseArguments.connection.tables }
     }
 
+    @ParameterizedTest(name = "[{index}] with {0}")
+    @ArgumentsSource(DatabaseArgumentProvider::class)
+    fun `Resetting database should succeed`(databaseArguments: DatabaseArguments) {
+        populateDB(databaseArguments.system, databaseArguments.connection)
+
+        databaseArguments.connection.reset()
+
+        assertEquals(0, databaseArguments.connection.tables.size)
+    }
+
     private fun assertTablesExist(connection: SQLDatabaseConnection) {
         val tables = connection.tables
         RecursiveComparison.assertEquals(listOf("company", "employee"), tables, ignoreCollectionOrder = true)

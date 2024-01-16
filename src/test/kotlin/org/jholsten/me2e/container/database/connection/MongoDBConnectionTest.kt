@@ -3,6 +3,7 @@ package org.jholsten.me2e.container.database.connection
 import org.bson.Document
 import org.jholsten.me2e.container.database.model.QueryResult
 import org.jholsten.util.RecursiveComparison
+import org.jholsten.util.assertDoesNotThrow
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -242,6 +243,19 @@ internal class MongoDBConnectionTest {
 
         assertTablesExist(connection)
         assertEquals(2, connection.getAllFromTable("company").size)
+        assertEquals(0, connection.getAllFromTable("employee").size)
+    }
+
+    @ParameterizedTest(name = "[{index}] with authentication: {1}")
+    @ArgumentsSource(DatabaseArgumentProvider::class)
+    @Suppress("UNUSED_PARAMETER")
+    fun `Resetting database should succeed`(connection: MongoDBConnection, withAuthentication: Boolean) {
+        populateDB(connection)
+
+        connection.reset()
+
+        assertEquals(0, connection.tables.size)
+        assertEquals(0, connection.getAllFromTable("company").size)
         assertEquals(0, connection.getAllFromTable("employee").size)
     }
 
