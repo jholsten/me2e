@@ -13,9 +13,12 @@ import org.junit.jupiter.params.provider.ArgumentsProvider
 import org.junit.jupiter.params.provider.ArgumentsSource
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.wait.strategy.Wait
+import java.io.File
+import java.io.FileNotFoundException
 import java.util.stream.Stream
 import kotlin.test.AfterTest
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 internal class MongoDBConnectionTest {
 
@@ -51,12 +54,14 @@ internal class MongoDBConnectionTest {
             unsecuredConnection = MongoDBConnection.Builder()
                 .withHost(unsecuredContainer.host)
                 .withPort(unsecuredContainer.getMappedPort(27017))
+                .withContainer(unsecuredContainer)
                 .withDatabase("testdb")
                 .build()
             securedContainer.start()
             securedConnection = MongoDBConnection.Builder()
                 .withHost(securedContainer.host)
                 .withPort(securedContainer.getMappedPort(27017))
+                .withContainer(securedContainer)
                 .withDatabase("testdb")
                 .withUsername("user")
                 .withPassword("123")
@@ -130,6 +135,12 @@ internal class MongoDBConnectionTest {
         assertEquals("mongodb://user:123@$securedUrl", securedConnection.url)
     }
 
+    @Test
+    fun `Mongo shell command should be set correctly`() {
+        assertEquals("mongo", unsecuredConnection.mongoShellCommand)
+        assertEquals("mongo", securedConnection.mongoShellCommand)
+    }
+
     @ParameterizedTest(name = "[{index}] with authentication: {1}")
     @ArgumentsSource(DatabaseArgumentProvider::class)
     @Suppress("UNUSED_PARAMETER")
@@ -156,10 +167,30 @@ internal class MongoDBConnectionTest {
     fun `Retrieving entries from table should return all rows`(connection: MongoDBConnection, withAuthentication: Boolean) {
         populateDB(connection)
 
-        val companies = connection.getAllFromTable("company").map { e -> e.filterKeys { it != "_id" } }
-        val employees = connection.getAllFromTable("employee").map { e -> e.filterKeys { it != "_id" } }
-        RecursiveComparison.assertEquals(expectedCompanies, companies)
-        RecursiveComparison.assertEquals(expectedEmployees, employees)
+        assertEqualsIgnoreInternalId(expectedCompanies, connection.getAllFromTable("company"))
+        assertEqualsIgnoreInternalId(expectedEmployees, connection.getAllFromTable("employee"))
+    }
+
+    @ParameterizedTest(name = "[{index}] with authentication: {1}")
+    @ArgumentsSource(DatabaseArgumentProvider::class)
+    fun `Executing script should succeed`(connection: MongoDBConnection, withAuthentication: Boolean) {
+        val script = when (withAuthentication) {
+            true -> "database/mongo_script_authenticated.js"
+            false -> "database/mongo_script.js"
+        }
+        connection.executeScript(script)
+
+        assertTablesExist(connection)
+        assertEqualsIgnoreInternalId(expectedCompanies, connection.getAllFromTable("company"))
+        assertEqualsIgnoreInternalId(expectedEmployees, connection.getAllFromTable("employee"))
+    }
+
+    @ParameterizedTest(name = "[{index}] with authentication: {1}")
+    @ArgumentsSource(DatabaseArgumentProvider::class)
+    @Suppress("UNUSED_PARAMETER")
+    fun `Executing non-existing script should fail`(connection: MongoDBConnection, withAuthentication: Boolean) {
+        assertFailsWith<FileNotFoundException> { connection.executeScript("non-existing") }
+        assertFailsWith<FileNotFoundException> { connection.executeScript(File("non-existing")) }
     }
 
     @ParameterizedTest(name = "[{index}] with authentication: {1}")
@@ -212,6 +243,10 @@ internal class MongoDBConnectionTest {
         assertTablesExist(connection)
         assertEquals(2, connection.getAllFromTable("company").size)
         assertEquals(0, connection.getAllFromTable("employee").size)
+    }
+
+    private fun assertEqualsIgnoreInternalId(expected: List<Map<String, Any?>>, actual: List<Map<String, Any?>>) {
+        RecursiveComparison.assertEquals(expected, actual.map { e -> e.filterKeys { it != "_id" } })
     }
 
     private fun assertTablesExist(connection: MongoDBConnection) {

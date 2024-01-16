@@ -1,7 +1,10 @@
 package org.jholsten.me2e.container.database.connection
 
 import org.jholsten.me2e.container.database.DatabaseManagementSystem
+import org.jholsten.me2e.container.database.exception.DatabaseException
 import org.jholsten.me2e.container.database.model.QueryResult
+import org.jholsten.me2e.parsing.utils.FileUtils
+import java.io.File
 
 /**
  * Representation of the connection to an SQL or No-SQL database.
@@ -49,6 +52,23 @@ abstract class DatabaseConnection protected constructor(
      * @param tableName Name of the table for which entries are to be retrieved.
      */
     abstract fun getAllFromTable(tableName: String): QueryResult
+
+    /**
+     * Executes the given script.
+     * @throws java.io.FileNotFoundException if file does not exist.
+     * @throws DatabaseException if script could not be executed.
+     */
+    abstract fun executeScript(file: File)
+
+    /**
+     * Executes the script on the given path.
+     * Path needs to be located in `resources` folder.
+     * @throws java.io.FileNotFoundException if file does not exist.
+     * @throws DatabaseException if script could not be executed.
+     */
+    fun executeScript(path: String) {
+        executeScript(FileUtils.getResourceAsFile(path))
+    }
 
     /**
      * Truncates the tables with the given names.

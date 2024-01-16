@@ -5,7 +5,6 @@ import org.apache.ibatis.jdbc.ScriptRunner
 import org.jholsten.me2e.container.database.DatabaseManagementSystem
 import org.jholsten.me2e.container.database.model.QueryResult
 import org.jholsten.me2e.container.database.exception.DatabaseException
-import org.jholsten.me2e.parsing.utils.FileUtils
 import org.jholsten.me2e.utils.logger
 import java.io.File
 import java.io.FileReader
@@ -95,7 +94,7 @@ class SQLDatabaseConnection private constructor(
      * @throws java.io.FileNotFoundException if file does not exist.
      * @throws DatabaseException if script could not be executed.
      */
-    fun executeScript(file: File) {
+    override fun executeScript(file: File) {
         logger.info("Executing SQL script ${file.path}...")
         try {
             val scriptRunner = ScriptRunner(connection)
@@ -105,16 +104,6 @@ class SQLDatabaseConnection private constructor(
         } catch (e: RuntimeSqlException) {
             throw DatabaseException("Unable to execute script: ${e.message}")
         }
-    }
-
-    /**
-     * Executes the SQL script on the given path.
-     * Path needs to be located in `resources` folder.
-     * @throws java.io.FileNotFoundException if file does not exist.
-     * @throws DatabaseException if script could not be executed.
-     */
-    fun executeScript(path: String) {
-        executeScript(FileUtils.getResourceAsFile(path))
     }
 
     override fun clear(tablesToClear: List<String>) {
