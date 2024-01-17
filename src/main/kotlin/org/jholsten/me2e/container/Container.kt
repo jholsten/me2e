@@ -6,15 +6,12 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import org.jholsten.me2e.config.model.DockerConfig
 import org.jholsten.me2e.config.utils.ContainerPortListDeserializer
 import org.jholsten.me2e.container.database.DatabaseContainer
+import org.jholsten.me2e.container.logging.LogConsumer
+import org.jholsten.me2e.container.logging.LogUtils
 import org.jholsten.me2e.container.microservice.MicroserviceContainer
 import org.jholsten.me2e.container.model.ContainerType
+import org.jholsten.me2e.container.logging.model.LogEntry
 import org.testcontainers.containers.ContainerState
-import org.testcontainers.containers.output.FrameConsumerResultCallback
-import org.testcontainers.containers.output.OutputFrame
-import org.testcontainers.containers.output.ToStringConsumer
-import org.testcontainers.containers.output.WaitingConsumer
-import org.testcontainers.utility.LogUtils
-import java.util.function.Consumer
 import com.github.dockerjava.api.model.Container as DockerContainer
 
 
@@ -121,6 +118,24 @@ open class Container(
     )
 
     /**
+     * Result of the execution of a command inside the Docker container.
+     */
+    data class ExecutionResult(
+        /**
+         * Exit code of the command.
+         */
+        val exitCode: Int,
+        /**
+         * Output of the command on STDOUT.
+         */
+        val stdout: String,
+        /**
+         * Output of the command on STDERR.
+         */
+        val stderr: String,
+    )
+
+    /**
      * Returns whether the container is currently up and running.
      */
     val isRunning: Boolean
@@ -153,7 +168,7 @@ open class Container(
      * Reference to the Docker container which represents this container instance.
      * Is initialized as soon as the docker compose is started.
      */
-    private var dockerContainer: DockerContainerReference? = null
+    var dockerContainer: DockerContainerReference? = null
 
     /**
      * Initializes the container by setting the corresponding [DockerContainer] and [ContainerState] instance
@@ -174,46 +189,83 @@ open class Container(
     }
 
     /**
-     * Executes the given command inside the container.
+     * Executes the given command inside the container, as using
+     * [`docker exec`](https://docs.docker.com/engine/reference/commandline/exec/).
+     * @param command Command to execute in array format. Example: `["echo", "a", "&&", "echo", "b"]`
+     * @return Result of the execution.
      */
-    fun execute() {
-        // TODO
+    fun execute(vararg command: String): ExecutionResult {
+        assertThatContainerIsInitialized()
+        val result = dockerContainer!!.state.execInContainer(*command)
+        return ExecutionResult(
+            exitCode = result.exitCode,
+            stdout = result.stdout,
+            stderr = result.stderr,
+        )
     }
 
     /**
-     * Returns all log output from the container from [since] until [until] along with their timestamps.
+     * Executes the given command inside the container as the given user, as using
+     * [`docker exec -u user`](https://docs.docker.com/engine/reference/commandline/exec/).
+     * @param user Username or UID to execute command with. Format is one of: `user`, `user:group`, `uid` or `uid:gid`.
+     * @param command Command to execute in array format. Example: `["echo", "a", "&&", "echo", "b"]`
+     * @return Result of the execution.
+     */
+    fun executeAsUser(user: String, vararg command: String): ExecutionResult {
+        assertThatContainerIsInitialized()
+        val result = dockerContainer!!.state.execInContainerWithUser(user, *command)
+        return ExecutionResult(
+            exitCode = result.exitCode,
+            stdout = result.stdout,
+            stderr = result.stderr,
+        )
+    }
+
+    /**
+     * Returns all log output from the container from [since] until now along with their timestamps,
+     * by executing `docker logs --since $since --timestamps $containerId`.
+     *
      * To retrieve all log entries starting from the creation of the container, set [since] to `0`.
-     * To retrieve all log entries until now, set [until] to `null`.
-     * @see LogUtils.followOutput
+     * @param since Only return logs since this time, as a UNIX timestamp.
      * @throws IllegalStateException if container is not initialized
      */
-    @JvmOverloads
-    fun getLogs(since: Int = 0, until: Int? = null): String {
-        assertThatContainerIsInitialized()
-        val cmd = dockerContainer!!.state.dockerClient
-            .logContainerCmd(dockerContainer!!.state.containerId)
-            .withFollowStream(false)
-            .withTimestamps(true)
-            .withSince(since)
-            .withStdOut(true)
-            .withStdErr(true)
+    fun getLogsSince(since: Int): List<LogEntry> {
+        return getLogs(since = since, until = null)
+    }
 
-        if (until != null) {
-            cmd.withUntil(until)
-        }
+    /**
+     * Returns all log output from the container from the creation of the container until [until] along with their timestamps,
+     * by executing `docker logs --until $until --timestamps $containerId`.
+     *
+     * To retrieve all log entries until now, set [until] to `null`.
+     * @param until Only return logs before this time, as a UNIX timestamp. If set to `null`, all log entries until now are returned.
+     * @throws IllegalStateException if container is not initialized
+     */
+    fun getLogsUntil(until: Int?): List<LogEntry> {
+        return getLogs(since = 0, until = until)
+    }
 
-        val toStringConsumer = ToStringConsumer()
-        val wait = WaitingConsumer()
-        val consumer = toStringConsumer.andThen(wait)
+    /**
+     * Returns all log output from the container from [since] until [until] along with their timestamps,
+     * by executing `docker logs --since $since --until $until --timestamps $containerId`.
+     *
+     * To retrieve all log entries starting from the creation of the container, set [since] to `0`.
+     * To retrieve all log entries until now, set [until] to `null`.
+     * @param since Only return logs since this time, as a UNIX timestamp.
+     * @param until Only return logs before this time, as a UNIX timestamp. If set to `null`, all log entries until now are returned.
+     * @throws IllegalStateException if container is not initialized
+     */
+    fun getLogsBetween(since: Int, until: Int?): List<LogEntry> {
+        return getLogs(since = since, until = until)
+    }
 
-        val callback = FrameConsumerResultCallback()
-        callback.addConsumer(OutputFrame.OutputType.STDOUT, consumer)
-        callback.addConsumer(OutputFrame.OutputType.STDERR, consumer)
-
-        cmd.exec(callback).use {
-            wait.waitUntilEnd()
-            return toStringConsumer.toUtf8String()
-        }
+    /**
+     * Returns all log output from the container from the creation of the container until now along with their timestamps,
+     * by executing `docker logs --timestamps $containerId`.
+     * @throws IllegalStateException if container is not initialized
+     */
+    fun getLogs(): List<LogEntry> {
+        return getLogs(since = 0, until = null)
     }
 
     /**
@@ -221,9 +273,24 @@ open class Container(
      * The consumer receives all previous and all future log frames.
      * @throws IllegalStateException if container is not initialized
      */
-    fun addLogConsumer(consumer: Consumer<OutputFrame>) {
+    fun addLogConsumer(consumer: LogConsumer) {
         assertThatContainerIsInitialized()
-        LogUtils.followOutput(dockerContainer!!.state.dockerClient, dockerContainer!!.state.containerId, consumer)
+        LogUtils.followOutput(dockerContainer!!.state, consumer)
+    }
+
+    /**
+     * Returns all log output from the container from [since] until [until] along with their timestamps,
+     * by executing `docker logs --since $since --until $until --timestamps $containerId`.
+     *
+     * To retrieve all log entries starting from the creation of the container, set [since] to `0`.
+     * To retrieve all log entries until now, set [until] to `null`.
+     * @param since Only return logs since this time, as a UNIX timestamp.
+     * @param until Only return logs before this time, as a UNIX timestamp. If set to `null`, all log entries until now are returned.
+     * @throws IllegalStateException if container is not initialized
+     */
+    private fun getLogs(since: Int, until: Int?): List<LogEntry> {
+        assertThatContainerIsInitialized()
+        return LogUtils.getLogs(dockerContainer!!.state, since, until)
     }
 
     private fun assertThatContainerIsInitialized() {
