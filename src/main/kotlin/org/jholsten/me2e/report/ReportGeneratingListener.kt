@@ -54,7 +54,7 @@ class ReportGeneratingListener : TestExecutionListener {
 
     /**
      * Callback function which is executed after all tests have been executed.
-     * Generates report using the [org.jholsten.me2e.report.presentation.ReportGenerator].
+     * Generates report using the [org.jholsten.me2e.report.summary.ReportGenerator].
      * @param testPlan Describes the tree of tests that have been executed.
      */
     override fun testPlanExecutionFinished(testPlan: TestPlan?) {

@@ -21,4 +21,8 @@ class LogEntry(
      * Message of the log entry.
      */
     message: String,
-) : ContainerLogEntry(timestamp, message)
+) : ContainerLogEntry(timestamp, message) {
+    override fun toString(): String {
+        return "[$timestamp]\t[$service]\t$message"
+    }
+}

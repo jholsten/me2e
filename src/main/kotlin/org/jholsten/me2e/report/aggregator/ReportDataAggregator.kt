@@ -2,6 +2,7 @@ package org.jholsten.me2e.report.aggregator
 
 import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.report.logs.LogAggregator
+import org.jholsten.me2e.report.summary.TestSummary
 import org.junit.platform.engine.TestExecutionResult
 import org.junit.platform.engine.reporting.ReportEntry
 import org.junit.platform.launcher.TestIdentifier
@@ -17,6 +18,8 @@ class ReportDataAggregator {
      */
     lateinit var logAggregator: LogAggregator
 
+    private val testSummaries: MutableMap<String, TestSummary> = mutableMapOf()
+
     @JvmSynthetic
     internal fun initialize(containers: Collection<Container>) {
         logAggregator = LogAggregator(containers)
@@ -31,6 +34,14 @@ class ReportDataAggregator {
     @JvmSynthetic
     internal fun onTestFinished(testIdentifier: TestIdentifier, testExecutionResult: TestExecutionResult?) {
         logAggregator.collectLogs(testIdentifier.uniqueId)
+        val summary = testSummaries[testIdentifier.uniqueId] ?: TestSummary(
+            testId = testIdentifier.uniqueId,
+            status = TestSummary.Status.SUCCESSFUL, //TODO
+            displayName = testIdentifier.displayName,
+            tags = testIdentifier.tags.map { it.name }.toSet(),
+            reportEntries = listOf(), // TODO
+            logs = logAggregator.getAggregatedLogsByTestId(testIdentifier.uniqueId),
+        )
         println("TODO: ON TEST FINISHED")
     }
 
@@ -59,7 +70,7 @@ class ReportDataAggregator {
 
     /**
      * Callback function which is executed after all tests have been executed.
-     * Generates report using the [org.jholsten.me2e.report.presentation.ReportGenerator].
+     * Generates report using the [org.jholsten.me2e.report.summary.ReportGenerator].
      * @param testPlan Describes the tree of tests that have been executed.
      */
     @JvmSynthetic
