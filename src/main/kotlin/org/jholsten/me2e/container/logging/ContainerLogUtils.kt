@@ -1,6 +1,7 @@
 package org.jholsten.me2e.container.logging
 
-import org.jholsten.me2e.container.logging.model.LogEntry
+import org.jholsten.me2e.container.logging.model.ContainerLogCollector
+import org.jholsten.me2e.container.logging.model.ContainerLogEntryList
 import org.testcontainers.containers.ContainerState
 import org.testcontainers.containers.output.FrameConsumerResultCallback
 import org.testcontainers.containers.output.OutputFrame
@@ -13,7 +14,7 @@ import java.util.function.Consumer
  * Expands the functionality of [org.testcontainers.utility.LogUtils].
  * @see org.testcontainers.utility.LogUtils
  */
-class LogUtils {
+class ContainerLogUtils {
     companion object {
         /**
          * Returns all log output from the container [dockerContainer] from [since] until [until] along with their timestamps,
@@ -27,8 +28,8 @@ class LogUtils {
          * @see org.testcontainers.utility.LogUtils.getOutput
          */
         @JvmStatic
-        fun getLogs(dockerContainer: ContainerState, since: Int, until: Int?): List<LogEntry> {
-            val collector = LogCollector()
+        fun getLogs(dockerContainer: ContainerState, since: Int, until: Int?): ContainerLogEntryList {
+            val collector = ContainerLogCollector()
             val wait = WaitingConsumer()
             val consumer = collector.andThen(wait)
 
@@ -46,7 +47,7 @@ class LogUtils {
          * @return Consumer thread which can be closed to stop consuming log entries.
          * @see org.testcontainers.utility.LogUtils.followOutput
          */
-        fun followOutput(dockerContainer: ContainerState, consumer: LogConsumer): Closeable {
+        fun followOutput(dockerContainer: ContainerState, consumer: ContainerLogConsumer): Closeable {
             return attachConsumer(dockerContainer, consumer, followStream = true, since = 0)
         }
 
@@ -74,14 +75,6 @@ class LogUtils {
             callback.addConsumer(OutputFrame.OutputType.STDERR, consumer)
 
             return cmd.exec(callback)
-        }
-
-        private class LogCollector : LogConsumer() {
-            val logs = mutableListOf<LogEntry>()
-
-            override fun accept(entry: LogEntry) {
-                logs.add(entry)
-            }
         }
     }
 }

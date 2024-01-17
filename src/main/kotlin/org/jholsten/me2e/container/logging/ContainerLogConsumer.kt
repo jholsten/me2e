@@ -1,6 +1,6 @@
 package org.jholsten.me2e.container.logging
 
-import org.jholsten.me2e.container.logging.model.LogEntry
+import org.jholsten.me2e.container.logging.model.ContainerLogEntry
 import org.slf4j.LoggerFactory
 import org.testcontainers.containers.output.OutputFrame
 import java.time.Instant
@@ -10,8 +10,8 @@ import java.util.function.Consumer
  * Base class for consuming log entries of a container.
  * Whenever the container prints a log message, the callback function [accept] is executed.
  */
-abstract class LogConsumer : Consumer<OutputFrame> {
-    private val logger = LoggerFactory.getLogger(LogConsumer::class.java)
+abstract class ContainerLogConsumer : Consumer<OutputFrame> {
+    private val logger = LoggerFactory.getLogger(ContainerLogConsumer::class.java)
 
     /**
      * Callback function to execute when a container logs a new entry. Empty messages are ignored
@@ -20,7 +20,7 @@ abstract class LogConsumer : Consumer<OutputFrame> {
      * When registering the consumer, all previous log entries are received.
      * @param entry Log entry received from the Docker container.
      */
-    abstract fun accept(entry: LogEntry)
+    abstract fun accept(entry: ContainerLogEntry)
 
     override fun accept(t: OutputFrame) {
         try {
@@ -38,17 +38,17 @@ abstract class LogConsumer : Consumer<OutputFrame> {
      * correspond to the predefined Regex [OUTPUT_REGEX].
      * @param frame Log entry frame to parse.
      */
-    private fun parseLogEntry(frame: OutputFrame): LogEntry? {
+    private fun parseLogEntry(frame: OutputFrame): ContainerLogEntry? {
         val output = frame.utf8String
         if (output.trim().isEmpty()) {
             return null
         }
-        val match = OUTPUT_REGEX.find(output) ?: return LogEntry(Instant.now(), output)
+        val match = OUTPUT_REGEX.find(output) ?: return ContainerLogEntry(Instant.now(), output)
         val (timestamp, message) = match.destructured
         if (message.trim().isEmpty()) {
             return null
         }
-        return LogEntry(
+        return ContainerLogEntry(
             timestamp = Instant.parse(timestamp),
             message = message,
         )

@@ -5,12 +5,7 @@ import java.time.Instant
 /**
  * Model representing one log entry.
  */
-data class LogEntry(
-    /**
-     * Name of the service which logged this entry.
-     */
-    //val service: String, TODO
-
+open class ContainerLogEntry(
     /**
      * Timestamp of when this entry was logged.
      */
@@ -20,4 +15,8 @@ data class LogEntry(
      * Message of the log entry.
      */
     val message: String,
-)
+) {
+    override fun toString(): String {
+        return "[$timestamp]\t$message"
+    }
+}

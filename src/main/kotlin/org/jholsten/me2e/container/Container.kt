@@ -6,11 +6,11 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import org.jholsten.me2e.config.model.DockerConfig
 import org.jholsten.me2e.config.utils.ContainerPortListDeserializer
 import org.jholsten.me2e.container.database.DatabaseContainer
-import org.jholsten.me2e.container.logging.LogConsumer
-import org.jholsten.me2e.container.logging.LogUtils
+import org.jholsten.me2e.container.logging.ContainerLogConsumer
+import org.jholsten.me2e.container.logging.ContainerLogUtils
 import org.jholsten.me2e.container.microservice.MicroserviceContainer
 import org.jholsten.me2e.container.model.ContainerType
-import org.jholsten.me2e.container.logging.model.LogEntry
+import org.jholsten.me2e.container.logging.model.ContainerLogEntryList
 import org.testcontainers.containers.ContainerState
 import com.github.dockerjava.api.model.Container as DockerContainer
 
@@ -168,7 +168,7 @@ open class Container(
      * Reference to the Docker container which represents this container instance.
      * Is initialized as soon as the docker compose is started.
      */
-    var dockerContainer: DockerContainerReference? = null
+    private var dockerContainer: DockerContainerReference? = null
 
     /**
      * Initializes the container by setting the corresponding [DockerContainer] and [ContainerState] instance
@@ -229,7 +229,7 @@ open class Container(
      * @param since Only return logs since this time, as a UNIX timestamp.
      * @throws IllegalStateException if container is not initialized
      */
-    fun getLogsSince(since: Int): List<LogEntry> {
+    fun getLogsSince(since: Int): ContainerLogEntryList {
         return getLogs(since = since, until = null)
     }
 
@@ -241,7 +241,7 @@ open class Container(
      * @param until Only return logs before this time, as a UNIX timestamp. If set to `null`, all log entries until now are returned.
      * @throws IllegalStateException if container is not initialized
      */
-    fun getLogsUntil(until: Int?): List<LogEntry> {
+    fun getLogsUntil(until: Int?): ContainerLogEntryList {
         return getLogs(since = 0, until = until)
     }
 
@@ -255,7 +255,7 @@ open class Container(
      * @param until Only return logs before this time, as a UNIX timestamp. If set to `null`, all log entries until now are returned.
      * @throws IllegalStateException if container is not initialized
      */
-    fun getLogsBetween(since: Int, until: Int?): List<LogEntry> {
+    fun getLogsBetween(since: Int, until: Int?): ContainerLogEntryList {
         return getLogs(since = since, until = until)
     }
 
@@ -264,7 +264,7 @@ open class Container(
      * by executing `docker logs --timestamps $containerId`.
      * @throws IllegalStateException if container is not initialized
      */
-    fun getLogs(): List<LogEntry> {
+    fun getLogs(): ContainerLogEntryList {
         return getLogs(since = 0, until = null)
     }
 
@@ -273,9 +273,9 @@ open class Container(
      * The consumer receives all previous and all future log frames.
      * @throws IllegalStateException if container is not initialized
      */
-    fun addLogConsumer(consumer: LogConsumer) {
+    fun addLogConsumer(consumer: ContainerLogConsumer) {
         assertThatContainerIsInitialized()
-        LogUtils.followOutput(dockerContainer!!.state, consumer)
+        ContainerLogUtils.followOutput(dockerContainer!!.state, consumer)
     }
 
     /**
@@ -288,9 +288,9 @@ open class Container(
      * @param until Only return logs before this time, as a UNIX timestamp. If set to `null`, all log entries until now are returned.
      * @throws IllegalStateException if container is not initialized
      */
-    private fun getLogs(since: Int, until: Int?): List<LogEntry> {
+    private fun getLogs(since: Int, until: Int?): ContainerLogEntryList {
         assertThatContainerIsInitialized()
-        return LogUtils.getLogs(dockerContainer!!.state, since, until)
+        return ContainerLogUtils.getLogs(dockerContainer!!.state, since, until)
     }
 
     private fun assertThatContainerIsInitialized() {
