@@ -5,6 +5,8 @@ import org.jholsten.me2e.container.ContainerManager
 import org.jholsten.me2e.container.injection.InjectionUtils
 import org.jholsten.me2e.mock.MockServerManager
 import org.jholsten.me2e.parsing.utils.FileUtils
+import org.jholsten.me2e.report.aggregator.ReportDataAggregator
+
 
 /**
  * Base class for the definition of ME2E-Tests.
@@ -14,30 +16,51 @@ open class Me2eTest {
         /**
          * Configuration annotation that is used to configure the tests.
          */
-        val configAnnotation = Me2eTestConfigScanner.findFirstTestConfigAnnotation()
+        @get:JvmStatic
+        val configAnnotation: Me2eTestConfig by lazy {
+            Me2eTestConfigScanner.findFirstTestConfigAnnotation()
+        }
 
         /**
          * Parsed test configuration.
          */
-        val config: TestConfig = configAnnotation.format.parser.parseFile(configAnnotation.config)
+        @get:JvmStatic
+        val config: TestConfig by lazy {
+            configAnnotation.format.parser.parseFile(configAnnotation.config)
+        }
 
         /**
          * Container manager instance responsible for managing the containers.
          */
-        val containerManager = ContainerManager(
-            dockerComposeFile = FileUtils.getResourceAsFile(config.environment.dockerCompose),
-            dockerConfig = config.docker,
-            containers = config.environment.containers,
-        )
+        @get:JvmStatic
+        val containerManager: ContainerManager by lazy {
+            ContainerManager(
+                dockerComposeFile = FileUtils.getResourceAsFile(config.environment.dockerCompose),
+                dockerConfig = config.docker,
+                containers = config.environment.containers,
+            )
+        }
 
         /**
          * Mock server manager instance responsible for managing the mock servers.
          */
-        val mockServerManager = MockServerManager(mockServers = config.environment.mockServers)
+        @get:JvmStatic
+        val mockServerManager: MockServerManager by lazy {
+            MockServerManager(mockServers = config.environment.mockServers)
+        }
+
+        /**
+         * Service which aggregates all the data required for the test report.
+         */
+        @get:JvmStatic
+        val reportDataAggregator: ReportDataAggregator by lazy {
+            ReportDataAggregator()
+        }
 
         init {
-            containerManager.start()
             mockServerManager.start()
+            containerManager.start()
+            reportDataAggregator.initialize(containerManager.containers.values)
         }
     }
 
