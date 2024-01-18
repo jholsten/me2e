@@ -6,6 +6,7 @@ import org.jholsten.me2e.container.Container
  * Service which collects all log entries from all containers.
  * After each test execution, the logs for this test are collected
  * from all containers and stored in [logs].
+ * TODO: Add test runner logs
  */
 class LogAggregator(
     /**
@@ -38,15 +39,17 @@ class LogAggregator(
      * Callback function to execute when one test execution finished.
      * Collects logs from all containers and stores them with the
      * reference to the corresponding test.
+     * @return Collected log entries.
      */
     @JvmSynthetic
-    internal fun collectLogs(testId: String) {
+    internal fun collectLogs(testId: String): AggregatedLogEntryList {
         val logs = mutableListOf<LogEntry>()
         for (container in containers) {
             logs.addAll(consumers[container.name]!!.reset())
         }
         logs.sortBy { it.timestamp }
         this.logs[testId] = logs
+        return AggregatedLogEntryList(logs)
     }
 
     /**

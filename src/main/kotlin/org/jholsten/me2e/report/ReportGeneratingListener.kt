@@ -24,7 +24,7 @@ class ReportGeneratingListener : TestExecutionListener {
      * @param testExecutionResult Result of the execution for the supplied [testIdentifier]
      */
     override fun executionFinished(testIdentifier: TestIdentifier?, testExecutionResult: TestExecutionResult?) {
-        if (testIdentifier?.isTest == true) {
+        if (testIdentifier?.isTest == true && testExecutionResult != null) {
             Me2eTest.reportDataAggregator.onTestFinished(testIdentifier, testExecutionResult)
         }
     }
@@ -49,7 +49,9 @@ class ReportGeneratingListener : TestExecutionListener {
      * @param entry The published [ReportEntry].
      */
     override fun reportingEntryPublished(testIdentifier: TestIdentifier?, entry: ReportEntry?) {
-        Me2eTest.reportDataAggregator.onReportingEntryPublished(testIdentifier, entry)
+        if (testIdentifier != null && entry != null) {
+            Me2eTest.reportDataAggregator.onReportingEntryPublished(entry)
+        }
     }
 
     /**
