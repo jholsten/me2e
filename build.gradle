@@ -145,6 +145,8 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(16)
     }
+    withSourcesJar()
+    withJavadocJar()
 }
 
 test {
