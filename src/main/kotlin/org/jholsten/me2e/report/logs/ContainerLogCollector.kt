@@ -9,7 +9,7 @@ import org.jholsten.me2e.container.logging.model.ContainerLogEntry
  * Log collector which collects the logs of the service with the given name
  * for one test execution.
  */
-internal class TestLogCollector(val service: String) : ContainerLogConsumer() {
+internal class ContainerLogCollector(val service: String) : ContainerLogConsumer() {
     private val logs: MutableList<LogEntry> = mutableListOf()
 
     override fun accept(entry: ContainerLogEntry) {

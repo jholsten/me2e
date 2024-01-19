@@ -13,13 +13,13 @@ import org.junit.platform.launcher.TestPlan
 /**
  * Service which aggregates all the data required for the test report.
  */
-class ReportDataAggregator {
+class ReportDataAggregator() {
     private val logger = logger(this)
 
     /**
      * Log collector which aggregates the logs of all containers for each test execution.
      */
-    lateinit var logAggregator: LogAggregator
+    private val logAggregator: LogAggregator = LogAggregator()
 
     /**
      * Summaries of all tests and test containers executed so far.
@@ -32,8 +32,17 @@ class ReportDataAggregator {
     private val collectedReportEntries: MutableList<ReportEntry> = mutableListOf()
 
     @JvmSynthetic
-    internal fun initialize(containers: Collection<Container>) {
-        logAggregator = LogAggregator(containers)
+    internal fun initializeBeforeContainersStarted() {
+        logAggregator.initializeBeforeContainersStarted()
+    }
+
+    /**
+     * Initializes the aggregator when the containers were started.
+     * Starts listeners for Container events.
+     */
+    @JvmSynthetic
+    internal fun initializeOnContainersStarted(containers: Collection<Container>) {
+        logAggregator.initializeOnContainersStarted(containers)
     }
 
     /**
@@ -47,8 +56,6 @@ class ReportDataAggregator {
         val logs = logAggregator.collectLogs(testIdentifier.uniqueId)
         val summary = TestSummary.finished(testIdentifier, testExecutionResult, collectedReportEntries, logs)
         storeTestSummary(summary)
-        logger.info("FINISHED")
-        //logger.info(summary.logs.toString())
     }
 
     /**
