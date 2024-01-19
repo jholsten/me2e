@@ -24,7 +24,7 @@ class ReportGeneratingListener : TestExecutionListener {
      * @param testExecutionResult Result of the execution for the supplied [testIdentifier]
      */
     override fun executionFinished(testIdentifier: TestIdentifier?, testExecutionResult: TestExecutionResult?) {
-        if (testIdentifier?.isTest == true && testExecutionResult != null) {
+        if (testIdentifier != null && testExecutionResult != null) {
             Me2eTest.reportDataAggregator.onTestFinished(testIdentifier, testExecutionResult)
         }
     }
@@ -36,7 +36,7 @@ class ReportGeneratingListener : TestExecutionListener {
      * @param reason Message describing why the execution has been skipped.
      */
     override fun executionSkipped(testIdentifier: TestIdentifier?, reason: String?) {
-        if (testIdentifier?.isTest == true) {
+        if (testIdentifier != null) {
             Me2eTest.reportDataAggregator.onTestSkipped(testIdentifier, reason)
         }
     }

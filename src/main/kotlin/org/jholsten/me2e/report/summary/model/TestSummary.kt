@@ -2,19 +2,28 @@ package org.jholsten.me2e.report.summary.model
 
 import org.jholsten.me2e.report.logs.AggregatedLogEntryList
 import org.jholsten.me2e.report.summary.mapper.TestSummaryStatusMapper
+import org.jholsten.me2e.utils.toJson
 import org.junit.platform.engine.TestExecutionResult
 import org.junit.platform.launcher.TestIdentifier
 
 /**
- * Summary of the execution of a single test.
- * TODO: Maybe extend this for containers also.
+ * Summary of the execution of a single test or test container.
+ * A test container may be for example a Test Class, [org.junit.jupiter.api.Nested] Class or a [org.junit.jupiter.params.ParameterizedTest].
+ * At the root of all Test Classes is the test container with id `[engine:junit-jupiter]`.
  */
 abstract class TestSummary(
     /**
-     * Unique identifier of the test.
+     * Unique identifier of the test or test container.
      * @see org.junit.platform.launcher.TestIdentifier.getUniqueId
      */
     val testId: String,
+
+    /**
+     * ID of the parent of this test or test container.
+     * An identifier without a parent is called a `root`.
+     * @see org.junit.platform.launcher.TestIdentifier.getParentId
+     */
+    val parentId: String?,
 
     /**
      * Status of the test execution.
@@ -23,47 +32,47 @@ abstract class TestSummary(
     val status: Status,
 
     /**
-     * Human-readable name of the test.
+     * Human-readable name of the test or test container.
      * @see org.junit.platform.launcher.TestIdentifier.getDisplayName
      */
     val displayName: String,
 
     /**
-     * Tags associated with the represented test.
+     * Tags associated with the represented test or test container.
      * @see org.junit.platform.launcher.TestIdentifier.getTags
      */
     val tags: Set<String>,
 ) {
     /**
-     * Status of executing a single test.
+     * Status of executing a single test or test container.
      * @see org.junit.platform.engine.TestExecutionResult.Status
      */
     enum class Status {
         /**
-         * Indicates that the execution of the test was successful.
+         * Indicates that the execution of the test or test container was successful.
          */
         SUCCESSFUL,
 
         /**
-         * Indicates that the execution of the test was aborted (started but not finished).
+         * Indicates that the execution of the test or test container was aborted (started but not finished).
          */
         ABORTED,
 
         /**
-         * Indicates that the execution of the test failed.
+         * Indicates that the execution of the test or test container failed.
          */
         FAILED,
 
         /**
-         * Indicates that the execution of the test was skipped.
+         * Indicates that the execution of the test or test container was skipped.
          */
         SKIPPED,
     }
 
     companion object {
         /**
-         * Creates an instance of [FinishedTestSummary] representing a test for which the execution was finished.
-         * @param testIdentifier Identifier of the finished test.
+         * Creates an instance of [FinishedTestSummary] representing a test or test container for which the execution was finished.
+         * @param testIdentifier Identifier of the finished test or test container.
          * @param testExecutionResult Result of the execution for the supplied [testIdentifier].
          * @param reportEntries Report entries that were published during the test execution.
          * @param logs Logs that were collected during the test execution.
@@ -77,6 +86,7 @@ abstract class TestSummary(
         ): FinishedTestSummary {
             return FinishedTestSummary(
                 testId = testIdentifier.uniqueId,
+                parentId = testIdentifier.parentId.orElse(null),
                 status = TestSummaryStatusMapper.INSTANCE.toInternalDto(testExecutionResult.status),
                 displayName = testIdentifier.displayName,
                 tags = testIdentifier.tags.map { it.name }.toSet(),
@@ -87,7 +97,7 @@ abstract class TestSummary(
         }
 
         /**
-         * Creates an instance of [SkippedTestSummary] representing a test for which the execution was skipped.
+         * Creates an instance of [SkippedTestSummary] representing a test or test container for which the execution was skipped.
          * @param testIdentifier Identifier of the skipped test.
          * @param reason Message describing why the execution has been skipped.
          */
@@ -98,6 +108,7 @@ abstract class TestSummary(
         ): SkippedTestSummary {
             return SkippedTestSummary(
                 testId = testIdentifier.uniqueId,
+                parentId = testIdentifier.parentId.orElse(null),
                 status = Status.SKIPPED,
                 displayName = testIdentifier.displayName,
                 tags = testIdentifier.tags.map { it.name }.toSet(),
@@ -105,4 +116,6 @@ abstract class TestSummary(
             )
         }
     }
+
+    override fun toString(): String = toJson(this)
 }
