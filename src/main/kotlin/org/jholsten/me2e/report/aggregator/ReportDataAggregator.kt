@@ -22,7 +22,7 @@ class ReportDataAggregator {
     lateinit var logAggregator: LogAggregator
 
     /**
-     * Summaries of all tests executed so far.
+     * Summaries of all tests and test containers executed so far.
      */
     private val testSummaries: MutableList<TestSummary> = mutableListOf()
 
@@ -37,24 +37,24 @@ class ReportDataAggregator {
     }
 
     /**
-     * Callback function which is executed when the execution of a test has finished.
+     * Callback function which is executed when the execution of a test or test container has finished.
      * Collects relevant data from the Docker containers for the test report and stores the execution result.
-     * @param testIdentifier Identifier of the finished test.
+     * @param testIdentifier Identifier of the finished test or test container.
      * @param testExecutionResult Result of the execution for the supplied [testIdentifier].
-     * TODO: Check for parameterized tests + nested classes
      */
     @JvmSynthetic
     internal fun onTestFinished(testIdentifier: TestIdentifier, testExecutionResult: TestExecutionResult) {
         val logs = logAggregator.collectLogs(testIdentifier.uniqueId)
         val summary = TestSummary.finished(testIdentifier, testExecutionResult, collectedReportEntries, logs)
         storeTestSummary(summary)
-        logger.info(summary.logs.toString())
+        logger.info("FINISHED")
+        //logger.info(summary.logs.toString())
     }
 
     /**
-     * Callback function which is executed when a test has been skipped.
+     * Callback function which is executed when a test or test container has been skipped.
      * Stores relevant data for the test report.
-     * @param testIdentifier Identifier of the skipped test or container.
+     * @param testIdentifier Identifier of the skipped test or test container.
      * @param reason Message describing why the execution has been skipped.
      */
     @JvmSynthetic
@@ -75,7 +75,7 @@ class ReportDataAggregator {
     }
 
     /**
-     * Callback function which is executed after all tests have been executed.
+     * Callback function which is executed after all tests have been finished.
      * Generates report using the [org.jholsten.me2e.report.summary.ReportGenerator].
      * @param testPlan Describes the tree of tests that have been executed.
      */
