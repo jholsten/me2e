@@ -1,6 +1,19 @@
 package org.jholsten.me2e.report.logs
 
+import ch.qos.logback.classic.Logger
+import ch.qos.logback.classic.LoggerContext
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.AppenderBase
+import ch.qos.logback.core.read.ListAppender
+import com.google.auto.service.AutoService
+import io.github.netmikey.logunit.api.LogCapturer
 import org.jholsten.me2e.container.Container
+import org.junit.platform.engine.reporting.ReportEntry
+import org.junit.platform.launcher.TestExecutionListener
+import org.junit.platform.launcher.TestIdentifier
+import org.slf4j.LoggerFactory
+import org.slf4j.MarkerFactory
+
 
 /**
  * Service which collects all log entries from all containers.
@@ -26,6 +39,28 @@ class LogAggregator(
      */
     private val logs: MutableMap<String, List<LogEntry>> = mutableMapOf()
 
+    lateinit var listAppender: AppenderBase<ILoggingEvent>
+
+
+    class MyCustomAppender : AppenderBase<ILoggingEvent>() {
+        val list: MutableList<ILoggingEvent> = mutableListOf()
+        override fun append(event: ILoggingEvent) {
+            list.add(event)
+        }
+
+        companion object {
+            private val MY_MARKER = MarkerFactory.getMarker("MY_MARKER")
+        }
+    }
+
+    @AutoService(TestExecutionListener::class)
+    class LogListener : TestExecutionListener {
+        override fun reportingEntryPublished(testIdentifier: TestIdentifier?, entry: ReportEntry?) {
+            println(entry)
+        }
+    }
+
+
     /**
      * Initializes the collector by attaching log consumers to all containers.
      */
@@ -33,6 +68,15 @@ class LogAggregator(
         for (container in containers) {
             container.addLogConsumer(consumers[container.name]!!)
         }
+        val loggerContext = LoggerFactory.getILoggerFactory() as LoggerContext
+        listAppender = MyCustomAppender();
+        listAppender.context = loggerContext
+        listAppender.name = "ABC"
+        listAppender.start()
+        val log = loggerContext.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
+        log.addAppender(listAppender)
+        val l = LogCapturer.create()
+        l.logProvider.
     }
 
     /**
