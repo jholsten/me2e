@@ -4,6 +4,7 @@ package org.jholsten.me2e.report.logs
 
 import org.jholsten.me2e.container.logging.ContainerLogConsumer
 import org.jholsten.me2e.container.logging.model.ContainerLogEntry
+import org.jholsten.me2e.report.logs.model.LogEntry
 
 /**
  * Log collector which collects the logs of the service with the given name

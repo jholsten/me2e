@@ -1,4 +1,4 @@
-package org.jholsten.me2e.report.logs
+package org.jholsten.me2e.report.logs.model
 
 import org.jholsten.me2e.container.logging.model.ContainerLogEntry
 import java.time.Instant

@@ -5,6 +5,7 @@ package org.jholsten.me2e.report.logs
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.AppenderBase
 import org.jholsten.me2e.report.logs.LogAggregator.Companion.TEST_RUNNER_NAME
+import org.jholsten.me2e.report.logs.model.LogEntry
 
 /**
  * Collector which collects the messages logged by the Test Runner for one test execution.

@@ -1,7 +1,7 @@
 package org.jholsten.me2e.report
 
 import com.google.auto.service.AutoService
-import org.jholsten.me2e.Me2eTest
+import org.jholsten.me2e.report.summary.ReportDataAggregator
 import org.junit.platform.engine.TestExecutionResult
 import org.junit.platform.engine.reporting.ReportEntry
 import org.junit.platform.launcher.TestExecutionListener
@@ -25,7 +25,7 @@ class ReportGeneratingListener : TestExecutionListener {
      */
     override fun executionFinished(testIdentifier: TestIdentifier?, testExecutionResult: TestExecutionResult?) {
         if (testIdentifier != null && testExecutionResult != null) {
-            Me2eTest.reportDataAggregator.onTestFinished(testIdentifier, testExecutionResult)
+            ReportDataAggregator.onTestFinished(testIdentifier, testExecutionResult)
         }
     }
 
@@ -37,7 +37,7 @@ class ReportGeneratingListener : TestExecutionListener {
      */
     override fun executionSkipped(testIdentifier: TestIdentifier?, reason: String?) {
         if (testIdentifier != null) {
-            Me2eTest.reportDataAggregator.onTestSkipped(testIdentifier, reason)
+            ReportDataAggregator.onTestSkipped(testIdentifier, reason)
         }
     }
 
@@ -50,8 +50,17 @@ class ReportGeneratingListener : TestExecutionListener {
      */
     override fun reportingEntryPublished(testIdentifier: TestIdentifier?, entry: ReportEntry?) {
         if (testIdentifier != null && entry != null) {
-            Me2eTest.reportDataAggregator.onReportingEntryPublished(entry)
+            ReportDataAggregator.onReportingEntryPublished(entry)
         }
+    }
+
+    /**
+     * Callback function which is executed before the execution of the tests starts.
+     * Initializes all data collectors.
+     * @param testPlan Describes the tree of tests about to be executed.
+     */
+    override fun testPlanExecutionStarted(testPlan: TestPlan?) {
+        ReportDataAggregator.onTestExecutionStarted()
     }
 
     /**
@@ -60,6 +69,6 @@ class ReportGeneratingListener : TestExecutionListener {
      * @param testPlan Describes the tree of tests that have been executed.
      */
     override fun testPlanExecutionFinished(testPlan: TestPlan?) {
-        Me2eTest.reportDataAggregator.onTestExecutionFinished(testPlan)
+        ReportDataAggregator.onTestExecutionFinished(testPlan)
     }
 }

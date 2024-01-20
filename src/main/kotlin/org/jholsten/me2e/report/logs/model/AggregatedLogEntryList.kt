@@ -1,4 +1,4 @@
-package org.jholsten.me2e.report.logs
+package org.jholsten.me2e.report.logs.model
 
 /**
  * List of log entries that were collected from all containers.

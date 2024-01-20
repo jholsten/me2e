@@ -2,6 +2,8 @@ package org.jholsten.me2e.report.logs
 
 import ch.qos.logback.classic.LoggerContext
 import org.jholsten.me2e.container.Container
+import org.jholsten.me2e.report.logs.model.AggregatedLogEntryList
+import org.jholsten.me2e.report.logs.model.LogEntry
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -21,16 +23,11 @@ class LogAggregator(
     }
 
     /**
-     * Containers of the environment.
-     */
-    private lateinit var containers: Collection<Container>
-
-    /**
      * Map of container name and log collector.
      * For each container, there is one collector which collects
      * the container's logs of the current test execution.
      */
-    private lateinit var consumers: Map<String, ContainerLogCollector>
+    private var consumers: Map<String, ContainerLogCollector> = mapOf()
 
     private val testRunnerLogCollector: TestRunnerLogCollector = TestRunnerLogCollector()
 
@@ -54,7 +51,6 @@ class LogAggregator(
      */
     @JvmSynthetic
     internal fun initializeOnContainersStarted(containers: Collection<Container>) {
-        this.containers = containers
         this.consumers = containers.associate { it.name to ContainerLogCollector(it.name) }
         for (container in containers) {
             container.addLogConsumer(consumers[container.name]!!)
@@ -70,8 +66,8 @@ class LogAggregator(
     @JvmSynthetic
     internal fun collectLogs(testId: String): AggregatedLogEntryList {
         val logs = mutableListOf<LogEntry>()
-        for (container in containers) {
-            logs.addAll(consumers[container.name]!!.reset())
+        for (consumer in consumers.values) {
+            logs.addAll(consumer.reset())
         }
         logs.addAll(testRunnerLogCollector.reset())
         logs.sortBy { it.timestamp }

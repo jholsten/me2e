@@ -1,6 +1,6 @@
 package org.jholsten.me2e.report.summary.model
 
-import org.jholsten.me2e.report.logs.AggregatedLogEntryList
+import org.jholsten.me2e.report.logs.model.AggregatedLogEntryList
 import org.jholsten.me2e.report.summary.mapper.TestSummaryStatusMapper
 import org.jholsten.me2e.utils.toJson
 import org.junit.platform.engine.TestExecutionResult
