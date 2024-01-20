@@ -2,12 +2,11 @@
 
 package org.jholsten.me2e.report.logs
 
-import ch.qos.logback.classic.PatternLayout
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.AppenderBase
 import ch.qos.logback.core.Layout
 import org.jholsten.me2e.report.logs.LogAggregator.Companion.TEST_RUNNER_NAME
-import org.jholsten.me2e.report.logs.model.LogEntry
+import org.jholsten.me2e.report.logs.model.AggregatedLogEntry
 
 /**
  * Collector which collects the messages logged by the Test Runner for one test execution.
@@ -21,11 +20,11 @@ internal class TestRunnerLogCollector(
     /**
      * List of log entries that were collected so far.
      */
-    private val logs: MutableList<LogEntry> = mutableListOf()
+    private val logs: MutableList<AggregatedLogEntry> = mutableListOf()
 
     override fun append(log: ILoggingEvent) {
         logs.add(
-            LogEntry(
+            AggregatedLogEntry(
                 service = TEST_RUNNER_NAME,
                 timestamp = log.instant,
                 message = layout.doLayout(log),
@@ -37,7 +36,7 @@ internal class TestRunnerLogCollector(
      * Resets the list of collected log entries.
      * Returns all entries that were collected so far.
      */
-    internal fun reset(): List<LogEntry> {
+    internal fun reset(): List<AggregatedLogEntry> {
         val entries = logs.toList()
         logs.clear()
         return entries

@@ -4,7 +4,7 @@ import ch.qos.logback.classic.LoggerContext
 import ch.qos.logback.classic.PatternLayout
 import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.report.logs.model.AggregatedLogEntryList
-import org.jholsten.me2e.report.logs.model.LogEntry
+import org.jholsten.me2e.report.logs.model.AggregatedLogEntry
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -40,7 +40,7 @@ class LogAggregator internal constructor() {
     /**
      * Logs for each unique test ID that were collected so far.
      */
-    private val logs: MutableMap<String, List<LogEntry>> = mutableMapOf()
+    private val logs: MutableMap<String, List<AggregatedLogEntry>> = mutableMapOf()
 
     /**
      * Initializes the collector for consuming the Test Runner's logs when the test execution started.
@@ -71,7 +71,7 @@ class LogAggregator internal constructor() {
      */
     @JvmSynthetic
     internal fun collectLogs(testId: String): AggregatedLogEntryList {
-        val logs = mutableListOf<LogEntry>()
+        val logs = mutableListOf<AggregatedLogEntry>()
         for (consumer in consumers.values) {
             logs.addAll(consumer.reset())
         }
@@ -82,7 +82,7 @@ class LogAggregator internal constructor() {
     }
 
     /**
-     * Returns aggregated logs which where collected for the execution of the test with the given ID.
+     * Returns aggregated logs which were collected for the execution of the test with the given ID.
      * @throws IllegalArgumentException if no logs are stored for the given test ID.
      */
     fun getAggregatedLogsByTestId(testId: String): AggregatedLogEntryList {
