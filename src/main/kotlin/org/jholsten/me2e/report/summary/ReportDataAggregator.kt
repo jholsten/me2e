@@ -9,6 +9,7 @@ import org.jholsten.me2e.utils.logger
 import org.junit.platform.engine.TestExecutionResult
 import org.junit.platform.launcher.TestIdentifier
 import org.junit.platform.launcher.TestPlan
+import java.time.Instant
 
 /**
  * Service which aggregates all the data required for the test report.
@@ -32,6 +33,11 @@ class ReportDataAggregator private constructor() {
          */
         private val collectedReportEntries: MutableList<ReportEntry> = mutableListOf()
 
+        /**
+         * Timestamps of when a test or test container was started as map of test ID and timestamp.
+         */
+        private val startTimes: MutableMap<String, Instant> = mutableMapOf()
+
         @JvmSynthetic
         internal fun onTestExecutionStarted() {
             logAggregator.initializeBeforeContainersStarted()
@@ -47,6 +53,16 @@ class ReportDataAggregator private constructor() {
         }
 
         /**
+         * Callback function which is executed when the execution of a test or test container is about to be started.
+         * Records the start time of the test for the test report.
+         * @param testIdentifier Identifier of the test or test container about to be started.
+         */
+        @JvmSynthetic
+        internal fun onTestStarted(testIdentifier: TestIdentifier) {
+            startTimes[testIdentifier.uniqueId] = Instant.now()
+        }
+
+        /**
          * Callback function which is executed when the execution of a test or test container has finished.
          * Collects relevant data from the Docker containers for the test report and stores the execution result.
          * @param testIdentifier Identifier of the finished test or test container.
@@ -55,7 +71,13 @@ class ReportDataAggregator private constructor() {
         @JvmSynthetic
         internal fun onTestFinished(testIdentifier: TestIdentifier, testExecutionResult: TestExecutionResult) {
             val logs = logAggregator.collectLogs(testIdentifier.uniqueId)
-            val summary = TestSummary.finished(testIdentifier, testExecutionResult, collectedReportEntries, logs)
+            val summary = TestSummary.finished(
+                testIdentifier = testIdentifier,
+                testExecutionResult = testExecutionResult,
+                startTime = startTimes[testIdentifier.uniqueId],
+                reportEntries = collectedReportEntries,
+                logs = logs,
+            )
             storeTestSummary(summary)
         }
 

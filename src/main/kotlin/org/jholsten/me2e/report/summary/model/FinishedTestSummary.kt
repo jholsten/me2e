@@ -2,6 +2,7 @@ package org.jholsten.me2e.report.summary.model
 
 import org.jholsten.me2e.report.logs.model.AggregatedLogEntryList
 import org.jholsten.me2e.utils.toJson
+import java.time.Instant
 
 /**
  * Summary of a test or test container for which the execution was finished.
@@ -26,6 +27,16 @@ class FinishedTestSummary(
      * @see org.junit.platform.engine.TestExecutionResult.getStatus
      */
     status: Status,
+
+    /**
+     * Timestamp of when this test or test container has started its execution.
+     */
+    val startTime: Instant,
+
+    /**
+     * Timestamp of when this test or test container has finished its execution.
+     */
+    val endTime: Instant,
 
     /**
      * Human-readable name of the test or test container.

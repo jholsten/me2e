@@ -15,6 +15,18 @@ import org.junit.platform.launcher.TestPlan
  */
 @AutoService(TestExecutionListener::class)
 class ReportGeneratingListener : TestExecutionListener {
+
+    /**
+     * Callback function which is executed when the execution of a test or test container is about to be started.
+     * Records the start time of the test for the test report.
+     * @param testIdentifier Identifier of the test or test container about to be started.
+     */
+    override fun executionStarted(testIdentifier: TestIdentifier?) {
+        if (testIdentifier != null) {
+            ReportDataAggregator.onTestStarted(testIdentifier)
+        }
+    }
+
     /**
      * Callback function which is executed when the execution of a test or a test container has finished.
      * Is called after all [org.junit.jupiter.api.AfterEach] and [org.junit.jupiter.api.AfterAll] methods
