@@ -11,6 +11,9 @@ import org.jholsten.me2e.container.logging.ContainerLogUtils
 import org.jholsten.me2e.container.microservice.MicroserviceContainer
 import org.jholsten.me2e.container.model.ContainerType
 import org.jholsten.me2e.container.logging.model.ContainerLogEntryList
+import org.jholsten.me2e.container.stats.ContainerStatsConsumer
+import org.jholsten.me2e.container.stats.ContainerStatsUtils
+import org.jholsten.me2e.container.stats.model.ContainerStatsEntry
 import org.testcontainers.containers.ContainerState
 import com.github.dockerjava.api.model.Container as DockerContainer
 
@@ -271,11 +274,33 @@ open class Container(
     /**
      * Attaches the given [consumer] to this container's log outputs.
      * The consumer receives all previous and all future log frames.
+     * @param consumer Log consumer to be attached.
      * @throws IllegalStateException if container is not initialized
      */
     fun addLogConsumer(consumer: ContainerLogConsumer) {
         assertThatContainerIsInitialized()
         ContainerLogUtils.followOutput(dockerContainer!!.state, consumer)
+    }
+
+    /**
+     * Returns current resource usage statistics of the container, by executing `docker stats --no-stream $containerId`.
+     * @throws IllegalStateException if container is not initialized
+     */
+    fun getStats(): ContainerStatsEntry {
+        assertThatContainerIsInitialized()
+        return ContainerStatsUtils.getStats(dockerContainer!!.state)
+    }
+
+    /**
+     * Attaches the given [consumer] to the container's resource usage statistics.
+     * Docker instantiates a live data stream for the container and for each
+     * statistics entry received by Docker, the consumer is notified.
+     * @param consumer Statistics consumer to be attached.
+     * @throws IllegalStateException if container is not initialized
+     */
+    fun addStatsConsumer(consumer: ContainerStatsConsumer) {
+        assertThatContainerIsInitialized()
+        ContainerStatsUtils.followOutput(dockerContainer!!.state, consumer)
     }
 
     /**
