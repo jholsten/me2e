@@ -40,7 +40,7 @@ class ReportDataAggregator private constructor() {
 
         @JvmSynthetic
         internal fun onTestExecutionStarted() {
-            logAggregator.initializeBeforeContainersStarted()
+            logAggregator.initializeOnTestExecutionStarted()
         }
 
         /**
@@ -111,6 +111,7 @@ class ReportDataAggregator private constructor() {
          */
         @JvmSynthetic
         internal fun onTestExecutionFinished(testPlan: TestPlan?) {
+            val logs = logAggregator.getAggregatedLogs()
             println("TODO: ON TEST EXECUTION FINISHED")
         }
 

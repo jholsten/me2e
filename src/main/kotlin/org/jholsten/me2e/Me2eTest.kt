@@ -5,7 +5,7 @@ import org.jholsten.me2e.container.ContainerManager
 import org.jholsten.me2e.container.injection.InjectionUtils
 import org.jholsten.me2e.mock.MockServerManager
 import org.jholsten.me2e.parsing.utils.FileUtils
-import org.jholsten.me2e.report.aggregator.ReportDataAggregator
+import org.jholsten.me2e.report.summary.ReportDataAggregator
 
 
 /**
@@ -49,18 +49,10 @@ open class Me2eTest {
             MockServerManager(mockServers = config.environment.mockServers)
         }
 
-        /**
-         * Service which aggregates all the data required for the test report.
-         */
-        @get:JvmStatic
-        val reportDataAggregator: ReportDataAggregator by lazy {
-            ReportDataAggregator()
-        }
-
         init {
             mockServerManager.start()
             containerManager.start()
-            reportDataAggregator.initialize(containerManager.containers.values)
+            ReportDataAggregator.initializeOnContainersStarted(config.environment.containers.values)
         }
     }
 
