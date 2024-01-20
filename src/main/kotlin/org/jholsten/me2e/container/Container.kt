@@ -295,6 +295,7 @@ open class Container(
      * Attaches the given [consumer] to the container's resource usage statistics.
      * Docker instantiates a live data stream for the container and for each
      * statistics entry received by Docker, the consumer is notified.
+     * Docker sends new resource usage information every second.
      * @param consumer Statistics consumer to be attached.
      * @throws IllegalStateException if container is not initialized
      */

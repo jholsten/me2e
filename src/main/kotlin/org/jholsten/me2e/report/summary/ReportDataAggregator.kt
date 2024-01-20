@@ -2,6 +2,7 @@ package org.jholsten.me2e.report.summary
 
 import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.report.logs.LogAggregator
+import org.jholsten.me2e.report.stats.StatsAggregator
 import org.jholsten.me2e.report.summary.mapper.ReportEntryMapper
 import org.jholsten.me2e.report.summary.model.ReportEntry
 import org.jholsten.me2e.report.summary.model.TestSummary
@@ -22,6 +23,12 @@ class ReportDataAggregator private constructor() {
          * Log collector which aggregates the logs of all containers for each test execution.
          */
         private val logAggregator: LogAggregator = LogAggregator()
+
+        /**
+         * Statistics collector which aggregates the resource usage statistics of all containers
+         * for each test execution.
+         */
+        private val statsAggregator: StatsAggregator = StatsAggregator()
 
         /**
          * Summaries of all tests and test containers executed so far.
@@ -50,6 +57,7 @@ class ReportDataAggregator private constructor() {
         @JvmSynthetic
         internal fun initializeOnContainersStarted(containers: Collection<Container>) {
             logAggregator.initializeOnContainersStarted(containers)
+            statsAggregator.initializeOnContainersStarted(containers)
         }
 
         /**
@@ -71,12 +79,14 @@ class ReportDataAggregator private constructor() {
         @JvmSynthetic
         internal fun onTestFinished(testIdentifier: TestIdentifier, testExecutionResult: TestExecutionResult) {
             val logs = logAggregator.collectLogs(testIdentifier.uniqueId)
+            val stats = statsAggregator.collectStats(testIdentifier.uniqueId)
             val summary = TestSummary.finished(
                 testIdentifier = testIdentifier,
                 testExecutionResult = testExecutionResult,
                 startTime = startTimes[testIdentifier.uniqueId],
                 reportEntries = collectedReportEntries,
                 logs = logs,
+                stats = stats,
             )
             storeTestSummary(summary)
         }
@@ -112,6 +122,7 @@ class ReportDataAggregator private constructor() {
         @JvmSynthetic
         internal fun onTestExecutionFinished(testPlan: TestPlan?) {
             val logs = logAggregator.getAggregatedLogs()
+            val stats = statsAggregator.getAggregatedStats()
             println("TODO: ON TEST EXECUTION FINISHED")
         }
 

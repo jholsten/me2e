@@ -1,6 +1,7 @@
 package org.jholsten.me2e.report.summary.model
 
 import org.jholsten.me2e.report.logs.model.AggregatedLogEntryList
+import org.jholsten.me2e.report.stats.model.AggregatedStatsEntryList
 import org.jholsten.me2e.utils.toJson
 import java.time.Instant
 
@@ -60,6 +61,11 @@ class FinishedTestSummary(
      * Includes test runner logs as well as Docker container logs.
      */
     val logs: AggregatedLogEntryList,
+
+    /**
+     * Resource usage statistics that were collected for this test execution.
+     */
+    val stats: AggregatedStatsEntryList,
 
     /**
      * Throwable that caused this result.

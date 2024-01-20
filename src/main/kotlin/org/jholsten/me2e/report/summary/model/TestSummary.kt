@@ -1,6 +1,7 @@
 package org.jholsten.me2e.report.summary.model
 
 import org.jholsten.me2e.report.logs.model.AggregatedLogEntryList
+import org.jholsten.me2e.report.stats.model.AggregatedStatsEntryList
 import org.jholsten.me2e.report.summary.mapper.TestSummaryStatusMapper
 import org.jholsten.me2e.utils.toJson
 import org.junit.platform.engine.TestExecutionResult
@@ -78,6 +79,7 @@ abstract class TestSummary(
          * @param startTime Timestamp of when this test or test container has started its execution.
          * @param reportEntries Report entries that were published during the test execution.
          * @param logs Logs that were collected during the test execution.
+         * @param stats Resource usage statistics that were collected during the test execution.
          */
         @JvmSynthetic
         internal fun finished(
@@ -86,6 +88,7 @@ abstract class TestSummary(
             startTime: Instant?,
             reportEntries: List<ReportEntry>,
             logs: AggregatedLogEntryList,
+            stats: AggregatedStatsEntryList,
         ): FinishedTestSummary {
             return FinishedTestSummary(
                 testId = testIdentifier.uniqueId,
@@ -97,6 +100,7 @@ abstract class TestSummary(
                 tags = testIdentifier.tags.map { it.name }.toSet(),
                 reportEntries = reportEntries.toList(),
                 logs = logs,
+                stats = stats,
                 throwable = testExecutionResult.throwable.orElse(null),
             )
         }
