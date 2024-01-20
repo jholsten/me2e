@@ -1,6 +1,7 @@
-package org.jholsten.me2e.container.logging.model
+package org.jholsten.me2e.container.logging
 
-import org.jholsten.me2e.container.logging.ContainerLogConsumer
+import org.jholsten.me2e.container.logging.model.ContainerLogEntry
+import org.jholsten.me2e.container.logging.model.ContainerLogEntryList
 
 /**
  * Log consumer which collects all logs and stores them in

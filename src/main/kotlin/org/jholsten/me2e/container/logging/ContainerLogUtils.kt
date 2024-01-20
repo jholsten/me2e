@@ -1,6 +1,5 @@
 package org.jholsten.me2e.container.logging
 
-import org.jholsten.me2e.container.logging.model.ContainerLogCollector
 import org.jholsten.me2e.container.logging.model.ContainerLogEntryList
 import org.testcontainers.containers.ContainerState
 import org.testcontainers.containers.output.FrameConsumerResultCallback
