@@ -87,6 +87,7 @@ dependencies {
 
     // Dependency for parsing YAML files
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.2"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.2"
 
     // Dependency for validating data using JSON schema
     implementation "com.networknt:json-schema-validator:1.0.86"
