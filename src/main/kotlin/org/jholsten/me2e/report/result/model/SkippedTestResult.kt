@@ -5,7 +5,7 @@ import org.jholsten.me2e.utils.toJson
 /**
  * Summary of a test or test container for which the execution was skipped.
  */
-class SkippedTestSummary(
+class SkippedTestResult(
     /**
      * Unique identifier of the test or test container.
      * @see org.junit.platform.launcher.TestIdentifier.getUniqueId
@@ -13,17 +13,43 @@ class SkippedTestSummary(
     testId: String,
 
     /**
-     * Summaries of the children of this test of test container.
+     * Summaries of the children of this test or test container.
      * For instance, if this summary describes a Test Class, the children include all tests of this class.
      * For a leaf, this list is empty.
      */
-    children: List<TestSummary>,
+    children: List<TestResult>,
 
     /**
      * Status of the test execution.
      * @see org.junit.platform.engine.TestExecutionResult.getStatus
      */
     status: Status,
+
+    /**
+     * Number of tests that this result contains.
+     * If this result relates to a single test (i.e. the list of [children]
+     * is empty), the value is set to `1`.
+     * However, if this result relates to a test container, the value
+     * reflects the number of tests contained in the container.
+     */
+    numberOfTests: Int,
+
+    /**
+     * Number of failed tests that this result contains.
+     * Since this result relates to a skipped test or test container and
+     * therefore all of its [children] were skipped as well, this value
+     * is set to `0`.
+     */
+    numberOfFailures: Int,
+
+    /**
+     * Number of skipped tests that this result contains.
+     * If this result relates to a single test (i.e. the list of [children]
+     * is empty), the value is set to `1`.
+     * However, if this result relates to a test container, the value
+     * reflects the number of skipped tests contained in the container.
+     */
+    numberOfSkipped: Int,
 
     /**
      * Human-readable name of the test or test container.
@@ -41,10 +67,13 @@ class SkippedTestSummary(
      * Message describing why the execution has been skipped.
      */
     val reason: String?,
-) : TestSummary(
+) : TestResult(
     testId = testId,
     children = children,
     status = status,
+    numberOfTests = numberOfTests,
+    numberOfFailures = numberOfFailures,
+    numberOfSkipped = numberOfSkipped,
     displayName = displayName,
     tags = tags,
 ) {

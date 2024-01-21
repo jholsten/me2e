@@ -9,7 +9,6 @@ import org.jholsten.me2e.report.result.model.ReportEntry
 import org.jholsten.me2e.report.result.model.TestExecutionResult
 import org.jholsten.me2e.report.result.model.TestResult
 import org.jholsten.me2e.utils.logger
-import org.junit.platform.engine.TestExecutionResult
 import org.junit.platform.launcher.TestIdentifier
 import org.junit.platform.launcher.TestPlan
 import java.time.Instant
@@ -35,7 +34,7 @@ class ReportDataAggregator private constructor() {
         /**
          * Summaries of all tests and test containers executed so far.
          */
-        private val testSummaries: MutableList<IntermediateTestSummary> = mutableListOf()
+        private val intermediateTestResults: MutableMap<String, IntermediateTestResult> = mutableMapOf()
 
         /**
          * Report entries that were collected so far for the current test execution.
@@ -79,10 +78,10 @@ class ReportDataAggregator private constructor() {
          * @param testExecutionResult Result of the execution for the supplied [testIdentifier].
          */
         @JvmSynthetic
-        internal fun onTestFinished(testIdentifier: TestIdentifier, testExecutionResult: TestExecutionResult) {
+        internal fun onTestFinished(testIdentifier: TestIdentifier, testExecutionResult: org.junit.platform.engine.TestExecutionResult) {
             val logs = logAggregator.collectLogs(testIdentifier.uniqueId)
             val stats = statsAggregator.collectStats(testIdentifier.uniqueId)
-            val summary = IntermediateTestSummary.finished(
+            val summary = IntermediateTestResult.finished(
                 testIdentifier = testIdentifier,
                 testExecutionResult = testExecutionResult,
                 startTime = startTimes[testIdentifier.uniqueId],
@@ -90,7 +89,7 @@ class ReportDataAggregator private constructor() {
                 logs = logs,
                 stats = stats,
             )
-            storeIntermediateTestSummary(summary)
+            storeIntermediateTestResult(summary)
         }
 
         /**
@@ -101,8 +100,8 @@ class ReportDataAggregator private constructor() {
          */
         @JvmSynthetic
         internal fun onTestSkipped(testIdentifier: TestIdentifier, reason: String?) {
-            val summary = IntermediateTestSummary.skipped(testIdentifier, reason)
-            storeIntermediateTestSummary(summary)
+            val summary = IntermediateTestResult.skipped(testIdentifier, reason)
+            storeIntermediateTestResult(summary)
         }
 
         /**
@@ -118,26 +117,60 @@ class ReportDataAggregator private constructor() {
 
         /**
          * Callback function which is executed after all tests have been finished.
-         * Generates report using the [org.jholsten.me2e.report.summary.ReportGenerator].
+         * Generates report using the [org.jholsten.me2e.report.result.ReportGenerator].
          * @param testPlan Describes the tree of tests that have been executed.
          */
         @JvmSynthetic
-        internal fun onTestExecutionFinished(testPlan: TestPlan?) {
+        internal fun onTestExecutionFinished(testPlan: TestPlan) {
             val logs = logAggregator.getAggregatedLogs()
             val stats = statsAggregator.getAggregatedStats()
+            val result = aggregateSummaries(testPlan)
             println("TODO: ON TEST EXECUTION FINISHED")
         }
 
-        private fun aggregateSummaries(testPlan: TestPlan) {
-
+        private fun aggregateSummaries(testPlan: TestPlan): TestExecutionResult {
+            val tree = buildTestTree(testPlan)
+            return TestExecutionResult(
+                numberOfTests = tree.sumOf { it.numberOfTests },
+                numberOfFailures = tree.sumOf { it.numberOfFailures },
+                numberOfSkipped = tree.sumOf { it.numberOfSkipped },
+                tests = tree,
+            )
         }
 
-        private fun buildTree(testPlan: TestPlan) {
-            
+        private fun buildTestTree(testPlan: TestPlan): List<TestResult> {
+            val roots: MutableList<TestResult> = mutableListOf()
+            for (root in testPlan.roots) {
+                val result = getIntermediateResult(root).toTestResult(buildTestTree(root, testPlan))
+                roots.add(result)
+            }
+            return roots
         }
 
-        private fun storeIntermediateTestSummary(summary: IntermediateTestSummary) {
-            testSummaries.add(summary)
+        private fun buildTestTree(identifier: TestIdentifier, testPlan: TestPlan): List<TestResult> {
+            val nodes: MutableList<TestResult> = mutableListOf()
+            val children = testPlan.getChildren(identifier)
+            for (child in children) {
+                val result = getIntermediateResult(child).toTestResult(buildTestTree(child, testPlan))
+                nodes.add(result)
+            }
+            return nodes
+        }
+
+        /**
+         * Returns the intermediate test result which is stored for the given identifier.
+         * If no such result is saved, we assume that the enclosing test container was
+         * skipped and therefore all the tests it contains were not executed.
+         * This situation and the case where the initialization of a test container has
+         * failed are the only cases in which it is possible that no result is stored
+         * for the identifier.
+         */
+        private fun getIntermediateResult(testIdentifier: TestIdentifier): IntermediateTestResult {
+            return this.intermediateTestResults[testIdentifier.uniqueId] ?: IntermediateTestResult.skipped(testIdentifier)
+        }
+
+        private fun storeIntermediateTestResult(result: IntermediateTestResult) {
+            intermediateTestResults[result.testId] = result
             collectedReportEntries.clear()
         }
     }

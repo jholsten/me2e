@@ -24,10 +24,10 @@ open class HtmlReportGenerator(
      */
     protected val outputDirectory: String = "build/reports/me2e"
 ) : ReportGenerator() {
-    protected lateinit var summaries: List<TestSummary>
+    protected lateinit var result: TestExecutionResult
 
-    override fun generate(summaries: List<TestSummary>) {
-        this.summaries = summaries
+    override fun generate(result: TestExecutionResult) {
+        this.result = result
     }
 
     open fun generateIndexHtml() {
