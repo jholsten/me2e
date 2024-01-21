@@ -1,6 +1,9 @@
 package org.jholsten.me2e.report.result.html.data
 
 import org.thymeleaf.context.Context
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 /**
@@ -44,6 +47,15 @@ open class TemplateData(
         fun withVariable(key: String, value: Any?): SELF {
             context.setVariable(key, value)
             return self()
+        }
+
+        /**
+         * Sets the timestamp of when the report was generated.
+         * The formatted timestamp can be used in the template by referencing `${generationTimestamp}`.
+         */
+        fun withGenerationTimestamp(timestamp: Instant): SELF {
+            val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm:ss").withZone(ZoneId.systemDefault())
+            return withVariable("generationTimestamp", formatter.format(timestamp))
         }
 
         open fun build(): TemplateData {

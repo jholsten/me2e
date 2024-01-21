@@ -2,6 +2,7 @@ package org.jholsten.me2e.report.result
 
 import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.report.logs.LogAggregator
+import org.jholsten.me2e.report.result.html.HtmlReportGenerator
 import org.jholsten.me2e.report.stats.StatsAggregator
 import org.jholsten.me2e.report.result.mapper.ReportEntryMapper
 import org.jholsten.me2e.report.result.model.IntermediateTestResult
@@ -125,6 +126,7 @@ class ReportDataAggregator private constructor() {
             val logs = logAggregator.getAggregatedLogs()
             val stats = statsAggregator.getAggregatedStats()
             val result = aggregateSummaries(testPlan)
+            HtmlReportGenerator().generate(result)
             println("TODO: ON TEST EXECUTION FINISHED")
         }
 

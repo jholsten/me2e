@@ -7,6 +7,7 @@ import org.jholsten.me2e.report.result.html.data.TestDetailTemplateData
 import org.jholsten.me2e.report.result.model.TestExecutionResult
 import org.jholsten.me2e.report.result.model.TestResult
 import org.slf4j.LoggerFactory
+import java.time.Instant
 
 /**
  * Report generator which generates an HTML test report.
@@ -31,25 +32,33 @@ open class HtmlReportGenerator(
 ) : ReportGenerator() {
     private val logger = LoggerFactory.getLogger(HtmlReportGenerator::class.java)
     protected lateinit var result: TestExecutionResult
+    private lateinit var generationTimestamp: Instant
 
     override fun generate(result: TestExecutionResult) {
+        generationTimestamp = Instant.now()
         this.result = result
         generateIndexHtml()
         val junitResult = result.tests.find { it.testId == "[engine:junit-jupiter]" }
         if (junitResult == null) {
             logger.warn("Unable to find test results of JUnit engine. Cannot generate detailed test reports.")
         } else {
-            generateTestDetailHtml(junitResult)
+            //generateTestDetailHtml(junitResult) // TODO
         }
     }
 
     protected open fun generateIndexHtml() {
-        val data = IndexTemplateData.Builder().withTestExecutionResult(result).build()
+        val data = IndexTemplateData.Builder()
+            .withGenerationTimestamp(generationTimestamp)
+            .withTestExecutionResult(result)
+            .build()
         generateHtml(indexTemplate, data, "$outputDirectory/index.html")
     }
 
     protected open fun generateTestDetailHtml(result: TestResult) {
-        val data = TestDetailTemplateData.Builder().withTestResult(result).build()
+        val data = TestDetailTemplateData.Builder()
+            .withGenerationTimestamp(generationTimestamp)
+            .withTestResult(result)
+            .build()
         generateHtml(testDetailTemplate, data, "$outputDirectory/detail/TODO.html")
         result.children.forEach { generateTestDetailHtml(it) }
     }

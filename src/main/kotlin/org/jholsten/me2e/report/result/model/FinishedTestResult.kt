@@ -1,8 +1,10 @@
 package org.jholsten.me2e.report.result.model
 
 import org.jholsten.me2e.report.logs.model.AggregatedLogEntryList
+import org.jholsten.me2e.report.result.utils.calculateDurationInSeconds
 import org.jholsten.me2e.report.stats.model.AggregatedStatsEntryList
 import org.jholsten.me2e.utils.toJson
+import java.math.BigDecimal
 import java.time.Duration
 import java.time.Instant
 
@@ -115,7 +117,7 @@ class FinishedTestResult(
      * As the [startTime] and [endTime] are recorded by the [org.jholsten.me2e.report.result.ReportDataAggregator],
      * there may be small deviations from the values in the JUnit test report.
      */
-    val duration: Long = Duration.between(startTime, endTime).seconds
+    val duration: BigDecimal = calculateDurationInSeconds(startTime, endTime)
 
     override fun toString(): String = toJson(this)
 }

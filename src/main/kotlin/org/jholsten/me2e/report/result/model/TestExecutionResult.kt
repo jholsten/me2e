@@ -1,6 +1,7 @@
 package org.jholsten.me2e.report.result.model
 
 import org.jholsten.me2e.report.result.utils.calculateSuccessRate
+import java.math.BigDecimal
 
 /**
  * Result of the execution of all tests.
@@ -40,4 +41,18 @@ class TestExecutionResult(
      * to [numberOfTests]).
      */
     val successRate: Int? = calculateSuccessRate(numberOfTests, numberOfFailures, numberOfSkipped)
+
+    /**
+     * Number of seconds that executing all tests took.
+     * Is set to `null` in case no tests were executed.
+     */
+    val duration: BigDecimal? = calculateDuration()
+
+    private fun calculateDuration(): BigDecimal? {
+        val finishedTests = tests.flatMap { it.children }.filterIsInstance<FinishedTestResult>()
+        if (finishedTests.isEmpty()) {
+            return null
+        }
+        return finishedTests.sumOf { it.duration }
+    }
 }

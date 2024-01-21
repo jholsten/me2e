@@ -50,7 +50,6 @@ class TemplateEngine(
      */
     fun process() {
         val htmlContent = engine.process(template, data.context)
-        println(htmlContent)
         FileUtils.writeStringToFile(File(outputPath), htmlContent, Charset.forName("UTF-8"))
     }
 }

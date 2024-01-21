@@ -4,6 +4,8 @@ package org.jholsten.me2e.report.result.utils
 
 import java.math.BigDecimal
 import java.math.MathContext
+import java.time.Duration
+import java.time.Instant
 
 /**
  * Calculates the success rate of a test result using the given metrics.
@@ -24,4 +26,14 @@ internal fun calculateSuccessRate(numberOfTests: Int, numberOfFailures: Int, num
         val success = total - BigDecimal(numberOfFailures)
         (success.divide(total, MathContext(2)) * BigDecimal(100)).round(MathContext(0)).toInt()
     }
+}
+
+/**
+ * Calculates the number of seconds between [startTime] and [endTime].
+ */
+internal fun calculateDurationInSeconds(startTime: Instant, endTime: Instant): BigDecimal {
+    val duration = Duration.between(startTime, endTime)
+    val seconds = duration.seconds
+    val milliseconds = duration.toMillisPart()
+    return (BigDecimal(seconds) + BigDecimal(milliseconds).divide(BigDecimal(1000), MathContext(3))).setScale(3)
 }
