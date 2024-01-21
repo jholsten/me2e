@@ -93,7 +93,7 @@ class FinishedTestResult(
     /**
      * Resource usage statistics that were collected for this test execution.
      */
-    val stats: AggregatedStatsEntryList,
+    val stats: AggregatedStatsEntryList, // TODO: Average stats
 
     /**
      * Throwable that caused this result.

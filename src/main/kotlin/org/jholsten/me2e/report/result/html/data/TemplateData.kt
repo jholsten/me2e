@@ -1,6 +1,7 @@
 package org.jholsten.me2e.report.result.html.data
 
 import org.thymeleaf.context.Context
+import java.util.Locale
 
 /**
  * Data to be inserted into a Thymeleaf template.
@@ -17,6 +18,17 @@ open class TemplateData(
 
     open class Builder<SELF : Builder<SELF>> {
         protected val context: Context = Context()
+
+        /**
+         * Sets the locale to use for the Thymeleaf template.
+         * In the template, the keys in `messages_$locale.properties` can then
+         * be referenced with `#{key}`.
+         * TODO: Verify
+         */
+        fun withLocale(locale: Locale): SELF {
+            context.locale = locale
+            return self()
+        }
 
         /**
          * Sets variable with the given [key] to the given [value].

@@ -1,7 +1,6 @@
 package org.jholsten.me2e.report.result.model
 
 import org.jholsten.me2e.report.result.utils.calculateSuccessRate
-import java.math.BigDecimal
 
 /**
  * Result of the execution of all tests.
