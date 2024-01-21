@@ -1,7 +1,7 @@
 package org.jholsten.me2e.report
 
 import com.google.auto.service.AutoService
-import org.jholsten.me2e.report.summary.ReportDataAggregator
+import org.jholsten.me2e.report.result.ReportDataAggregator
 import org.junit.platform.engine.TestExecutionResult
 import org.junit.platform.engine.reporting.ReportEntry
 import org.junit.platform.launcher.TestExecutionListener
@@ -77,10 +77,10 @@ class ReportGeneratingListener : TestExecutionListener {
 
     /**
      * Callback function which is executed after all tests have been executed.
-     * Generates report using the [org.jholsten.me2e.report.summary.ReportGenerator].
+     * Generates report using the [org.jholsten.me2e.report.result.ReportGenerator].
      * @param testPlan Describes the tree of tests that have been executed.
      */
-    override fun testPlanExecutionFinished(testPlan: TestPlan?) {
+    override fun testPlanExecutionFinished(testPlan: TestPlan) {
         ReportDataAggregator.onTestExecutionFinished(testPlan)
     }
 }

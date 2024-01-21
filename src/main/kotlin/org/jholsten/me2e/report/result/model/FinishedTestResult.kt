@@ -1,4 +1,4 @@
-package org.jholsten.me2e.report.summary.model
+package org.jholsten.me2e.report.result.model
 
 import org.jholsten.me2e.report.logs.model.AggregatedLogEntryList
 import org.jholsten.me2e.report.stats.model.AggregatedStatsEntryList
@@ -17,11 +17,11 @@ class FinishedTestSummary(
     testId: String,
 
     /**
-     * ID of the parent of this test or test container.
-     * An identifier without a parent is called a `root`.
-     * @see org.junit.platform.launcher.TestIdentifier.getParentId
+     * Summaries of the children of this test of test container.
+     * For instance, if this summary describes a Test Class, the children include all tests of this class.
+     * For a leaf, this list is empty.
      */
-    parentId: String?,
+    children: List<TestSummary>,
 
     /**
      * Status of the test execution.
@@ -74,7 +74,7 @@ class FinishedTestSummary(
     val throwable: Throwable?,
 ) : TestSummary(
     testId = testId,
-    parentId = parentId,
+    children = children,
     status = status,
     displayName = displayName,
     tags = tags,

@@ -1,8 +1,11 @@
-package org.jholsten.me2e.report.summary.html
+package org.jholsten.me2e.report.result.html
 
-import org.jholsten.me2e.report.summary.html.data.TemplateData
+import org.apache.commons.io.FileUtils
+import org.jholsten.me2e.report.result.html.data.TemplateData
 import org.thymeleaf.TemplateEngine
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
+import java.io.File
+import java.nio.charset.Charset
 
 /**
  * Engine which fills HTML templates using Thymeleaf.
@@ -47,6 +50,7 @@ class TemplateEngine(
      */
     fun process() {
         val htmlContent = engine.process(template, data.context)
-        // TODO: Store as file
+        println(htmlContent)
+        FileUtils.writeStringToFile(File(outputPath), htmlContent, Charset.forName("UTF-8"))
     }
 }

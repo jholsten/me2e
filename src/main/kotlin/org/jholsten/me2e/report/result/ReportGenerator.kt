@@ -1,6 +1,6 @@
-package org.jholsten.me2e.report.summary
+package org.jholsten.me2e.report.result
 
-import org.jholsten.me2e.report.summary.model.TestSummary
+import org.jholsten.me2e.report.result.model.TestExecutionResult
 
 /**
  * Base class for generating the test report based on the data provided in the [ReportDataAggregator].

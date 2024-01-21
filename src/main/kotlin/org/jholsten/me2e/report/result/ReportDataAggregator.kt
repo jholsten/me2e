@@ -1,11 +1,13 @@
-package org.jholsten.me2e.report.summary
+package org.jholsten.me2e.report.result
 
 import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.report.logs.LogAggregator
 import org.jholsten.me2e.report.stats.StatsAggregator
-import org.jholsten.me2e.report.summary.mapper.ReportEntryMapper
-import org.jholsten.me2e.report.summary.model.ReportEntry
-import org.jholsten.me2e.report.summary.model.TestSummary
+import org.jholsten.me2e.report.result.mapper.ReportEntryMapper
+import org.jholsten.me2e.report.result.model.IntermediateTestResult
+import org.jholsten.me2e.report.result.model.ReportEntry
+import org.jholsten.me2e.report.result.model.TestExecutionResult
+import org.jholsten.me2e.report.result.model.TestResult
 import org.jholsten.me2e.utils.logger
 import org.junit.platform.engine.TestExecutionResult
 import org.junit.platform.launcher.TestIdentifier
@@ -33,7 +35,7 @@ class ReportDataAggregator private constructor() {
         /**
          * Summaries of all tests and test containers executed so far.
          */
-        private val testSummaries: MutableList<TestSummary> = mutableListOf()
+        private val testSummaries: MutableList<IntermediateTestSummary> = mutableListOf()
 
         /**
          * Report entries that were collected so far for the current test execution.
@@ -80,7 +82,7 @@ class ReportDataAggregator private constructor() {
         internal fun onTestFinished(testIdentifier: TestIdentifier, testExecutionResult: TestExecutionResult) {
             val logs = logAggregator.collectLogs(testIdentifier.uniqueId)
             val stats = statsAggregator.collectStats(testIdentifier.uniqueId)
-            val summary = TestSummary.finished(
+            val summary = IntermediateTestSummary.finished(
                 testIdentifier = testIdentifier,
                 testExecutionResult = testExecutionResult,
                 startTime = startTimes[testIdentifier.uniqueId],
@@ -88,7 +90,7 @@ class ReportDataAggregator private constructor() {
                 logs = logs,
                 stats = stats,
             )
-            storeTestSummary(summary)
+            storeIntermediateTestSummary(summary)
         }
 
         /**
@@ -99,8 +101,8 @@ class ReportDataAggregator private constructor() {
          */
         @JvmSynthetic
         internal fun onTestSkipped(testIdentifier: TestIdentifier, reason: String?) {
-            val summary = TestSummary.skipped(testIdentifier, reason)
-            storeTestSummary(summary)
+            val summary = IntermediateTestSummary.skipped(testIdentifier, reason)
+            storeIntermediateTestSummary(summary)
         }
 
         /**
@@ -126,7 +128,15 @@ class ReportDataAggregator private constructor() {
             println("TODO: ON TEST EXECUTION FINISHED")
         }
 
-        private fun storeTestSummary(summary: TestSummary) {
+        private fun aggregateSummaries(testPlan: TestPlan) {
+
+        }
+
+        private fun buildTree(testPlan: TestPlan) {
+            
+        }
+
+        private fun storeIntermediateTestSummary(summary: IntermediateTestSummary) {
             testSummaries.add(summary)
             collectedReportEntries.clear()
         }

@@ -1,6 +1,6 @@
-package org.jholsten.me2e.report.summary.html.data
+package org.jholsten.me2e.report.result.html.data
 
-import org.jholsten.me2e.report.summary.model.TestSummary
+import org.jholsten.me2e.report.result.model.TestResult
 import org.thymeleaf.context.Context
 
 class TestDetailTemplateData(context: Context) : TemplateData(context) {

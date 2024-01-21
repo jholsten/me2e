@@ -1,8 +1,8 @@
 @file:JvmSynthetic
 
-package org.jholsten.me2e.report.summary.mapper
+package org.jholsten.me2e.report.result.mapper
 
-import org.jholsten.me2e.report.summary.model.ReportEntry
+import org.jholsten.me2e.report.result.model.ReportEntry
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
 import org.mapstruct.Named

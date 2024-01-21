@@ -1,4 +1,4 @@
-package org.jholsten.me2e.report.summary.html.data
+package org.jholsten.me2e.report.result.html.data
 
 import org.thymeleaf.context.Context
 
@@ -38,7 +38,7 @@ open class TemplateData(
             return TemplateData(context)
         }
 
-        protected fun self(): SELF {
+        protected open fun self(): SELF {
             @Suppress("UNCHECKED_CAST")
             return this as SELF
         }

@@ -1,4 +1,4 @@
-package org.jholsten.me2e.report.summary.model
+package org.jholsten.me2e.report.result.model
 
 import java.time.Instant
 

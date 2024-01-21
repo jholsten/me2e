@@ -5,7 +5,7 @@ import org.jholsten.me2e.container.ContainerManager
 import org.jholsten.me2e.container.injection.InjectionUtils
 import org.jholsten.me2e.mock.MockServerManager
 import org.jholsten.me2e.parsing.utils.FileUtils
-import org.jholsten.me2e.report.summary.ReportDataAggregator
+import org.jholsten.me2e.report.result.ReportDataAggregator
 
 
 /**

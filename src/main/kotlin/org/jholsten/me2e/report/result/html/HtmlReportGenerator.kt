@@ -1,7 +1,7 @@
-package org.jholsten.me2e.report.summary.html
+package org.jholsten.me2e.report.result.html
 
-import org.jholsten.me2e.report.summary.ReportGenerator
-import org.jholsten.me2e.report.summary.model.TestSummary
+import org.jholsten.me2e.report.result.ReportGenerator
+import org.jholsten.me2e.report.result.model.TestExecutionResult
 
 /**
  * Report generator which generates an HTML test report.
