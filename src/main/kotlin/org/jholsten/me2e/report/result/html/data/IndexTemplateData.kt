@@ -19,7 +19,8 @@ class IndexTemplateData(context: Context) : TemplateData(context) {
          * - `numberOfSkipped:` [Int] - Total number of tests which were skipped (see [TestExecutionResult.numberOfSkipped]).
          * - `successRate:` [Int]? - Relative share of successful tests in the number of tests that the result contains (see [TestExecutionResult.successRate]).
          * - `duration:` [java.math.BigDecimal]? - Number of seconds that executing all tests took (see [TestExecutionResult.duration]).
-         * - `tests:` [List]<[TestResult]> - Roots of all tests that have been performed (see [TestExecutionResult.tests]).
+         * - `roots:` [List]<[TestResult]> - Roots of all tests that have been performed (see [TestExecutionResult.roots]).
+         * - `tests:` [List]<[TestResult]> - All tests included in the result (see [TestExecutionResult.tests]).
          */
         fun withTestExecutionResult(result: TestExecutionResult) = apply {
             withVariable("numberOfTests", result.numberOfTests)
@@ -27,6 +28,7 @@ class IndexTemplateData(context: Context) : TemplateData(context) {
             withVariable("numberOfSkipped", result.numberOfSkipped)
             withVariable("successRate", result.successRate)
             withVariable("duration", result.duration)
+            withVariable("roots", result.roots)
             withVariable("tests", result.tests)
         }
 

@@ -131,12 +131,12 @@ class ReportDataAggregator private constructor() {
         }
 
         private fun aggregateSummaries(testPlan: TestPlan): TestExecutionResult {
-            val tree = buildTestTree(testPlan)
+            val roots = buildTestTree(testPlan)
             return TestExecutionResult(
-                numberOfTests = tree.sumOf { it.numberOfTests },
-                numberOfFailures = tree.sumOf { it.numberOfFailures },
-                numberOfSkipped = tree.sumOf { it.numberOfSkipped },
-                tests = tree,
+                numberOfTests = roots.sumOf { it.numberOfTests },
+                numberOfFailures = roots.sumOf { it.numberOfFailures },
+                numberOfSkipped = roots.sumOf { it.numberOfSkipped },
+                roots = roots,
             )
         }
 

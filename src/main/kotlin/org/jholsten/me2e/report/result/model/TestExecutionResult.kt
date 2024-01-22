@@ -31,7 +31,7 @@ class TestExecutionResult(
      * of the results of all executed tests, which may span over several levels.
      * @see org.junit.platform.launcher.TestPlan
      */
-    val tests: List<TestResult>,
+    val roots: List<TestResult>,
 ) {
 
     /**
@@ -47,11 +47,39 @@ class TestExecutionResult(
      */
     val duration: BigDecimal? = calculateDuration()
 
+    /**
+     * All tests and test containers included in the result, i.e. all of the [roots], their children
+     * and their children, recursively.
+     */
+    val tests: List<TestResult> = getAllTests()
+
     private fun calculateDuration(): BigDecimal? {
-        val finishedTests = tests.flatMap { it.children }.filterIsInstance<FinishedTestResult>()
+        val finishedTests = roots.flatMap { it.children }.filterIsInstance<FinishedTestResult>()
         if (finishedTests.isEmpty()) {
             return null
         }
         return finishedTests.sumOf { it.duration }
+    }
+
+    private fun getAllTests(): List<TestResult> {
+        val result: MutableList<TestResult> = mutableListOf()
+        for (root in roots) {
+            result.add(root)
+            result.addAll(getDescendants(root))
+        }
+        return result
+    }
+
+    /**
+     * Returns all descendants of the supplied [parent], i.e. all of its
+     * children and their children, recursively.
+     */
+    private fun getDescendants(parent: TestResult): List<TestResult> {
+        val descendants: MutableList<TestResult> = mutableListOf()
+        descendants.addAll(parent.children)
+        for (child in parent.children) {
+            descendants.addAll(getDescendants(child))
+        }
+        return descendants
     }
 }

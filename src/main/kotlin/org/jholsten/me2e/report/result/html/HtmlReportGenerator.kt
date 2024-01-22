@@ -38,7 +38,7 @@ open class HtmlReportGenerator(
         generationTimestamp = Instant.now()
         this.result = result
         generateIndexHtml()
-        for (test in result.tests) {
+        for (test in result.roots) {
             //generateTestDetailHtml(test)
         }
     }
