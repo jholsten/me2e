@@ -147,14 +147,19 @@
     <div class="card metrics-box">
         <i class="fas fa-stopwatch primary"></i>
         <div class="metrics">
-            <span class="title" th:text="${duration != null ? duration : '-'} + 's'"></span>
+            <span class="title" th:text="${duration != null ? duration + 's' : '-'}"></span>
             <span class="label">Duration</span>
         </div>
     </div>
     <div class="card metrics-box">
-        <i class="fas fa-bullseye" th:classappend="${numberOfFailures > 0 ? 'failure' : 'success'}"></i>
+        <i class="fas fa-bullseye"
+           th:classappend="${numberOfTests == numberOfSkipped ? 'skipped' : (numberOfFailures > 0 ? 'failure' : 'success')}"
+        ></i>
         <div class="metrics">
-            <span class="title" th:classappend="${numberOfFailures > 0 ? 'failure' : 'success'}" th:text="${successRate} + ' %'"></span>
+            <span class="title"
+                  th:classappend="${numberOfTests == numberOfSkipped ? 'skipped' : (numberOfFailures > 0 ? 'failure' : 'success')}"
+                  th:text="${successRate != null ? successRate + ' %' : '-'}"
+            ></span>
             <span class="label">Success Rate</span>
         </div>
     </div>
