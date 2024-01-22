@@ -140,10 +140,19 @@ class ReportDataAggregator private constructor() {
             )
         }
 
+        /**
+         * Builds tree of the test containers and tests which were executed.
+         * The original roots of the test plan, i.e. the test engine such as [engine:junit-jupiter]`,
+         * are not included in the tree. Instead, the roots of the tree to be built are formed by
+         * the underlying children, which are typically the executed test classes.
+         */
         private fun buildTestTree(testPlan: TestPlan): List<TestResult> {
             val roots: MutableList<TestResult> = mutableListOf()
-            for (root in testPlan.roots) {
-                val result = getIntermediateResult(root).toTestResult(buildTestTree(root, testPlan))
+            val flattened = testPlan.roots.flatMap { testPlan.getChildren(it) }
+            for (root in flattened) {
+                val intermediateResult = getIntermediateResult(root)
+                intermediateResult.parentId = null
+                val result = intermediateResult.toTestResult(buildTestTree(root, testPlan))
                 roots.add(result)
             }
             return roots

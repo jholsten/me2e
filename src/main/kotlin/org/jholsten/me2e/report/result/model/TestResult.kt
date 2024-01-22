@@ -5,8 +5,8 @@ import org.jholsten.me2e.utils.toJson
 
 /**
  * Summary of the execution of a single test or test container.
- * A test container may be for example a Test Class, [org.junit.jupiter.api.Nested] Class or a [org.junit.jupiter.params.ParameterizedTest].
- * At the root of all Test Classes is the test container with id `[engine:junit-jupiter]`.
+ * A test container may be for example a Test Class, [org.junit.jupiter.api.Nested] Class
+ * or a [org.junit.jupiter.params.ParameterizedTest].
  */
 abstract class TestResult(
     /**
@@ -14,6 +14,13 @@ abstract class TestResult(
      * @see org.junit.platform.launcher.TestIdentifier.getUniqueId
      */
     val testId: String,
+
+    /**
+     * ID of the parent of this test or test container.
+     * An identifier without a parent is called a `root`.
+     * @see org.junit.platform.launcher.TestIdentifier.getParentId
+     */
+    val parentId: String?,
 
     /**
      * Summaries of the children of this test or test container.

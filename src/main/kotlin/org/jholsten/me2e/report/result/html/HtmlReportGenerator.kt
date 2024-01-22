@@ -38,11 +38,8 @@ open class HtmlReportGenerator(
         generationTimestamp = Instant.now()
         this.result = result
         generateIndexHtml()
-        val junitResult = result.tests.find { it.testId == "[engine:junit-jupiter]" }
-        if (junitResult == null) {
-            logger.warn("Unable to find test results of JUnit engine. Cannot generate detailed test reports.")
-        } else {
-            //generateTestDetailHtml(junitResult) // TODO
+        for (test in result.tests) {
+            //generateTestDetailHtml(test)
         }
     }
 

@@ -29,7 +29,7 @@ internal class IntermediateTestResult(
      * An identifier without a parent is called a `root`.
      * @see org.junit.platform.launcher.TestIdentifier.getParentId
      */
-    val parentId: String?,
+    var parentId: String?,
 
     /**
      * Status of the test execution.
@@ -148,6 +148,11 @@ internal class IntermediateTestResult(
         }
     }
 
+    /**
+     * Generates [TestResult] instance from this intermediate result.
+     * @param children Children of this test or test container.
+     * Should be set to `false` to transform roots.
+     */
     @JvmSynthetic
     internal fun toTestResult(children: List<TestResult>): TestResult {
         val numberOfTests = when {
@@ -165,6 +170,7 @@ internal class IntermediateTestResult(
         if (status == TestResult.Status.SKIPPED) {
             return SkippedTestResult(
                 testId = testId,
+                parentId = parentId,
                 children = children,
                 status = status,
                 numberOfTests = numberOfTests,
@@ -177,6 +183,7 @@ internal class IntermediateTestResult(
         } else {
             return FinishedTestResult(
                 testId = testId,
+                parentId = parentId,
                 children = children,
                 status = status,
                 startTime = startTime!!,

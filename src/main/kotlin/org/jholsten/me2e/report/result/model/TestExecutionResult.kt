@@ -26,10 +26,9 @@ class TestExecutionResult(
 
     /**
      * Roots of all tests that have been performed along with their detailed test results.
-     * Typically, this list contains only one entry with the test engine `[engine:junit-jupiter]`,
-     * whose children in turn contain the executed test classes and whose children contain the
-     * executed tests. Along with nested classes and parameterized tests, this forms a tree of the
-     * results of all executed tests, which may span over several levels.
+     * Typically, this list contains the executed test classes, whose children in turn contain
+     * the executed tests. Along with nested classes and parameterized tests, this forms a tree
+     * of the results of all executed tests, which may span over several levels.
      * @see org.junit.platform.launcher.TestPlan
      */
     val tests: List<TestResult>,

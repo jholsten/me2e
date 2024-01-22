@@ -13,6 +13,13 @@ class SkippedTestResult(
     testId: String,
 
     /**
+     * ID of the parent of this test or test container.
+     * An identifier without a parent is called a `root`.
+     * @see org.junit.platform.launcher.TestIdentifier.getParentId
+     */
+    parentId: String?,
+
+    /**
      * Summaries of the children of this test or test container.
      * For instance, if this summary describes a Test Class, the children include all tests of this class.
      * For a leaf, this list is empty.
@@ -69,6 +76,7 @@ class SkippedTestResult(
     val reason: String?,
 ) : TestResult(
     testId = testId,
+    parentId = parentId,
     children = children,
     status = status,
     numberOfTests = numberOfTests,
