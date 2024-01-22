@@ -1,5 +1,6 @@
 package org.jholsten.me2e.report.result.html
 
+import org.jholsten.me2e.parsing.utils.FileUtils
 import org.jholsten.me2e.report.result.ReportGenerator
 import org.jholsten.me2e.report.result.html.data.IndexTemplateData
 import org.jholsten.me2e.report.result.html.data.TemplateData
@@ -7,6 +8,7 @@ import org.jholsten.me2e.report.result.html.data.TestDetailTemplateData
 import org.jholsten.me2e.report.result.model.TestExecutionResult
 import org.jholsten.me2e.report.result.model.TestResult
 import org.slf4j.LoggerFactory
+import java.io.File
 import java.time.Instant
 
 /**
@@ -26,6 +28,16 @@ open class HtmlReportGenerator(
     protected val testDetailTemplate: String = "report/templates/test-detail.html",
 
     /**
+     * Additional resources required for the templates (e.g. `.css` or `.js` files) to be
+     * copied to the [outputDirectory] as map of source path and destination path.
+     * All source files need to be located in resources folder.
+     */
+    protected val additionalResources: Map<String, String> = mapOf(
+        "report/tree-table/jquery.treetable.js" to "tree-table/jquery.treetable.js",
+        "report/tree-table/jquery.treetable.css" to "tree-table/jquery.treetable.css",
+    ),
+
+    /**
      * Base directory where the generated HTML files are to be stored.
      */
     protected val outputDirectory: String = "build/reports/me2e"
@@ -37,6 +49,7 @@ open class HtmlReportGenerator(
     override fun generate(result: TestExecutionResult) {
         generationTimestamp = Instant.now()
         this.result = result
+        copyAdditionalResources()
         generateIndexHtml()
         for (test in result.roots) {
             //generateTestDetailHtml(test)
@@ -62,5 +75,12 @@ open class HtmlReportGenerator(
 
     protected open fun generateHtml(template: String, data: TemplateData, outputPath: String) {
         TemplateEngine(template, data, outputPath).process()
+    }
+
+    protected open fun copyAdditionalResources() {
+        for ((source, destination) in additionalResources) {
+            val file = FileUtils.getResourceAsFile(source)
+            org.apache.commons.io.FileUtils.copyFile(file, File("$outputDirectory/$destination"))
+        }
     }
 }
