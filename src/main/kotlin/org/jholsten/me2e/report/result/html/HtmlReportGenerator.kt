@@ -33,6 +33,7 @@ open class HtmlReportGenerator(
      * All source files need to be located in resources folder.
      */
     protected val additionalResources: Map<String, String> = mapOf(
+        "report/css/report-style.css" to "css/report-style.css",
         "report/tree-table/jquery.treetable.js" to "tree-table/jquery.treetable.js",
         "report/tree-table/jquery.treetable.css" to "tree-table/jquery.treetable.css",
     ),
