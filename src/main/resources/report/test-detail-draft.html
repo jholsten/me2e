@@ -19,6 +19,28 @@
             background-color: #f7f7ff;
         }
 
+        .container-chip input {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            margin: 0;
+        }
+
+        .container-chip input:checked + .label {
+            border-color: #4541DD;
+            background-color: #4541DD;
+            color: white;
+            box-shadow: -5px 10px 20px 0 rgba(69, 65, 221, 0.25);
+        }
+
+        .container-chip .label {
+            border-radius: 100px;
+            background-color: #fff;
+            border: 1px solid #b5b5b5;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
         table .label {
             font-weight: 600;
             width: 80px;
@@ -122,7 +144,42 @@
     of the tests belonging to "Tudelu".
 </p>
 <div class="card">
-    <div id="chart_div"></div>
+    <div>
+        Select the container for which you want to display the resource usage.
+    </div>
+    <div class="container-chip-group" style="padding: 16px 0 48px 0;">
+        <span class="container-chip">
+            <label for="database">
+                <input type="radio" id="database"
+                       value="database" name="container-chip-group"
+                       onclick="onContainerSelected('database')"
+                       checked>
+                <span class="label">database</span>
+            </label>
+        </span>
+        <span class="container-chip">
+            <label for="backend-api">
+                <input type="radio" id="backend-api"
+                       value="backend-api" name="container-chip-group"
+                       onclick="onContainerSelected('backend-api')">
+                <span class="label">backend-api</span>
+            </label>
+        </span>
+        <span class="container-chip">
+            <label for="auth-server">
+                <input type="radio" id="auth-server"
+                       value="auth-server" name="container-chip-group"
+                       onclick="onContainerSelected('auth-server')">
+                <span class="label">auth-server</span>
+            </label>
+        </span>
+    </div>
+    <div style="text-align: center; margin-bottom: 12px;">
+        <b>Resource Usage of Container "database"</b>
+    </div>
+    <div style="height: 300px;">
+        <div id="chart_div"></div>
+    </div>
 </div>
 
 <h2>Test Results</h2>
@@ -235,11 +292,18 @@
 </div>
 
 <script type="text/javascript">
+    selectedContainer = "database";
+
     google.charts.load('current', {'packages': ['line']});
     google.charts.setOnLoadCallback(drawChart);
 
+    function onContainerSelected(containerName) {
+        this.selectedContainer = containerName;
+        console.log(this.selectedContainer);
+    }
+
     function drawChart() {
-        var data = google.visualization.arrayToDataTable([
+        const data = google.visualization.arrayToDataTable([
             ['Time', 'Memory Usage', 'CPU Usage', 'Network IN', 'Network OUT'],
             ['08:21:01', null, 0.13, 6000, 2000],
             ['08:21:02', 0.13, 0.15, 6500, 2200],
@@ -249,7 +313,7 @@
             ['08:21:06', 0.20, 0.05, 7600, 2950]
         ]);
 
-        var options = {
+        const options = {
             height: 300,
             series: {
                 0: {axis: 'Percent'},
@@ -269,7 +333,7 @@
             },
         };
 
-        var chart = new google.charts.Line(document.getElementById('chart_div'));
+        const chart = new google.charts.Line(document.getElementById('chart_div'));
         chart.draw(data, google.charts.Line.convertOptions(options));
     }
 </script>
