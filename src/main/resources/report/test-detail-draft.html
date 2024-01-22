@@ -28,15 +28,11 @@
         }
 
         .log-table {
-            display: block;
-            max-height: 400px;
-            overflow-y: auto;
+            table-layout: fixed;
         }
 
         .log-table thead {
-            background-color: white;
             position: sticky;
-            top: 0;
             box-shadow: 0 1px 0 0 #A6A6A6;
         }
 
@@ -44,10 +40,43 @@
             text-align: start;
         }
 
+        .log-table th:first-child {
+            width: 90px;
+        }
+
+        .log-table th:nth-child(2) {
+            width: 110px;
+        }
+
+        .log-table td:first-child {
+            width: 92px;
+        }
+
+        .log-table td:nth-child(2) {
+            width: 112px;
+        }
+
+        .log-table tbody {
+            display: block;
+            overflow-y: auto;
+            max-height: 400px;
+        }
+
+        .log-table tr {
+            display: table;
+            width: 100%;
+        }
+
         ul {
             padding: 0;
             margin: 0;
             list-style-position: inside;
+        }
+
+        h4 {
+            background-color: rgba(129, 169, 231, 0.1);
+            color: #618bde;
+            padding: 5px 0;
         }
     </style>
 </head>
@@ -115,6 +144,8 @@ TODO: Chart for resource usage
     </table>
 </div>
 
+<div style="padding: 16px 0;"></div>
+
 <h3 id="1"><i class="fas fa-circle-check success"></i> Tudelu > abc</h3>
 <div class="card">
     <table>
@@ -151,12 +182,11 @@ TODO: Chart for resource usage
     <hr class="divider">
 
     <h4>Logs</h4>
-    TODO: Filters
     <table class="log-table">
         <thead>
         <tr>
-            <th style="width: 90px">Time</th>
-            <th style="width: 110px">Service</th>
+            <th>Time</th>
+            <th>Service</th>
             <th>Message</th>
         </tr>
         </thead>
@@ -188,6 +218,8 @@ TODO: Chart for resource usage
         </tbody>
     </table>
 </div>
+
+<div style="padding: 16px 0;"></div>
 
 <h3 id="2"><i class="fas fa-circle-xmark failure"></i> Tudelu > fail</h3>
 
