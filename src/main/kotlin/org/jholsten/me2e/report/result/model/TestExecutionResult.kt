@@ -54,7 +54,7 @@ class TestExecutionResult(
     val tests: List<TestResult> = getAllTests()
 
     private fun calculateDuration(): BigDecimal? {
-        val finishedTests = roots.flatMap { it.children }.filterIsInstance<FinishedTestResult>()
+        val finishedTests = roots.filterIsInstance<FinishedTestResult>()
         if (finishedTests.isEmpty()) {
             return null
         }
@@ -76,8 +76,8 @@ class TestExecutionResult(
      */
     private fun getDescendants(parent: TestResult): List<TestResult> {
         val descendants: MutableList<TestResult> = mutableListOf()
-        descendants.addAll(parent.children)
         for (child in parent.children) {
+            descendants.add(child)
             descendants.addAll(getDescendants(child))
         }
         return descendants
