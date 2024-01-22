@@ -118,7 +118,7 @@ internal class IntermediateTestResult(
                 status = TestSummaryStatusMapper.INSTANCE.toInternalDto(testExecutionResult.status),
                 startTime = startTime ?: Instant.now(),
                 endTime = Instant.now(),
-                displayName = testIdentifier.displayName,
+                displayName = testIdentifier.displayName.substringBeforeLast("("),
                 tags = testIdentifier.tags.map { it.name }.toSet(),
                 reportEntries = reportEntries.toList(),
                 logs = logs,
@@ -141,7 +141,7 @@ internal class IntermediateTestResult(
                 testId = testIdentifier.uniqueId,
                 parentId = testIdentifier.parentId.orElse(null),
                 status = TestResult.Status.SKIPPED,
-                displayName = testIdentifier.displayName,
+                displayName = testIdentifier.displayName.substringBeforeLast("("),
                 tags = testIdentifier.tags.map { it.name }.toSet(),
                 skippingReason = reason,
             )
