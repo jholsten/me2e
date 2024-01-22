@@ -90,6 +90,12 @@
             width: 100%;
         }
 
+        .stack-trace {
+            background-color: rgba(255, 95, 86, 0.05);
+            border: 2px solid #FF5F56;
+            margin-top: 3px;
+        }
+
         ul {
             padding: 0;
             margin: 0;
@@ -175,7 +181,7 @@
         </span>
     </div>
     <div style="text-align: center; margin-bottom: 12px;">
-        <b>Resource Usage of Container "database"</b>
+        <b id="resource-usage-chart-title">Resource Usage of Container "database"</b>
     </div>
     <div style="height: 300px;">
         <div id="chart_div"></div>
@@ -252,6 +258,89 @@
         </thead>
         <tbody>
         <tr>
+            <td><code>12:03.235</code></td>
+            <td><code>Test Runner</code></td>
+            <td><code>Hello from the Test Runner</code></td>
+        </tr>
+        <tr>
+            <td><code>12:03.235</code></td>
+            <td><code>Test Runner</code></td>
+            <td><code>Hello from the Test Runner</code></td>
+        </tr>
+        <tr>
+            <td><code>12:03.235</code></td>
+            <td><code>Test Runner</code></td>
+            <td><code>Hello from the Test Runner</code></td>
+        </tr>
+        <tr>
+            <td><code>12:03.235</code></td>
+            <td><code>Test Runner</code></td>
+            <td><code>Hello from the Test Runner</code></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<div style="padding: 16px 0;"></div>
+
+<h3 id="2"><i class="fas fa-circle-xmark failure"></i> Tudelu > fail</h3>
+<div class="card">
+    <table>
+        <tr>
+            <td class="label">Tags:</td>
+            <td><span class="tag">Tag1</span> <span class="tag">Tag2</span> <span class="tag">Tag3</span></td>
+        </tr>
+        <tr>
+            <td class="label">Status:</td>
+            <td class="failure"><i class="fas fa-circle-xmark"></i> <b>Failed</b></td>
+        </tr>
+        <tr>
+            <td class="label">Duration:</td>
+            <td>0.783s</td>
+        </tr>
+        <tr>
+            <td class="label">Report Entries:</td>
+            <td>
+                <ul>
+                    <li>Key: Value</li>
+                    <li>Key2: Value2</li>
+                </ul>
+            </td>
+        </tr>
+    </table>
+
+    <div style="margin-top: 12px;">
+        <b>Failure:</b>
+    </div>
+    <div>
+        <pre class="stack-trace">
+java.lang.RuntimeException: NONONO
+	at org.jholsten.me2e.ztest.Tudelu.bla(Tudelu.kt:74)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:567)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)</pre>
+    </div>
+
+    <hr class="divider">
+
+    <h4>Network Traces</h4>
+    <p>
+        TODO: Traces
+    </p>
+
+    <hr class="divider">
+
+    <h4>Logs</h4>
+    <table class="log-table">
+        <thead>
+        <tr>
+            <th>Time</th>
+            <th>Service</th>
+            <th>Message</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
             <td>12:03.235</td>
             <td>Test Runner</td>
             <td>Hello from the Test Runner</td>
@@ -278,10 +367,6 @@
         </tbody>
     </table>
 </div>
-
-<div style="padding: 16px 0;"></div>
-
-<h3 id="2"><i class="fas fa-circle-xmark failure"></i> Tudelu > fail</h3>
 
 <div style="margin-bottom: 1000px;">
     eyo
