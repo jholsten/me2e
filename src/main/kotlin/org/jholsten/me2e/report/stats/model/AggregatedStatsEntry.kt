@@ -1,6 +1,7 @@
 package org.jholsten.me2e.report.stats.model
 
 import org.jholsten.me2e.container.stats.model.ContainerStatsEntry
+import org.jholsten.me2e.report.logs.model.ServiceSpecification
 import java.time.Instant
 
 /**
@@ -8,9 +9,9 @@ import java.time.Instant
  */
 class AggregatedStatsEntry(
     /**
-     * Name of the service for which this entry was collected.
+     * Service for which this entry was collected.
      */
-    val service: String,
+    val service: ServiceSpecification,
 
     /**
      * Timestamp of when this entry was received.

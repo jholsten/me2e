@@ -2,6 +2,7 @@ package org.jholsten.me2e.report.result
 
 import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.report.logs.LogAggregator
+import org.jholsten.me2e.report.logs.model.ServiceSpecification
 import org.jholsten.me2e.report.result.html.HtmlReportGenerator
 import org.jholsten.me2e.report.stats.StatsAggregator
 import org.jholsten.me2e.report.result.mapper.ReportEntryMapper
@@ -57,16 +58,6 @@ class ReportDataAggregator private constructor() {
         @JvmSynthetic
         internal fun onTestExecutionStarted() {
             logAggregator.initializeOnTestExecutionStarted()
-        }
-
-        /**
-         * Initializes the aggregator when the containers were started.
-         * Starts listeners for Container events.
-         */
-        @JvmSynthetic
-        internal fun initializeOnContainersStarted(containers: Collection<Container>) {
-            logAggregator.initializeOnContainersStarted(containers)
-            statsAggregator.initializeOnContainersStarted(containers)
         }
 
         /**
@@ -135,6 +126,16 @@ class ReportDataAggregator private constructor() {
             val result = aggregateSummaries(testPlan)
             HtmlReportGenerator().generate(result)
             println("TODO: ON TEST EXECUTION FINISHED")
+        }
+
+        /**
+         * Callback function which is executed after the given Docker container was started.
+         */
+        @JvmSynthetic
+        internal fun onContainerStarted(container: Container) {
+            val specification = ServiceSpecification(name = container.name)
+            logAggregator.onContainerStarted(container, specification)
+            statsAggregator.onContainerStarted(container, specification)
         }
 
         private fun aggregateSummaries(testPlan: TestPlan): TestExecutionResult {

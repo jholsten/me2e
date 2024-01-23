@@ -1,6 +1,7 @@
 package org.jholsten.me2e.report.stats
 
 import org.jholsten.me2e.container.Container
+import org.jholsten.me2e.report.logs.model.ServiceSpecification
 import org.jholsten.me2e.report.stats.model.AggregatedStatsEntry
 import org.jholsten.me2e.report.stats.model.AggregatedStatsEntryList
 import org.jholsten.me2e.utils.logger
@@ -9,11 +10,11 @@ class StatsAggregator internal constructor() {
     private val logger = logger(this)
 
     /**
-     * Map of container name and statistics entry collector.
+     * Map of container specification and statistics entry collector.
      * For each container, there is one collector which collects the container's
      * resource usage statistics for the current test execution.
      */
-    private var consumers: Map<String, ContainerStatsCollector> = mapOf()
+    private val consumers: MutableMap<ServiceSpecification, ContainerStatsCollector> = mutableMapOf()
 
     /**
      * Container statistics for each unique test ID that were collected so far.
@@ -21,15 +22,14 @@ class StatsAggregator internal constructor() {
     private val stats: MutableMap<String, List<AggregatedStatsEntry>> = mutableMapOf()
 
     /**
-     * Initializes the collector for consuming container statistics when the [containers] were started.
-     * Attaches statistics consumers to all containers to start capturing their resource usage statistics.
+     * Initializes the collector for consuming container statistics when the [container] was started.
+     * Attaches statistics consumer to the container to start capturing its resource usage statistics.
      */
     @JvmSynthetic
-    internal fun initializeOnContainersStarted(containers: Collection<Container>) {
-        this.consumers = containers.associate { it.name to ContainerStatsCollector(it.name) }
-        for (container in containers) {
-            container.addStatsConsumer(consumers[container.name]!!)
-        }
+    internal fun onContainerStarted(container: Container, specification: ServiceSpecification) {
+        val consumer = ContainerStatsCollector(specification)
+        this.consumers[specification] = consumer
+        container.addStatsConsumer(consumer)
         logger.info("Initialized container stats aggregator.")
     }
 

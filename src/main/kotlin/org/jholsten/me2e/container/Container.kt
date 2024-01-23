@@ -14,6 +14,7 @@ import org.jholsten.me2e.container.logging.model.ContainerLogEntryList
 import org.jholsten.me2e.container.stats.ContainerStatsConsumer
 import org.jholsten.me2e.container.stats.ContainerStatsUtils
 import org.jholsten.me2e.container.stats.model.ContainerStatsEntry
+import org.jholsten.me2e.report.result.ReportDataAggregator
 import org.testcontainers.containers.ContainerState
 import com.github.dockerjava.api.model.Container as DockerContainer
 
@@ -189,6 +190,7 @@ open class Container(
                 internalPort.external = port.publicPort
             }
         }
+        ReportDataAggregator.onContainerStarted(this)
     }
 
     /**

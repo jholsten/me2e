@@ -5,13 +5,18 @@ package org.jholsten.me2e.report.logs
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.AppenderBase
 import ch.qos.logback.core.Layout
-import org.jholsten.me2e.report.logs.LogAggregator.Companion.TEST_RUNNER_NAME
 import org.jholsten.me2e.report.logs.model.AggregatedLogEntry
+import org.jholsten.me2e.report.logs.model.ServiceSpecification
 
 /**
  * Collector which collects the messages logged by the Test Runner for one test execution.
  */
 internal class TestRunnerLogCollector(
+    /**
+     * Representation of the test runner.
+     */
+    private val service: ServiceSpecification,
+
     /**
      * Layout to use for formatting the log messages of the test runner.
      */
@@ -25,7 +30,7 @@ internal class TestRunnerLogCollector(
     override fun append(log: ILoggingEvent) {
         logs.add(
             AggregatedLogEntry(
-                service = TEST_RUNNER_NAME,
+                service = service,
                 timestamp = log.instant,
                 message = layout.doLayout(log),
             )

@@ -5,7 +5,6 @@ import org.jholsten.me2e.container.ContainerManager
 import org.jholsten.me2e.container.injection.InjectionUtils
 import org.jholsten.me2e.mock.MockServerManager
 import org.jholsten.me2e.parsing.utils.FileUtils
-import org.jholsten.me2e.report.result.ReportDataAggregator
 
 
 /**
@@ -52,7 +51,6 @@ open class Me2eTest {
         init {
             mockServerManager.start()
             containerManager.start()
-            ReportDataAggregator.initializeOnContainersStarted(config.environment.containers.values)
         }
     }
 

@@ -5,6 +5,7 @@ import ch.qos.logback.classic.PatternLayout
 import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.report.logs.model.AggregatedLogEntryList
 import org.jholsten.me2e.report.logs.model.AggregatedLogEntry
+import org.jholsten.me2e.report.logs.model.ServiceSpecification
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -12,8 +13,6 @@ import org.slf4j.LoggerFactory
  * Service which collects all log entries from all containers and from the Test Runner.
  * After each test execution, the logs for this test are collected from all containers
  * and from the Test Runner and stored in [logs].
- * TODO: Add support for recording logs when container was started manually by calling function in Container's init.
- * TODO: Use UUID as identifier for containers.
  */
 class LogAggregator internal constructor() {
     companion object {
@@ -25,11 +24,11 @@ class LogAggregator internal constructor() {
     }
 
     /**
-     * Map of container name and log collector.
-     * For each container, there is one collector which collects
+     * Map of container specification and log collector.
+     * For each container instance, there is one collector which collects
      * the container's logs of the current test execution.
      */
-    private var consumers: Map<String, ContainerLogCollector> = mapOf()
+    private val consumers: MutableMap<ServiceSpecification, ContainerLogCollector> = mutableMapOf()
 
     /**
      * Consumer of the Test Runner's logs.
@@ -52,15 +51,14 @@ class LogAggregator internal constructor() {
     }
 
     /**
-     * Initializes the collector for consuming container logs when the [containers] were started.
-     * Attaches log consumers to all containers to start capturing their logs.
+     * Initializes the collector for consuming container logs when the [container] was started.
+     * Attaches log consumer to the container to start capturing its logs.
      */
     @JvmSynthetic
-    internal fun initializeOnContainersStarted(containers: Collection<Container>) {
-        this.consumers = containers.associate { it.name to ContainerLogCollector(it.name) }
-        for (container in containers) {
-            container.addLogConsumer(consumers[container.name]!!)
-        }
+    internal fun onContainerStarted(container: Container, specification: ServiceSpecification) {
+        val consumer = ContainerLogCollector(specification)
+        this.consumers[specification] = consumer
+        container.addLogConsumer(consumer)
     }
 
     /**
@@ -102,7 +100,7 @@ class LogAggregator internal constructor() {
         testRunnerLayout.context = loggerContext
         testRunnerLayout.pattern = "%-5level %-50.50logger{16} %msg%n"
         testRunnerLayout.start()
-        testRunnerLogCollector = TestRunnerLogCollector(testRunnerLayout)
+        testRunnerLogCollector = TestRunnerLogCollector(ServiceSpecification(name = TEST_RUNNER_NAME), testRunnerLayout)
         testRunnerLogCollector.context = loggerContext
         testRunnerLogCollector.name = "TestRunnerLogCollector"
         testRunnerLogCollector.start()

@@ -8,9 +8,9 @@ import java.time.Instant
  */
 class AggregatedLogEntry(
     /**
-     * Name of the service which logged this entry.
+     * Service which logged this entry.
      */
-    val service: String,
+    val service: ServiceSpecification,
 
     /**
      * Timestamp of when this entry was logged.
@@ -23,6 +23,6 @@ class AggregatedLogEntry(
     message: String,
 ) : ContainerLogEntry(timestamp, message) {
     override fun toString(): String {
-        return "[$timestamp]\t[$service]\t$message"
+        return "[$timestamp]\t[${service.name}]\t$message"
     }
 }
