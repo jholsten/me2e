@@ -150,7 +150,7 @@ internal class ContainerStatsConsumerTest {
 
         val entry = consumer.entry
         val expected = ContainerStatsEntry(
-            timestamp = Instant.from(OffsetDateTime.of(2015, 1, 8, 22, 57, 31, 547920715, ZoneOffset.UTC)),
+            timestamp = Instant.from(OffsetDateTime.of(2015, 1, 8, 22, 57, 31, 0, ZoneOffset.UTC)),
             memoryUsage = ContainerStatsEntry.MemoryUsage(
                 usedMemory = 6537191,
                 availableMemory = 67108864,
@@ -176,7 +176,7 @@ internal class ContainerStatsConsumerTest {
 
         val entry = consumer.entry
         val expected = ContainerStatsEntry(
-            timestamp = Instant.from(OffsetDateTime.of(2015, 1, 8, 22, 57, 31, 547920715, ZoneOffset.UTC)),
+            timestamp = Instant.from(OffsetDateTime.of(2015, 1, 8, 22, 57, 31, 0, ZoneOffset.UTC)),
             memoryUsage = ContainerStatsEntry.MemoryUsage(
                 usedMemory = null,
                 availableMemory = null,
