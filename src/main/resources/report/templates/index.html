@@ -97,7 +97,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:each="test : ${tests}" th:data-tt-id="${test.testId}" th:data-tt-parent-id="${test.parentId}">
+        <tr th:each="test : ${allTests}" th:data-tt-id="${test.testId}" th:data-tt-parent-id="${test.parentId}">
             <td class="align-left"
                 th:classappend="${test.status.name == 'SKIPPED' ? 'skipped' : (test.numberOfFailures > 0 ? 'failure' : 'success')}"
                 th:text="${test.displayName}"

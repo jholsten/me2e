@@ -21,7 +21,7 @@ class IndexTemplateData(context: Context) : TemplateData(context) {
          * - `successRate:` [Int]? - Relative share of successful tests in the number of tests that the result contains (see [TestExecutionResult.successRate]).
          * - `duration:` [java.math.BigDecimal]? - Number of seconds that executing all tests took (see [TestExecutionResult.duration]).
          * - `roots:` [List]<[TestResult]> - Roots of all tests that have been performed (see [TestExecutionResult.roots]).
-         * - `tests:` [List]<[TestResult]> - All tests and test containers included in the result, i.e. all of the [TestExecutionResult.roots],
+         * - `allTests:` [List]<[TestResult]> - All tests and test containers included in the result, i.e. all of the [TestExecutionResult.roots],
          * their children and their children, recursively.
          */
         fun withTestExecutionResult(result: TestExecutionResult) = apply {
@@ -31,7 +31,7 @@ class IndexTemplateData(context: Context) : TemplateData(context) {
             withVariable("successRate", result.successRate)
             withVariable("duration", result.duration)
             withVariable("roots", result.roots)
-            withVariable("tests", getAllTests(result))
+            withVariable("allTests", getAllTests(result))
         }
 
         override fun build(): IndexTemplateData {
