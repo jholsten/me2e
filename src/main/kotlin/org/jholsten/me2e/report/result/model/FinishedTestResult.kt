@@ -5,7 +5,6 @@ import org.jholsten.me2e.report.result.utils.calculateDurationInSeconds
 import org.jholsten.me2e.report.stats.model.AggregatedStatsEntryList
 import org.jholsten.me2e.utils.toJson
 import java.math.BigDecimal
-import java.time.Duration
 import java.time.Instant
 
 /**
@@ -141,6 +140,11 @@ class FinishedTestResult(
      * there may be small deviations from the values in the JUnit test report.
      */
     val duration: BigDecimal = calculateDurationInSeconds(startTime, endTime)
+
+    /**
+     * String representation of the stack trace of the [throwable] that caused this result.
+     */
+    val stackTrace: String? = throwable?.stackTraceToString()
 
     override fun toString(): String = toJson(this)
 }

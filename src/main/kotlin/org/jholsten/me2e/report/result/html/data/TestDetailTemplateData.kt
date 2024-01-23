@@ -44,6 +44,8 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
          * (see [FinishedTestResult.stats]). **Only available if [TestResult.status] is not [TestResult.Status.SKIPPED]**.
          * - `throwable:` [Throwable]? - Throwable that caused the test result (see [FinishedTestResult.throwable]).
          * **Only available if [TestResult.status] is not [TestResult.Status.SKIPPED]**.
+         * - `stackTrace:` [String]? - String representation of the stack trace of the throwable that caused this result
+         * (see [FinishedTestResult.stackTrace]). **Only available if [TestResult.status] is not [TestResult.Status.SKIPPED]**.
          * - `reason:` [String]? - Message describing why the execution has been skipped (see [SkippedTestResult.reason]).
          * **Only available if [TestResult.status] is [TestResult.Status.SKIPPED]**.
          */
@@ -53,7 +55,7 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
             withVariable("path", result.path)
             withVariable("children", result.children)
             withVariable("allTests", getAllTests(result))
-            withVariable("url", "sources/${result.source}")
+            withVariable("url", "${result.source}.html")
             withVariable("status", result.status)
             withVariable("numberOfTests", result.numberOfTests)
             withVariable("numberOfFailures", result.numberOfFailures)
@@ -68,6 +70,7 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
                 withVariable("logs", result.logs)
                 withVariable("stats", result.stats)
                 withVariable("throwable", result.throwable)
+                withVariable("stackTrace", result.stackTrace)
             } else if (result is SkippedTestResult) {
                 withVariable("reason", result.reason)
             }
