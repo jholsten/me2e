@@ -22,7 +22,6 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
          * - `children:` [List]<[TestResult]> - Summaries of the children of the test or test container (see [TestResult.children]).
          * - `allTests:` [List]<[TestResult]> - All tests and test containers included in the result, i.e. all of the [TestResult.children],
          * their children and their children, recursively.
-         * - `url:` [String] - URL of the HTML file of the result.
          * - `status:` [TestResult.Status] - Status of the test execution (see [TestResult.status]).
          * - `numberOfTests:` [Int] - Number of tests that the result contains (see [TestResult.numberOfTests]).
          * - `numberOfFailures:` [Int] - Number of failed tests that the result contains (see [TestResult.numberOfFailures]).
@@ -55,7 +54,6 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
             withVariable("path", result.path)
             withVariable("children", result.children)
             withVariable("allTests", getAllTests(result))
-            withVariable("url", "${result.source}.html")
             withVariable("status", result.status)
             withVariable("numberOfTests", result.numberOfTests)
             withVariable("numberOfFailures", result.numberOfFailures)
