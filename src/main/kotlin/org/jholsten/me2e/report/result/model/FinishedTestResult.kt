@@ -20,6 +20,13 @@ class FinishedTestResult(
     testId: String,
 
     /**
+     * Source of the [TestExecutionResult.roots] where this test or test container is defined.
+     * Typically, this represents the name of the surrounding test class.
+     * @see org.junit.platform.launcher.TestIdentifier.getSource
+     */
+    source: String,
+
+    /**
      * Path of this result in the overall test execution tree from the root to this test.
      * Contains the test ID along with the display name of the tests and test containers.
      */
@@ -117,6 +124,7 @@ class FinishedTestResult(
     val throwable: Throwable?,
 ) : TestResult(
     testId = testId,
+    source = source,
     path = path,
     parentId = parentId,
     children = children,

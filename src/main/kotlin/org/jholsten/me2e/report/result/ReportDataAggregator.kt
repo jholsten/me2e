@@ -10,9 +10,19 @@ import org.jholsten.me2e.report.result.model.ReportEntry
 import org.jholsten.me2e.report.result.model.TestExecutionResult
 import org.jholsten.me2e.report.result.model.TestResult
 import org.jholsten.me2e.utils.logger
+import org.junit.platform.engine.support.descriptor.ClassSource
+import org.junit.platform.engine.support.descriptor.ClasspathResourceSource
+import org.junit.platform.engine.support.descriptor.CompositeTestSource
+import org.junit.platform.engine.support.descriptor.DirectorySource
+import org.junit.platform.engine.support.descriptor.FileSource
+import org.junit.platform.engine.support.descriptor.FileSystemSource
+import org.junit.platform.engine.support.descriptor.MethodSource
+import org.junit.platform.engine.support.descriptor.PackageSource
+import org.junit.platform.engine.support.descriptor.UriSource
 import org.junit.platform.launcher.TestIdentifier
 import org.junit.platform.launcher.TestPlan
 import java.time.Instant
+import kotlin.jvm.optionals.getOrNull
 
 /**
  * Service which aggregates all the data required for the test report.
@@ -152,17 +162,35 @@ class ReportDataAggregator private constructor() {
             for (root in flattened) {
                 val intermediateResult = getIntermediateResult(root)
                 intermediateResult.parentId = null
-                val result = intermediateResult.toTestResult(listOf(), buildTestTree(listOf(root), root, testPlan))
+                val source = getSource(root)
+                if (source == null) {
+                    logger.warn("Unknown source for test identifier $root. Will ignore this test in the test report.")
+                    continue
+                }
+                val result = intermediateResult.toTestResult(
+                    source = source,
+                    parents = listOf(),
+                    children = buildTestTree(source, listOf(root), root, testPlan),
+                )
                 roots.add(result)
             }
             return roots
         }
 
-        private fun buildTestTree(parents: List<TestIdentifier>, identifier: TestIdentifier, testPlan: TestPlan): List<TestResult> {
+        private fun buildTestTree(
+            source: String,
+            parents: List<TestIdentifier>,
+            identifier: TestIdentifier,
+            testPlan: TestPlan
+        ): List<TestResult> {
             val nodes: MutableList<TestResult> = mutableListOf()
             val children = testPlan.getChildren(identifier)
             for (child in children) {
-                val result = getIntermediateResult(child).toTestResult(parents, buildTestTree(parents.toList() + child, child, testPlan))
+                val result = getIntermediateResult(child).toTestResult(
+                    source = source,
+                    parents = parents,
+                    children = buildTestTree(source, parents.toList() + child, child, testPlan)
+                )
                 nodes.add(result)
             }
             return nodes
@@ -178,6 +206,18 @@ class ReportDataAggregator private constructor() {
          */
         private fun getIntermediateResult(testIdentifier: TestIdentifier): IntermediateTestResult {
             return this.intermediateTestResults[testIdentifier.uniqueId] ?: IntermediateTestResult.skipped(testIdentifier)
+        }
+
+        private fun getSource(testIdentifier: TestIdentifier): String? {
+            val source = testIdentifier.source.getOrNull() ?: return null
+            return when (source) {
+                is ClassSource -> source.className
+                is ClasspathResourceSource -> source.classpathResourceName
+                is UriSource -> source.uri.toString()
+                is MethodSource -> source.className
+                is PackageSource -> source.packageName
+                else -> null
+            }
         }
 
         private fun storeIntermediateTestResult(result: IntermediateTestResult) {

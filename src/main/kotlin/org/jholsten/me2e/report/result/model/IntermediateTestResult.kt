@@ -150,11 +150,12 @@ internal class IntermediateTestResult(
 
     /**
      * Generates [TestResult] instance from this intermediate result.
+     * @param source Source where this test or test container is defined.
      * @param parents Parents of this result in the overall test execution tree.
      * @param children Children of this test or test container.
      */
     @JvmSynthetic
-    internal fun toTestResult(parents: List<TestIdentifier>, children: List<TestResult>): TestResult {
+    internal fun toTestResult(source: String, parents: List<TestIdentifier>, children: List<TestResult>): TestResult {
         val numberOfTests = when {
             children.isNotEmpty() -> children.sumOf { it.numberOfTests }
             else -> 1
@@ -171,6 +172,7 @@ internal class IntermediateTestResult(
         if (status == TestResult.Status.SKIPPED) {
             return SkippedTestResult(
                 testId = testId,
+                source = source,
                 path = path,
                 parentId = parentId,
                 children = children,
@@ -185,6 +187,7 @@ internal class IntermediateTestResult(
         } else {
             return FinishedTestResult(
                 testId = testId,
+                source = source,
                 path = path,
                 parentId = parentId,
                 children = children,
