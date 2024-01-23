@@ -300,8 +300,11 @@
                     <tbody>
                     <tr th:each="entry : ${test.logs}">
                         <td><code th:text="${#temporals.format(entry.timestamp, 'HH:mm:ss.SSS')}"></code></td>
-                        <td><code th:text="${entry.service}"></code></td>
-                        <td><code th:text="${entry.message}"></code></td>
+                        <td>
+                            <i class="fas fa-square" style="font-size: 11px;" th:styleappend="${'color: ' + entry.service.color}"></i>
+                            <code th:text="${entry.service.name}"></code>
+                        </td>
+                        <td><code th:text="${entry.message}" style="white-space: pre-wrap"></code></td>
                     </tr>
                     </tbody>
                 </table>
