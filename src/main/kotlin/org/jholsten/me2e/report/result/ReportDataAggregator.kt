@@ -12,10 +12,6 @@ import org.jholsten.me2e.report.result.model.TestResult
 import org.jholsten.me2e.utils.logger
 import org.junit.platform.engine.support.descriptor.ClassSource
 import org.junit.platform.engine.support.descriptor.ClasspathResourceSource
-import org.junit.platform.engine.support.descriptor.CompositeTestSource
-import org.junit.platform.engine.support.descriptor.DirectorySource
-import org.junit.platform.engine.support.descriptor.FileSource
-import org.junit.platform.engine.support.descriptor.FileSystemSource
 import org.junit.platform.engine.support.descriptor.MethodSource
 import org.junit.platform.engine.support.descriptor.PackageSource
 import org.junit.platform.engine.support.descriptor.UriSource
@@ -167,7 +163,7 @@ class ReportDataAggregator private constructor() {
                 val result = intermediateResult.toTestResult(
                     source = source,
                     parents = listOf(),
-                    children = buildTestTree(source, listOf(root), root, testPlan),
+                    children = buildTestTree(source, listOf(intermediateResult), root, testPlan),
                 )
                 roots.add(result)
             }
@@ -176,17 +172,18 @@ class ReportDataAggregator private constructor() {
 
         private fun buildTestTree(
             source: String,
-            parents: List<TestIdentifier>,
+            parents: List<IntermediateTestResult>,
             identifier: TestIdentifier,
             testPlan: TestPlan
         ): List<TestResult> {
             val nodes: MutableList<TestResult> = mutableListOf()
             val children = testPlan.getChildren(identifier)
             for (child in children) {
-                val result = getIntermediateResult(child).toTestResult(
+                val intermediateResult = getIntermediateResult(child)
+                val result = intermediateResult.toTestResult(
                     source = source,
                     parents = parents,
-                    children = buildTestTree(source, parents.toList() + child, child, testPlan)
+                    children = buildTestTree(source, parents.toList() + intermediateResult, child, testPlan)
                 )
                 nodes.add(result)
             }

@@ -155,7 +155,7 @@ internal class IntermediateTestResult(
      * @param children Children of this test or test container.
      */
     @JvmSynthetic
-    internal fun toTestResult(source: String, parents: List<TestIdentifier>, children: List<TestResult>): TestResult {
+    internal fun toTestResult(source: String, parents: List<IntermediateTestResult>, children: List<TestResult>): TestResult {
         val numberOfTests = when {
             children.isNotEmpty() -> children.sumOf { it.numberOfTests }
             else -> 1
@@ -168,8 +168,12 @@ internal class IntermediateTestResult(
             children.isNotEmpty() -> children.sumOf { it.numberOfSkipped }
             else -> if (status == TestResult.Status.SKIPPED) 1 else 0
         }
-        val path = parents.map { it.uniqueId to it.displayName.substringBeforeLast("(") } + Pair(testId, displayName)
+        val path = parents.map { it.testId to it.displayName } + Pair(testId, displayName)
         if (status == TestResult.Status.SKIPPED) {
+            val reason = when {
+                skippingReason != null -> skippingReason
+                else -> parents.find { it.status == TestResult.Status.SKIPPED }?.skippingReason
+            }
             return SkippedTestResult(
                 testId = testId,
                 source = source,
@@ -182,7 +186,7 @@ internal class IntermediateTestResult(
                 numberOfSkipped = numberOfSkipped,
                 displayName = displayName,
                 tags = tags,
-                reason = skippingReason,
+                reason = reason,
             )
         } else {
             return FinishedTestResult(
