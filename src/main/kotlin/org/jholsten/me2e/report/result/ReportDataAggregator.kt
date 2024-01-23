@@ -22,6 +22,7 @@ import org.junit.platform.engine.support.descriptor.UriSource
 import org.junit.platform.launcher.TestIdentifier
 import org.junit.platform.launcher.TestPlan
 import java.time.Instant
+import java.util.UUID
 import kotlin.jvm.optionals.getOrNull
 
 /**
@@ -162,11 +163,7 @@ class ReportDataAggregator private constructor() {
             for (root in flattened) {
                 val intermediateResult = getIntermediateResult(root)
                 intermediateResult.parentId = null
-                val source = getSource(root)
-                if (source == null) {
-                    logger.warn("Unknown source for test identifier $root. Will ignore this test in the test report.")
-                    continue
-                }
+                val source = getSource(root) ?: UUID.randomUUID().toString()
                 val result = intermediateResult.toTestResult(
                     source = source,
                     parents = listOf(),
