@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.math.MathContext
 import java.time.Instant
+import java.time.temporal.ChronoUnit
 import java.util.function.Consumer
 
 /**
@@ -43,7 +44,7 @@ abstract class ContainerStatsConsumer : Consumer<Statistics> {
         val cpuUsage = aggregateCpuUsage(statistics)
         val networkUsage = aggregateNetworkUsage(statistics)
         return ContainerStatsEntry(
-            timestamp = Instant.parse(statistics.read),
+            timestamp = Instant.parse(statistics.read).truncatedTo(ChronoUnit.SECONDS),
             memoryUsage = memoryUsage,
             cpuUsage = cpuUsage,
             networkUsage = networkUsage,
