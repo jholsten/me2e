@@ -100,7 +100,7 @@ class LogAggregator internal constructor() {
         val loggerContext = LoggerFactory.getILoggerFactory() as LoggerContext
         val testRunnerLayout = PatternLayout()
         testRunnerLayout.context = loggerContext
-        testRunnerLayout.pattern = "%highlight(%-5level) %-50.50logger{16} %msg%n"
+        testRunnerLayout.pattern = "%-5level %-50.50logger{16} %msg%n"
         testRunnerLayout.start()
         testRunnerLogCollector = TestRunnerLogCollector(testRunnerLayout)
         testRunnerLogCollector.context = loggerContext
