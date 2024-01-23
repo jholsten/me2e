@@ -20,6 +20,12 @@ class FinishedTestResult(
     testId: String,
 
     /**
+     * Path of this result in the overall test execution tree from the root to this test.
+     * Contains the test ID along with the display name of the tests and test containers.
+     */
+    path: List<Pair<String, String>>,
+
+    /**
      * ID of the parent of this test or test container.
      * An identifier without a parent is called a `root`.
      * @see org.junit.platform.launcher.TestIdentifier.getParentId
@@ -111,6 +117,7 @@ class FinishedTestResult(
     val throwable: Throwable?,
 ) : TestResult(
     testId = testId,
+    path = path,
     parentId = parentId,
     children = children,
     status = status,

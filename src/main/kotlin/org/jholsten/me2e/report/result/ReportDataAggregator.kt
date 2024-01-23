@@ -152,17 +152,17 @@ class ReportDataAggregator private constructor() {
             for (root in flattened) {
                 val intermediateResult = getIntermediateResult(root)
                 intermediateResult.parentId = null
-                val result = intermediateResult.toTestResult(buildTestTree(root, testPlan))
+                val result = intermediateResult.toTestResult(listOf(), buildTestTree(listOf(root), root, testPlan))
                 roots.add(result)
             }
             return roots
         }
 
-        private fun buildTestTree(identifier: TestIdentifier, testPlan: TestPlan): List<TestResult> {
+        private fun buildTestTree(parents: List<TestIdentifier>, identifier: TestIdentifier, testPlan: TestPlan): List<TestResult> {
             val nodes: MutableList<TestResult> = mutableListOf()
             val children = testPlan.getChildren(identifier)
             for (child in children) {
-                val result = getIntermediateResult(child).toTestResult(buildTestTree(child, testPlan))
+                val result = getIntermediateResult(child).toTestResult(parents, buildTestTree(parents.toList() + child, child, testPlan))
                 nodes.add(result)
             }
             return nodes

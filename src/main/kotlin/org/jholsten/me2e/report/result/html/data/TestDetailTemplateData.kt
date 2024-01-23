@@ -2,10 +2,8 @@ package org.jholsten.me2e.report.result.html.data
 
 import org.jholsten.me2e.report.logs.model.AggregatedLogEntryList
 import org.jholsten.me2e.report.result.html.HtmlReportGenerator
-import org.jholsten.me2e.report.result.model.FinishedTestResult
-import org.jholsten.me2e.report.result.model.ReportEntry
-import org.jholsten.me2e.report.result.model.SkippedTestResult
-import org.jholsten.me2e.report.result.model.TestResult
+import org.jholsten.me2e.report.result.model.*
+import org.jholsten.me2e.report.result.utils.getDescendants
 import org.jholsten.me2e.report.stats.model.AggregatedStatsEntryList
 import org.thymeleaf.context.Context
 
@@ -19,7 +17,10 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
          * Sets variables for the data contained in the given [result].
          * The following variables are available in the template:
          * - `testId:` [String] - Unique identifier of the test or test container (see [TestResult.testId]).
+         * - `path:` [List]<[Pair]<[String],[String]>> - Path of this result in the overall test execution tree from the root to this test (see [TestResult.path]).
          * - `children:` [List]<[TestResult]> - Summaries of the children of the test or test container (see [TestResult.children]).
+         * - `allTests:` [List]<[TestResult]> - All tests and test containers included in the result, i.e. all of the [TestResult.children],
+         * their children and their children, recursively.
          * - `status:` [TestResult.Status] - Status of the test execution (see [TestResult.status]).
          * - `numberOfTests:` [Int] - Number of tests that the result contains (see [TestResult.numberOfTests]).
          * - `numberOfFailures:` [Int] - Number of failed tests that the result contains (see [TestResult.numberOfFailures]).
@@ -46,7 +47,9 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
          */
         fun withTestResult(result: TestResult) = apply {
             withVariable("testId", result.testId)
+            withVariable("path", result.path)
             withVariable("children", result.children)
+            withVariable("allTests", getAllTests(result))
             withVariable("status", result.status)
             withVariable("numberOfTests", result.numberOfTests)
             withVariable("numberOfFailures", result.numberOfFailures)
@@ -72,6 +75,15 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
 
         override fun self(): Builder {
             return this
+        }
+
+        private fun getAllTests(result: TestResult): List<TestResult> {
+            val tests: MutableList<TestResult> = mutableListOf()
+            for (child in result.children) {
+                tests.add(child)
+                tests.addAll(getDescendants(child))
+            }
+            return tests
         }
     }
 }
