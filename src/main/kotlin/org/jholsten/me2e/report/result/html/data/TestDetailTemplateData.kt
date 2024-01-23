@@ -17,10 +17,12 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
          * Sets variables for the data contained in the given [result].
          * The following variables are available in the template:
          * - `testId:` [String] - Unique identifier of the test or test container (see [TestResult.testId]).
+         * - `source:` [String] - Source of the [TestExecutionResult.roots] where this test or test container is defined (see [TestResult.source]).
          * - `path:` [List]<[Pair]<[String],[String]>> - Path of this result in the overall test execution tree from the root to this test (see [TestResult.path]).
          * - `children:` [List]<[TestResult]> - Summaries of the children of the test or test container (see [TestResult.children]).
          * - `allTests:` [List]<[TestResult]> - All tests and test containers included in the result, i.e. all of the [TestResult.children],
          * their children and their children, recursively.
+         * - `url:` [String] - URL of the HTML file of the result.
          * - `status:` [TestResult.Status] - Status of the test execution (see [TestResult.status]).
          * - `numberOfTests:` [Int] - Number of tests that the result contains (see [TestResult.numberOfTests]).
          * - `numberOfFailures:` [Int] - Number of failed tests that the result contains (see [TestResult.numberOfFailures]).
@@ -47,9 +49,11 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
          */
         fun withTestResult(result: TestResult) = apply {
             withVariable("testId", result.testId)
+            withVariable("source", result.source)
             withVariable("path", result.path)
             withVariable("children", result.children)
             withVariable("allTests", getAllTests(result))
+            withVariable("url", "sources/${result.source}")
             withVariable("status", result.status)
             withVariable("numberOfTests", result.numberOfTests)
             withVariable("numberOfFailures", result.numberOfFailures)
