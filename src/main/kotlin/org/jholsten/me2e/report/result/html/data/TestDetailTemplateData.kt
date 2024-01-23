@@ -4,6 +4,7 @@ import org.jholsten.me2e.report.logs.model.AggregatedLogEntryList
 import org.jholsten.me2e.report.result.html.HtmlReportGenerator
 import org.jholsten.me2e.report.result.model.*
 import org.jholsten.me2e.report.result.utils.getDescendants
+import org.jholsten.me2e.report.stats.model.AggregatedStatsEntry
 import org.jholsten.me2e.report.stats.model.AggregatedStatsEntryList
 import org.thymeleaf.context.Context
 
@@ -29,6 +30,7 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
          * - `successRate`: [Int]? - Relative share of successful tests in the number of tests that the result contains (see [TestResult.successRate]).
          * - `displayName:` [String] - Human-readable name of the test or test container (see [TestResult.displayName]).
          * - `tags:` [Set]<[String]> - Tags associated with the test or test container (see [TestResult.tags]).
+         * - `statsByContainer:` [Map]<[String], [List]<[AggregatedStatsEntry]>> - Map of container name and their resource usage statistics.
          * - `startTime:` [java.time.Instant] - Timestamp of the test or test container has started its execution
          * (see [FinishedTestResult.startTime]). **Only available if [TestResult.status] is not [TestResult.Status.SKIPPED]**.
          * - `endTime:` [java.time.Instant] - Timestamp of the test or test container has finished its execution
@@ -53,13 +55,15 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
             withVariable("source", result.source)
             withVariable("path", result.path)
             withVariable("children", result.children)
-            withVariable("allTests", getAllTests(result))
             withVariable("status", result.status)
             withVariable("numberOfTests", result.numberOfTests)
             withVariable("numberOfFailures", result.numberOfFailures)
             withVariable("successRate", result.successRate)
             withVariable("displayName", result.displayName)
             withVariable("tags", result.tags)
+            val allTests = getAllTests(result)
+            withVariable("allTests", allTests)
+            withVariable("statsByContainer", getStatsByContainer(allTests))
             if (result is FinishedTestResult) {
                 withVariable("startTime", result.startTime)
                 withVariable("endTime", result.endTime)
@@ -89,6 +93,11 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
                 tests.addAll(getDescendants(child))
             }
             return tests
+        }
+
+        private fun getStatsByContainer(allTests: List<TestResult>): Map<String, List<AggregatedStatsEntry>> {
+            val allStats = allTests.filterIsInstance<FinishedTestResult>().flatMap { it.stats }
+            return allStats.groupBy { it.service.name }
         }
     }
 }
