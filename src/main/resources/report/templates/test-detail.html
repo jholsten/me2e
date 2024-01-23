@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>ME2E Test Results</title>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.0/css/all.css">
+    <link rel="stylesheet" href="../tree-table/jquery.treetable.css">
+    <link rel="stylesheet" href="../css/report-style.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="../tree-table/jquery.treetable.js"></script>
+    <script src="https://www.gstatic.com/charts/loader.js"></script>
+    <style>
+        .tag {
+            padding: 3px 5px;
+            border-radius: 8px;
+            border: 2px solid #4541DD;
+            font-size: 14px;
+            font-weight: 600;
+            color: #4541DD;
+            background-color: #f7f7ff;
+        }
+
+        .container-chip input {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            margin: 0;
+        }
+
+        .container-chip input:checked + .label {
+            border-color: #4541DD;
+            background-color: #4541DD;
+            color: white;
+            box-shadow: -5px 10px 20px 0 rgba(69, 65, 221, 0.25);
+        }
+
+        .container-chip .label {
+            border-radius: 100px;
+            background-color: #fff;
+            border: 1px solid #b5b5b5;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        table .label {
+            font-weight: 600;
+            width: 80px;
+        }
+
+        table td {
+            padding: 5px 0;
+        }
+
+        .metadata-table td {
+            vertical-align: top;
+        }
+
+        .log-table {
+            table-layout: fixed;
+        }
+
+        .log-table thead {
+            position: sticky;
+            box-shadow: 0 1px 0 0 #A6A6A6;
+        }
+
+        .log-table th {
+            text-align: start;
+        }
+
+        .log-table td {
+            padding: 3px 0;
+            vertical-align: top;
+        }
+
+        .log-table th:first-child {
+            width: 95px;
+        }
+
+        .log-table th:nth-child(2) {
+            width: 110px;
+        }
+
+        .log-table td:first-child {
+            width: 97px;
+        }
+
+        .log-table td:nth-child(2) {
+            width: 112px;
+        }
+
+        .log-table tbody {
+            display: block;
+            overflow-y: auto;
+            max-height: 400px;
+        }
+
+        .log-table tr {
+            display: table;
+            width: 100%;
+        }
+
+        .stack-trace {
+            background-color: rgba(255, 95, 86, 0.05);
+            border: 2px solid #FF5F56;
+            margin-top: 3px;
+        }
+
+        h4 {
+            background-color: rgba(129, 169, 231, 0.1);
+            color: #618bde;
+            padding: 5px 0;
+        }
+    </style>
+</head>
+<body>
+<h1 th:id="${testId}">Test Summary: [[${displayName}]]</h1>
+<div style="color: #A6A6A6; margin-bottom: 24px;">
+    Source: [[${source}]]
+</div>
+
+<div class="card" style="padding: 24px">
+    <table class="tree-table" id="test-overview">
+        <thead>
+        <tr>
+            <th class="align-left">Test</th>
+            <th>Tests</th>
+            <th>Failures</th>
+            <th>Skipped</th>
+            <th>Duration</th>
+            <th>Success Rate</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="test : ${allTests}" th:data-tt-id="${test.testId}" th:data-tt-parent-id="${test.parentId}">
+            <td class="align-left"
+                th:classappend="${test.status.name == 'SKIPPED' ? 'skipped' : (test.numberOfFailures > 0 ? 'failure' : 'success')}"
+                th:text="${test.displayName}"
+            ></td>
+            <td th:text="${test.numberOfTests}"></td>
+            <td th:text="${test.numberOfFailures}"></td>
+            <td th:text="${test.numberOfSkipped}"></td>
+            <td th:text="${test.status.name != 'SKIPPED' ? test.duration + 's' : '-'}"></td>
+            <td
+                    th:classappend="${test.status.name == 'SKIPPED' ? 'skipped' : (test.numberOfFailures > 0 ? 'failure' : 'success')}"
+                    th:text="${test.successRate != null ? test.successRate + ' %' : '-'}"
+            ></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<h2>Resource Usage</h2>
+<p>
+    The following diagrams show the resource usage of the Docker containers during the execution
+    of the tests belonging to "[[${displayName}]]".
+</p>
+<div class="card">
+    <div>
+        Select the container for which you want to display the resource usage.
+    </div>
+    <div class="container-chip-group" style="padding: 16px 0 48px 0;">
+        <span class="container-chip">
+            <label for="database">
+                <input type="radio" id="database"
+                       value="database" name="container-chip-group"
+                       onclick="onContainerSelected('database')"
+                       checked>
+                <span class="label">database</span>
+            </label>
+        </span>
+        <span class="container-chip">
+            <label for="backend-api">
+                <input type="radio" id="backend-api"
+                       value="backend-api" name="container-chip-group"
+                       onclick="onContainerSelected('backend-api')">
+                <span class="label">backend-api</span>
+            </label>
+        </span>
+        <span class="container-chip">
+            <label for="auth-server">
+                <input type="radio" id="auth-server"
+                       value="auth-server" name="container-chip-group"
+                       onclick="onContainerSelected('auth-server')">
+                <span class="label">auth-server</span>
+            </label>
+        </span>
+    </div>
+    <div style="text-align: center; margin-bottom: 12px;">
+        <b id="resource-usage-chart-title">Resource Usage of Container "database"</b>
+    </div>
+    <div style="height: 300px;">
+        <div id="chart_div"></div>
+    </div>
+</div>
+
+<h2>Test Results</h2>
+<div th:each="test, iter : ${allTests}" th:if="${test.children.isEmpty()}">
+    <h3>
+        <span th:switch="${test.status.name}">
+            <i th:case="'SKIPPED'" class="fas fa-ban skipped"></i>
+            <i th:case="'SUCCESSFUL'" class="fas fa-circle-check success"></i>
+            <i th:case="'FAILED'" class="fas fa-circle-xmark failure"></i>
+            <i th:case="'ABORTED'" class="fas fa-ban aborted"></i>
+        </span>
+        <span> </span>
+        <span th:each="entry, i : ${test.path}">
+            <span th:if="${i.first}">
+                <a style="color: #15134C;" th:href="${url} + '#' + ${testId}">[[${entry.second}]]</a>
+            </span>
+            <span th:if="${!i.first}" th:text="${entry.second}"></span>
+            <span th:if="${!i.last}"> ></span>
+        </span>
+    </h3>
+
+    <div class="card">
+        <table class="metadata-table">
+            <tr th:if="${!test.tags.isEmpty()}">
+                <td class="label">Tags:</td>
+                <td>
+                    <span th:each="tag, i : ${test.tags}">
+                        <span class="tag" th:text="${tag}"></span>
+                        <span th:if="${!i.last}"> </span>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Status:</td>
+                <td th:switch="${test.status.name}">
+                    <span th:case="'SKIPPED'" class="skipped"><i class="fas fa-ban"></i> <b>Skipped</b></span>
+                    <span th:case="'SUCCESSFUL'" class="success"><i class="fas fa-circle-check"></i> <b>Success</b></span>
+                    <span th:case="'FAILED'" class="failure"><i class="fas fa-circle-xmark"></i> <b>Failed</b></span>
+                    <span th:case="'ABORTED'" class="aborted"><i class="fas fa-ban"></i> <b>Aborted</b></span>
+                </td>
+            </tr>
+            <tr th:if="${test.status.name == 'SKIPPED' && test.reason != null}">
+                <td class="label">Reason:</td>
+                <td>
+                    <span th:text="${test.reason}"></span>
+                </td>
+            </tr>
+            <tr th:if="${test.status.name != 'SKIPPED'}">
+                <td class="label">Started:</td>
+                <td th:text="${#temporals.format(test.startTime, 'dd.MM.yyyy HH:mm:ss.SSS')}"></td>
+            </tr>
+            <tr th:if="${test.status.name != 'SKIPPED'}">
+                <td class="label">Finished:</td>
+                <td th:text="${#temporals.format(test.endTime, 'dd.MM.yyyy HH:mm:ss.SSS')}"></td>
+            </tr>
+            <tr th:if="${test.status.name != 'SKIPPED'}">
+                <td class="label">Duration:</td>
+                <td th:text="${test.duration} + 's'"></td>
+            </tr>
+            <tr th:if="${test.status.name != 'SKIPPED' && !test.reportEntries.isEmpty()}">
+                <td class="label">Report Entries:</td>
+                <td>
+                    <ul>
+                        <li th:each="entry, i : ${test.reportEntries}" th:style="${!i.first ? 'margin-top: 12px;' : ''}">
+                            <b>Entry [[${i.index + 1}]]</b> ([[${#temporals.format(entry.timestamp, 'dd.MM.yyyy HH:mm:ss.SSS')}]]):
+                            <ul>
+                                <li th:each="mapEntry : ${entry.keyValuePairs}">[[${mapEntry.key}]]: [[${mapEntry.value}]]</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        </table>
+
+
+        <div th:if="${test.status.name != 'SKIPPED'}">
+            <div th:if="${test.stackTrace != null}">
+                <div style="margin-top: 12px;">
+                    <b>Failure:</b>
+                </div>
+                <div>
+                    <pre th:text="${test.stackTrace}" class="stack-trace"></pre>
+                </div>
+            </div>
+
+            <div>
+                <hr class="divider">
+
+                <h4>Network Traces</h4>
+                <p>
+                    TODO: Traces
+                </p>
+            </div>
+
+            <div th:if="${!test.logs.isEmpty()}">
+                <hr class="divider">
+
+                <h4>Logs</h4>
+                <table class="log-table">
+                    <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Service</th>
+                        <th>Message</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="entry : ${test.logs}">
+                        <td><code th:text="${#temporals.format(entry.timestamp, 'HH:mm:ss.SSS')}"></code></td>
+                        <td><code th:text="${entry.service}"></code></td>
+                        <td><code th:text="${entry.message}"></code></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${!iter.last}" style="padding: 16px 0;"></div>
+</div>
+
+<div id="footer">
+    <span>Generated by <a href="https://gitlab.informatik.uni-bremen.de/master-thesis1/me2e">ME2E</a> at [[${generationTimestamp}]]</span>
+</div>
+
+<script type="text/javascript">
+    selectedContainer = "database";
+
+    google.charts.load('current', {'packages': ['line']});
+    google.charts.setOnLoadCallback(drawChart);
+
+    function onContainerSelected(containerName) {
+        this.selectedContainer = containerName;
+        console.log(this.selectedContainer);
+    }
+
+    function drawChart() {
+        const data = google.visualization.arrayToDataTable([
+            ['Time', 'Memory Usage', 'CPU Usage', 'Network IN', 'Network OUT'],
+            ['08:21:01', null, 0.13, 6000, 2000],
+            ['08:21:02', 0.13, 0.15, 6500, 2200],
+            ['08:21:03', 0.22, 0.08, 6900, 2500],
+            ['08:21:04', 0.30, 0.07, 7300, 2500],
+            ['08:21:05', 0.23, 0.06, 7300, 2900],
+            ['08:21:06', 0.20, 0.05, 7600, 2950]
+        ]);
+
+        const options = {
+            height: 300,
+            series: {
+                0: {axis: 'Percent'},
+                1: {axis: 'Percent'},
+                2: {axis: 'Bytes'},
+                3: {axis: 'Bytes'}
+            },
+            axes: {
+                y: {
+                    Percent: {label: 'Percentage [%]'},
+                    Bytes: {label: 'Number of Bytes [B]'}
+                }
+            },
+            selectionMode: 'multiple',
+            animation: {
+                startup: true,
+            },
+        };
+
+        const chart = new google.charts.Line(document.getElementById('chart_div'));
+        chart.draw(data, google.charts.Line.convertOptions(options));
+    }
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#test-overview").treetable({
+            expandable: true,
+            initialState: "expanded",
+            indent: 20,
+        });
+    });
+</script>
+</body>
+</html>

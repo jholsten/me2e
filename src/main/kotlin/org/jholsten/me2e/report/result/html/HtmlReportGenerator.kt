@@ -52,8 +52,8 @@ open class HtmlReportGenerator(
         this.result = result
         copyAdditionalResources()
         generateIndexHtml()
-        for (test in result.roots) {
-            //generateTestDetailHtml(test)
+        for (root in result.roots) {
+            generateTestDetailHtml(root)
         }
     }
 
@@ -70,8 +70,7 @@ open class HtmlReportGenerator(
             .withGenerationTimestamp(generationTimestamp)
             .withTestResult(result)
             .build()
-        generateHtml(testDetailTemplate, data, "$outputDirectory/detail/TODO.html")
-        result.children.forEach { generateTestDetailHtml(it) }
+        generateHtml(testDetailTemplate, data, "$outputDirectory/sources/${result.source}.html")
     }
 
     protected open fun generateHtml(template: String, data: TemplateData, outputPath: String) {
