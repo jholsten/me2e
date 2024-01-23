@@ -5,6 +5,7 @@ import com.github.dockerjava.api.model.ContainerPort
 import com.github.dockerjava.api.model.Container as DockerContainer
 import io.mockk.*
 import org.jholsten.me2e.container.model.ContainerType
+import org.jholsten.me2e.report.result.ReportDataAggregator
 import org.jholsten.util.RecursiveComparison
 import org.testcontainers.containers.ContainerState
 import kotlin.test.*
@@ -38,6 +39,8 @@ internal class ContainerTest {
             }
         }
         every { dockerContainerState.containerId } returns "container-id"
+        mockkObject(ReportDataAggregator)
+        every { ReportDataAggregator.onContainerStarted(any()) } just runs
     }
 
     @AfterTest

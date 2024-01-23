@@ -7,6 +7,7 @@ import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.container.database.connection.MongoDBConnection
 import org.jholsten.me2e.container.database.connection.SQLDatabaseConnection
 import org.jholsten.me2e.container.database.model.QueryResult
+import org.jholsten.me2e.report.result.ReportDataAggregator
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -132,6 +133,8 @@ internal class DatabaseContainerTest {
         every { mockedMongoDBConnection.clearAll() } just runs
         every { mockedMongoDBConnection.clearAllExcept(any()) } just runs
         every { mockedMongoDBConnection.reset() } just runs
+        mockkObject(ReportDataAggregator)
+        every { ReportDataAggregator.onContainerStarted(any()) } just runs
     }
 
     @AfterTest
