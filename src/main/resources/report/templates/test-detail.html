@@ -163,8 +163,8 @@
     </table>
 </div>
 
+<h2>Resource Usage</h2>
 <div th:if="${!statsByContainer.isEmpty()}">
-    <h2>Resource Usage</h2>
     <p>
         The following diagrams show the resource usage of the Docker containers during the execution
         of the tests belonging to "[[${displayName}]]".
@@ -189,6 +189,27 @@
         </div>
         <div style="height: 300px;">
             <div id="resource-usage-chart"></div>
+        </div>
+    </div>
+</div>
+<div th:if="${statsByContainer.isEmpty()}">
+    <div class="card">
+        <div style="height: 200px; display: flex; align-items: center; justify-content: center;">
+            <span style="font-size: 20px; margin-right: 12px; color: #A6A6A6;">No Data Available</span>
+            <div class="tooltip"><i class="fas fa-circle-info"></i>
+                <div class="tooltip-text" style="text-align: start;">
+                    There may be several reasons why no data is available:
+                    <ul>
+                        <li>
+                            No containers were started or the started containers were no longer active when this test class was executed.
+                        </li>
+                        <li>
+                            No data was collected during the execution of the tests in this test class. As Docker only sends the data once
+                            per second, it is possible that no data was received during the execution.
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
 </div>
