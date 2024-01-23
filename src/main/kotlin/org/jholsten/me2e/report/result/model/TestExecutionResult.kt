@@ -47,12 +47,6 @@ class TestExecutionResult(
      */
     val duration: BigDecimal? = calculateDuration()
 
-    /**
-     * All tests and test containers included in the result, i.e. all of the [roots], their children
-     * and their children, recursively.
-     */
-    val tests: List<TestResult> = getAllTests()
-
     private fun calculateDuration(): BigDecimal? {
         val finishedTests = roots.filterIsInstance<FinishedTestResult>()
         if (finishedTests.isEmpty()) {
@@ -61,25 +55,5 @@ class TestExecutionResult(
         return finishedTests.sumOf { it.duration }
     }
 
-    private fun getAllTests(): List<TestResult> {
-        val result: MutableList<TestResult> = mutableListOf()
-        for (root in roots) {
-            result.add(root)
-            result.addAll(getDescendants(root))
-        }
-        return result
-    }
 
-    /**
-     * Returns all descendants of the supplied [parent], i.e. all of its
-     * children and their children, recursively.
-     */
-    private fun getDescendants(parent: TestResult): List<TestResult> {
-        val descendants: MutableList<TestResult> = mutableListOf()
-        for (child in parent.children) {
-            descendants.add(child)
-            descendants.addAll(getDescendants(child))
-        }
-        return descendants
-    }
 }

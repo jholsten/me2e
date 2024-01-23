@@ -3,6 +3,7 @@ package org.jholsten.me2e.report.result.html.data
 import org.jholsten.me2e.report.result.html.HtmlReportGenerator
 import org.jholsten.me2e.report.result.model.TestExecutionResult
 import org.jholsten.me2e.report.result.model.TestResult
+import org.jholsten.me2e.report.result.utils.getDescendants
 import org.thymeleaf.context.Context
 
 /**
@@ -20,7 +21,8 @@ class IndexTemplateData(context: Context) : TemplateData(context) {
          * - `successRate:` [Int]? - Relative share of successful tests in the number of tests that the result contains (see [TestExecutionResult.successRate]).
          * - `duration:` [java.math.BigDecimal]? - Number of seconds that executing all tests took (see [TestExecutionResult.duration]).
          * - `roots:` [List]<[TestResult]> - Roots of all tests that have been performed (see [TestExecutionResult.roots]).
-         * - `tests:` [List]<[TestResult]> - All tests included in the result (see [TestExecutionResult.tests]).
+         * - `tests:` [List]<[TestResult]> - All tests and test containers included in the result, i.e. all of the [TestExecutionResult.roots],
+         * their children and their children, recursively.
          */
         fun withTestExecutionResult(result: TestExecutionResult) = apply {
             withVariable("numberOfTests", result.numberOfTests)
@@ -29,7 +31,7 @@ class IndexTemplateData(context: Context) : TemplateData(context) {
             withVariable("successRate", result.successRate)
             withVariable("duration", result.duration)
             withVariable("roots", result.roots)
-            withVariable("tests", result.tests)
+            withVariable("tests", getAllTests(result))
         }
 
         override fun build(): IndexTemplateData {
@@ -38,6 +40,15 @@ class IndexTemplateData(context: Context) : TemplateData(context) {
 
         override fun self(): Builder {
             return this
+        }
+
+        private fun getAllTests(result: TestExecutionResult): List<TestResult> {
+            val tests: MutableList<TestResult> = mutableListOf()
+            for (root in result.roots) {
+                tests.add(root)
+                tests.addAll(getDescendants(root))
+            }
+            return tests
         }
     }
 }

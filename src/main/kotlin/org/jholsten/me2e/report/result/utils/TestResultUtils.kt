@@ -2,6 +2,7 @@
 
 package org.jholsten.me2e.report.result.utils
 
+import org.jholsten.me2e.report.result.model.TestResult
 import java.math.BigDecimal
 import java.math.MathContext
 import java.time.Duration
@@ -36,4 +37,17 @@ internal fun calculateDurationInSeconds(startTime: Instant, endTime: Instant): B
     val seconds = duration.seconds
     val milliseconds = duration.toMillisPart()
     return (BigDecimal(seconds) + BigDecimal(milliseconds).divide(BigDecimal(1000), MathContext(3))).setScale(3)
+}
+
+/**
+ * Returns all descendants of the supplied [parent], i.e. all of its
+ * children and their children, recursively.
+ */
+internal fun getDescendants(parent: TestResult): List<TestResult> {
+    val descendants: MutableList<TestResult> = mutableListOf()
+    for (child in parent.children) {
+        descendants.add(child)
+        descendants.addAll(getDescendants(child))
+    }
+    return descendants
 }
