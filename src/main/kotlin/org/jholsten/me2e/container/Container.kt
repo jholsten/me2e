@@ -11,6 +11,8 @@ import org.jholsten.me2e.container.logging.ContainerLogUtils
 import org.jholsten.me2e.container.microservice.MicroserviceContainer
 import org.jholsten.me2e.container.model.ContainerType
 import org.jholsten.me2e.container.logging.model.ContainerLogEntryList
+import org.jholsten.me2e.container.network.ContainerNetwork
+import org.jholsten.me2e.container.network.mapper.ContainerNetworkMapper
 import org.jholsten.me2e.container.stats.ContainerStatsConsumer
 import org.jholsten.me2e.container.stats.ContainerStatsUtils
 import org.jholsten.me2e.container.stats.model.ContainerStatsEntry
@@ -166,6 +168,18 @@ open class Container(
         get() {
             assertThatContainerIsInitialized()
             return dockerContainer!!.state.containerId
+        }
+
+    /**
+     * Returns information about all networks that the container is connected to
+     * as a map of network name and network information.
+     * @throws IllegalStateException if container is not initialized
+     */
+    val networks: Map<String, ContainerNetwork>
+        get() {
+            assertThatContainerIsInitialized()
+            val networkSettings = dockerContainer!!.container.networkSettings ?: return mapOf()
+            return ContainerNetworkMapper.INSTANCE.toInternalDto(networkSettings.networks)
         }
 
     /**
