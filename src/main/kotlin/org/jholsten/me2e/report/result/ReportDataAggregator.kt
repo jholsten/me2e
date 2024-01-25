@@ -10,6 +10,7 @@ import org.jholsten.me2e.report.result.model.IntermediateTestResult
 import org.jholsten.me2e.report.result.model.ReportEntry
 import org.jholsten.me2e.report.result.model.TestExecutionResult
 import org.jholsten.me2e.report.result.model.TestResult
+import org.jholsten.me2e.report.tracing.NetworkTraceAggregator
 import org.jholsten.me2e.utils.logger
 import org.junit.platform.engine.support.descriptor.ClassSource
 import org.junit.platform.engine.support.descriptor.ClasspathResourceSource
@@ -39,6 +40,11 @@ class ReportDataAggregator private constructor() {
          * for each test execution.
          */
         private val statsAggregator: StatsAggregator = StatsAggregator()
+
+        /**
+         * Network trace aggregator which collects HTTP packets from all Docker networks.
+         */
+        private val networkTraceAggregator: NetworkTraceAggregator = NetworkTraceAggregator()
 
         /**
          * Summaries of all tests and test containers executed so far.
@@ -80,6 +86,7 @@ class ReportDataAggregator private constructor() {
         internal fun onTestFinished(testIdentifier: TestIdentifier, testExecutionResult: org.junit.platform.engine.TestExecutionResult) {
             val logs = logAggregator.collectLogs(testIdentifier.uniqueId)
             val stats = statsAggregator.collectStats(testIdentifier.uniqueId)
+            networkTraceAggregator.collectPackets(testIdentifier.uniqueId)
             val summary = IntermediateTestResult.finished(
                 testIdentifier = testIdentifier,
                 testExecutionResult = testExecutionResult,
@@ -136,6 +143,7 @@ class ReportDataAggregator private constructor() {
             val specification = ServiceSpecification(name = container.name)
             logAggregator.onContainerStarted(container, specification)
             statsAggregator.onContainerStarted(container, specification)
+            networkTraceAggregator.onContainerStarted(container, specification)
         }
 
         private fun aggregateSummaries(testPlan: TestPlan): TestExecutionResult {
