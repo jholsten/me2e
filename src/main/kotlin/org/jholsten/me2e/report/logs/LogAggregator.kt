@@ -71,7 +71,7 @@ class LogAggregator internal constructor() {
     internal fun collectLogs(testId: String): AggregatedLogEntryList {
         val logs = mutableListOf<AggregatedLogEntry>()
         for (consumer in consumers.values) {
-            logs.addAll(consumer.reset())
+            logs.addAll(consumer.collect())
         }
         logs.addAll(testRunnerLogCollector.reset())
         logs.sortBy { it.timestamp }

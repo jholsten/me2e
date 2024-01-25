@@ -31,7 +31,7 @@ internal class ContainerStatsCollector(val service: ServiceSpecification) : Cont
      * Resets the list of collected statistics entries.
      * Returns all entries that were collected so far.
      */
-    internal fun reset(): List<AggregatedStatsEntry> {
+    internal fun collect(): List<AggregatedStatsEntry> {
         val entries = stats.toList()
         stats.clear()
         return entries

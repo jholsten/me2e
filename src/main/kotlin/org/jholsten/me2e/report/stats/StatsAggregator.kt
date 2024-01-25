@@ -43,7 +43,7 @@ class StatsAggregator internal constructor() {
     internal fun collectStats(testId: String): AggregatedStatsEntryList {
         val stats = mutableListOf<AggregatedStatsEntry>()
         for (consumer in consumers.values) {
-            stats.addAll(consumer.reset())
+            stats.addAll(consumer.collect())
         }
         stats.sortBy { it.timestamp }
         this.stats[testId] = stats

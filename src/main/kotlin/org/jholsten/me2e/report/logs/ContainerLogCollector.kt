@@ -28,7 +28,7 @@ internal class ContainerLogCollector(val service: ServiceSpecification) : Contai
      * Resets the list of collected log entries.
      * Returns all entries that were collected so far.
      */
-    internal fun reset(): List<AggregatedLogEntry> {
+    internal fun collect(): List<AggregatedLogEntry> {
         val entries = logs.toList()
         logs.clear()
         return entries
