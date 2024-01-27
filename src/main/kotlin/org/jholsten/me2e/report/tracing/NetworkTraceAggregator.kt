@@ -9,6 +9,7 @@ import org.jholsten.me2e.utils.logger
  * Service which aggregates all HTTP packets sent in the Docker networks,
  * which the containers are part of. Enables to trace requests and responses.
  * Matches IP addresses to the associated services.
+ * TODO: Error handling
  */
 class NetworkTraceAggregator {
     private val logger = logger(this)
@@ -27,7 +28,7 @@ class NetworkTraceAggregator {
             if (network.ipAddress == null) {
                 logger.warn(
                     "No IP address set for container ${container.name} in network $network. " +
-                        "Unable to associate TCP packets from and to this container with the container instance."
+                        "Unable to associate HTTP packets from and to this container with the container instance."
                 )
             }
             val networkContainers = monitoredNetworks[network.networkId] ?: mutableListOf()
@@ -58,9 +59,10 @@ class NetworkTraceAggregator {
     private fun startNetworkMonitoring(networkId: String) {
         val monitor = NetworkTraceCollector(networkId)
         networkTraceCollectors[networkId] = monitor
-        //monitor.start()
+        monitor.start()
     }
 
+    // TODO:
     private data class ContainerNetworkSpecification(
         val containerSpecification: ServiceSpecification,
         val ipAddress: String?,

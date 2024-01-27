@@ -1,9 +1,8 @@
 package org.jholsten.me2e.report.tracing
 
+import com.fasterxml.jackson.core.type.TypeReference
+import org.jholsten.me2e.parsing.utils.DeserializerFactory
 import org.jholsten.me2e.report.tracing.model.HttpPacket
-import org.jholsten.me2e.request.client.OkHttpClient
-import org.jholsten.me2e.request.model.RelativeUrl
-import org.jholsten.me2e.request.model.Url
 import org.jholsten.me2e.utils.logger
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.wait.strategy.Wait
@@ -28,19 +27,15 @@ class NetworkTraceCollector(
      */
     private val capturer = GenericContainer(DockerImageName.parse(DOCKER_TRAFFIC_CAPTURER_IMAGE))
         .withNetworkMode("host")
-        //.withExposedPorts(8000)
         .withEnv("NETWORK_ID", networkId)
-    //.waitingFor(Wait.forHttp("/health"))
+        .waitingFor(Wait.forLogMessage(".*Live capture initialization complete.*", 1))
 
     /**
-     * HTTP client for executing requests towards the [capturer].
+     * Starts container for capturing HTTP packets in the network.
      */
-    private lateinit var httpClient: OkHttpClient
-
     fun start() {
         capturer.start()
-        //val port = capturer.firstMappedPort
-        //httpClient = OkHttpClient.Builder().withBaseUrl(Url("http://${capturer.host}:${port}")).build()
+        logger.info("Started network traffic capturer for network ID $networkId")
     }
 
     /**
@@ -49,18 +44,17 @@ class NetworkTraceCollector(
      */
     @JvmSynthetic
     internal fun collect(): List<HttpPacket> {
-//        //val body = httpClient.get(RelativeUrl("/collect")).body
-//        if (body == null) {
-//            logger.error("Docker network capturer did not provide a body.")
-//            return listOf()
-//        }
-//
-//        return body.asObject<List<HttpPacket>>()!!
-        capturer.execInContainer("curl", "http://localhost:8000/collect")
-        return listOf()
+        logger.info("Collecting packets...")
+        val result = capturer.execInContainer("sh", "collect.sh")
+        if (result.exitCode != 0) {
+            throw RuntimeException("Capturer responded with unsuccessful exit code: ${result.exitCode}. Output: ${result.stderr}")
+        }
+
+        return DESERIALIZER.readValue(result.stdout, object : TypeReference<List<HttpPacket>>() {})
     }
 
     companion object {
         private const val DOCKER_TRAFFIC_CAPTURER_IMAGE = "gitlab.informatik.uni-bremen.de:5005/jholsten/docker-traffic-capturer:latest"
+        private val DESERIALIZER = DeserializerFactory.getObjectMapper()
     }
 }
