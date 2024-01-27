@@ -28,13 +28,15 @@ class NetworkTraceCollector(
     private val capturer = GenericContainer(DockerImageName.parse(DOCKER_TRAFFIC_CAPTURER_IMAGE))
         .withNetworkMode("host")
         .withEnv("NETWORK_ID", networkId)
-        .waitingFor(Wait.forLogMessage(".*Live capture initialization complete.*", 1))
+        .waitingFor(Wait.forLogMessage(".*Capture started.*", 1))
 
     /**
      * Starts container for capturing HTTP packets in the network.
      */
     fun start() {
         capturer.start()
+        // Since starting network capturing is delayed by a couple of milliseconds, we wait until a little bit
+        Thread.sleep(1000)
         logger.info("Started network traffic capturer for network ID $networkId")
     }
 
@@ -42,8 +44,7 @@ class NetworkTraceCollector(
      * Collects HTTP packets sent in this network from the [capturer].
      * @return Packages captured since the last time this method was called.
      */
-    @JvmSynthetic
-    internal fun collect(): List<HttpPacket> {
+    fun collect(): List<HttpPacket> {
         logger.info("Collecting packets...")
         val result = capturer.execInContainer("sh", "collect.sh")
         if (result.exitCode != 0) {
