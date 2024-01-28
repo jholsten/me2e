@@ -1,6 +1,7 @@
 package org.jholsten.me2e.report.logs.model
 
 import org.jholsten.me2e.utils.ColorIterator
+import org.jholsten.me2e.utils.toHex
 import java.util.UUID
 
 /**
@@ -21,7 +22,7 @@ data class ServiceSpecification(
     /**
      * Color representing this container as Hex value.
      */
-    val color: String = "#" + Integer.toHexString(colorIterator.next().rgb).substring(2)
+    val color: String = colorIterator.next().toHex()
 
     companion object {
         private val colorIterator: ColorIterator = ColorIterator()
