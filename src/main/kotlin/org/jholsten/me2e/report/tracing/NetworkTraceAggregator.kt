@@ -81,15 +81,25 @@ class NetworkTraceAggregator {
         val responsePackets = packets.sortedByDescending { it.timestamp }.filterIsInstance<HttpResponsePacket>()
         val aggregatedPackets: MutableList<IntermediateAggregatedPacket> = mutableListOf()
         val requestResponses: MutableMap<IntermediateAggregatedPacket, IntermediateAggregatedPacket> = mutableMapOf()
-        for (responsePacket in responsePackets) {
+        for ((index, responsePacket) in responsePackets.withIndex()) {
             val requestPacket = findCorrespondingRequest(responsePacket, packets)
             if (requestPacket == null) {
                 logger.warn("Unable to find corresponding request for response $responsePacket.")
                 continue
             }
             val (client, server) = matchSourceAndDestination(requestPacket)
-            val aggregatedRequest = IntermediateAggregatedPacket(source = client, destination = server, packet = requestPacket)
-            val aggregatedResponse = IntermediateAggregatedPacket(source = server, destination = client, packet = responsePacket)
+            val aggregatedRequest = IntermediateAggregatedPacket(
+                source = client,
+                destination = server,
+                packet = requestPacket,
+                stream = -index,
+            )
+            val aggregatedResponse = IntermediateAggregatedPacket(
+                source = server,
+                destination = client,
+                packet = responsePacket,
+                stream = -index,
+            )
             aggregatedPackets.add(aggregatedRequest)
             aggregatedPackets.add(aggregatedResponse)
             requestResponses[aggregatedRequest] = aggregatedResponse
@@ -101,6 +111,7 @@ class NetworkTraceAggregator {
             for (intermediateRequest in requestsInBetween) {
                 if (intermediateRequest.packet.sourceIp == request.packet.destinationIp) {
                     intermediateRequest.parentId = request.id
+                    intermediateRequest.stream = request.stream
                 }
             }
             if (request.parentId == null && request.packet.sourceIp == networkGateways[request.packet.networkId]) {
@@ -108,18 +119,9 @@ class NetworkTraceAggregator {
             }
             response.destination = request.source
             response.parentId = request.parentId
+            response.stream = request.stream
         }
-//        for (i in 0 until aggregatedPackets.size) {
-//            val aggregatedPacket = aggregatedPackets[i]
-//            if (aggregatedPacket.packet.response != null) {
-//                val aggregatedRequest = requestResponses[aggregatedPacket]!!
-//                aggregatedPacket.destination = aggregatedRequest.source
-//                aggregatedPacket.parentId = aggregatedRequest.parentId
-//                continue
-//            } else if (aggregatedPacket.packet.request != null) {
-//
-//            }
-//        }
+        val streams = aggregatedPackets.groupBy { it.stream }
         println("")
     }
 
@@ -225,11 +227,11 @@ class NetworkTraceAggregator {
     }
 
     private data class IntermediateAggregatedPacket(
-        val id: String = UUID.randomUUID().toString(),
+        val id: UUID = UUID.randomUUID(),
         var source: ServiceSpecification?,
         var destination: ServiceSpecification?,
         val packet: HttpPacket,
-        var parentId: String? = null,
-        var assigned: Boolean = false,
+        var parentId: UUID? = null,
+        var stream: Int,
     )
 }
