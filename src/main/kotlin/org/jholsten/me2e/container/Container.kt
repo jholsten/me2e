@@ -1,5 +1,6 @@
 package org.jholsten.me2e.container
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
@@ -175,6 +176,7 @@ open class Container(
      * as a map of network name and network information.
      * @throws IllegalStateException if container is not initialized
      */
+    @get:JsonIgnore
     val networks: Map<String, ContainerNetwork>
         get() {
             assertThatContainerIsInitialized()
