@@ -12,6 +12,10 @@ import org.testcontainers.utility.DockerImageName
  * Service which collects all HTTP packets sent in the Docker network with ID [networkId].
  * Uses the [docker-traffic-capturer](https://gitlab.informatik.uni-bremen.de/jholsten/docker-traffic-capturer)
  * to sniff the packets which were sent in the network.
+ * As there can be delays when receiving and processing the captured packets in the `docker-traffic-capturer`
+ * and the packets are not available immediately after the test execution, they are only collected after all
+ * tests have been executed. The assignment of the packets to the tests then takes place using the timestamps
+ * of the captured packets.
  */
 class NetworkTraceCollector(
     /**
@@ -35,14 +39,12 @@ class NetworkTraceCollector(
      */
     fun start() {
         capturer.start()
-        // Since starting network capturing is delayed by a couple of milliseconds, we wait until a little bit
-        Thread.sleep(1000)
         logger.info("Started network traffic capturer for network ID $networkId")
     }
 
     /**
      * Collects HTTP packets sent in this network from the [capturer].
-     * @return Packages captured since the last time this method was called.
+     * @return All packets captured in this network.
      */
     fun collect(): List<HttpPacket> {
         logger.info("Collecting packets...")
