@@ -8,6 +8,17 @@ import java.time.Instant
  */
 open class HttpPacket(
     /**
+     * Frame number of this packet.
+     */
+    val number: Int,
+
+    /**
+     * ID of the network in which this packet was captured.
+     */
+    @JsonProperty("network_id")
+    val networkId: String,
+
+    /**
      * Timestamp of when this packet was sent.
      */
     val timestamp: Instant,
@@ -103,6 +114,17 @@ open class HttpPacket(
          */
         @JsonProperty("status_code_description")
         val statusCodeDescription: String,
+
+        /**
+         * Frame number of the request to which this response corresponds.
+         */
+        @JsonProperty("request_in")
+        val requestIn: Int?,
+
+        /**
+         * Duration of the response in seconds, i.e. the time since the request.
+         */
+        val duration: Float?,
 
         /**
          * Response headers as a map of key and value.

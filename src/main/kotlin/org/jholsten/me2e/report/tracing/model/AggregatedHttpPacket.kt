@@ -11,6 +11,17 @@ import java.time.Instant
  */
 class AggregatedHttpPacket(
     /**
+     * Frame number of this packet.
+     */
+    number: Int,
+
+    /**
+     * ID of the network in which this packet was captured.
+     */
+    @JsonProperty("network_id")
+    networkId: String,
+
+    /**
      * Timestamp of when this packet was sent.
      */
     timestamp: Instant,
@@ -63,6 +74,8 @@ class AggregatedHttpPacket(
      */
     response: Response?
 ) : HttpPacket(
+    number = number,
+    networkId = networkId,
     timestamp = timestamp,
     sourceIp = sourceIp,
     sourcePort = sourcePort,
