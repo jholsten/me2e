@@ -1,12 +1,26 @@
 package org.jholsten.me2e.report.tracing.model
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.time.Instant
 
 /**
  * Represents one captured HTTP packet.
  */
-open class HttpPacket(
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.NAME,
+    property = "type",
+    include = JsonTypeInfo.As.PROPERTY,
+    visible = true,
+)
+@JsonSubTypes(
+    value = [
+        JsonSubTypes.Type(value = HttpRequestPacket::class, name = "REQUEST"),
+        JsonSubTypes.Type(value = HttpResponsePacket::class, name = "RESPONSE"),
+    ]
+)
+abstract class HttpPacket(
     /**
      * Frame number of this packet.
      */
@@ -22,6 +36,11 @@ open class HttpPacket(
      * Timestamp of when this packet was sent.
      */
     val timestamp: Instant,
+
+    /**
+     * Type of this HTTP packet.
+     */
+    val type: Type,
 
     /**
      * IP address of the host which has sent this packet.
@@ -48,97 +67,19 @@ open class HttpPacket(
     val destinationPort: Int,
 
     /**
-     * Additional information about the HTTP request. Is only set
-     * if this packet represents a request.
+     * HTTP protocol version which was used.
      */
-    val request: Request?,
+    val version: String,
 
     /**
-     * Additional information about the HTTP response. Is only set
-     * if this packet represents a response.
+     * Request/Response headers as a map of key and value.
      */
-    val response: Response?
+    val headers: Map<String, String>,
+
+    /**
+     * Request/Response body of this packet.
+     */
+    val payload: Any?,
 ) {
-    /**
-     * Represents the information about a captured HTTP request.
-     */
-    data class Request(
-        /**
-         * HTTP protocol version which was used for the HTTP request.
-         */
-        val version: String,
-
-        /**
-         * URI of the HTTP request.
-         */
-        val uri: String,
-
-        /**
-         * HTTP method of the HTTP request.
-         */
-        val method: String,
-
-        /**
-         * Request headers as a map of key and value.
-         */
-        val headers: Map<String, String>,
-
-        /**
-         * Request body of the HTTP request.
-         */
-        val payload: Any?
-    ) {
-        /**
-         * Status line of the HTTP request.
-         */
-        val statusLine: String = "$method $uri $version"
-    }
-
-    /**
-     * Represents the information about a captured HTTP response.
-     */
-    data class Response(
-        /**
-         * HTTP protocol version which was used for the HTTP response.
-         */
-        val version: String,
-
-        /**
-         * Response code of the HTTP response.
-         */
-        @JsonProperty("status_code")
-        val statusCode: Int,
-
-        /**
-         * Description of the response code of the HTTP response.
-         */
-        @JsonProperty("status_code_description")
-        val statusCodeDescription: String,
-
-        /**
-         * Frame number of the request to which this response corresponds.
-         */
-        @JsonProperty("request_in")
-        val requestIn: Int?,
-
-        /**
-         * Duration of the response in seconds, i.e. the time since the request.
-         */
-        val duration: Float?,
-
-        /**
-         * Response headers as a map of key and value.
-         */
-        val headers: Map<String, String>,
-
-        /**
-         * Response body of the HTTP response.
-         */
-        val payload: Any?
-    ) {
-        /**
-         * Status line of the HTTP response.
-         */
-        val statusLine: String = "$version $statusCode $statusCodeDescription"
-    }
+    enum class Type { REQUEST, RESPONSE }
 }

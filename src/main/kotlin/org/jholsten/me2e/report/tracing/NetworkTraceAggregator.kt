@@ -7,6 +7,9 @@ import org.jholsten.me2e.report.logs.model.ServiceSpecification
 import org.jholsten.me2e.report.result.ReportDataAggregator
 import org.jholsten.me2e.report.result.model.TestResult
 import org.jholsten.me2e.report.tracing.model.HttpPacket
+import org.jholsten.me2e.report.tracing.model.HttpRequestPacket
+import org.jholsten.me2e.report.tracing.model.HttpResponsePacket
+import org.jholsten.me2e.report.tracing.model.NetworkNodeSpecification
 import org.jholsten.me2e.utils.logger
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.output.ToStringConsumer
@@ -36,7 +39,9 @@ class NetworkTraceAggregator {
 
     private val mockServers: Map<String, ServiceSpecification> = if (Me2eTestConfigStorage.config != null) {
         Me2eTestConfigStorage.config!!.environment.mockServers.values
-            .associate { it.hostname to ServiceSpecification(name = "Mock Server ${it.name}") }
+            .associate {
+                it.hostname to ServiceSpecification(name = "Mock Server ${it.name}")
+            }
     } else {
         mapOf()
     }
@@ -73,7 +78,7 @@ class NetworkTraceAggregator {
 
     private fun aggregatePackets(packets: MutableList<HttpPacket>) {
         packets.sortBy { it.timestamp }
-        val responsePackets = packets.sortedByDescending { it.timestamp }.filter { it.response != null }
+        val responsePackets = packets.sortedByDescending { it.timestamp }.filterIsInstance<HttpResponsePacket>()
         val aggregatedPackets: MutableList<IntermediateAggregatedPacket> = mutableListOf()
         val requestResponses: MutableMap<IntermediateAggregatedPacket, IntermediateAggregatedPacket> = mutableMapOf()
         for (responsePacket in responsePackets) {
@@ -92,7 +97,7 @@ class NetworkTraceAggregator {
         aggregatedPackets.sortBy { it.packet.timestamp }
         for ((request, response) in requestResponses) {
             val requestsInBetween = aggregatedPackets.subList(aggregatedPackets.indexOf(request) + 1, aggregatedPackets.indexOf(response))
-                .filter { it.packet.request != null }
+                .filter { it.packet is HttpRequestPacket }
             for (intermediateRequest in requestsInBetween) {
                 if (intermediateRequest.packet.sourceIp == request.packet.destinationIp) {
                     intermediateRequest.parentId = request.id
@@ -118,10 +123,10 @@ class NetworkTraceAggregator {
         println("")
     }
 
-    private fun findCorrespondingRequest(responsePacket: HttpPacket, packets: List<HttpPacket>): HttpPacket? {
+    private fun findCorrespondingRequest(responsePacket: HttpResponsePacket, packets: List<HttpPacket>): HttpPacket? {
         val networkPackets = packets.filter { it.networkId == responsePacket.networkId }
-        if (responsePacket.response!!.requestIn != null) {
-            return networkPackets.find { it.number == responsePacket.response.requestIn }
+        if (responsePacket.requestIn != null) {
+            return networkPackets.find { it.number == responsePacket.requestIn }
         }
         if (responsePacket.destinationIp == "127.0.0.1") {
             /*
@@ -133,7 +138,7 @@ class NetworkTraceAggregator {
             for (i in index downTo 0) {
                 val packet = networkPackets[i]
                 val networkGateway = networkGateways[responsePacket.networkId]
-                if (packet.request != null && packet.sourceIp == networkGateway && packet.sourcePort == responsePacket.destinationPort) {
+                if (packet is HttpRequestPacket && packet.sourceIp == networkGateway && packet.sourcePort == responsePacket.destinationPort) {
                     return packet
                 }
             }
@@ -169,8 +174,8 @@ class NetworkTraceAggregator {
 
         if (ipAddress == hostIpAddress) {
             if (port == 80 && mockServers.isNotEmpty()) {
-                if (packet.request != null) {
-                    val host = packet.request.headers.filterKeys { it.lowercase() == "host" }.firstNotNullOfOrNull { it.value }
+                if (packet is HttpRequestPacket) {
+                    val host = packet.headers.filterKeys { it.lowercase() == "host" }.firstNotNullOfOrNull { it.value }
                     if (host == null) {
                         logger.warn("Host header is not set for request $packet.")
                         return null
