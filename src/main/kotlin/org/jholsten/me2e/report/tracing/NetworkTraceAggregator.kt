@@ -6,11 +6,11 @@ import org.jholsten.me2e.container.network.ContainerNetwork
 import org.jholsten.me2e.report.logs.model.ServiceSpecification
 import org.jholsten.me2e.report.result.ReportDataAggregator
 import org.jholsten.me2e.report.result.model.TestResult
-import org.jholsten.me2e.report.tracing.model.AggregatedHttpPacket
 import org.jholsten.me2e.report.tracing.model.HttpPacket
 import org.jholsten.me2e.utils.logger
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.output.ToStringConsumer
+import java.util.UUID
 
 /**
  * Service which aggregates all HTTP packets sent in the Docker networks,
@@ -73,8 +73,9 @@ class NetworkTraceAggregator {
 
     private fun aggregatePackets(packets: MutableList<HttpPacket>) {
         packets.sortBy { it.timestamp }
-        val responsePackets = packets.filter { it.response != null }
-        val aggregatedPackets: MutableList<AggregatedHttpPacket> = mutableListOf()
+        val responsePackets = packets.sortedByDescending { it.timestamp }.filter { it.response != null }
+        val aggregatedPackets: MutableList<IntermediateAggregatedPacket> = mutableListOf()
+        val requestResponses: MutableMap<IntermediateAggregatedPacket, IntermediateAggregatedPacket> = mutableMapOf()
         for (responsePacket in responsePackets) {
             val requestPacket = findCorrespondingRequest(responsePacket, packets)
             if (requestPacket == null) {
@@ -82,43 +83,38 @@ class NetworkTraceAggregator {
                 continue
             }
             val (client, server) = matchSourceAndDestination(requestPacket)
-            aggregatedPackets.add(
-                AggregatedHttpPacket(
-                    number = requestPacket.number,
-                    networkId = requestPacket.networkId,
-                    timestamp = requestPacket.timestamp,
-                    source = client,
-                    sourceIp = requestPacket.sourceIp,
-                    sourcePort = requestPacket.sourcePort,
-                    destination = server,
-                    destinationIp = requestPacket.destinationIp,
-                    destinationPort = requestPacket.destinationPort,
-                    request = requestPacket.request,
-                    response = requestPacket.response,
-                )
-            )
-            aggregatedPackets.add(
-                AggregatedHttpPacket(
-                    number = responsePacket.number,
-                    networkId = responsePacket.networkId,
-                    timestamp = responsePacket.timestamp,
-                    source = server,
-                    sourceIp = responsePacket.sourceIp,
-                    sourcePort = responsePacket.sourcePort,
-                    destination = client,
-                    destinationIp = responsePacket.destinationIp,
-                    destinationPort = responsePacket.destinationPort,
-                    request = responsePacket.request,
-                    response = responsePacket.response,
-                )
-            )
+            val aggregatedRequest = IntermediateAggregatedPacket(source = client, destination = server, packet = requestPacket)
+            val aggregatedResponse = IntermediateAggregatedPacket(source = server, destination = client, packet = responsePacket)
+            aggregatedPackets.add(aggregatedRequest)
+            aggregatedPackets.add(aggregatedResponse)
+            requestResponses[aggregatedRequest] = aggregatedResponse
         }
-        aggregatedPackets.sortBy { it.timestamp }
-        for (i in 0 until aggregatedPackets.size) {
-            if (aggregatedPackets[i].request != null) {
-                
+        aggregatedPackets.sortBy { it.packet.timestamp }
+        for ((request, response) in requestResponses) {
+            val requestsInBetween = aggregatedPackets.subList(aggregatedPackets.indexOf(request) + 1, aggregatedPackets.indexOf(response))
+                .filter { it.packet.request != null }
+            for (intermediateRequest in requestsInBetween) {
+                if (intermediateRequest.packet.sourceIp == request.packet.destinationIp) {
+                    intermediateRequest.parentId = request.id
+                }
             }
+            if (request.parentId == null && request.packet.sourceIp == networkGateways[request.packet.networkId]) {
+                request.source = ReportDataAggregator.testRunner
+            }
+            response.destination = request.source
+            response.parentId = request.parentId
         }
+//        for (i in 0 until aggregatedPackets.size) {
+//            val aggregatedPacket = aggregatedPackets[i]
+//            if (aggregatedPacket.packet.response != null) {
+//                val aggregatedRequest = requestResponses[aggregatedPacket]!!
+//                aggregatedPacket.destination = aggregatedRequest.source
+//                aggregatedPacket.parentId = aggregatedRequest.parentId
+//                continue
+//            } else if (aggregatedPacket.packet.request != null) {
+//
+//            }
+//        }
         println("")
     }
 
@@ -136,7 +132,8 @@ class NetworkTraceAggregator {
             val index = networkPackets.indexOf(responsePacket)
             for (i in index downTo 0) {
                 val packet = networkPackets[i]
-                if (packet.request != null && packet.sourceIp == networkGateways[responsePacket.networkId]) {
+                val networkGateway = networkGateways[responsePacket.networkId]
+                if (packet.request != null && packet.sourceIp == networkGateway && packet.sourcePort == responsePacket.destinationPort) {
                     return packet
                 }
             }
@@ -221,4 +218,13 @@ class NetworkTraceAggregator {
 
         return toStringConsumer.toUtf8String().replace("\n", "")
     }
+
+    private data class IntermediateAggregatedPacket(
+        val id: String = UUID.randomUUID().toString(),
+        var source: ServiceSpecification?,
+        var destination: ServiceSpecification?,
+        val packet: HttpPacket,
+        var parentId: String? = null,
+        var assigned: Boolean = false,
+    )
 }
