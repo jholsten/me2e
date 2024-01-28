@@ -17,7 +17,7 @@ open class Me2eTest {
          */
         @get:JvmStatic
         val configAnnotation: Me2eTestConfig by lazy {
-            Me2eTestConfigScanner.findFirstTestConfigAnnotation()
+            Me2eTestConfigStorage.configAnnotation ?: throw RuntimeException("Unable to find Me2eTestConfig annotation.")
         }
 
         /**
@@ -25,7 +25,7 @@ open class Me2eTest {
          */
         @get:JvmStatic
         val config: TestConfig by lazy {
-            configAnnotation.format.parser.parseFile(configAnnotation.config)
+            Me2eTestConfigStorage.config ?: throw RuntimeException("Unable to find Me2eTestConfig annotation.")
         }
 
         /**
