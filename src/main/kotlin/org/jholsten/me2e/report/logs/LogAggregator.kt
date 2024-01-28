@@ -6,6 +6,7 @@ import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.report.logs.model.AggregatedLogEntryList
 import org.jholsten.me2e.report.logs.model.AggregatedLogEntry
 import org.jholsten.me2e.report.logs.model.ServiceSpecification
+import org.jholsten.me2e.report.result.ReportDataAggregator
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -15,14 +16,6 @@ import org.slf4j.LoggerFactory
  * and from the Test Runner and stored in [logs].
  */
 class LogAggregator internal constructor() {
-    companion object {
-        /**
-         * Name of the service which represents the Test Runner.
-         */
-        @JvmStatic
-        val TEST_RUNNER_NAME = "Test Runner"
-    }
-
     /**
      * Map of container specification and log collector.
      * For each container instance, there is one collector which collects
@@ -100,7 +93,7 @@ class LogAggregator internal constructor() {
         testRunnerLayout.context = loggerContext
         testRunnerLayout.pattern = "%-5level %-50.50logger{16} %msg%n"
         testRunnerLayout.start()
-        testRunnerLogCollector = TestRunnerLogCollector(ServiceSpecification(name = TEST_RUNNER_NAME), testRunnerLayout)
+        testRunnerLogCollector = TestRunnerLogCollector(ReportDataAggregator.testRunner, testRunnerLayout)
         testRunnerLogCollector.context = loggerContext
         testRunnerLogCollector.name = "TestRunnerLogCollector"
         testRunnerLogCollector.start()

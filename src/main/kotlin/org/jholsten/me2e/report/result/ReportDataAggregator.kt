@@ -31,6 +31,12 @@ class ReportDataAggregator private constructor() {
         private val logger = logger(this)
 
         /**
+         * Service which represents the Test Runner.
+         */
+        @JvmSynthetic
+        internal val testRunner: ServiceSpecification = ServiceSpecification(name = "Test Runner")
+
+        /**
          * Log collector which aggregates the logs of all containers for each test execution.
          */
         private val logAggregator: LogAggregator = LogAggregator()
@@ -86,7 +92,6 @@ class ReportDataAggregator private constructor() {
         internal fun onTestFinished(testIdentifier: TestIdentifier, testExecutionResult: org.junit.platform.engine.TestExecutionResult) {
             val logs = logAggregator.collectLogs(testIdentifier.uniqueId)
             val stats = statsAggregator.collectStats(testIdentifier.uniqueId)
-            networkTraceAggregator.collectPackets(testIdentifier.uniqueId)
             val summary = IntermediateTestResult.finished(
                 testIdentifier = testIdentifier,
                 testExecutionResult = testExecutionResult,
@@ -131,6 +136,7 @@ class ReportDataAggregator private constructor() {
             val logs = logAggregator.getAggregatedLogs()
             val stats = statsAggregator.getAggregatedStats()
             val result = aggregateSummaries(testPlan)
+            networkTraceAggregator.collectPackets(listOf()) // TODO
             HtmlReportGenerator().generate(result)
             println("TODO: ON TEST EXECUTION FINISHED")
         }
