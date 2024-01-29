@@ -112,7 +112,6 @@ class NetworkTraceAggregator {
             test.traces = associateStreams(traces.toMutableList())
         }
         reviseClients(aggregatedTraces)
-        println(packets)
     }
 
     /**
@@ -263,6 +262,9 @@ class NetworkTraceAggregator {
         roots: List<FinishedTestResult>,
         traces: List<AggregatedNetworkTrace>,
     ): Map<FinishedTestResult, List<AggregatedNetworkTrace>> {
+        if (traces.isEmpty()) {
+            return mapOf()
+        }
         val testTraces: MutableMap<FinishedTestResult, List<AggregatedNetworkTrace>> = mutableMapOf()
         for (test in roots) {
             matchTracesToTest(test, traces = traces, testTraces = testTraces)
