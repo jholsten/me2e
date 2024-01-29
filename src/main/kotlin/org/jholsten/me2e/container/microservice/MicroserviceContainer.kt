@@ -35,7 +35,7 @@ class MicroserviceContainer(
      * URL where microservice is accessible from localhost.
      * This value may either be set in the Docker-Compose file, or it is automatically set by retrieving the first exposed port.
      */
-    private var url: String? = url
+    var url: String? = url
 
     /**
      * HTTP client for executing requests towards this microservice.
