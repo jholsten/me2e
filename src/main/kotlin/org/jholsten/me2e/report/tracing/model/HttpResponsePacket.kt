@@ -96,9 +96,4 @@ class HttpResponsePacket(
     version = version,
     headers = headers,
     payload = payload,
-) {
-    /**
-     * Status line of the HTTP response.
-     */
-    val statusLine: String = "$version $statusCode $statusCodeDescription"
-}
+)

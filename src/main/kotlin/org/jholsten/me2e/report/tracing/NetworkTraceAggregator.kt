@@ -6,10 +6,7 @@ import org.jholsten.me2e.container.network.ContainerNetwork
 import org.jholsten.me2e.report.logs.model.ServiceSpecification
 import org.jholsten.me2e.report.result.ReportDataAggregator
 import org.jholsten.me2e.report.result.model.TestResult
-import org.jholsten.me2e.report.tracing.model.HttpPacket
-import org.jholsten.me2e.report.tracing.model.HttpRequestPacket
-import org.jholsten.me2e.report.tracing.model.HttpResponsePacket
-import org.jholsten.me2e.report.tracing.model.NetworkNodeSpecification
+import org.jholsten.me2e.report.tracing.model.*
 import org.jholsten.me2e.utils.logger
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.output.ToStringConsumer
@@ -72,63 +69,91 @@ class NetworkTraceAggregator {
         for (monitor in networkTraceCollectors.values) {
             packets.addAll(monitor.collect())
         }
-        aggregatePackets(packets)
+        val streams = aggregatePackets(packets)
         println(packets)
     }
 
-    private fun aggregatePackets(packets: MutableList<HttpPacket>) {
+    private fun findRequestResponsePairs(packets: MutableList<HttpPacket>): Map<HttpRequestPacket, HttpResponsePacket> {
         packets.sortBy { it.timestamp }
-        val responsePackets = packets.sortedByDescending { it.timestamp }.filterIsInstance<HttpResponsePacket>()
-        val aggregatedPackets: MutableList<IntermediateAggregatedPacket> = mutableListOf()
-        val requestResponses: MutableMap<IntermediateAggregatedPacket, IntermediateAggregatedPacket> = mutableMapOf()
-        for ((index, responsePacket) in responsePackets.withIndex()) {
+        val responsePackets = packets.filterIsInstance<HttpResponsePacket>()
+        val requestResponses: MutableMap<HttpRequestPacket, HttpResponsePacket> = mutableMapOf()
+        for (responsePacket in responsePackets) {
             val requestPacket = findCorrespondingRequest(responsePacket, packets)
             if (requestPacket == null) {
                 logger.warn("Unable to find corresponding request for response $responsePacket.")
                 continue
             }
-            val (client, server) = matchSourceAndDestination(requestPacket)
-            val aggregatedRequest = IntermediateAggregatedPacket(
-                source = client,
-                destination = server,
-                packet = requestPacket,
-                stream = -index,
-            )
-            val aggregatedResponse = IntermediateAggregatedPacket(
-                source = server,
-                destination = client,
-                packet = responsePacket,
-                stream = -index,
-            )
-            aggregatedPackets.add(aggregatedRequest)
-            aggregatedPackets.add(aggregatedResponse)
-            requestResponses[aggregatedRequest] = aggregatedResponse
+            requestResponses[requestPacket] = responsePacket
         }
-        aggregatedPackets.sortBy { it.packet.timestamp }
-        for ((request, response) in requestResponses) {
-            val requestsInBetween = aggregatedPackets.subList(aggregatedPackets.indexOf(request) + 1, aggregatedPackets.indexOf(response))
-                .filter { it.packet is HttpRequestPacket }
-            for (intermediateRequest in requestsInBetween) {
-                if (intermediateRequest.packet.sourceIp == request.packet.destinationIp) {
-                    intermediateRequest.parentId = request.id
-                    intermediateRequest.stream = request.stream
-                }
-            }
-            if (request.parentId == null && request.packet.sourceIp == networkGateways[request.packet.networkId]) {
-                request.source = ReportDataAggregator.testRunner
-            }
-            response.destination = request.source
-            response.parentId = request.parentId
-            response.stream = request.stream
-        }
-        val streams = aggregatedPackets.groupBy { it.stream }
-        println("")
+        return requestResponses
     }
 
-    private fun findCorrespondingRequest(responsePacket: HttpResponsePacket, packets: List<HttpPacket>): HttpPacket? {
+    private fun aggregateTraces(packets: MutableList<HttpPacket>): MutableList<AggregatedNetworkTrace> {
+        val requestResponses: Map<HttpRequestPacket, HttpResponsePacket> = findRequestResponsePairs(packets)
+        val aggregatedTraces: MutableList<AggregatedNetworkTrace> = mutableListOf()
+        for ((requestPacket, responsePacket) in requestResponses) {
+            val (client, server) = matchSourceAndDestination(requestPacket)
+            val aggregatedRequest = AggregatedNetworkTrace.RequestPacket(requestPacket)
+            val aggregatedResponse = AggregatedNetworkTrace.ResponsePacket(responsePacket)
+            aggregatedTraces.add(
+                AggregatedNetworkTrace(
+                    networkId = requestPacket.networkId,
+                    client = client,
+                    server = server,
+                    request = aggregatedRequest,
+                    response = aggregatedResponse,
+                )
+            )
+        }
+        return aggregatedTraces
+    }
+
+    /**
+     * Aggregates the given packets to instances of [AggregatedNetworkTrace].
+     * Matches IP addresses to network nodes, responses to requests and nested requests and responses to streams.
+     */
+    private fun aggregatePackets(packets: MutableList<HttpPacket>): List<Pair<UUID, List<AggregatedNetworkTrace>>> {
+        val aggregatedTraces = aggregateTraces(packets)
+        val streams = associateStreams(aggregatedTraces)
+        reviseClients(streams.flatMap { it.second })
+        // TODO: Match to tests
+        return streams
+    }
+
+    private fun associateStreams(aggregatedTraces: MutableList<AggregatedNetworkTrace>): List<Pair<UUID, List<AggregatedNetworkTrace>>> {
+        aggregatedTraces.sortByDescending { it.response.timestamp }
+        for (trace in aggregatedTraces) {
+            val tracesInBetween = aggregatedTraces.findTracesInBetween(trace.request, trace.response)
+            for (traceInBetween in tracesInBetween) {
+                if (traceInBetween.parentId == null && traceInBetween.request.sourceIp == trace.request.destinationIp) {
+                    traceInBetween.parentId = trace.id
+                    traceInBetween.streamId = trace.streamId
+                    traceInBetween.assigned = true
+                }
+            }
+        }
+        return aggregatedTraces.groupBy { it.streamId }.map { it.key to it.value }.sortedBy { it.second.first().request.timestamp }
+    }
+
+    private fun reviseClients(traces: List<AggregatedNetworkTrace>) {
+        for (trace in traces) {
+            if (trace.parentId == null && trace.request.sourceIp == networkGateways[trace.networkId]) {
+                trace.client = ReportDataAggregator.testRunner
+            }
+        }
+    }
+
+    private fun List<AggregatedNetworkTrace>.findTracesInBetween(
+        request: AggregatedNetworkTrace.RequestPacket,
+        response: AggregatedNetworkTrace.ResponsePacket,
+    ): List<AggregatedNetworkTrace> {
+        return this.filter { it.request.timestamp > request.timestamp && it.response.timestamp < response.timestamp }
+    }
+
+    private fun findCorrespondingRequest(responsePacket: HttpResponsePacket, packets: List<HttpPacket>): HttpRequestPacket? {
         val networkPackets = packets.filter { it.networkId == responsePacket.networkId }
         if (responsePacket.requestIn != null) {
-            return networkPackets.find { it.number == responsePacket.requestIn }
+            return networkPackets.filterIsInstance<HttpRequestPacket>().find { it.number == responsePacket.requestIn }
         }
         if (responsePacket.destinationIp == "127.0.0.1") {
             /*
@@ -187,7 +212,7 @@ class NetworkTraceAggregator {
             }
             return ReportDataAggregator.testRunner
         }
-        // TODO
+        logger.warn("Unable to find network node for IP address $ipAddress in network $networkId.")
         return null
     }
 
@@ -225,13 +250,4 @@ class NetworkTraceAggregator {
 
         return toStringConsumer.toUtf8String().replace("\n", "")
     }
-
-    private data class IntermediateAggregatedPacket(
-        val id: UUID = UUID.randomUUID(),
-        var source: ServiceSpecification?,
-        var destination: ServiceSpecification?,
-        val packet: HttpPacket,
-        var parentId: UUID? = null,
-        var stream: Int,
-    )
 }

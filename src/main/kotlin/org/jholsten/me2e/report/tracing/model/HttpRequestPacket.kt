@@ -83,9 +83,4 @@ class HttpRequestPacket(
     version = version,
     headers = headers,
     payload = payload,
-) {
-    /**
-     * Status line of the HTTP request.
-     */
-    val statusLine: String = "$method $uri $version"
-}
+)
