@@ -19,6 +19,34 @@ import java.time.Instant
  * Matches IP addresses to the associated services.
  */
 class NetworkTraceAggregator {
+    companion object {
+        private val logger = logger(this)
+
+        /**
+         * IP address of the host which is running the tests.
+         */
+        private val hostIpAddress: String by lazy {
+            val ipAddress = System.getenv("RUNNER_IP") ?: getHostDockerInternalIp()
+            logger.info("Host IP address is $ipAddress.")
+            ipAddress
+        }
+
+        /**
+         * Starts a temporary Docker container to retrieve the IP address of `host.docker.internal`,
+         * i.e. the IP address of the test runner.
+         * @return IP address of `host.docker.internal`.
+         */
+        private fun getHostDockerInternalIp(): String {
+            val toStringConsumer = ToStringConsumer()
+            val tempContainer = GenericContainer("alpine")
+                .withCommand("sh", "-c", "getent hosts host.docker.internal | awk '{ print $1 }'")
+                .withLogConsumer(toStringConsumer)
+            tempContainer.start()
+
+            return toStringConsumer.toUtf8String().replace("\n", "")
+        }
+    }
+
     private val logger = logger(this)
 
     /**
@@ -38,15 +66,6 @@ class NetworkTraceAggregator {
      * network traffic inside this network.
      */
     private val networkTraceCollectors: MutableMap<String, NetworkTraceCollector> = mutableMapOf()
-
-    /**
-     * IP address of the host which is running the tests.
-     */
-    private val hostIpAddress: String by lazy {
-        val ipAddress = System.getenv("RUNNER_IP") ?: getHostDockerInternalIp()
-        logger.info("Host IP address is $ipAddress.")
-        ipAddress
-    }
 
     /**
      * Node representation of all mock servers in the test environment.
@@ -407,20 +426,5 @@ class NetworkTraceAggregator {
                 specification = ServiceSpecification(name = networkName),
             )
         }
-    }
-
-    /**
-     * Starts a temporary Docker container to retrieve the IP address of `host.docker.internal`,
-     * i.e. the IP address of the test runner.
-     * @return IP address of `host.docker.internal`.
-     */
-    private fun getHostDockerInternalIp(): String {
-        val toStringConsumer = ToStringConsumer()
-        val tempContainer = GenericContainer("alpine")
-            .withCommand("sh", "-c", "getent hosts host.docker.internal | awk '{ print $1 }'")
-            .withLogConsumer(toStringConsumer)
-        tempContainer.start()
-
-        return toStringConsumer.toUtf8String().replace("\n", "")
     }
 }
