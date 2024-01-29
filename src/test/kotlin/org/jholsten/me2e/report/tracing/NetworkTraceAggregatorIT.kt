@@ -1,6 +1,6 @@
 package org.jholsten.me2e.report.tracing
 
-import org.jholsten.me2e.Me2eTestConfigStorage
+import org.jholsten.me2e.Me2eTestConfigScanner
 import org.jholsten.me2e.container.ContainerManager
 import org.jholsten.me2e.container.microservice.MicroserviceContainer
 import org.jholsten.me2e.mock.MockServerManager
@@ -27,7 +27,8 @@ internal class NetworkTraceAggregatorIT {
 
     companion object {
         private val networkTraceAggregator = NetworkTraceAggregator()
-        private val config = Me2eTestConfigStorage.config!!
+        private val configAnnotation = Me2eTestConfigScanner.findFirstTestConfigAnnotation()!!
+        private val config = configAnnotation.format.parser.parseFile(configAnnotation.config)
 
         private val containerManager: ContainerManager = ContainerManager(
             dockerComposeFile = FileUtils.getResourceAsFile(config.environment.dockerCompose),
@@ -57,7 +58,7 @@ internal class NetworkTraceAggregatorIT {
         }
     }
 
-    val backendApi: MicroserviceContainer = containerManager.containers["backend-api"] as MicroserviceContainer
+    private val backendApi: MicroserviceContainer = containerManager.containers["backend-api"] as MicroserviceContainer
 
     @Test
     fun `Packets from all networks should be aggregated to traces`() {
