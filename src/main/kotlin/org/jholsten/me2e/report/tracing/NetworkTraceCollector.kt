@@ -41,6 +41,8 @@ class NetworkTraceCollector(
     fun start() {
         capturer.start()
         logger.info("Started network traffic capturer for network ID $networkId")
+        logger.info("CAPTURER LOGS:")
+        logger.info(capturer.logs)
     }
 
     /**

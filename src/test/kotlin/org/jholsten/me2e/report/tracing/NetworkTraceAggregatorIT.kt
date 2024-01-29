@@ -15,6 +15,7 @@ import org.jholsten.me2e.report.tracing.model.NetworkNodeSpecification
 import org.jholsten.me2e.request.model.HttpRequestBody
 import org.jholsten.me2e.request.model.MediaType
 import org.jholsten.me2e.request.model.RelativeUrl
+import org.jholsten.me2e.utils.logger
 import org.jholsten.util.RecursiveComparison
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -24,6 +25,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 internal class NetworkTraceAggregatorIT {
+    val logger = logger(this)
 
     companion object {
         private val networkTraceAggregator = NetworkTraceAggregator()
@@ -82,7 +84,13 @@ internal class NetworkTraceAggregatorIT {
                 throwable = null,
             )
 
+        logger.info("RUNNER IP: ${System.getenv("RUNNER_IP")}")
+        logger.info("BACKEND API LOGS1:")
+        logger.info(backendApi.getLogs().toString())
+        logger.info("BACKEND API URL: ${backendApi.url}")
         backendApi.post(RelativeUrl("/search"), HttpRequestBody(content = "{\"id\": 123}", MediaType.JSON_UTF8))
+        logger.info("BACKEND API LOGS2:")
+        logger.info(backendApi.getLogs().toString())
 
         networkTraceAggregator.collectPackets(listOf(test))
 
