@@ -26,7 +26,7 @@ class NetworkTraceAggregator {
          * IP address of the host which is running the tests.
          */
         private val hostIpAddress: String by lazy {
-            val ipAddress = System.getenv("RUNNER_IP") ?: getHostDockerInternalIp()
+            val ipAddress = System.getenv("RUNNER_IP")?.trim() ?: getHostDockerInternalIp()
             logger.info("Host IP address is $ipAddress.")
             ipAddress
         }
@@ -410,6 +410,7 @@ class NetworkTraceAggregator {
             specification = specification,
         )
         monitoredNetworks[network.networkId] = networkContainers
+        logger.info("Registered IP address ${network.ipAddress} of container ${container.name} in network ${network.networkId}.")
     }
 
     /**
