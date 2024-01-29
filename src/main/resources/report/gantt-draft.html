@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Gantt Chart</title>
+    <style>
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, 100px);
+            grid-auto-flow: column;
+            grid-auto-columns: 100px;
+            grid-gap: 1px;
+            background-color: #efefef;
+        }
+
+        .time-series {
+            position: relative;
+            left: -50px;
+            text-align: center;
+            font-size: 12px;
+            background-color: white;
+        }
+
+        .gantt-item {
+            background-color: white;
+        }
+
+        .gantt-bar {
+            display: block;
+            height: 12px;
+            position: relative;
+            border-radius: 12px;
+            cursor: pointer;
+            margin: 6px 0;
+        }
+
+        details > summary {
+            list-style: none;
+        }
+
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .trace-details {
+            background-color: white;
+            border: 1pt solid #cbcbcb;
+            border-radius: 4px;
+            padding: 4px;
+            box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body>
+<div style="overflow-x: auto; width: 900px;">
+    <!--    Min/Max value: https://stackoverflow.com/questions/63030841/how-to-use-math-max-in-thymeleaf-to-find-maximum-number-->
+    <div class="container" style="background-color: white;">
+        <div class="time-series">18:00:35.000</div>
+        <div class="time-series">18:00:35.100</div>
+        <div class="time-series">18:00:35.200</div>
+        <div class="time-series">18:00:35.300</div>
+        <div class="time-series">18:00:35.400</div>
+        <div class="time-series">18:00:35.500</div>
+        <div class="time-series">18:00:35.600</div>
+        <div class="time-series">18:00:35.700</div>
+        <div class="time-series">18:00:35.800</div>
+    </div>
+    <div class="container">
+        <div class="gantt-item">
+            <details style="left: 25px; position: relative; width: 500px">
+                <summary>
+                    <span class="gantt-bar" style="background-color: #4541DD; width: 300px;"></span>
+                </summary>
+                <div class="trace-details">
+                    <div>
+                        <b>Request:</b> <code>POST /data HTTP/1.1</code>
+                    </div>
+                    <div>
+                        TODO: Request Data
+                    </div>
+                    <div>
+                        <b>Response:</b> <code>HTTP/1.1 200 OK</code>
+                    </div>
+                    <div>
+                        TODO: Response Data
+                    </div>
+                </div>
+            </details>
+        </div>
+        <div class="gantt-item"></div>
+        <div class="gantt-item"></div>
+        <div class="gantt-item"></div>
+        <div class="gantt-item"></div>
+        <div class="gantt-item"></div>
+        <div class="gantt-item"></div>
+        <div class="gantt-item"></div>
+        <div class="gantt-item"></div>
+    </div>
+    <div class="container">
+        <div class="gantt-item">
+            <details style="left: 40px; position: relative; width: 500px">
+                <summary>
+                    <span class="gantt-bar" style="background-color: #FF5F56; width: 150px;"></span>
+                </summary>
+                <div class="trace-details">
+                    TODO: Add Request and Response Data
+                </div>
+            </details>
+        </div>
+        <div class="gantt-item"></div>
+        <div class="gantt-item"></div>
+        <div class="gantt-item"></div>
+        <div class="gantt-item"></div>
+        <div class="gantt-item"></div>
+        <div class="gantt-item"></div>
+        <div class="gantt-item"></div>
+        <div class="gantt-item"></div>
+    </div>
+</div>
+</body>
+</html>
