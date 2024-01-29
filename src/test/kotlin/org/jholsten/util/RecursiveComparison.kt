@@ -8,9 +8,10 @@ class RecursiveComparison {
 
     companion object {
         @JvmStatic
-        fun <T> assertEquals(expected: T, actual: T, ignoreCollectionOrder: Boolean = false) {
+        fun <T> assertEquals(expected: T, actual: T, ignoreCollectionOrder: Boolean = false, fieldsToIgnore: List<String> = listOf()) {
             val config = RecursiveComparisonConfiguration.builder()
                 .withIgnoreCollectionOrder(ignoreCollectionOrder)
+                .withIgnoredFields(*fieldsToIgnore.toTypedArray())
                 .build()
 
             Assertions.assertThat(actual).usingRecursiveComparison(config).isEqualTo(expected)
