@@ -32,7 +32,7 @@ internal class TestRunnerLogCollector(
         logs.add(
             AggregatedLogEntry(
                 service = service,
-                timestamp = Instant.ofEpochSecond(log.timeStamp),
+                timestamp = Instant.ofEpochMilli(log.timeStamp),
                 message = layout.doLayout(log),
             )
         )
