@@ -119,12 +119,54 @@ Example: To forward requests to `example.com` and `google.com` to the correspond
 
 In case you are receiving 403 errors and your operating system is Windows, you may need to [disable the automatic proxy detection](https://support.rezstream.com/hc/en-us/articles/360025156853-Disable-Auto-Proxy-Settings-in-Windows-10) (see [GitHub Issue](https://github.com/docker/for-win/issues/13127)).
 
+------------
+We recommend to not set the public port of the services, as this may lead to port conflicts.
+Instead, only set the internal port, and Docker will assign a port automatically.
+------------
+
 ## Private Registries
 ```
 docker login -u REGISTRY_USER -p URhN8CYa_Ks_AAvucNMg gitlab.informatik.uni-bremen.de:5005
 ```
 
 ## Run E2E-Tests inside GitLab CI
+### With Docker Cache:
+```    
+test:
+  stage: test
+  image: $CI_REGISTRY_IMAGE:test
+  services:
+    - name: docker:20.10.20-dind
+      alias: docker
+      command: [ "--tls=false" ]
+  before_script:
+    - chmod +x ./gradlew
+    - if [[ -f "docker/cache.tar" ]]; then
+      echo "Loading Docker Image Cache...";
+      docker load -i docker/cache.tar;
+      fi
+  script:
+    - docker login -u REGISTRY_TOKEN -p $REGISTRY_TOKEN $CI_REGISTRY
+    - export RUNNER_IP=$(hostname -I)
+    - ./gradlew --build-cache test
+  after_script:
+    - echo "Storing Docker Image Cache..."
+    - mkdir -p docker
+    - docker save $(docker images -q) -o docker/cache.tar
+  cache:
+    - <<: *gradle_cache
+    - key: docker-cache
+      paths:
+        - docker/
+  variables:
+    DOCKER_HOST: "tcp://docker:2375"
+  artifacts:
+    when: always
+    reports:
+      junit: build/test-results/test/**/TEST-*.xml
+```
+
+
 ### In case you can configure the GitLab Runner
 https://java.testcontainers.org/supported_docker_environment/continuous_integration/gitlab_ci/
 

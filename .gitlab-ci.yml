@@ -27,8 +27,6 @@ build:
     - chmod +x ./gradlew
   script:
     - ./gradlew --build-cache assemble
-  cache:
-    <<: *gradle_cache
 
 # Runs JUnit tests inside Docker container (required to have access to Docker and Docker-Compose)
 test:
@@ -38,25 +36,10 @@ test:
     - name: docker:20.10.20-dind
       alias: docker
       command: [ "--tls=false" ]
-  before_script:
-    - chmod +x ./gradlew
-    - if [[ -f "docker/cache.tar" ]]; then
-      echo "Loading Docker Image Cache...";
-      docker load -i docker/cache.tar;
-      fi
   script:
     - docker login -u REGISTRY_TOKEN -p $REGISTRY_TOKEN $CI_REGISTRY
     - export RUNNER_IP=$(hostname -I)
     - ./gradlew --build-cache test
-  after_script:
-    - echo "Storing Docker Image Cache..."
-    - mkdir -p docker
-    - docker save $(docker images -q) -o docker/cache.tar
-  cache:
-    - <<: *gradle_cache
-    - key: docker-cache
-      paths:
-        - docker/
   variables:
     DOCKER_HOST: "tcp://docker:2375"
   artifacts:
