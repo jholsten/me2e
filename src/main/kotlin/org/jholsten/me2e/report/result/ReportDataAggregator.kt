@@ -2,16 +2,12 @@ package org.jholsten.me2e.report.result
 
 import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.report.logs.LogAggregator
-import org.jholsten.me2e.report.logs.model.AggregatedLogEntry
-import org.jholsten.me2e.report.logs.model.AggregatedLogEntryList
 import org.jholsten.me2e.report.logs.model.ServiceSpecification
 import org.jholsten.me2e.report.result.html.HtmlReportGenerator
 import org.jholsten.me2e.report.stats.StatsAggregator
 import org.jholsten.me2e.report.result.mapper.ReportEntryMapper
 import org.jholsten.me2e.report.result.model.*
 import org.jholsten.me2e.report.result.model.IntermediateTestResult
-import org.jholsten.me2e.report.stats.model.AggregatedStatsEntry
-import org.jholsten.me2e.report.stats.model.AggregatedStatsEntryList
 import org.jholsten.me2e.report.tracing.NetworkTraceAggregator
 import org.jholsten.me2e.utils.logger
 import org.junit.platform.engine.support.descriptor.ClassSource
@@ -183,7 +179,6 @@ class ReportDataAggregator private constructor() {
                     children = buildTestTree(source, listOf(intermediateResult), root, testPlan),
                 )
                 roots.add(result)
-                moveTestContainerLogsAndStatsToChildren(result)
             }
             return roots
         }
@@ -218,47 +213,6 @@ class ReportDataAggregator private constructor() {
          */
         private fun getIntermediateResult(testIdentifier: TestIdentifier): IntermediateTestResult {
             return this.intermediateTestResults[testIdentifier.uniqueId] ?: IntermediateTestResult.skipped(testIdentifier)
-        }
-
-        /**
-         * Moves the logs and stats of the test containers to their children.
-         * The first child receives all logs and stats that have been recorded since the start of the test container.
-         * The last child receives all logs and stats that have been recorded up to the end of the test container.
-         * As a result, all logs and stats are only assigned to individual tests and no longer to the test containers.
-         * @param parentLogs Logs of the test's parent. Only set if [test] is its first or last child.
-         * @param parentStats Stats of the test's parent. Only set if [test] is its first or last child.
-         */
-        private fun moveTestContainerLogsAndStatsToChildren(
-            test: TestResult,
-            parentLogs: List<AggregatedLogEntry>? = null,
-            parentStats: List<AggregatedStatsEntry>? = null,
-        ) {
-            if (test !is FinishedTestResult) {
-                return
-            }
-            val testLogs = parentLogs?.let { test.logs + it } ?: test.logs
-            val testStats = parentStats?.let { test.stats + it } ?: test.stats
-            if (test.children.isEmpty()) {
-                test.logs = AggregatedLogEntryList(testLogs.sortedBy { it.timestamp })
-                test.stats = AggregatedStatsEntryList(testStats.sortedBy { it.timestamp })
-            } else {
-                val finishedChildren = test.children.filterIsInstance<FinishedTestResult>()
-                for ((index, child) in finishedChildren.withIndex()) {
-                    var logs: List<AggregatedLogEntry>? = null
-                    var stats: List<AggregatedStatsEntry>? = null
-                    if (index == 0) {
-                        logs = testLogs.filter { it.timestamp <= child.startTime }
-                        stats = testStats.filter { it.timestamp <= child.startTime }
-                    }
-                    if (index == finishedChildren.size - 1) {
-                        logs = testLogs.filter { it.timestamp >= child.startTime }
-                        stats = testStats.filter { it.timestamp >= child.startTime }
-                    }
-                    moveTestContainerLogsAndStatsToChildren(child, logs, stats)
-                }
-                test.logs.clear()
-                test.stats.clear()
-            }
         }
 
         private fun getSource(testIdentifier: TestIdentifier): String? {
