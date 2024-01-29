@@ -105,23 +105,15 @@ class NetworkTraceAggregator {
     }
 
     /**
-     * Finds all pairs of request and response packet in the given list of all captured packets.
-     * If no corresponding request can be found for a response, it is ignored.
-     * @return Map of all associated request and response pairs.
+     * Aggregates the given packets to instances of [AggregatedNetworkTrace].
+     * Matches IP addresses to network nodes, responses to requests and nested requests and responses to streams.
+     * @return List of streams along with their associated traces, sorted by the timestamp of the first request.
      */
-    private fun findRequestResponsePairs(packets: MutableList<HttpPacket>): Map<HttpRequestPacket, HttpResponsePacket> {
-        packets.sortBy { it.timestamp }
-        val responsePackets = packets.filterIsInstance<HttpResponsePacket>()
-        val requestResponses: MutableMap<HttpRequestPacket, HttpResponsePacket> = mutableMapOf()
-        for (responsePacket in responsePackets) {
-            val requestPacket = findCorrespondingRequest(responsePacket, packets)
-            if (requestPacket == null) {
-                logger.warn("Unable to find corresponding request for response $responsePacket.")
-                continue
-            }
-            requestResponses[requestPacket] = responsePacket
-        }
-        return requestResponses
+    private fun aggregatePackets(packets: MutableList<HttpPacket>): List<Pair<UUID, List<AggregatedNetworkTrace>>> {
+        val aggregatedTraces = aggregateTraces(packets)
+        val streams = associateStreams(aggregatedTraces)
+        reviseClients(streams.flatMap { it.second })
+        return streams
     }
 
     /**
@@ -150,18 +142,6 @@ class NetworkTraceAggregator {
     }
 
     /**
-     * Aggregates the given packets to instances of [AggregatedNetworkTrace].
-     * Matches IP addresses to network nodes, responses to requests and nested requests and responses to streams.
-     * @return List of streams along with their associated traces, sorted by the timestamp of the first request.
-     */
-    private fun aggregatePackets(packets: MutableList<HttpPacket>): List<Pair<UUID, List<AggregatedNetworkTrace>>> {
-        val aggregatedTraces = aggregateTraces(packets)
-        val streams = associateStreams(aggregatedTraces)
-        reviseClients(streams.flatMap { it.second })
-        return streams
-    }
-
-    /**
      * Groups the given traces into streams, which can consist of several nested requests, for which further requests were sent
      * in response to the original request. Considers the timestamps and IP addresses of the requests to identify nested requests.
      * @return List of streams along with their associated traces, sorted by the timestamp of the first request.
@@ -181,28 +161,23 @@ class NetworkTraceAggregator {
     }
 
     /**
-     * After all streams have been aggregated and the client and server nodes have been assigned based on the IP addresses,
-     * the assigned clients are revised using this method. For requests received via the network gateway that are not part
-     * of a nested request, it is assumed that they were initiated by the Test Runner. If the conditions are met, the
-     * [testRunner] is set as the client of the corresponding trace.
+     * Finds all pairs of request and response packet in the given list of all captured packets.
+     * If no corresponding request can be found for a response, it is ignored.
+     * @return Map of all associated request and response pairs.
      */
-    private fun reviseClients(traces: List<AggregatedNetworkTrace>) {
-        for (trace in traces) {
-            if (trace.parentId == null && trace.request.sourceIp == networkGateways[trace.networkId]?.ipAddress) {
-                trace.client = testRunner
+    private fun findRequestResponsePairs(packets: MutableList<HttpPacket>): Map<HttpRequestPacket, HttpResponsePacket> {
+        packets.sortBy { it.timestamp }
+        val responsePackets = packets.filterIsInstance<HttpResponsePacket>()
+        val requestResponses: MutableMap<HttpRequestPacket, HttpResponsePacket> = mutableMapOf()
+        for (responsePacket in responsePackets) {
+            val requestPacket = findCorrespondingRequest(responsePacket, packets)
+            if (requestPacket == null) {
+                logger.warn("Unable to find corresponding request for response $responsePacket.")
+                continue
             }
+            requestResponses[requestPacket] = responsePacket
         }
-    }
-
-    /**
-     * Extension function to find all traces which were captured between the timestamps of the
-     * given request and response packet.
-     */
-    private fun List<AggregatedNetworkTrace>.findTracesInBetween(
-        request: AggregatedNetworkTrace.RequestPacket,
-        response: AggregatedNetworkTrace.ResponsePacket,
-    ): List<AggregatedNetworkTrace> {
-        return this.filter { it.request.timestamp > request.timestamp && it.response.timestamp < response.timestamp }
+        return requestResponses
     }
 
     /**
@@ -279,6 +254,20 @@ class NetworkTraceAggregator {
     }
 
     /**
+     * After all streams have been aggregated and the client and server nodes have been assigned based on the IP addresses,
+     * the assigned clients are revised using this method. For requests received via the network gateway that are not part
+     * of a nested request, it is assumed that they were initiated by the Test Runner. If the conditions are met, the
+     * [testRunner] is set as the client of the corresponding trace.
+     */
+    private fun reviseClients(traces: List<AggregatedNetworkTrace>) {
+        for (trace in traces) {
+            if (trace.parentId == null && trace.request.sourceIp == networkGateways[trace.networkId]?.ipAddress) {
+                trace.client = testRunner
+            }
+        }
+    }
+
+    /**
      * Tries to find the mock server addressed in the given packet. Uses the information from
      * the host header of the request to find the corresponding mock server with the same name.
      */
@@ -289,6 +278,17 @@ class NetworkTraceAggregator {
             return null
         }
         return mockServers[host]
+    }
+
+    /**
+     * Extension function to find all traces which were captured between the timestamps of the
+     * given request and response packet.
+     */
+    private fun List<AggregatedNetworkTrace>.findTracesInBetween(
+        request: AggregatedNetworkTrace.RequestPacket,
+        response: AggregatedNetworkTrace.ResponsePacket,
+    ): List<AggregatedNetworkTrace> {
+        return this.filter { it.request.timestamp > request.timestamp && it.response.timestamp < response.timestamp }
     }
 
     /**
