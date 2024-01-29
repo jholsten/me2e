@@ -1,5 +1,6 @@
 package org.jholsten.me2e.report.result.html.data
 
+import org.jholsten.me2e.report.logs.model.AggregatedLogEntry
 import org.jholsten.me2e.report.logs.model.AggregatedLogEntryList
 import org.jholsten.me2e.report.result.html.HtmlReportGenerator
 import org.jholsten.me2e.report.result.model.*
@@ -31,6 +32,7 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
          * - `displayName:` [String] - Human-readable name of the test or test container (see [TestResult.displayName]).
          * - `tags:` [Set]<[String]> - Tags associated with the test or test container (see [TestResult.tags]).
          * - `statsByContainer:` [Map]<[String], [List]<[AggregatedStatsEntry]>> - Map of container name and their resource usage statistics.
+         * - `allLogs:` [List]<[AggregatedLogEntry]> - All logs from all tests, including those from `@BeforeAll` and `@AfterAll` methods.
          * - `startTime:` [java.time.Instant] - Timestamp of the test or test container has started its execution
          * (see [FinishedTestResult.startTime]). **Only available if [TestResult.status] is not [TestResult.Status.SKIPPED]**.
          * - `endTime:` [java.time.Instant] - Timestamp of the test or test container has finished its execution
@@ -63,7 +65,8 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
             withVariable("tags", result.tags)
             val allTests = getAllTests(result)
             withVariable("allTests", allTests)
-            withVariable("statsByContainer", getStatsByContainer(allTests))
+            withVariable("statsByContainer", getStatsByContainer(allTests + result))
+            withVariable("allLogs", getAllLogs(allTests + result))
             if (result is FinishedTestResult) {
                 withVariable("startTime", result.startTime)
                 withVariable("endTime", result.endTime)
@@ -98,6 +101,10 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
         private fun getStatsByContainer(allTests: List<TestResult>): Map<String, List<AggregatedStatsEntry>> {
             val allStats = allTests.filterIsInstance<FinishedTestResult>().flatMap { it.stats }
             return allStats.groupBy { it.service.name }
+        }
+
+        private fun getAllLogs(allTests: List<TestResult>): List<AggregatedLogEntry> {
+            return allTests.filterIsInstance<FinishedTestResult>().flatMap { it.logs }.sortedBy { it.timestamp }
         }
     }
 }
