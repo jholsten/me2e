@@ -1,6 +1,5 @@
 package org.jholsten.me2e.report.tracing.model
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import org.jholsten.me2e.report.logs.model.ServiceSpecification
 import org.jholsten.me2e.report.result.utils.calculateDurationInSeconds
 import java.math.BigDecimal
@@ -60,13 +59,6 @@ data class AggregatedNetworkTrace(
      * Packet which represents the HTTP response of this trace.
      */
     val response: ResponsePacket,
-
-    /**
-     * Whether this trace is already assigned to a stream.
-     */
-    @JvmSynthetic
-    @JsonIgnore
-    internal var assigned: Boolean = false,
 ) {
     /**
      * Duration of the response in seconds, i.e. the time between request and response.

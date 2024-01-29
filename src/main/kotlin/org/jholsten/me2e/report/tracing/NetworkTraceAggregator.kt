@@ -128,7 +128,6 @@ class NetworkTraceAggregator {
                 if (traceInBetween.parentId == null && traceInBetween.request.sourceIp == trace.request.destinationIp) {
                     traceInBetween.parentId = trace.id
                     traceInBetween.streamId = trace.streamId
-                    traceInBetween.assigned = true
                 }
             }
         }
