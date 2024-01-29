@@ -7,6 +7,7 @@ import org.jholsten.me2e.utils.logger
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.wait.strategy.Wait
 import org.testcontainers.utility.DockerImageName
+import java.lang.Exception
 
 /**
  * Service which collects all HTTP packets sent in the Docker network with ID [networkId].
@@ -48,12 +49,22 @@ class NetworkTraceCollector(
      */
     fun collect(): List<HttpPacket> {
         logger.info("Collecting packets...")
-        val result = capturer.execInContainer("sh", "collect.sh")
-        if (result.exitCode != 0) {
-            throw RuntimeException("Capturer responded with unsuccessful exit code: ${result.exitCode}. Output: ${result.stderr}")
-        }
+        try {
+            val result = capturer.execInContainer("sh", "collect.sh")
+            if (result.exitCode != 0) {
+                logger.warn(
+                    "Traffic capturer of network $networkId responded with unsuccessful exit code: ${result.exitCode}. " +
+                        "Output: ${result.stderr}. Unable to collect packets."
+                )
+                return listOf()
+            }
 
-        return DESERIALIZER.readValue(result.stdout, object : TypeReference<List<HttpPacket>>() {})
+            return DESERIALIZER.readValue(result.stdout, object : TypeReference<List<HttpPacket>>() {})
+        } catch (e: Exception) {
+            logger.warn("Unable to collect packets from network $networkId.")
+            e.printStackTrace()
+            return listOf()
+        }
     }
 
     companion object {

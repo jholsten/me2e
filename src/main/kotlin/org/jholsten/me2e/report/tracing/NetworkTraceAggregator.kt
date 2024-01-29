@@ -10,13 +10,13 @@ import org.jholsten.me2e.report.tracing.model.*
 import org.jholsten.me2e.utils.logger
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.output.ToStringConsumer
+import java.lang.Exception
 import java.util.UUID
 
 /**
  * Service which aggregates all HTTP packets sent in the Docker networks,
  * which the containers are part of. Enables to trace requests and responses.
  * Matches IP addresses to the associated services.
- * TODO: Error handling
  */
 class NetworkTraceAggregator {
     private val logger = logger(this)
@@ -83,7 +83,13 @@ class NetworkTraceAggregator {
     @JvmSynthetic
     internal fun onContainerStarted(container: Container, specification: ServiceSpecification) {
         for ((networkName, network) in container.networks) {
-            initializeNetworkTraceCollector(networkName, network)
+            try {
+                initializeNetworkTraceCollector(networkName, network)
+            } catch (e: Exception) {
+                logger.warn("Unable to initialize network trace collector for network $network. Cannot capture HTTP traffic for this network.")
+                e.printStackTrace()
+                continue
+            }
             registerContainer(network, container, specification)
         }
     }
