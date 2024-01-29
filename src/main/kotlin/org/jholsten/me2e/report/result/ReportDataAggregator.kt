@@ -6,10 +6,8 @@ import org.jholsten.me2e.report.logs.model.ServiceSpecification
 import org.jholsten.me2e.report.result.html.HtmlReportGenerator
 import org.jholsten.me2e.report.stats.StatsAggregator
 import org.jholsten.me2e.report.result.mapper.ReportEntryMapper
+import org.jholsten.me2e.report.result.model.*
 import org.jholsten.me2e.report.result.model.IntermediateTestResult
-import org.jholsten.me2e.report.result.model.ReportEntry
-import org.jholsten.me2e.report.result.model.TestExecutionResult
-import org.jholsten.me2e.report.result.model.TestResult
 import org.jholsten.me2e.report.tracing.NetworkTraceAggregator
 import org.jholsten.me2e.utils.logger
 import org.junit.platform.engine.support.descriptor.ClassSource
@@ -136,7 +134,7 @@ class ReportDataAggregator private constructor() {
             val logs = logAggregator.getAggregatedLogs()
             val stats = statsAggregator.getAggregatedStats()
             val result = aggregateSummaries(testPlan)
-            networkTraceAggregator.collectPackets(listOf()) // TODO
+            networkTraceAggregator.collectPackets(result.roots.filterIsInstance<FinishedTestResult>())
             HtmlReportGenerator().generate(result)
             println("TODO: ON TEST EXECUTION FINISHED")
         }
@@ -167,6 +165,7 @@ class ReportDataAggregator private constructor() {
          * The original roots of the test plan, i.e. the test engine such as [engine:junit-jupiter]`,
          * are not included in the tree. Instead, the roots of the tree to be built are formed by
          * the underlying children, which are typically the executed test classes.
+         * TODO: Move logs to children
          */
         private fun buildTestTree(testPlan: TestPlan): List<TestResult> {
             val roots: MutableList<TestResult> = mutableListOf()

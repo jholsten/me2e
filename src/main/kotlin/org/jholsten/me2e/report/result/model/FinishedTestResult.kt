@@ -3,6 +3,7 @@ package org.jholsten.me2e.report.result.model
 import org.jholsten.me2e.report.logs.model.AggregatedLogEntryList
 import org.jholsten.me2e.report.result.utils.calculateDurationInSeconds
 import org.jholsten.me2e.report.stats.model.AggregatedStatsEntryList
+import org.jholsten.me2e.report.tracing.model.AggregatedNetworkTrace
 import org.jholsten.me2e.utils.toJson
 import java.math.BigDecimal
 import java.time.Instant
@@ -114,7 +115,12 @@ class FinishedTestResult(
     /**
      * Resource usage statistics that were collected for this test execution.
      */
-    val stats: AggregatedStatsEntryList, // TODO: Average stats
+    val stats: AggregatedStatsEntryList,
+
+    /**
+     * HTTP network traces that were collected for this test execution.
+     */
+    var traces: List<AggregatedNetworkTrace> = listOf(),
 
     /**
      * Throwable that caused this result.

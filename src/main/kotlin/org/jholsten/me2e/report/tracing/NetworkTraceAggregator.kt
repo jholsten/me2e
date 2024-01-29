@@ -5,13 +5,13 @@ import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.container.network.ContainerNetwork
 import org.jholsten.me2e.report.logs.model.ServiceSpecification
 import org.jholsten.me2e.report.result.ReportDataAggregator
-import org.jholsten.me2e.report.result.model.TestResult
+import org.jholsten.me2e.report.result.model.FinishedTestResult
 import org.jholsten.me2e.report.tracing.model.*
 import org.jholsten.me2e.utils.logger
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.output.ToStringConsumer
 import java.lang.Exception
-import java.util.UUID
+import java.time.Instant
 
 /**
  * Service which aggregates all HTTP packets sent in the Docker networks,
@@ -98,28 +98,21 @@ class NetworkTraceAggregator {
      * Collects and aggregates all captured packets in all networks.
      * Associates packets with the corresponding tests by their timestamps.
      */
-    fun collectPackets(executedTests: List<TestResult>) {
+    fun collectPackets(roots: List<FinishedTestResult>) {
         // Since network capturing may be delayed by a couple of milliseconds, we wait a little bit
         Thread.sleep(1000)
         val packets: MutableList<HttpPacket> = mutableListOf()
         for (monitor in networkTraceCollectors.values) {
             packets.addAll(monitor.collect())
         }
-        val streams = aggregatePackets(packets)
-        // TODO: Match to tests
-        println(packets)
-    }
-
-    /**
-     * Aggregates the given packets to instances of [AggregatedNetworkTrace].
-     * Matches IP addresses to network nodes, responses to requests and nested requests and responses to streams.
-     * @return List of streams along with their associated traces, sorted by the timestamp of the first request.
-     */
-    private fun aggregatePackets(packets: MutableList<HttpPacket>): List<Pair<UUID, List<AggregatedNetworkTrace>>> {
+        logger.info("Collected ${packets.size} HTTP packets from all networks.")
         val aggregatedTraces = aggregateTraces(packets)
-        val streams = associateStreams(aggregatedTraces)
-        reviseClients(streams.flatMap { it.second })
-        return streams
+        val testTraces = matchTracesToTests(roots, aggregatedTraces)
+        for ((test, traces) in testTraces) {
+            test.traces = associateStreams(traces.toMutableList())
+        }
+        reviseClients(aggregatedTraces)
+        println(packets)
     }
 
     /**
@@ -150,9 +143,9 @@ class NetworkTraceAggregator {
     /**
      * Groups the given traces into streams, which can consist of several nested requests, for which further requests were sent
      * in response to the original request. Considers the timestamps and IP addresses of the requests to identify nested requests.
-     * @return List of streams along with their associated traces, sorted by the timestamp of the first request.
+     * @return List of traces, sorted by streams and timestamp of the first request.
      */
-    private fun associateStreams(aggregatedTraces: MutableList<AggregatedNetworkTrace>): List<Pair<UUID, List<AggregatedNetworkTrace>>> {
+    private fun associateStreams(aggregatedTraces: MutableList<AggregatedNetworkTrace>): List<AggregatedNetworkTrace> {
         aggregatedTraces.sortByDescending { it.response.timestamp }
         for (trace in aggregatedTraces) {
             val tracesInBetween = aggregatedTraces.findTracesInBetween(trace.request, trace.response)
@@ -163,7 +156,10 @@ class NetworkTraceAggregator {
                 }
             }
         }
-        return aggregatedTraces.groupBy { it.streamId }.map { it.key to it.value }.sortedBy { it.second.first().request.timestamp }
+        val streams = aggregatedTraces.groupBy { it.streamId }
+            .map { it.key to it.value.sortedBy { trace -> trace.request.timestamp } }
+            .sortedBy { it.second.first().request.timestamp }
+        return streams.flatMap { it.second }
     }
 
     /**
@@ -260,6 +256,60 @@ class NetworkTraceAggregator {
     }
 
     /**
+     * Matches all traces to the corresponding test by their timestamps.
+     * Returns map of assigned tests and their associated traces.
+     */
+    private fun matchTracesToTests(
+        roots: List<FinishedTestResult>,
+        traces: List<AggregatedNetworkTrace>,
+    ): Map<FinishedTestResult, List<AggregatedNetworkTrace>> {
+        val testTraces: MutableMap<FinishedTestResult, List<AggregatedNetworkTrace>> = mutableMapOf()
+        for (test in roots) {
+            matchTracesToTest(test, traces = traces, testTraces = testTraces)
+        }
+        return testTraces
+    }
+
+    /**
+     * Matches network traces to the given test, if it is not a test container (i.e. it does not contain any children).
+     * If it is a test container, however, the traces are assigned to its children. The first child receives all traces
+     * since the start of its parent, to capture all traces that were triggered in a `@BeforeAll` method. The last child
+     * receives all traces that were recorded up to the end of its parent in order to also capture the traces triggered
+     * in a `@AfterAll` method.
+     * @param test Test for which corresponding traces are to be matched.
+     * @param parentStart Start time of the test's parent. Only set if [test] is its first child.
+     * @param parentEnd End time of the test's parent. Only set if [test] is its last child.
+     * @param traces All traces captured from all networks.
+     * @param testTraces Tests with their associated traces assigned so far.
+     */
+    private fun matchTracesToTest(
+        test: FinishedTestResult,
+        parentStart: Instant? = null,
+        parentEnd: Instant? = null,
+        traces: List<AggregatedNetworkTrace>,
+        testTraces: MutableMap<FinishedTestResult, List<AggregatedNetworkTrace>>,
+    ) {
+        val testStart = parentStart ?: test.startTime
+        val testEnd = parentEnd ?: test.endTime
+        if (test.children.isEmpty()) {
+            testTraces[test] = traces.findTracesBetween(testStart, testEnd)
+        } else {
+            val finishedChildren = test.children.filterIsInstance<FinishedTestResult>()
+            for ((index, child) in finishedChildren.withIndex()) {
+                val start = when {
+                    index == 0 -> testStart
+                    else -> null
+                }
+                val end = when {
+                    index == finishedChildren.size - 1 -> testEnd
+                    else -> null
+                }
+                matchTracesToTest(child, start, end, traces, testTraces)
+            }
+        }
+    }
+
+    /**
      * After all streams have been aggregated and the client and server nodes have been assigned based on the IP addresses,
      * the assigned clients are revised using this method. For requests received via the network gateway that are not part
      * of a nested request, it is assumed that they were initiated by the Test Runner. If the conditions are met, the
@@ -295,6 +345,17 @@ class NetworkTraceAggregator {
         response: AggregatedNetworkTrace.ResponsePacket,
     ): List<AggregatedNetworkTrace> {
         return this.filter { it.request.timestamp > request.timestamp && it.response.timestamp < response.timestamp }
+    }
+
+    /**
+     * Extension function to find all traces for which the request's timestamp is between the
+     * given start (inclusive) and end time (exclusive).
+     */
+    private fun List<AggregatedNetworkTrace>.findTracesBetween(
+        startInclusive: Instant,
+        endExclusive: Instant,
+    ): List<AggregatedNetworkTrace> {
+        return this.filter { it.request.timestamp >= startInclusive && it.request.timestamp < endExclusive }
     }
 
     /**
