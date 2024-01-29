@@ -111,6 +111,7 @@ class NetworkTraceAggregator {
             }
             registerContainer(network, container, specification)
         }
+        logger.info("Initialized network trace aggregator for container ${container.name}.")
     }
 
     /**
