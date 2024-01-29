@@ -32,7 +32,15 @@
             position: relative;
             border-radius: 12px;
             cursor: pointer;
-            margin: 6px 0;
+            margin-top: 6px;
+            margin-bottom: 2px;
+        }
+
+        .duration {
+            font-size: 12px;
+            color: grey;
+            display: flex;
+            justify-content: end;
         }
 
         details > summary {
@@ -70,7 +78,10 @@
         <div class="gantt-item">
             <details style="left: 25px; position: relative; width: 500px">
                 <summary>
-                    <span class="gantt-bar" style="background-color: #4541DD; width: 300px;"></span>
+                    <span style="width: 300px; display: block">
+                        <span class="gantt-bar" style="background-color: #4541DD;"></span>
+                        <span class="duration">82ms</span>
+                    </span>
                 </summary>
                 <div class="trace-details">
                     <div>
@@ -101,7 +112,10 @@
         <div class="gantt-item">
             <details style="left: 40px; position: relative; width: 500px">
                 <summary>
-                    <span class="gantt-bar" style="background-color: #FF5F56; width: 150px;"></span>
+                    <span style="width: 150px; display: block">
+                        <span class="gantt-bar" style="background-color: #FF5F56;"></span>
+                        <span class="duration">61ms</span>
+                    </span>
                 </summary>
                 <div class="trace-details">
                     TODO: Add Request and Response Data
