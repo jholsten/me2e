@@ -1,6 +1,5 @@
 package org.jholsten.me2e.report.tracing.model
 
-import org.jholsten.me2e.report.logs.model.ServiceSpecification
 import org.jholsten.me2e.report.result.utils.calculateDurationInSeconds
 import java.math.BigDecimal
 import java.time.Instant
@@ -42,13 +41,13 @@ data class AggregatedNetworkTrace(
      * Client which sent the request. Is only set if IP address could be
      * associated with a corresponding container, mock server etc.
      */
-    var client: ServiceSpecification?,
+    var client: NetworkNodeSpecification?,
 
     /**
      * Server which received the request. Is only set if IP address could be
      * associated with a corresponding container, mock server etc.
      */
-    var server: ServiceSpecification?,
+    var server: NetworkNodeSpecification?,
 
     /**
      * Packet which represents the HTTP request of this trace.

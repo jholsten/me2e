@@ -25,19 +25,23 @@ class NetworkTraceAggregator {
      * Docker network IDs for which the HTTP traffic is recorded as a map of
      * network IDs and (ip, service).
      */
-    private val monitoredNetworks: MutableMap<String, MutableMap<String, ServiceSpecification>> = mutableMapOf()
+    private val monitoredNetworks: MutableMap<String, MutableMap<String, NetworkNodeSpecification>> = mutableMapOf()
 
-    private val networkGateways: MutableMap<String, String> = mutableMapOf()
+    private val networkGateways: MutableMap<String, NetworkNodeSpecification> = mutableMapOf()
 
     /**
      * Collectors which are
      */
     private val networkTraceCollectors: MutableMap<String, NetworkTraceCollector> = mutableMapOf()
 
-    private val mockServers: Map<String, ServiceSpecification> = if (Me2eTestConfigStorage.config != null) {
+    private val mockServers: Map<String, NetworkNodeSpecification> = if (Me2eTestConfigStorage.config != null) {
         Me2eTestConfigStorage.config!!.environment.mockServers.values
             .associate {
-                it.hostname to ServiceSpecification(name = "Mock Server ${it.name}")
+                it.hostname to NetworkNodeSpecification(
+                    nodeType = NetworkNodeSpecification.NodeType.MOCK_SERVER,
+                    ipAddress = hostIpAddress,
+                    specification = ServiceSpecification(name = it.name),
+                )
             }
     } else {
         mapOf()
@@ -47,14 +51,21 @@ class NetworkTraceAggregator {
      * IP address of the host which is running the tests.
      */
     private val hostIpAddress: String by lazy {
-        System.getenv("RUNNER_IP") ?: getHostDockerInternalIp()
+        val ipAddress = System.getenv("RUNNER_IP") ?: getHostDockerInternalIp()
+        logger.info("Host IP address is $ipAddress.")
+        ipAddress
     }
+
+    private val testRunner: NetworkNodeSpecification = NetworkNodeSpecification(
+        nodeType = NetworkNodeSpecification.NodeType.SERVICE,
+        ipAddress = hostIpAddress,
+        specification = ReportDataAggregator.testRunner,
+    )
 
     @JvmSynthetic
     internal fun onContainerStarted(container: Container, specification: ServiceSpecification) {
-        val networks = container.networks.values
-        for (network in networks) {
-            initializeNetworkTraceCollector(network, container, specification)
+        for ((networkName, network) in container.networks) {
+            initializeNetworkTraceCollector(networkName, network, container, specification)
         }
     }
 
@@ -136,8 +147,8 @@ class NetworkTraceAggregator {
 
     private fun reviseClients(traces: List<AggregatedNetworkTrace>) {
         for (trace in traces) {
-            if (trace.parentId == null && trace.request.sourceIp == networkGateways[trace.networkId]) {
-                trace.client = ReportDataAggregator.testRunner
+            if (trace.parentId == null && trace.request.sourceIp == networkGateways[trace.networkId]?.ipAddress) {
+                trace.client = testRunner
             }
         }
     }
@@ -163,7 +174,7 @@ class NetworkTraceAggregator {
             val index = networkPackets.indexOf(responsePacket)
             for (i in index downTo 0) {
                 val packet = networkPackets[i]
-                val networkGateway = networkGateways[responsePacket.networkId]
+                val networkGateway = networkGateways[responsePacket.networkId]?.ipAddress
                 if (packet is HttpRequestPacket && packet.sourceIp == networkGateway && packet.sourcePort == responsePacket.destinationPort) {
                     return packet
                 }
@@ -177,7 +188,7 @@ class NetworkTraceAggregator {
      * If no such service can be found, `null` is returned.
      * @return Pair of source service and destination service.
      */
-    private fun matchSourceAndDestination(packet: HttpPacket): Pair<ServiceSpecification?, ServiceSpecification?> {
+    private fun matchSourceAndDestination(packet: HttpPacket): Pair<NetworkNodeSpecification?, NetworkNodeSpecification?> {
         val source = matchIpAndPort(packet.networkId, packet.sourceIp, packet.sourcePort, packet)
         val destination = matchIpAndPort(packet.networkId, packet.destinationIp, packet.destinationPort, packet)
         return source to destination
@@ -188,14 +199,14 @@ class NetworkTraceAggregator {
      * If the service is not found in the list of registered containers, it may be the test runner
      * or one of the mock servers which sent/received the associated packet.
      */
-    private fun matchIpAndPort(networkId: String, ipAddress: String, port: Int, packet: HttpPacket): ServiceSpecification? {
+    private fun matchIpAndPort(networkId: String, ipAddress: String, port: Int, packet: HttpPacket): NetworkNodeSpecification? {
         val networkContainers = monitoredNetworks[networkId] ?: return null
         if (ipAddress in networkContainers) {
             return networkContainers[ipAddress]
         }
 
-        if (ipAddress == networkGateways[networkId]) {
-            return ServiceSpecification(name = "Network Gateway")
+        if (ipAddress == networkGateways[networkId]?.ipAddress) {
+            return networkGateways[networkId]
         }
 
         if (ipAddress == hostIpAddress) {
@@ -209,7 +220,7 @@ class NetworkTraceAggregator {
                     return mockServers[host]
                 }
             }
-            return ReportDataAggregator.testRunner
+            return testRunner
         }
         logger.warn("Unable to find network node for IP address $ipAddress in network $networkId.")
         return null
@@ -221,7 +232,12 @@ class NetworkTraceAggregator {
         monitor.start()
     }
 
-    private fun initializeNetworkTraceCollector(network: ContainerNetwork, container: Container, specification: ServiceSpecification) {
+    private fun initializeNetworkTraceCollector(
+        networkName: String,
+        network: ContainerNetwork,
+        container: Container,
+        specification: ServiceSpecification
+    ) {
         if (network.ipAddress == null) {
             logger.warn(
                 "No IP address set for container ${container.name} in network $network. " +
@@ -230,11 +246,19 @@ class NetworkTraceAggregator {
             return
         }
         val networkContainers = monitoredNetworks[network.networkId] ?: mutableMapOf()
-        networkContainers[network.ipAddress] = specification
+        networkContainers[network.ipAddress] = NetworkNodeSpecification(
+            nodeType = NetworkNodeSpecification.NodeType.SERVICE,
+            ipAddress = network.ipAddress,
+            specification = specification,
+        )
         monitoredNetworks[network.networkId] = networkContainers
         if (!networkTraceCollectors.containsKey(network.networkId)) {
             if (network.gateway != null) {
-                networkGateways[network.networkId] = network.gateway
+                networkGateways[network.networkId] = NetworkNodeSpecification(
+                    nodeType = NetworkNodeSpecification.NodeType.NETWORK_GATEWAY,
+                    ipAddress = network.gateway,
+                    specification = ServiceSpecification(name = networkName),
+                )
             }
             startNetworkMonitoring(network.networkId)
         }
