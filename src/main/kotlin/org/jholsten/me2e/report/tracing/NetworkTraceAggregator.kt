@@ -22,18 +22,37 @@ class NetworkTraceAggregator {
     private val logger = logger(this)
 
     /**
-     * Docker network IDs for which the HTTP traffic is recorded as a map of
-     * network IDs and (ip, service).
+     * Docker network IDs for which the HTTP traffic is captured along with the Docker containers in the
+     * networks and their IP addresses as a map of network IDs and (ip, container).
      */
     private val monitoredNetworks: MutableMap<String, MutableMap<String, NetworkNodeSpecification>> = mutableMapOf()
 
+    /**
+     * Network IDs along with their gateway. Includes only networks which contain a gateway, i.e. networks
+     * which are accessible from outside.
+     */
     private val networkGateways: MutableMap<String, NetworkNodeSpecification> = mutableMapOf()
 
     /**
-     * Collectors which are
+     * Network IDs along with a corresponding trace collector which is responsible for collecting all
+     * network traffic inside this network.
      */
     private val networkTraceCollectors: MutableMap<String, NetworkTraceCollector> = mutableMapOf()
 
+    /**
+     * IP address of the host which is running the tests.
+     */
+    private val hostIpAddress: String by lazy {
+        val ipAddress = System.getenv("RUNNER_IP") ?: getHostDockerInternalIp()
+        logger.info("Host IP address is $ipAddress.")
+        ipAddress
+    }
+
+    /**
+     * Node representation of all mock servers in the test environment.
+     * The mock servers are not actually separate nodes in the network, but are reachable via the Test Runner on port 80/443.
+     * Requests to the mock servers are assigned via the name specified in the host header.
+     */
     private val mockServers: Map<String, NetworkNodeSpecification> = if (Me2eTestConfigStorage.config != null) {
         Me2eTestConfigStorage.config!!.environment.mockServers.values
             .associate {
@@ -48,24 +67,24 @@ class NetworkTraceAggregator {
     }
 
     /**
-     * IP address of the host which is running the tests.
+     * Network node representing the test runner.
      */
-    private val hostIpAddress: String by lazy {
-        val ipAddress = System.getenv("RUNNER_IP") ?: getHostDockerInternalIp()
-        logger.info("Host IP address is $ipAddress.")
-        ipAddress
-    }
-
     private val testRunner: NetworkNodeSpecification = NetworkNodeSpecification(
         nodeType = NetworkNodeSpecification.NodeType.SERVICE,
         ipAddress = hostIpAddress,
         specification = ReportDataAggregator.testRunner,
     )
 
+    /**
+     * Initializes collectors for capturing HTTP traffic in the networks of the given [container].
+     * Registers the container with its IP address and instantiates a network trace collector for
+     * each of its networks, if this network is not already being monitored.
+     */
     @JvmSynthetic
     internal fun onContainerStarted(container: Container, specification: ServiceSpecification) {
         for ((networkName, network) in container.networks) {
-            initializeNetworkTraceCollector(networkName, network, container, specification)
+            initializeNetworkTraceCollector(networkName, network)
+            registerContainer(network, container, specification)
         }
     }
 
@@ -81,9 +100,15 @@ class NetworkTraceAggregator {
             packets.addAll(monitor.collect())
         }
         val streams = aggregatePackets(packets)
+        // TODO: Match to tests
         println(packets)
     }
 
+    /**
+     * Finds all pairs of request and response packet in the given list of all captured packets.
+     * If no corresponding request can be found for a response, it is ignored.
+     * @return Map of all associated request and response pairs.
+     */
     private fun findRequestResponsePairs(packets: MutableList<HttpPacket>): Map<HttpRequestPacket, HttpResponsePacket> {
         packets.sortBy { it.timestamp }
         val responsePackets = packets.filterIsInstance<HttpResponsePacket>()
@@ -99,6 +124,11 @@ class NetworkTraceAggregator {
         return requestResponses
     }
 
+    /**
+     * Aggregates the given packets into [AggregatedNetworkTrace] instances, each of which represents an
+     * HTTP request along with the associated HTTP response. Matches source and destination IP addresses
+     * to the corresponding network nodes.
+     */
     private fun aggregateTraces(packets: MutableList<HttpPacket>): MutableList<AggregatedNetworkTrace> {
         val requestResponses: Map<HttpRequestPacket, HttpResponsePacket> = findRequestResponsePairs(packets)
         val aggregatedTraces: MutableList<AggregatedNetworkTrace> = mutableListOf()
@@ -122,15 +152,20 @@ class NetworkTraceAggregator {
     /**
      * Aggregates the given packets to instances of [AggregatedNetworkTrace].
      * Matches IP addresses to network nodes, responses to requests and nested requests and responses to streams.
+     * @return List of streams along with their associated traces, sorted by the timestamp of the first request.
      */
     private fun aggregatePackets(packets: MutableList<HttpPacket>): List<Pair<UUID, List<AggregatedNetworkTrace>>> {
         val aggregatedTraces = aggregateTraces(packets)
         val streams = associateStreams(aggregatedTraces)
         reviseClients(streams.flatMap { it.second })
-        // TODO: Match to tests
         return streams
     }
 
+    /**
+     * Groups the given traces into streams, which can consist of several nested requests, for which further requests were sent
+     * in response to the original request. Considers the timestamps and IP addresses of the requests to identify nested requests.
+     * @return List of streams along with their associated traces, sorted by the timestamp of the first request.
+     */
     private fun associateStreams(aggregatedTraces: MutableList<AggregatedNetworkTrace>): List<Pair<UUID, List<AggregatedNetworkTrace>>> {
         aggregatedTraces.sortByDescending { it.response.timestamp }
         for (trace in aggregatedTraces) {
@@ -145,6 +180,12 @@ class NetworkTraceAggregator {
         return aggregatedTraces.groupBy { it.streamId }.map { it.key to it.value }.sortedBy { it.second.first().request.timestamp }
     }
 
+    /**
+     * After all streams have been aggregated and the client and server nodes have been assigned based on the IP addresses,
+     * the assigned clients are revised using this method. For requests received via the network gateway that are not part
+     * of a nested request, it is assumed that they were initiated by the Test Runner. If the conditions are met, the
+     * [testRunner] is set as the client of the corresponding trace.
+     */
     private fun reviseClients(traces: List<AggregatedNetworkTrace>) {
         for (trace in traces) {
             if (trace.parentId == null && trace.request.sourceIp == networkGateways[trace.networkId]?.ipAddress) {
@@ -153,6 +194,10 @@ class NetworkTraceAggregator {
         }
     }
 
+    /**
+     * Extension function to find all traces which were captured between the timestamps of the
+     * given request and response packet.
+     */
     private fun List<AggregatedNetworkTrace>.findTracesInBetween(
         request: AggregatedNetworkTrace.RequestPacket,
         response: AggregatedNetworkTrace.ResponsePacket,
@@ -160,6 +205,20 @@ class NetworkTraceAggregator {
         return this.filter { it.request.timestamp > request.timestamp && it.response.timestamp < response.timestamp }
     }
 
+    /**
+     * Tries to find the corresponding request for the given response in the list of all [packets].
+     * For response packets which have not left their network, TShark sets the frame number of the corresponding request in the
+     * response packet as [HttpResponsePacket.requestIn]. In this case, the request with this frame number is returned.
+     * In contrast, responses that are directed to a host outside the network, are sent by Docker to the loopback address
+     * `127.0.0.1` and TShark cannot associate the response with the request, as the ACK number does not match the sequence
+     * number of the request. Therefore, in this case a request is searched for that fulfills the following conditions:
+     * - The timestamp is before that of the response
+     * - The request was sent via the network gateway
+     * - The source port of the request corresponds to the destination port of the response
+     * @param responsePacket Packet for which corresponding request is to be found.
+     * @param packets List of all captured packets, sorted by their timestamp.
+     * @return Corresponding request for the given response.
+     */
     private fun findCorrespondingRequest(responsePacket: HttpResponsePacket, packets: List<HttpPacket>): HttpRequestPacket? {
         val networkPackets = packets.filter { it.networkId == responsePacket.networkId }
         if (responsePacket.requestIn != null) {
@@ -184,22 +243,22 @@ class NetworkTraceAggregator {
     }
 
     /**
-     * Matches the source and destination IP addresses to the services in the network.
-     * If no such service can be found, `null` is returned.
-     * @return Pair of source service and destination service.
+     * Matches the source and destination IP address of the given request packet to the nodes in the network.
+     * If no such node can be found, `null` is returned.
+     * @return Pair of source node and destination node.
      */
-    private fun matchSourceAndDestination(packet: HttpPacket): Pair<NetworkNodeSpecification?, NetworkNodeSpecification?> {
+    private fun matchSourceAndDestination(packet: HttpRequestPacket): Pair<NetworkNodeSpecification?, NetworkNodeSpecification?> {
         val source = matchIpAndPort(packet.networkId, packet.sourceIp, packet.sourcePort, packet)
         val destination = matchIpAndPort(packet.networkId, packet.destinationIp, packet.destinationPort, packet)
         return source to destination
     }
 
     /**
-     * Tries to find the service in the network which is associated with the given IP address.
-     * If the service is not found in the list of registered containers, it may be the test runner
-     * or one of the mock servers which sent/received the associated packet.
+     * Tries to find the node in the network which is associated with the given IP address.
+     * If the IP address is not found in the list of registered containers, it may be the test runner,
+     * a network gateway or one of the mock servers which sent/received the associated packet.
      */
-    private fun matchIpAndPort(networkId: String, ipAddress: String, port: Int, packet: HttpPacket): NetworkNodeSpecification? {
+    private fun matchIpAndPort(networkId: String, ipAddress: String, port: Int, packet: HttpRequestPacket): NetworkNodeSpecification? {
         val networkContainers = monitoredNetworks[networkId] ?: return null
         if (ipAddress in networkContainers) {
             return networkContainers[ipAddress]
@@ -210,15 +269,8 @@ class NetworkTraceAggregator {
         }
 
         if (ipAddress == hostIpAddress) {
-            if (port == 80 && mockServers.isNotEmpty()) {
-                if (packet is HttpRequestPacket) {
-                    val host = packet.headers.filterKeys { it.lowercase() == "host" }.firstNotNullOfOrNull { it.value }
-                    if (host == null) {
-                        logger.warn("Host header is not set for request $packet.")
-                        return null
-                    }
-                    return mockServers[host]
-                }
+            if ((port == 80 || port == 443) && mockServers.isNotEmpty()) {
+                return findMockServer(packet)
             }
             return testRunner
         }
@@ -226,18 +278,35 @@ class NetworkTraceAggregator {
         return null
     }
 
+    /**
+     * Tries to find the mock server addressed in the given packet. Uses the information from
+     * the host header of the request to find the corresponding mock server with the same name.
+     */
+    private fun findMockServer(packet: HttpRequestPacket): NetworkNodeSpecification? {
+        val host = packet.headers.filterKeys { it.lowercase() == "host" }.firstNotNullOfOrNull { it.value }
+        if (host == null) {
+            logger.warn("Host header is not set for request $packet.")
+            return null
+        }
+        return mockServers[host]
+    }
+
+    /**
+     * Initializes network trace collector for the network with the given ID to start capturing the
+     * network's HTTP traffic.
+     */
     private fun startNetworkMonitoring(networkId: String) {
         val monitor = NetworkTraceCollector(networkId)
         networkTraceCollectors[networkId] = monitor
         monitor.start()
     }
 
-    private fun initializeNetworkTraceCollector(
-        networkName: String,
-        network: ContainerNetwork,
-        container: Container,
-        specification: ServiceSpecification
-    ) {
+    /**
+     * Registers the given container with its IP address in the given network to be able to associate packets from and
+     * to this container with the corresponding container instance. If the container does not have an IP address assigned
+     * in the given network, it is ignored.
+     */
+    private fun registerContainer(network: ContainerNetwork, container: Container, specification: ServiceSpecification) {
         if (network.ipAddress == null) {
             logger.warn(
                 "No IP address set for container ${container.name} in network $network. " +
@@ -252,18 +321,30 @@ class NetworkTraceAggregator {
             specification = specification,
         )
         monitoredNetworks[network.networkId] = networkContainers
-        if (!networkTraceCollectors.containsKey(network.networkId)) {
-            if (network.gateway != null) {
-                networkGateways[network.networkId] = NetworkNodeSpecification(
-                    nodeType = NetworkNodeSpecification.NodeType.NETWORK_GATEWAY,
-                    ipAddress = network.gateway,
-                    specification = ServiceSpecification(name = networkName),
-                )
-            }
+    }
+
+    /**
+     * Initializes a network trace collector for the given network if it not already being monitored.
+     * Registers a network node specification for the network's gateway, if available.
+     */
+    private fun initializeNetworkTraceCollector(networkName: String, network: ContainerNetwork) {
+        if (network.networkId !in networkTraceCollectors) {
             startNetworkMonitoring(network.networkId)
+        }
+        if (network.gateway != null && network.networkId !in networkGateways) {
+            networkGateways[network.networkId] = NetworkNodeSpecification(
+                nodeType = NetworkNodeSpecification.NodeType.NETWORK_GATEWAY,
+                ipAddress = network.gateway,
+                specification = ServiceSpecification(name = networkName),
+            )
         }
     }
 
+    /**
+     * Starts a temporary Docker container to retrieve the IP address of `host.docker.internal`,
+     * i.e. the IP address of the test runner.
+     * @return IP address of `host.docker.internal`.
+     */
     private fun getHostDockerInternalIp(): String {
         val toStringConsumer = ToStringConsumer()
         val tempContainer = GenericContainer("alpine")
