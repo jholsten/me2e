@@ -68,6 +68,15 @@ ul ul {
     color: #8BAAE7;
 }
 
+.break-word {
+    word-break: break-all;
+}
+
+.inline-code {
+    font-size: 16px;
+    font-family: monospace;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
