@@ -30,7 +30,7 @@ class StatsAggregator internal constructor() {
         val consumer = ContainerStatsCollector(specification)
         this.consumers[specification] = consumer
         container.addStatsConsumer(consumer)
-        logger.info("Initialized container stats aggregator.")
+        logger.info("Initialized container stats aggregator for container ${container.name}.")
     }
 
     /**
