@@ -461,7 +461,7 @@
                                                 <span class="gantt-bar"
                                                       th:styleappend="'background-color:' + (trace.client != null ? trace.client.color : '#4541DD')">
                                                 </span>
-                                                <span th:text="${response.duration} + 'ms'" class="duration"></span>
+                                                <span th:text="${trace.duration} + 'ms'" class="duration"></span>
                                             </summary>
                                             <div class="trace-details">
                                                 <div class="header">

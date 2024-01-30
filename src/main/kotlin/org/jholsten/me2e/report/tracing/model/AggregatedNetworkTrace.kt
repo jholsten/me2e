@@ -1,7 +1,6 @@
 package org.jholsten.me2e.report.tracing.model
 
-import org.jholsten.me2e.report.result.utils.calculateDurationInSeconds
-import java.math.BigDecimal
+import java.time.Duration
 import java.time.Instant
 import java.util.*
 
@@ -60,9 +59,9 @@ data class AggregatedNetworkTrace(
     val response: ResponsePacket,
 ) {
     /**
-     * Duration of the response in seconds, i.e. the time between request and response.
+     * Duration of the response in milliseconds, i.e. the time between request and response.
      */
-    val duration: BigDecimal = calculateDurationInSeconds(request.timestamp, response.timestamp)
+    val duration: Long = Duration.between(request.timestamp, response.timestamp).toMillis()
 
     class RequestPacket(
         /**
