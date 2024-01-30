@@ -114,6 +114,127 @@
             color: #618bde;
             padding: 5px 0;
         }
+
+        .traces-table-container {
+            overflow-x: auto;
+        }
+
+        .traces-table {
+            border-collapse: collapse;
+            table-layout: fixed;
+            width: unset;
+
+            & td {
+                padding: 0 10px 0 0;
+                vertical-align: top;
+            }
+
+            & .status {
+                border-radius: 64px;
+                padding: 2px 8px;
+                color: white;
+                font-weight: bolder;
+                margin-right: 6px;
+            }
+
+            > thead > tr > th:first-child,
+            > tbody > tr > td:first-child {
+                position: sticky;
+                left: 0;
+                z-index: 2;
+                background-color: white;
+                min-width: 200px;
+                box-shadow: inset -1px 0 0 0 #A6A6A6;
+                text-align: start;
+                white-space: nowrap;
+            }
+
+            > tbody > tr:first-child > td:first-child,
+            > tbody > tr:first-child > td > .gantt-row > .gantt-item {
+                padding-top: 12px;
+            }
+        }
+
+        .gantt-row {
+            display: grid;
+            grid-template-columns: 50px repeat(auto-fit, 100px);
+            grid-auto-flow: column;
+            grid-auto-columns: 100px;
+            grid-gap: 1px;
+            background-color: #efefef;
+
+            > .time-series {
+                position: relative;
+                left: -50px;
+                text-align: center;
+                font-size: 12px;
+                background-color: white;
+            }
+
+            > .gantt-item {
+                background-color: white;
+
+                > details {
+                    position: relative;
+                    width: 500px;
+
+                    > summary {
+                        list-style: none;
+                    }
+
+                    > summary::-webkit-details-marker {
+                        display: none;
+                    }
+                }
+            }
+
+            & .gantt-bar {
+                display: block;
+                height: 12px;
+                position: relative;
+                border-radius: 12px;
+                cursor: pointer;
+                margin-top: 5px;
+                margin-bottom: 2px;
+            }
+
+            & .duration {
+                font-size: 12px;
+                color: grey;
+                display: flex;
+                justify-content: end;
+            }
+        }
+
+        .trace-details {
+            background-color: white;
+            border: 1pt solid #cbcbcb;
+            border-radius: 4px;
+            padding: 4px;
+            box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.05);
+
+            & .header {
+                background-color: aliceblue;
+                padding: 2px 0;
+                margin-bottom: 6px;
+            }
+        }
+
+        .trace-details-table {
+            & .label {
+                font-weight: 600;
+                width: 105px;
+            }
+
+            & td {
+                padding: 3px 0;
+            }
+
+            & .http-payload {
+                font-size: 15px;
+                white-space: pre-wrap;
+            }
+        }
     </style>
 </head>
 <body>
@@ -301,18 +422,216 @@
                 </div>
             </div>
 
-            <div>
-                <hr class="divider">
+            <hr th:if="${!test.traces.isEmpty() || !test.logs.isEmpty()}" class="divider">
 
+            <div th:if="${!test.traces.isEmpty()}">
                 <h4>Network Traces</h4>
-                <p>
-                    TODO: Traces
-                </p>
+                <div class="traces-table-container">
+                    <table class="traces-table" th:id="${'traces-' + test.testId}"
+                           th:with="timeSeries=${tracesTimeSeries.get(test.testId)}">
+                        <thead>
+                        <tr>
+                            <th>Request</th>
+                            <th>
+                                <div class="gantt-row" style="background-color: white">
+                                    <div></div>
+                                    <div th:each="timestamp : ${timeSeries}"
+                                         th:text="${#temporals.format(timestamp, 'HH:mm:ss.SSS')}" class="time-series">
+                                    </div>
+                                </div>
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="trace : ${test.traces}" th:data-tt-id="${trace.id}" th:data-tt-parent-id="${trace.parentId}"
+                            th:with="request=${trace.request},response=${trace.response}">
+                            <td th:with="status=${response.statusCode}">
+                                <span th:text="${status}"
+                                      th:styleappend="${'background-color:' + (status <= 199 ? '#1a6bff' : (status <= 299 ? '#0BBD58' : (status <= 399 ? '#1ac0ff' : (status <= 499 ? '#ffb91a' : '#FF5F56'))))}"
+                                      class="status"></span>
+                                <span th:text="${request.statusLine}" class="inline-code"></span>
+                            </td>
+                            <td th:with="left=${T(java.time.Duration).between(timeSeries[0], request.timestamp).toMillis()}">
+                                <div class="gantt-row">
+                                    <div style="background-color: white;"></div>
+                                    <div class="gantt-item"
+                                         th:with="width=${T(java.time.Duration).between(request.timestamp, response.timestamp).toMillis()}">
+                                        <details th:style="'left:' + ${left} + 'px'">
+                                            <summary th:styleappend="'width:' + ${width} + 'px'" style="display: block;">
+                                                <span class="gantt-bar"
+                                                      th:styleappend="'background-color:' + (trace.client != null ? trace.client.color : '#4541DD')">
+                                                </span>
+                                                <span th:text="${response.duration} + 'ms'" class="duration"></span>
+                                            </summary>
+                                            <div class="trace-details">
+                                                <div class="header">
+                                                    <b>Request:</b> <span th:text="${request.statusLine}" class="inline-code"></span>
+                                                </div>
+                                                <table class="trace-details-table">
+                                                    <tr>
+                                                        <td class="label">Frame-No.:</td>
+                                                        <td th:text="${request.number}"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="label">Timestamp:</td>
+                                                        <td th:text="${#temporals.format(request.timestamp, 'dd.MM.yyyy HH:mm:ss.SSS')}"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="label">Source:</td>
+                                                        <td th:with="client=${trace.client}">
+                                                            <span th:if="${client != null}">
+                                                                <i class="fas fa-square" th:styleappend="'color:' + ${client.color}"
+                                                                   style="font-size: 14px; vertical-align: 1px;"></i>
+                                                                <span th:if="${client.nodeType.name == 'SERVICE'}">
+                                                                    <span th:text="${client.name}"></span>
+                                                                </span>
+                                                                <span th:if="${client.nodeType.name == 'MOCK_SERVER'}">
+                                                                    Mock Server <i th:text="${client.name}" class="break-word"></i>
+                                                                </span>
+                                                                <span th:if="${client.nodeType.name == 'NETWORK_GATEWAY'}">
+                                                                    Network Gateway <i th:text="${client.name}" class="break-word"></i>
+                                                                </span>
+                                                                (<span th:text="${request.sourceIp + ':' + request.sourcePort}"
+                                                                       class="inline-code"></span>)
+                                                            </span>
+                                                            <span th:if="${client == null}">
+                                                                <span th:text="${request.sourceIp + ':' + request.sourcePort}"
+                                                                      class="inline-code"></span>
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="label">Destination:</td>
+                                                        <td th:with="server=${trace.server}">
+                                                            <span th:if="${server != null}">
+                                                                <i class="fas fa-square" th:styleappend="'color:' + ${server.color}"
+                                                                   style="font-size: 14px; vertical-align: 1px;"></i>
+                                                                <span th:if="${server.nodeType.name == 'SERVICE'}">
+                                                                    <span th:text="${server.name}"></span>
+                                                                </span>
+                                                                <span th:if="${server.nodeType.name == 'MOCK_SERVER'}">
+                                                                    Mock Server <i th:text="${server.name}" class="break-word"></i>
+                                                                </span>
+                                                                <span th:if="${server.nodeType.name == 'NETWORK_GATEWAY'}">
+                                                                    Network Gateway <i th:text="${server.name}" class="break-word"></i>
+                                                                </span>
+                                                                (<span th:text="${request.destinationIp + ':' + request.destinationPort}"
+                                                                       class="inline-code"></span>)
+                                                            </span>
+                                                            <span th:if="${server == null}">
+                                                                <span th:text="${request.destinationIp + ':' + request.destinationPort}"
+                                                                      class="inline-code"></span>
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr th:if="${!request.headers.isEmpty()}">
+                                                        <td class="label">Headers:</td>
+                                                        <td class="inline-code break-word">
+                                                            <div th:each="entry : ${request.headers}">
+                                                                <b th:text="${entry.key} + ':'"></b>
+                                                                <span th:text="${entry.value}"></span>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr th:if="${request.payload != null}">
+                                                        <td class="label">Payload:</td>
+                                                        <td>
+                                                            <pre th:text="${request.payload}" class="http-payload break-word"
+                                                                 style="margin: 0;"></pre>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+
+                                                <div class="header" style="margin-top: 12px;">
+                                                    <b>Response:</b> <span th:text="${response.statusLine}" class="inline-code"></span>
+                                                </div>
+                                                <table class="trace-details-table">
+                                                    <tr>
+                                                        <td class="label">Frame-No.:</td>
+                                                        <td th:text="${response.number}"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="label">Timestamp:</td>
+                                                        <td th:text="${#temporals.format(response.timestamp, 'dd.MM.yyyy HH:mm:ss.SSS')}"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="label">Source:</td>
+                                                        <td th:with="server=${trace.server}">
+                                                            <span th:if="${server != null}">
+                                                                <i class="fas fa-square" th:styleappend="'color:' + ${server.color}"
+                                                                   style="font-size: 14px; vertical-align: 1px;"></i>
+                                                                <span th:if="${server.nodeType.name == 'SERVICE'}">
+                                                                    <span th:text="${server.name}"></span>
+                                                                </span>
+                                                                <span th:if="${server.nodeType.name == 'MOCK_SERVER'}">
+                                                                    Mock Server <i th:text="${server.name}" class="break-word"></i>
+                                                                </span>
+                                                                <span th:if="${server.nodeType.name == 'NETWORK_GATEWAY'}">
+                                                                    Network Gateway <i th:text="${server.name}" class="break-word"></i>
+                                                                </span>
+                                                                (<span th:text="${response.sourceIp + ':' + response.sourcePort}"
+                                                                       class="inline-code"></span>)
+                                                            </span>
+                                                            <span th:if="${server == null}">
+                                                                <span th:text="${response.sourceIp + ':' + response.sourcePort}"
+                                                                      class="inline-code"></span>
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="label">Destination:</td>
+                                                        <td th:with="client=${trace.client}">
+                                                            <span th:if="${client != null}">
+                                                                <i class="fas fa-square" th:styleappend="'color:' + ${client.color}"
+                                                                   style="font-size: 14px; vertical-align: 1px;"></i>
+                                                                <span th:if="${client.nodeType.name == 'SERVICE'}">
+                                                                    <span th:text="${client.name}"></span>
+                                                                </span>
+                                                                <span th:if="${client.nodeType.name == 'MOCK_SERVER'}">
+                                                                    Mock Server <i th:text="${client.name}" class="break-word"></i>
+                                                                </span>
+                                                                <span th:if="${client.nodeType.name == 'NETWORK_GATEWAY'}">
+                                                                    Network Gateway <i th:text="${client.name}" class="break-word"></i>
+                                                                </span>
+                                                                (<span th:text="${response.destinationIp + ':' + response.destinationPort}"
+                                                                       class="inline-code"></span>)
+                                                            </span>
+                                                            <span th:if="${client == null}">
+                                                                <span th:text="${response.destinationIp + ':' + response.destinationPort}"
+                                                                      class="inline-code"></span>
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr th:if="${!response.headers.isEmpty()}">
+                                                        <td class="label">Headers:</td>
+                                                        <td class="inline-code break-word">
+                                                            <div th:each="entry : ${response.headers}">
+                                                                <b th:text="${entry.key} + ':'"></b>
+                                                                <span th:text="${entry.value}"></span>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr th:if="${response.payload != null}">
+                                                        <td class="label">Payload:</td>
+                                                        <td>
+                                                            <pre th:text="${response.payload}" class="http-payload break-word"
+                                                                 style="margin: 0;"></pre>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </details>
+                                    </div>
+                                    <div class="gantt-item" th:each="i : ${#numbers.sequence(1, timeSeries.size() - 1)}"></div>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <div th:if="${!test.logs.isEmpty()}">
-                <hr class="divider">
-
                 <h4>Logs</h4>
                 <table class="log-table">
                     <thead>
