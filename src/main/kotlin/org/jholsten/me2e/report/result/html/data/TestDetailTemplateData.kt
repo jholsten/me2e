@@ -8,6 +8,7 @@ import org.jholsten.me2e.report.result.utils.getDescendants
 import org.jholsten.me2e.report.stats.model.AggregatedStatsEntry
 import org.jholsten.me2e.report.stats.model.AggregatedStatsEntryList
 import org.thymeleaf.context.Context
+import java.time.Instant
 
 /**
  * Data of a [TestResult] instance to be inserted into a Thymeleaf template.
@@ -33,6 +34,8 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
          * - `tags:` [Set]<[String]> - Tags associated with the test or test container (see [TestResult.tags]).
          * - `statsByContainer:` [Map]<[String], [List]<[AggregatedStatsEntry]>> - Map of container name and their resource usage statistics.
          * - `allLogs:` [List]<[AggregatedLogEntry]> - All logs from all tests, including those from `@BeforeAll` and `@AfterAll` methods.
+         * - `tracesTimeSeries:` [Map]<[String], [List]<[Instant]>> - Map of `testId` and the timestamps of which the time series of the
+         * test's traces is composed of. Includes only tests for which traces were captured.
          * - `startTime:` [java.time.Instant] - Timestamp of the test or test container has started its execution
          * (see [FinishedTestResult.startTime]). **Only available if [TestResult.status] is not [TestResult.Status.SKIPPED]**.
          * - `endTime:` [java.time.Instant] - Timestamp of the test or test container has finished its execution
@@ -67,6 +70,7 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
             withVariable("allTests", allTests)
             withVariable("statsByContainer", getStatsByContainer(allTests + result))
             withVariable("allLogs", getAllLogs(allTests + result))
+            withVariable("tracesTimeSeries", getTracesTimeSeries(allTests))
             if (result is FinishedTestResult) {
                 withVariable("startTime", result.startTime)
                 withVariable("endTime", result.endTime)
@@ -105,6 +109,47 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
 
         private fun getAllLogs(allTests: List<TestResult>): List<AggregatedLogEntry> {
             return allTests.filterIsInstance<FinishedTestResult>().flatMap { it.logs }.sortedBy { it.timestamp }
+        }
+
+        /**
+         * Returns map of [TestResult.testId] and the list of timestamps of which the time series of
+         * the test's traces is composed of. Only includes tests for which traces were captured.
+         */
+        private fun getTracesTimeSeries(allTests: List<TestResult>): Map<String, List<Instant>> {
+            val result: MutableMap<String, List<Instant>> = mutableMapOf()
+            val testsWithTraces = allTests.filterIsInstance<FinishedTestResult>().filter { it.traces.isNotEmpty() }
+            for (test in testsWithTraces) {
+                val seriesStart = test.traces.minOf { it.request.timestamp }.floor()
+                val seriesEnd = test.traces.maxOf { it.response.timestamp }.ceil()
+                result[test.testId] = getTimeSeries(seriesStart, seriesEnd)
+            }
+            return result
+        }
+
+        /**
+         * Rounds the given instant down to the nearest 100th millisecond.
+         */
+        private fun Instant.floor(): Instant {
+            val milliseconds = this.toEpochMilli()
+            return Instant.ofEpochMilli(milliseconds / 100 * 100)
+        }
+
+        /**
+         * Rounds the given instant up to the nearest 100th millisecond.
+         */
+        private fun Instant.ceil(): Instant {
+            return this.floor().plusMillis(100)
+        }
+
+        private fun getTimeSeries(seriesStart: Instant, seriesEnd: Instant): List<Instant> {
+            val result: MutableList<Instant> = mutableListOf()
+            var current = seriesStart
+            while (current.isBefore(seriesEnd)) {
+                result.add(current)
+                current = current.plusMillis(100)
+            }
+            result.add(seriesEnd)
+            return result
         }
     }
 }
