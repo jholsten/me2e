@@ -37,14 +37,23 @@ class NetworkTraceAggregator {
          * @return IP address of `host.docker.internal`.
          */
         private fun getHostDockerInternalIp(): String {
-            val toStringConsumer = ToStringConsumer()
-            val tempContainer = GenericContainer("alpine")
-                .withCommand("sh", "-c", "getent hosts host.docker.internal | awk '{ print $1 }'")
-                .withExtraHost("host.docker.internal", "host-gateway")
-                .withLogConsumer(toStringConsumer)
-            tempContainer.start()
+            try {
+                val toStringConsumer = ToStringConsumer()
+                val tempContainer = GenericContainer("alpine")
+                    .withCommand("sh", "-c", "getent hosts host.docker.internal | awk '{ print $1 }'")
+                    .withExtraHost("host.docker.internal", "host-gateway")
+                    .withLogConsumer(toStringConsumer)
+                tempContainer.start()
 
-            return toStringConsumer.toUtf8String().replace("\n", "")
+                val ipAddress = toStringConsumer.toUtf8String().replace("\n", "")
+                if (ipAddress.isNotBlank()) {
+                    return ipAddress
+                }
+            } catch (e: Exception) {
+                logger.warn("Exception occurred while trying to retrieve IP address of `host.docker.internal`: $e")
+            }
+            logger.warn("Unable to determine IP address of `host.docker.internal`. Will be using default address `192.168.65.2` to match packets to host.")
+            return "192.168.65.2"
         }
     }
 
