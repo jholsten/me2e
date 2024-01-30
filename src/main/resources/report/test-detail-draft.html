@@ -193,11 +193,17 @@
             border-radius: 64px;
             padding: 2px 8px;
             color: white;
+            font-weight: bolder;
+            margin-right: 6px;
         }
 
         .trace-details-table .label {
             font-weight: 600;
             width: 105px;
+        }
+
+        .trace-details-table td {
+            padding: 3px 0;
         }
 
         .trace-details .header {
@@ -424,16 +430,16 @@
                                         <tr>
                                             <td class="label">Source:</td>
                                             <td>
-                                                <i class="fas fa-square" style="font-size: 11px; color: #4541DD"></i> Test Runner (<span
-                                                    class="inline-code">127.0.0.1:80</span>)
+                                                <i class="fas fa-square" style="font-size: 14px; color: #4541DD; vertical-align: 1px;"></i>
+                                                Test Runner (<span class="inline-code">127.0.0.1:80</span>)
                                             </td>
                                         </tr>
                                         <tr>
                                             <td class="label">Destination:</td>
                                             <td>
-                                                <i class="fas fa-square" style="font-size: 11px; color: #FF5F56;"></i> A super long name for
-                                                a
-                                                service which is not realistic but let's have a look
+                                                <i class="fas fa-square"
+                                                   style="font-size: 14px; color: aquamarine; vertical-align: 1px;"></i>
+                                                A super long name for a service which is not realistic but let's have a look
                                                 (<span class="inline-code">192.168.65.2:1080</span>)
                                             </td>
                                         </tr>
@@ -465,8 +471,7 @@
                                             </td>
                                         </tr>
                                     </table>
-                                    <hr class="divider">
-                                    <div class="header">
+                                    <div class="header" style="margin-top: 12px;">
                                         <b>Response:</b> <span class="inline-code">HTTP/1.1 200 OK</span>
                                     </div>
                                     <div>
@@ -487,7 +492,7 @@
                 </td>
             </tr>
             <tr data-tt-id="2" data-tt-parent-id=1>
-                <td><span class="status" style="background-color: #0BBD58;">200</span> <code class="inline-code">POST /search?query=1
+                <td><span class="status" style="background-color: #ffb91a;">401</span> <code class="inline-code">POST /search?query=1
                     HTTP/1.1</code></td>
                 <td>
                     <div class="gantt-row">
@@ -496,7 +501,7 @@
                             <details style="left: 40px; position: relative; width: 500px">
                                 <summary>
                     <span style="width: 150px; display: block">
-                        <span class="gantt-bar" style="background-color: #FF5F56;"></span>
+                        <span class="gantt-bar" style="background-color: aquamarine;"></span>
                         <span class="duration">61ms</span>
                     </span>
                                 </summary>
@@ -517,7 +522,7 @@
                 </td>
             </tr>
             <tr data-tt-id="3" data-tt-parent-id=1>
-                <td><span class="status" style="background-color: #0BBD58;">200</span> <code class="inline-code">POST /search?query=1
+                <td><span class="status" style="background-color: #FF5F56;">500</span> <code class="inline-code">POST /search?query=1
                     HTTP/1.1</code></td>
                 <td>
                     <div class="gantt-row">
@@ -526,7 +531,7 @@
                             <details style="left: 40px; position: relative; width: 500px">
                                 <summary>
                                 <span style="width: 15px; display: block">
-                                    <span class="gantt-bar" style="background-color: #FF5F56;"></span>
+                                    <span class="gantt-bar" style="background-color: aquamarine;"></span>
                                     <span class="duration">61ms</span>
                                 </span>
                                 </summary>
