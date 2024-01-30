@@ -157,15 +157,15 @@
 
         .gantt-row {
             display: grid;
-            grid-template-columns: 50px repeat(auto-fit, 100px);
+            grid-template-columns: 50px repeat(auto-fit, 150px);
             grid-auto-flow: column;
-            grid-auto-columns: 100px;
+            grid-auto-columns: 150px;
             grid-gap: 1px;
             background-color: #efefef;
 
             > .time-series {
                 position: relative;
-                left: -50px;
+                left: -75px;
                 text-align: center;
                 font-size: 12px;
                 background-color: white;
@@ -451,11 +451,11 @@
                                       class="status"></span>
                                 <span th:text="${request.statusLine}" class="inline-code"></span>
                             </td>
-                            <td th:with="left=${@java.time.Duration@between(timeSeries[0], request.timestamp).toMillis()}">
+                            <td th:with="left=${@java.time.Duration@between(timeSeries[0], request.timestamp).toMillis() * 1.5}">
                                 <div class="gantt-row">
                                     <div style="background-color: white;"></div>
                                     <div class="gantt-item"
-                                         th:with="width=${@java.time.Duration@between(request.timestamp, response.timestamp).toMillis()}">
+                                         th:with="width=${@java.time.Duration@between(request.timestamp, response.timestamp).toMillis() * 1.5}">
                                         <details th:style="'left:' + ${left} + 'px'">
                                             <summary th:styleappend="'width:' + ${width} + 'px'" style="display: block;">
                                                 <span class="gantt-bar"
