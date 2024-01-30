@@ -40,6 +40,7 @@ class NetworkTraceAggregator {
             val toStringConsumer = ToStringConsumer()
             val tempContainer = GenericContainer("alpine")
                 .withCommand("sh", "-c", "getent hosts host.docker.internal | awk '{ print $1 }'")
+                .withExtraHost("host.docker.internal", "host-gateway")
                 .withLogConsumer(toStringConsumer)
             tempContainer.start()
 
