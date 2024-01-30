@@ -6,7 +6,7 @@ import java.awt.Color
  * Deterministic iterator which iterates over all possible colors.
  * Adapted from https://stackoverflow.com/a/21863798/17203788.
  */
-class ColorIterator(initialStepSize: Float = 0.1F) {
+class ColorIterator(initialStepSize: Float = 0.15F) {
     init {
         require(initialStepSize < 1 && initialStepSize > 0) { "Initial step size needs to be between 0 and 1." }
     }
@@ -27,6 +27,6 @@ class ColorIterator(initialStepSize: Float = 0.1F) {
         } else if (step % (step * 10) == 0.0F) {
             step += stepSize
         }
-        return Color.getHSBColor(step, 1.0F, 1.0F)
+        return Color.getHSBColor(step, 0.9F, 1.0F)
     }
 }
