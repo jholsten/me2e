@@ -2,7 +2,6 @@ package org.jholsten.me2e.request.model
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
-import com.fasterxml.jackson.databind.node.MissingNode
 import org.jholsten.me2e.parsing.exception.ParseException
 import org.jholsten.util.RecursiveComparison
 import kotlin.test.*
