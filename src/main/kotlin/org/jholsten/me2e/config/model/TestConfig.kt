@@ -23,6 +23,3 @@ class TestConfig(
      */
     val environment: TestEnvironmentConfig,
 )
-
-// TODO: Add option to set labels in environment config instead of docker-compose
-// (enables to use existing docker-compose without required modifications)
