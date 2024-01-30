@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="tree-table/jquery.treetable.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="tree-table/jquery.treetable.js"></script>
     <title>Simple Gantt Chart</title>
     <style>
         .container {
@@ -43,6 +46,7 @@
             justify-content: end;
         }
 
+        /*Hide arrow for details*/
         details > summary {
             list-style: none;
         }
@@ -58,9 +62,145 @@
             padding: 4px;
             box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.05);
         }
+
+        .traces-table-container {
+            overflow-x: auto;
+            width: 700px;
+        }
+
+        .traces-table-container tr th:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 2;
+            background-color: white;
+            min-width: 200px;
+            box-shadow: inset -1px 0 0 0 #A6A6A6;
+            text-align: start;
+        }
+
+        .traces-table-container tr td:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 2;
+            background-color: white;
+            min-width: 200px;
+            box-shadow: inset -1px 0 0 0 #A6A6A6;
+            text-align: start;
+            white-space: nowrap;
+        }
+
+        .traces-table td {
+            vertical-align: top;
+        }
+
+        .traces-table {
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        .traces-table .status {
+            border-radius: 64px;
+            padding: 2px 8px;
+            color: white;
+        }
     </style>
 </head>
 <body>
+<!--https://stackoverflow.com/questions/3402295/html-table-with-horizontal-scrolling-first-column-fixed-->
+
+<div class="traces-table-container">
+    <table class="traces-table" id="traces">
+        <thead>
+        <tr>
+            <th>Request</th>
+            <th>
+                <div class="container" style="background-color: white">
+                    <div class="time-series" style="background-color: transparent"></div>
+                    <div class="time-series">18:00:35.100</div>
+                    <div class="time-series">18:00:35.200</div>
+                    <div class="time-series">18:00:35.300</div>
+                    <div class="time-series">18:00:35.400</div>
+                    <div class="time-series">18:00:35.500</div>
+                    <div class="time-series">18:00:35.600</div>
+                    <div class="time-series">18:00:35.700</div>
+                    <div class="time-series">18:00:35.800</div>
+                </div>
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><span class="status" style="background-color: #0BBD58;">200</span> GET /data HTTP/1.1</td>
+            <td>
+                <div class="container">
+                    <div class="gantt-item">
+                        <details style="left: 25px; position: relative; width: 500px">
+                            <summary>
+                                <span style="width: 300px; display: block">
+                                    <span class="gantt-bar" style="background-color: #4541DD;"></span>
+                                    <span class="duration">82ms</span>
+                                </span>
+                            </summary>
+                            <div class="trace-details">
+                                <div>
+                                    <b>Request:</b> <code>POST /data HTTP/1.1</code>
+                                </div>
+                                <div>
+                                    TODO: Request Data
+                                </div>
+                                <div>
+                                    <b>Response:</b> <code>HTTP/1.1 200 OK</code>
+                                </div>
+                                <div>
+                                    TODO: Response Data
+                                </div>
+                            </div>
+                        </details>
+                    </div>
+                    <div class="gantt-item"></div>
+                    <div class="gantt-item"></div>
+                    <div class="gantt-item"></div>
+                    <div class="gantt-item"></div>
+                    <div class="gantt-item"></div>
+                    <div class="gantt-item"></div>
+                    <div class="gantt-item"></div>
+                    <div class="gantt-item"></div>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td><span class="status" style="background-color: #0BBD58;">200</span> POST /search?query=1 HTTP/1.1</td>
+            <td>
+                <div class="container">
+                    <div class="gantt-item">
+                        <details style="left: 40px; position: relative; width: 500px">
+                            <summary>
+                    <span style="width: 150px; display: block">
+                        <span class="gantt-bar" style="background-color: #FF5F56;"></span>
+                        <span class="duration">61ms</span>
+                    </span>
+                            </summary>
+                            <div class="trace-details">
+                                TODO: Add Request and Response Data
+                            </div>
+                        </details>
+                    </div>
+                    <div class="gantt-item"></div>
+                    <div class="gantt-item"></div>
+                    <div class="gantt-item"></div>
+                    <div class="gantt-item"></div>
+                    <div class="gantt-item"></div>
+                    <div class="gantt-item"></div>
+                    <div class="gantt-item"></div>
+                    <div class="gantt-item"></div>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+
 <div style="overflow-x: auto; width: 900px;">
     <!--    Min/Max value: https://stackoverflow.com/questions/63030841/how-to-use-math-max-in-thymeleaf-to-find-maximum-number-->
     <div class="container" style="background-color: white;">
