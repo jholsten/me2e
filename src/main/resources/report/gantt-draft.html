@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="tree-table/jquery.treetable.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.0/css/all.css">
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script src="tree-table/jquery.treetable.js"></script>
     <title>Simple Gantt Chart</title>
@@ -68,17 +69,8 @@
             width: 700px;
         }
 
-        .traces-table-container tr th:first-child {
-            position: sticky;
-            left: 0;
-            z-index: 2;
-            background-color: white;
-            min-width: 200px;
-            box-shadow: inset -1px 0 0 0 #A6A6A6;
-            text-align: start;
-        }
-
-        .traces-table-container tr td:first-child {
+        .traces-table-container > .traces-table > thead > tr > th:first-child,
+        .traces-table-container > .traces-table > tbody > tr > td:first-child {
             position: sticky;
             left: 0;
             z-index: 2;
@@ -102,6 +94,36 @@
             border-radius: 64px;
             padding: 2px 8px;
             color: white;
+        }
+
+        .trace-details-table .label {
+            font-weight: 600;
+            width: 120px;
+        }
+
+        .trace-details .header {
+            background-color: aliceblue;
+            padding: 2px 0;
+            margin-bottom: 3px;
+        }
+
+        .inline-code {
+            font-size: 15px;
+            font-family: monospace;
+        }
+
+        .http-header {
+            word-break: break-all;
+        }
+
+        .http-header .key {
+            font-weight: bold;
+        }
+
+        .http-payload {
+            font-size: 15px;
+            word-break: break-all;
+            white-space: pre-line;
         }
     </style>
 </head>
@@ -130,11 +152,11 @@
         </thead>
         <tbody>
         <tr data-tt-id="1" data-tt-parent-id=null>
-            <td><span class="status" style="background-color: #0BBD58;">200</span> GET /data HTTP/1.1</td>
+            <td><span class="status" style="background-color: #0BBD58;">200</span> <span class="inline-code">GET /data HTTP/1.1</span></td>
             <td>
                 <div class="container">
                     <div class="gantt-item">
-                        <details style="left: 25px; position: relative; width: 500px">
+                        <details style="left: 25px; position: relative; width: 500px" open>
                             <summary>
                                 <span style="width: 300px; display: block">
                                     <span class="gantt-bar" style="background-color: #4541DD;"></span>
@@ -142,14 +164,64 @@
                                 </span>
                             </summary>
                             <div class="trace-details">
-                                <div>
-                                    <b>Request:</b> <code>POST /data HTTP/1.1</code>
+                                <div class="header">
+                                    <b>Request:</b> <span class="inline-code">POST /data HTTP/1.1</span>
                                 </div>
-                                <div>
-                                    TODO: Request Data
-                                </div>
-                                <div>
-                                    <b>Response:</b> <code>HTTP/1.1 200 OK</code>
+                                <table class="trace-details-table">
+                                    <tr>
+                                        <td class="label">Frame-No.:</td>
+                                        <td>1</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="label">Timestamp:</td>
+                                        <td>30.01.2024 12:02:01.12345</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="label">Source:</td>
+                                        <td>
+                                            <i class="fas fa-square" style="font-size: 11px; color: #4541DD"></i> Test Runner (<span
+                                                class="inline-code">127.0.0.1:80</span>)
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="label">Destination:</td>
+                                        <td>
+                                            <i class="fas fa-square" style="font-size: 11px; color: #FF5F56;"></i> A super long name for a
+                                            service which is not realistic but let's have a look
+                                            (<span class="inline-code">192.168.65.2:1080</span>)
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="label">Headers:</td>
+                                        <td class="inline-code http-header">
+                                            <div>
+                                                <span class="key">Host:</span>
+                                                <span>payment.example.com</span>
+                                            </div>
+                                            <div>
+                                                <span class="key">Content-Type:</span>
+                                                <span>application/json</span>
+                                            </div>
+                                            <div>
+                                                <span class="key">Anything:</span>
+                                                <span>Asuperlongvaluethatmayormaynotfitintoonelineandlet'sseehowthisislooking.</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="label">Payload:</td>
+                                        <td>
+<pre class="http-payload" style="margin: 0">{
+    "emobId": 123,
+    "sessionId": 1,
+    "Asuperlongvaluethatmayormaynotfitintoonelineandlet": 2
+}</pre>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <hr class="divider">
+                                <div class="header">
+                                    <b>Response:</b> <span class="inline-code">HTTP/1.1 200 OK</span>
                                 </div>
                                 <div>
                                     TODO: Response Data
@@ -169,7 +241,8 @@
             </td>
         </tr>
         <tr data-tt-id="2" data-tt-parent-id=1>
-            <td><span class="status" style="background-color: #0BBD58;">200</span> POST /search?query=1 HTTP/1.1</td>
+            <td><span class="status" style="background-color: #0BBD58;">200</span> <code class="inline-code">POST /search?query=1
+                HTTP/1.1</code></td>
             <td>
                 <div class="container">
                     <div class="gantt-item">
@@ -179,6 +252,35 @@
                         <span class="gantt-bar" style="background-color: #FF5F56;"></span>
                         <span class="duration">61ms</span>
                     </span>
+                            </summary>
+                            <div class="trace-details">
+                                TODO: Add Request and Response Data
+                            </div>
+                        </details>
+                    </div>
+                    <div class="gantt-item"></div>
+                    <div class="gantt-item"></div>
+                    <div class="gantt-item"></div>
+                    <div class="gantt-item"></div>
+                    <div class="gantt-item"></div>
+                    <div class="gantt-item"></div>
+                    <div class="gantt-item"></div>
+                    <div class="gantt-item"></div>
+                </div>
+            </td>
+        </tr>
+        <tr data-tt-id="3" data-tt-parent-id=1>
+            <td><span class="status" style="background-color: #0BBD58;">200</span> <code class="inline-code">POST /search?query=1
+                HTTP/1.1</code></td>
+            <td>
+                <div class="container">
+                    <div class="gantt-item">
+                        <details style="left: 40px; position: relative; width: 500px">
+                            <summary>
+                                <span style="width: 15px; display: block">
+                                    <span class="gantt-bar" style="background-color: #FF5F56;"></span>
+                                    <span class="duration">61ms</span>
+                                </span>
                             </summary>
                             <div class="trace-details">
                                 TODO: Add Request and Response Data
