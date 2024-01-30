@@ -44,7 +44,7 @@ abstract class ContainerStatsConsumer : Consumer<Statistics> {
         val cpuUsage = aggregateCpuUsage(statistics)
         val networkUsage = aggregateNetworkUsage(statistics)
         return ContainerStatsEntry(
-            timestamp = Instant.parse(statistics.read).truncatedTo(ChronoUnit.SECONDS),
+            timestamp = parseTimestamp(statistics.read).truncatedTo(ChronoUnit.SECONDS),
             memoryUsage = memoryUsage,
             cpuUsage = cpuUsage,
             networkUsage = networkUsage,
@@ -172,4 +172,21 @@ abstract class ContainerStatsConsumer : Consumer<Statistics> {
                 else -> this.onlineCpus
             }
         }
+
+    /**
+     * Parses the given timestamp to an [Instant]. In case the timestamp
+     * does not have a valid format or if the timestamp represents an invalid
+     * value (e.g. `0001-01-01T00:00:00Z`), the current time is returned.
+     */
+    private fun parseTimestamp(timestamp: String): Instant {
+        val instant = try {
+            Instant.parse(timestamp)
+        } catch (e: Exception) {
+            null
+        }
+        if (instant == null || instant.toEpochMilli() < 0) {
+            return Instant.now()
+        }
+        return instant
+    }
 }
