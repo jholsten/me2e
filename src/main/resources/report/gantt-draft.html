@@ -129,7 +129,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr>
+        <tr data-tt-id="1" data-tt-parent-id=null>
             <td><span class="status" style="background-color: #0BBD58;">200</span> GET /data HTTP/1.1</td>
             <td>
                 <div class="container">
@@ -168,7 +168,7 @@
                 </div>
             </td>
         </tr>
-        <tr>
+        <tr data-tt-id="2" data-tt-parent-id=1>
             <td><span class="status" style="background-color: #0BBD58;">200</span> POST /search?query=1 HTTP/1.1</td>
             <td>
                 <div class="container">
@@ -199,6 +199,16 @@
         </tbody>
     </table>
 </div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#traces").treetable({
+            expandable: true,
+            initialState: "expanded",
+            indent: 20,
+        });
+    });
+</script>
 
 
 <div style="overflow-x: auto; width: 900px;">
