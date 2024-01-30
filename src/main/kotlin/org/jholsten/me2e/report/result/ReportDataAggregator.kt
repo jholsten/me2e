@@ -133,8 +133,10 @@ class ReportDataAggregator private constructor() {
         internal fun onTestExecutionFinished(testPlan: TestPlan) {
             val logs = logAggregator.getAggregatedLogs()
             val stats = statsAggregator.getAggregatedStats()
+            // TODO: Collect logs and stats after all tests were executed
             val result = aggregateSummaries(testPlan)
             networkTraceAggregator.collectPackets(result.roots.filterIsInstance<FinishedTestResult>())
+            // TODO: Use Report Generator from Annotation
             HtmlReportGenerator().generate(result)
             println("TODO: ON TEST EXECUTION FINISHED")
         }
