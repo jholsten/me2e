@@ -217,6 +217,35 @@
                 white-space: pre-wrap;
             }
         }
+
+        .log-table {
+            .filter-button {
+                font-size: 15px;
+                cursor: pointer;
+            }
+
+            .filter-modal-container {
+                position: relative;
+                display: inline-block;
+
+                .filter-modal {
+                    background-color: white;
+                    border-radius: 6px;
+                    box-shadow: 0 8px 20px 0 rgba(0, 0, 0, 0.2);
+                    z-index: 1;
+                    display: none;
+                    position: absolute;
+                    top: 110%;
+                    left: 50%;
+                    margin-left: -60px;
+                    padding: 10px;
+                    width: 200px;
+                    font-weight: normal;
+                    font-family: monospace;
+                    font-size: 16px;
+                }
+            }
+        }
     </style>
 </head>
 <body>
@@ -545,11 +574,28 @@
     </div>
 
     <h4>Logs</h4>
-    <table class="log-table">
+    <table id="log-table" class="log-table">
         <thead>
         <tr>
             <th>Time</th>
-            <th>Service</th>
+            <th>
+                Service
+                <div class="filter-modal-container" style="margin-left: 12px;">
+                    <i id="filter-1" class="filter-button fas fa-filter"></i>
+                    <div id="filter-modal-1" class="filter-modal">
+                        <div>
+                            <input type="checkbox" style="accent-color: #F3B469" id="Test Runner" value="Test Runner"
+                                   name="log-service-filter" onclick="filterLogs()">
+                            <label for="Test Runner">Test Runner</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" style="accent-color: #4541DD" id="Backend-Api-f" value="Backend-Api"
+                                   name="log-service-filter" onclick="filterLogs()">
+                            <label for="Backend-Api-f">Backend-API</label>
+                        </div>
+                    </div>
+                </div>
+            </th>
             <th>Message</th>
         </tr>
         </thead>
@@ -571,12 +617,77 @@
         </tr>
         <tr>
             <td><code>12:03.235</code></td>
-            <td><code>Test Runner</code></td>
+            <td><code>Backend-Api</code></td>
             <td><code>Hello from the Test Runner</code></td>
         </tr>
         </tbody>
     </table>
 </div>
+
+<script type="text/javascript">
+    let open = false;
+    const modal = document.getElementById("filter-modal-1");
+    const filterButton = document.getElementById("filter-1");
+
+    // Toggle modal on click
+    filterButton.onclick = function () {
+        if (!open) {
+            modal.style.display = "block";
+        } else {
+            modal.style.display = "none";
+        }
+
+        open = !open;
+    }
+
+    /**
+     * Closes filter modal on click outside
+     */
+    window.onclick = function (event) {
+        if (!modal.contains(event.target) && event.target !== filterButton) {
+            modal.style.display = "none";
+            open = false;
+        }
+    }
+
+    const logTable = document.getElementById("log-table");
+    const rows = logTable.getElementsByTagName("tr");
+
+    /**
+     * Hides all rows in log table which were not logged by the selected services.
+     * Changes style of filter button to highlight whether filters are active.
+     */
+    function filterLogs() {
+        const checkboxes = document.getElementsByName("log-service-filter");
+        const selected = [...checkboxes].filter((c) => c.checked).map((c) => c.value);
+        if (selected.length === 0) {
+            updateLogTableRows((_) => true);
+            filterButton.style.color = "unset";
+            filterButton.style.textShadow = "unset";
+        } else {
+            updateLogTableRows((service) => selected.includes(service));
+            filterButton.style.color = "#4541DD";
+            filterButton.style.textShadow = "0 0 20px #4541DD";
+        }
+    }
+
+    /**
+     * Hides all rows in log table for which the function `shouldDisplay` returns false.
+     */
+    function updateLogTableRows(shouldDisplay) {
+        for (let i = 0; i < rows.length; i++) {
+            let serviceCell = rows[i].getElementsByTagName("td")[1];
+            if (serviceCell) {
+                let service = serviceCell.textContent || serviceCell.innerText;
+                if (shouldDisplay(service)) {
+                    rows[i].style.display = "";
+                } else {
+                    rows[i].style.display = "none";
+                }
+            }
+        }
+    }
+</script>
 
 <script type="text/javascript">
     $(document).ready(function () {
