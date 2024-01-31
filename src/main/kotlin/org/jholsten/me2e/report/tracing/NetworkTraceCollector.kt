@@ -48,7 +48,7 @@ class NetworkTraceCollector(
      * @return All packets captured in this network.
      */
     fun collect(): List<HttpPacket> {
-        logger.info("Collecting packets...")
+        logger.info("Collecting packets from network $networkId...")
         try {
             val result = capturer.execInContainer("sh", "collect.sh")
             if (result.exitCode != 0) {

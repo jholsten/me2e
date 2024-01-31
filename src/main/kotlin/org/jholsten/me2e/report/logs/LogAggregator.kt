@@ -6,6 +6,7 @@ import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.report.logs.model.AggregatedLogEntry
 import org.jholsten.me2e.report.logs.model.ServiceSpecification
 import org.jholsten.me2e.report.result.ReportDataAggregator
+import org.jholsten.me2e.utils.logger
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -13,6 +14,8 @@ import org.slf4j.LoggerFactory
  * Service which collects all log entries from all containers and from the Test Runner.
  */
 class LogAggregator internal constructor() {
+    private val logger = logger(this)
+
     /**
      * Map of container specification and log collector.
      * For each container instance, there is one collector which collects
@@ -33,6 +36,7 @@ class LogAggregator internal constructor() {
     @JvmSynthetic
     internal fun initializeOnTestExecutionStarted() {
         consumeTestRunnerLogs()
+        logger.info("Attached log consumer to Test Runner logs.")
     }
 
     /**
@@ -44,6 +48,7 @@ class LogAggregator internal constructor() {
         val consumer = ContainerLogCollector(specification)
         this.consumers[specification] = consumer
         container.addLogConsumer(consumer)
+        logger.info("Attached log consumer to container ${container.name}.")
     }
 
     /**

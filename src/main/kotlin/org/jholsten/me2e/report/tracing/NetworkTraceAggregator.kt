@@ -82,27 +82,31 @@ class NetworkTraceAggregator {
      * The mock servers are not actually separate nodes in the network, but are reachable via the Test Runner on port 80/443.
      * Requests to the mock servers are assigned via the name specified in the host header.
      */
-    private val mockServers: Map<String, NetworkNodeSpecification> = if (Me2eTestConfigStorage.config != null) {
-        Me2eTestConfigStorage.config!!.environment.mockServers.values
-            .associate {
-                it.hostname to NetworkNodeSpecification(
-                    nodeType = NetworkNodeSpecification.NodeType.MOCK_SERVER,
-                    ipAddress = hostIpAddress,
-                    specification = ServiceSpecification(name = it.name),
-                )
-            }
-    } else {
-        mapOf()
+    private val mockServers: Map<String, NetworkNodeSpecification> by lazy {
+        if (Me2eTestConfigStorage.config != null) {
+            Me2eTestConfigStorage.config!!.environment.mockServers.values
+                .associate {
+                    it.hostname to NetworkNodeSpecification(
+                        nodeType = NetworkNodeSpecification.NodeType.MOCK_SERVER,
+                        ipAddress = hostIpAddress,
+                        specification = ServiceSpecification(name = it.name),
+                    )
+                }
+        } else {
+            mapOf()
+        }
     }
 
     /**
      * Network node representing the test runner.
      */
-    private val testRunner: NetworkNodeSpecification = NetworkNodeSpecification(
-        nodeType = NetworkNodeSpecification.NodeType.SERVICE,
-        ipAddress = hostIpAddress,
-        specification = ReportDataAggregator.testRunner,
-    )
+    private val testRunner: NetworkNodeSpecification by lazy {
+        NetworkNodeSpecification(
+            nodeType = NetworkNodeSpecification.NodeType.SERVICE,
+            ipAddress = hostIpAddress,
+            specification = ReportDataAggregator.testRunner,
+        )
+    }
 
     /**
      * Initializes collectors for capturing HTTP traffic in the networks of the given [container].
@@ -129,6 +133,7 @@ class NetworkTraceAggregator {
      * Associates packets with the corresponding tests by their timestamps.
      */
     fun collectPackets(roots: List<FinishedTestResult>) {
+        logger.info("Collection packets...")
         // Since network capturing may be delayed by a couple of milliseconds, we wait a little bit
         Thread.sleep(1000)
         val packets: MutableList<HttpPacket> = mutableListOf()
@@ -296,8 +301,10 @@ class NetworkTraceAggregator {
             return mapOf()
         }
         val testTraces: MutableMap<FinishedTestResult, List<AggregatedNetworkTrace>> = mutableMapOf()
-        for (test in roots) {
-            matchTracesToTest(test, traces = traces, testTraces = testTraces)
+        for ((index, test) in roots.withIndex()) {
+            val start = if (index == 0) Instant.MIN else null
+            val end = if (index == roots.size - 1) Instant.MAX else null
+            matchTracesToTest(test, start, end, traces, testTraces)
         }
         return testTraces
     }
@@ -328,14 +335,8 @@ class NetworkTraceAggregator {
         } else {
             val finishedChildren = test.children.filterIsInstance<FinishedTestResult>()
             for ((index, child) in finishedChildren.withIndex()) {
-                val start = when {
-                    index == 0 -> testStart
-                    else -> null
-                }
-                val end = when {
-                    index == finishedChildren.size - 1 -> testEnd
-                    else -> null
-                }
+                val start = if (index == 0) testStart else null
+                val end = if (index == finishedChildren.size - 1) testEnd else null
                 matchTracesToTest(child, start, end, traces, testTraces)
             }
         }

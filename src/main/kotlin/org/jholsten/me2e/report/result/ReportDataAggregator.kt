@@ -79,6 +79,9 @@ class ReportDataAggregator private constructor() {
          */
         @JvmSynthetic
         internal fun onTestStarted(testIdentifier: TestIdentifier) {
+            if (!testIdentifier.isContainer) {
+                logger.info("Running test ${testIdentifier.displayName}...")
+            }
             startTimes[testIdentifier.uniqueId] = Instant.now()
         }
 
@@ -90,6 +93,9 @@ class ReportDataAggregator private constructor() {
          */
         @JvmSynthetic
         internal fun onTestFinished(testIdentifier: TestIdentifier, testExecutionResult: org.junit.platform.engine.TestExecutionResult) {
+            if (!testIdentifier.isContainer) {
+                logger.info("Executing test ${testIdentifier.displayName} finished.")
+            }
             val summary = IntermediateTestResult.finished(
                 testIdentifier = testIdentifier,
                 testExecutionResult = testExecutionResult,
@@ -129,12 +135,12 @@ class ReportDataAggregator private constructor() {
          */
         @JvmSynthetic
         internal fun onTestExecutionFinished(testPlan: TestPlan) {
+            logger.info("Aggregating test summaries...")
             val result = aggregateSummaries(testPlan)
             networkTraceAggregator.collectPackets(result.roots.filterIsInstance<FinishedTestResult>())
             collectLogsAndStats(result.roots.filterIsInstance<FinishedTestResult>())
             // TODO: Use Report Generator from Annotation
             HtmlReportGenerator().generate(result)
-            println("TODO: ON TEST EXECUTION FINISHED")
         }
 
         /**
@@ -224,8 +230,10 @@ class ReportDataAggregator private constructor() {
         private fun collectLogsAndStats(roots: List<FinishedTestResult>) {
             val logs = logAggregator.collectLogs()
             val stats = statsAggregator.collectStats()
-            for (test in roots) {
-                matchLogsAndStatsToTest(test, logs = logs, stats = stats)
+            for ((index, test) in roots.withIndex()) {
+                val start = if (index == 0) Instant.MIN else null
+                val end = if (index == roots.size - 1) Instant.MAX else null
+                matchLogsAndStatsToTest(test, start, end, logs, stats)
             }
         }
 
@@ -253,14 +261,8 @@ class ReportDataAggregator private constructor() {
             } else {
                 val finishedChildren = test.children.filterIsInstance<FinishedTestResult>()
                 for ((index, child) in finishedChildren.withIndex()) {
-                    val start = when {
-                        index == 0 -> testStart
-                        else -> null
-                    }
-                    val end = when {
-                        index == finishedChildren.size - 1 -> testEnd
-                        else -> null
-                    }
+                    val start = if (index == 0) testStart else null
+                    val end = if (index == finishedChildren.size - 1) testEnd else null
                     matchLogsAndStatsToTest(child, start, end, logs, stats)
                 }
             }
