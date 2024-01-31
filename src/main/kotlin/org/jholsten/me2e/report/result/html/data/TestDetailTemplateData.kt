@@ -2,6 +2,7 @@ package org.jholsten.me2e.report.result.html.data
 
 import org.jholsten.me2e.report.logs.model.AggregatedLogEntry
 import org.jholsten.me2e.report.logs.model.AggregatedLogEntryList
+import org.jholsten.me2e.report.logs.model.ServiceSpecification
 import org.jholsten.me2e.report.result.html.HtmlReportGenerator
 import org.jholsten.me2e.report.result.model.*
 import org.jholsten.me2e.report.result.utils.getDescendants
@@ -33,7 +34,8 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
          * - `displayName:` [String] - Human-readable name of the test or test container (see [TestResult.displayName]).
          * - `tags:` [Set]<[String]> - Tags associated with the test or test container (see [TestResult.tags]).
          * - `statsByContainer:` [Map]<[String], [List]<[AggregatedStatsEntry]>> - Map of container name and their resource usage statistics.
-         * - `allLogs:` [List]<[AggregatedLogEntry]> - All logs from all tests, including those from `@BeforeAll` and `@AfterAll` methods.
+         * - `loggingServices:` [Map]<[String], [List]<[ServiceSpecification]>> - Map of `testId` and a list of distinct and sorted services
+         * which logged at least one entry for this test. Includes only tests for which logs were captured. Can be used to filter logs by service.
          * - `tracesTimeSeries:` [Map]<[String], [List]<[Instant]>> - Map of `testId` and the timestamps of which the time series of the
          * test's traces is composed of. Includes only tests for which traces were captured.
          * - `startTime:` [java.time.Instant] - Timestamp of the test or test container has started its execution
@@ -69,7 +71,7 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
             val allTests = getAllTests(result)
             withVariable("allTests", allTests)
             withVariable("statsByContainer", getStatsByContainer(allTests + result))
-            withVariable("allLogs", getAllLogs(allTests + result))
+            withVariable("loggingServices", getLoggingServices(allTests))
             withVariable("tracesTimeSeries", getTracesTimeSeries(allTests))
             if (result is FinishedTestResult) {
                 withVariable("startTime", result.startTime)
@@ -107,8 +109,17 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
             return allStats.groupBy { it.service.name }
         }
 
-        private fun getAllLogs(allTests: List<TestResult>): List<AggregatedLogEntry> {
-            return allTests.filterIsInstance<FinishedTestResult>().flatMap { it.logs }.sortedBy { it.timestamp }
+        /**
+         * Returns map of [TestResult.testId] and a sorted list of services which logged entries
+         * for this test. Can be used to filter logs by services.
+         */
+        private fun getLoggingServices(allTests: List<TestResult>): Map<String, List<ServiceSpecification>> {
+            val result: MutableMap<String, List<ServiceSpecification>> = mutableMapOf()
+            val testsWithLogs = allTests.filterIsInstance<FinishedTestResult>().filter { it.logs.isNotEmpty() }
+            for (test in testsWithLogs) {
+                result[test.testId] = test.logs.map { it.service }.distinctBy { it.name }.sortedBy { it.name }
+            }
+            return result
         }
 
         /**
