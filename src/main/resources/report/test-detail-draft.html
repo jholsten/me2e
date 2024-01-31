@@ -584,7 +584,11 @@
     </div>
 
     <h4>Logs</h4>
-    <input type="search" id="log-message-search" style="margin-bottom: 12px;" oninput="filterLogs()" placeholder="Search for messages...">
+    <div style="display: flex; align-items: center; margin-bottom: 12px; position: relative;">
+        <input type="search" id="log-message-search" oninput="filterLogs()"
+               placeholder="Search for messages...">
+        <i class="fas fa-xmark clear-search" id="clear-message-filter" onclick="clearSearch()"></i>
+    </div>
     <table id="log-table" class="log-table">
         <thead>
         <tr>
@@ -695,6 +699,12 @@
 
     }
 
+    function clearSearch() {
+        const messageFilterField = document.getElementById("log-message-search");
+        messageFilterField.value = "";
+        filterLogs();
+    }
+
     /**
      * Hides all rows in log table which were not logged by the selected services and do not match the search value.
      * Changes style of filter button to highlight whether filters are active.
@@ -702,13 +712,24 @@
     function filterLogs() {
         const checkboxes = document.getElementsByName("log-service-filter");
         const selected = [...checkboxes].filter((c) => c.checked).map((c) => c.value);
-        const messageFilter = document.getElementById("log-message-search").value.toLowerCase();
+        const messageFilterField = document.getElementById("log-message-search");
+        const clearMessageFilterField = document.getElementById("clear-message-filter");
+        const messageFilter = messageFilterField.value.toLowerCase();
         if (selected.length === 0 || checkboxes.length === selected.length) {
             filterButton.style.color = "unset";
             filterButton.style.textShadow = "unset";
         } else {
             filterButton.style.color = "#4541DD";
             filterButton.style.textShadow = "0 0 20px #4541DD";
+        }
+        if (messageFilter.length === 0) {
+            messageFilterField.style.borderColor = "#D6DDE8";
+            messageFilterField.style.borderWidth = "1px";
+            clearMessageFilterField.style.display = "none";
+        } else {
+            messageFilterField.style.borderColor = "#4541DD";
+            messageFilterField.style.borderWidth = "2px";
+            clearMessageFilterField.style.display = "unset";
         }
         updateLogTableRows((service, message) => (selected.length === 0 || selected.includes(service)) && (message.toLowerCase().indexOf(messageFilter) > -1));
     }
