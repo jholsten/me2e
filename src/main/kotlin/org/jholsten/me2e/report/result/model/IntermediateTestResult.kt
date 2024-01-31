@@ -2,6 +2,7 @@
 
 package org.jholsten.me2e.report.result.model
 
+import org.jholsten.me2e.report.logs.model.AggregatedLogEntry
 import org.jholsten.me2e.report.result.mapper.TestSummaryStatusMapper
 import org.jholsten.me2e.utils.toJson
 import org.junit.platform.engine.TestExecutionResult
@@ -66,6 +67,13 @@ internal class IntermediateTestResult(
     val reportEntries: List<ReportEntry>? = null,
 
     /**
+     * Logs that were collected for this test execution.
+     * Includes test runner logs as well as Docker container logs.
+     * Only set for tests for which the status is not [TestResult.Status.SKIPPED].
+     */
+    val logs: List<AggregatedLogEntry>? = null,
+
+    /**
      * Throwable that caused this result.
      * Only set for tests for which the status is not [TestResult.Status.SKIPPED].
      * @see org.junit.platform.engine.TestExecutionResult.getThrowable
@@ -92,6 +100,7 @@ internal class IntermediateTestResult(
             testExecutionResult: TestExecutionResult,
             startTime: Instant?,
             reportEntries: List<ReportEntry>,
+            logs: List<AggregatedLogEntry> = listOf(),
         ): IntermediateTestResult {
             return IntermediateTestResult(
                 testId = testIdentifier.uniqueId,
@@ -102,6 +111,7 @@ internal class IntermediateTestResult(
                 displayName = testIdentifier.displayName.substringBeforeLast("("),
                 tags = testIdentifier.tags.map { it.name }.toSet(),
                 reportEntries = reportEntries.toList(),
+                logs = logs,
                 throwable = testExecutionResult.throwable.orElse(null),
             )
         }
@@ -183,6 +193,7 @@ internal class IntermediateTestResult(
                 displayName = displayName,
                 tags = tags,
                 reportEntries = reportEntries!!,
+                logs = logs!!,
                 throwable = throwable,
             )
         }

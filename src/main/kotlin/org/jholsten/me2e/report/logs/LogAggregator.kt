@@ -53,16 +53,25 @@ class LogAggregator internal constructor() {
 
     /**
      * Callback function to execute when the execution of all tests has finished.
+     * Collects logs from the test runner.
+     * @return Collected log entries.
+     */
+    @JvmSynthetic
+    internal fun collectTestRunnerLogs(): List<AggregatedLogEntry> {
+        return testRunnerLogCollector.collect().toList()
+    }
+
+    /**
+     * Callback function to execute when the execution of all tests has finished.
      * Collects logs from all containers.
      * @return Collected log entries.
      */
     @JvmSynthetic
-    internal fun collectLogs(): List<AggregatedLogEntry> {
+    internal fun collectContainerLogs(): List<AggregatedLogEntry> {
         val logs = mutableListOf<AggregatedLogEntry>()
         for (consumer in consumers.values) {
             logs.addAll(consumer.collect())
         }
-        logs.addAll(testRunnerLogCollector.collect())
         logs.sortBy { it.timestamp }
         return logs.toList()
     }

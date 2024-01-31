@@ -79,9 +79,7 @@ class ReportDataAggregator private constructor() {
          */
         @JvmSynthetic
         internal fun onTestStarted(testIdentifier: TestIdentifier) {
-            if (!testIdentifier.isContainer) {
-                logger.info("Running test ${testIdentifier.displayName}...")
-            }
+            logger.info("Running test ${testIdentifier.displayName}...")
             startTimes[testIdentifier.uniqueId] = Instant.now()
         }
 
@@ -93,14 +91,13 @@ class ReportDataAggregator private constructor() {
          */
         @JvmSynthetic
         internal fun onTestFinished(testIdentifier: TestIdentifier, testExecutionResult: org.junit.platform.engine.TestExecutionResult) {
-            if (!testIdentifier.isContainer) {
-                logger.info("Executing test ${testIdentifier.displayName} finished.")
-            }
+            logger.info("Executing test ${testIdentifier.displayName} finished.")
             val summary = IntermediateTestResult.finished(
                 testIdentifier = testIdentifier,
                 testExecutionResult = testExecutionResult,
                 startTime = startTimes[testIdentifier.uniqueId],
                 reportEntries = collectedReportEntries,
+                logs = logAggregator.collectTestRunnerLogs(),
             )
             storeIntermediateTestResult(summary)
         }
@@ -228,7 +225,7 @@ class ReportDataAggregator private constructor() {
          * parent and the last child receives all entries recorded up to the end of its parent.
          */
         private fun collectLogsAndStats(roots: List<FinishedTestResult>) {
-            val logs = logAggregator.collectLogs()
+            val logs = logAggregator.collectContainerLogs() + logAggregator.collectTestRunnerLogs()
             val stats = statsAggregator.collectStats()
             for ((index, test) in roots.withIndex()) {
                 val start = if (index == 0) Instant.MIN else null
@@ -256,7 +253,7 @@ class ReportDataAggregator private constructor() {
             val testStart = parentStart ?: test.startTime
             val testEnd = parentEnd ?: test.endTime
             if (test.children.isEmpty()) {
-                test.logs = logs.findLogsBetween(testStart, testEnd)
+                test.logs = (test.logs + logs.findLogsBetween(testStart, testEnd)).sortedBy { it.timestamp }
                 test.stats = stats.findStatsBetween(testStart, testEnd)
             } else {
                 val finishedChildren = test.children.filterIsInstance<FinishedTestResult>()
