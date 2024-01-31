@@ -1,5 +1,6 @@
 package org.jholsten.me2e.report.result
 
+import org.jholsten.me2e.Me2eTestConfigStorage
 import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.report.logs.LogAggregator
 import org.jholsten.me2e.report.logs.model.AggregatedLogEntry
@@ -22,6 +23,7 @@ import org.junit.platform.launcher.TestPlan
 import java.time.Instant
 import java.util.UUID
 import kotlin.jvm.optionals.getOrNull
+import kotlin.reflect.full.primaryConstructor
 
 /**
  * Service which aggregates all the data required for the test report.
@@ -137,8 +139,7 @@ class ReportDataAggregator private constructor() {
             val result = aggregateSummaries(testPlan)
             networkTraceAggregator.collectPackets(result.roots.filterIsInstance<FinishedTestResult>())
             collectContainerLogsAndStats(result.roots.filterIsInstance<FinishedTestResult>())
-            // TODO: Use Report Generator from Annotation
-            HtmlReportGenerator().generate(result)
+            generateReport(result)
         }
 
         /**
@@ -260,6 +261,26 @@ class ReportDataAggregator private constructor() {
                 is MethodSource -> source.className
                 is PackageSource -> source.packageName
                 else -> null
+            }
+        }
+
+        /**
+         * Generates test reports using the [ReportGenerator]s specified in the [org.jholsten.me2e.Me2eTestConfig].
+         */
+        private fun generateReport(result: TestExecutionResult) {
+            val reportGeneratorClasses = Me2eTestConfigStorage.configAnnotation?.reportGenerators ?: arrayOf(HtmlReportGenerator::class)
+            for (reportGeneratorClass in reportGeneratorClasses) {
+                if (reportGeneratorClass.primaryConstructor == null) {
+                    logger.error("Cannot use report generator $reportGeneratorClass, since it does not have a primary, no argument constructor.")
+                    continue
+                }
+                try {
+                    val reportGenerator = reportGeneratorClass.primaryConstructor!!.callBy(emptyMap())
+                    logger.info("Using report generator $reportGeneratorClass to generate test report.")
+                    reportGenerator.generate(result)
+                } catch (e: Exception) {
+                    logger.error("Exception occurred while trying to generate report using $reportGeneratorClass.", e)
+                }
             }
         }
 

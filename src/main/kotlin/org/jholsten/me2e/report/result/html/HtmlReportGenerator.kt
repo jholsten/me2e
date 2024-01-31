@@ -55,6 +55,7 @@ open class HtmlReportGenerator(
         for (root in result.roots) {
             generateTestDetailHtml(root)
         }
+        logger.info("Generated and stored HTML report at $outputDirectory/index.html.")
     }
 
     protected open fun generateIndexHtml() {
