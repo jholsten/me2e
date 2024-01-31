@@ -1,9 +1,7 @@
 package org.jholsten.me2e
 
-import io.github.classgraph.AnnotationEnumValue
 import io.github.classgraph.ClassGraph
 import io.github.classgraph.ClassInfo
-import org.jholsten.me2e.config.model.ConfigFormat
 import org.jholsten.me2e.utils.logger
 
 internal class Me2eTestConfigScanner {
@@ -23,16 +21,12 @@ internal class Me2eTestConfigScanner {
                 logger.warn("Found ${annotatedClasses.size} Me2eTestConfig annotations. Will be using the first one...")
             }
             val annotatedClass = annotatedClasses.first()
-            logger.info("Reading test configuration from ${annotatedClass.name}")
+            logger.info("Reading test configuration from ${annotatedClass.name}.")
             return extractAnnotationFromAnnotatedClass(annotatedClass)
         }
 
         private fun extractAnnotationFromAnnotatedClass(annotatedClass: ClassInfo): Me2eTestConfig {
-            val annotation = annotatedClass.getAnnotationInfo(Me2eTestConfig::class.java)
-            val params = annotation.getParameterValues(true)
-            val config = params.find { it.name == "config" }!!.value as String
-            val format = params.find { it.name == "format" }!!.value as AnnotationEnumValue
-            return Me2eTestConfig(config = config, format = ConfigFormat.valueOf(format.valueName))
+            return annotatedClass.loadClass().getAnnotation(Me2eTestConfig::class.java)
         }
     }
 }
