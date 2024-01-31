@@ -61,13 +61,19 @@
         .log-table {
             table-layout: fixed;
 
-            & thead {
+            > thead {
                 position: sticky;
                 box-shadow: 0 1px 0 0 #A6A6A6;
+                background-color: #FBFBFB;
+
+                > tr > th > input[type="search"] {
+                    margin-left: 12px;
+                }
             }
 
             & th {
                 text-align: start;
+                padding: 10px 0;
             }
 
             & td {
@@ -102,31 +108,9 @@
                 width: 100%;
             }
 
-            & .filter-button {
-                font-size: 15px;
-                cursor: pointer;
-            }
-
-            & .filter-modal-container {
-                position: relative;
-                display: inline-block;
-
-                & .filter-modal {
-                    background-color: white;
-                    border-radius: 6px;
-                    box-shadow: 0 8px 20px 0 rgba(0, 0, 0, 0.2);
-                    z-index: 1;
-                    display: none;
-                    position: absolute;
-                    top: 110%;
-                    left: 50%;
-                    margin-left: -60px;
-                    padding: 10px;
-                    width: 200px;
-                    font-weight: normal;
-                    font-family: monospace;
-                    font-size: 16px;
-                }
+            & .filter-modal {
+                font-family: monospace;
+                font-size: 16px;
             }
         }
 
@@ -660,6 +644,8 @@
 
             <div th:if="${!test.logs.isEmpty()}">
                 <h4>Logs</h4>
+                <input type="search" th:id="'log-message-search-' + ${test.testId}" style="margin-bottom: 12px;"
+                       th:attr="oninput=|filterLogs('${test.testId}')|" placeholder="Search for messages...">
                 <table th:id="'log-table-' + ${test.testId}" class="log-table">
                     <thead>
                     <tr>
@@ -845,7 +831,7 @@
     }
 
     /**
-     * Hides all rows in log table which were not logged by the selected services.
+     * Hides all rows in log table which were not logged by the selected services and do not match the search value.
      * Changes style of filter button to highlight whether filters are active.
      */
     function filterLogs(testId) {
@@ -853,15 +839,17 @@
         const rows = logTable.getElementsByTagName("tr");
         const checkboxes = document.getElementsByName(`log-service-filter-${testId}`);
         const selected = [...checkboxes].filter((c) => c.checked).map((c) => c.value);
+        const messageFilter = document.getElementById(`log-message-search-${testId}`).value.toLowerCase();
         if (selected.length === 0) {
-            updateLogTableRows(rows, (_) => true);
             filterButtons.get(testId).style.color = "unset";
             filterButtons.get(testId).style.textShadow = "unset";
         } else {
-            updateLogTableRows(rows, (service) => selected.includes(service));
             filterButtons.get(testId).style.color = "#4541DD";
             filterButtons.get(testId).style.textShadow = "0 0 20px #4541DD";
         }
+        updateLogTableRows(rows, (service, message) =>
+            (selected.length === 0 || selected.includes(service)) && (message.toLowerCase().indexOf(messageFilter) > -1)
+        );
     }
 
     /**
@@ -869,10 +857,13 @@
      */
     function updateLogTableRows(rows, shouldDisplay) {
         for (const row of rows) {
-            let serviceCell = row.getElementsByTagName("td")[1];
-            if (serviceCell) {
+            let data = row.getElementsByTagName("td");
+            let serviceCell = data[1];
+            let messageCell = data[2];
+            if (serviceCell && messageCell) {
                 let service = (serviceCell.textContent || serviceCell.innerText).trim();
-                if (shouldDisplay(service)) {
+                let message = messageCell.textContent || messageCell.innerText;
+                if (shouldDisplay(service, message)) {
                     row.style.display = "";
                 } else {
                     row.style.display = "none";
