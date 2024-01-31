@@ -113,7 +113,8 @@ class ReportDataAggregator private constructor() {
          */
         @JvmSynthetic
         internal fun onTestSkipped(testIdentifier: TestIdentifier, reason: String?) {
-            IntermediateTestResult.skipped(testIdentifier, reason)
+            val summary = IntermediateTestResult.skipped(testIdentifier, reason)
+            intermediateTestResults[testIdentifier.uniqueId] = summary
             collectedReportEntries.clear()
         }
 
