@@ -99,17 +99,11 @@
         <tbody>
         <tr th:each="test : ${allTests}" th:data-tt-id="${test.testId}" th:data-tt-parent-id="${test.parentId}">
             <td class="align-left">
-                <a th:if="${test.children.isEmpty() || test.parentId == null}"
-                   th:style="${'color: ' + (test.status.name == 'SKIPPED' ? '#A6A6A6' : (test.numberOfFailures > 0 ? '#FF5F56' : '#0BBD58'))}"
+                <a th:style="${'color: ' + (test.status.name == 'SKIPPED' ? '#A6A6A6' : (test.numberOfFailures > 0 ? '#FF5F56' : '#0BBD58'))}"
                    th:href="${'sources/' + test.source + '.html#' + test.testId}"
                 >
                     <span th:text="${test.displayName}"></span>
                 </a>
-                <span th:if="${!test.children.isEmpty() && test.parentId != null}">
-                    <span th:class="${test.status.name == 'SKIPPED' ? 'skipped' : (test.numberOfFailures > 0 ? 'failure' : 'success')}"
-                          th:text="${test.displayName}"
-                    ></span>
-                </span>
             </td>
             <td th:text="${test.numberOfTests}"></td>
             <td th:text="${test.numberOfFailures}"></td>

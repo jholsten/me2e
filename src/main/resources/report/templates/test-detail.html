@@ -250,7 +250,7 @@
 </head>
 <body>
 <div style="display: flex; justify-content: space-between; align-items: center;">
-    <h1 th:id="${testId}">Test Summary: [[${displayName}]]</h1>
+    <h1>Test Summary: [[${displayName}]]</h1>
     <a href="../index.html" style="color: #15134C; text-decoration: none;">
         <i class="fas fa-home fa-lg"></i>
     </a>
@@ -274,17 +274,11 @@
         <tbody>
         <tr th:each="test : ${allTests}" th:data-tt-id="${test.testId}" th:data-tt-parent-id="${test.parentId}">
             <td class="align-left">
-                <a th:if="${test.children.isEmpty()}"
-                   th:style="${'color: ' + (test.status.name == 'SKIPPED' ? '#A6A6A6' : (test.numberOfFailures > 0 ? '#FF5F56' : '#0BBD58'))}"
+                <a th:style="${'color: ' + (test.status.name == 'SKIPPED' ? '#A6A6A6' : (test.numberOfFailures > 0 ? '#FF5F56' : '#0BBD58'))}"
                    th:href="${'../sources/' + test.source + '.html#' + test.testId}"
                 >
                     <span th:text="${test.displayName}"></span>
                 </a>
-                <span th:if="${!test.children.isEmpty()}">
-                    <span th:class="${test.status.name == 'SKIPPED' ? 'skipped' : (test.numberOfFailures > 0 ? 'failure' : 'success')}"
-                          th:text="${test.displayName}"
-                    ></span>
-                </span>
             </td>
             <td th:text="${test.numberOfTests}"></td>
             <td th:text="${test.numberOfFailures}"></td>
@@ -351,7 +345,7 @@
 </div>
 
 <h2>Test Results</h2>
-<div th:each="test, iter : ${allTests}" th:if="${test.children.isEmpty()}" th:id="${test.testId}">
+<div th:each="test, iter : ${allTests}" th:id="${test.testId}">
     <h3>
         <span th:switch="${test.status.name}">
             <i th:case="'SKIPPED'" class="fas fa-ban skipped"></i>

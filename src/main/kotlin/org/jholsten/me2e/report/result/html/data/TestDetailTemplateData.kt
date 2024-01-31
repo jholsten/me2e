@@ -22,8 +22,8 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
          * - `source:` [String] - Source of the [TestExecutionResult.roots] where this test or test container is defined (see [TestResult.source]).
          * - `path:` [List]<[Pair]<[String],[String]>> - Path of this result in the overall test execution tree from the root to this test (see [TestResult.path]).
          * - `children:` [List]<[TestResult]> - Summaries of the children of the test or test container (see [TestResult.children]).
-         * - `allTests:` [List]<[TestResult]> - All tests and test containers included in the result, i.e. all of the [TestResult.children],
-         * their children and their children, recursively.
+         * - `allTests:` [List]<[TestResult]> - All tests and test containers included in the result, i.e. the [result], all of the
+         * [TestResult.children], their children and their children, recursively.
          * - `status:` [TestResult.Status] - Status of the test execution (see [TestResult.status]).
          * - `numberOfTests:` [Int] - Number of tests that the result contains (see [TestResult.numberOfTests]).
          * - `numberOfFailures:` [Int] - Number of failed tests that the result contains (see [TestResult.numberOfFailures]).
@@ -68,7 +68,7 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
             withVariable("tags", result.tags)
             val allTests = getAllTests(result)
             withVariable("allTests", allTests)
-            withVariable("statsByContainer", getStatsByContainer(allTests + result))
+            withVariable("statsByContainer", getStatsByContainer(allTests))
             withVariable("loggingServices", getLoggingServices(allTests))
             withVariable("tracesTimeSeries", getTracesTimeSeries(allTests))
             if (result is FinishedTestResult) {
@@ -94,7 +94,7 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
         }
 
         private fun getAllTests(result: TestResult): List<TestResult> {
-            val tests: MutableList<TestResult> = mutableListOf()
+            val tests: MutableList<TestResult> = mutableListOf(result)
             for (child in result.children) {
                 tests.add(child)
                 tests.addAll(getDescendants(child))
