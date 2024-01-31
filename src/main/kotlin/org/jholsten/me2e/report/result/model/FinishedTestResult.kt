@@ -1,6 +1,6 @@
 package org.jholsten.me2e.report.result.model
 
-import org.jholsten.me2e.report.logs.model.AggregatedLogEntryList
+import org.jholsten.me2e.report.logs.model.AggregatedLogEntry
 import org.jholsten.me2e.report.result.utils.calculateDurationInSeconds
 import org.jholsten.me2e.report.stats.model.AggregatedStatsEntryList
 import org.jholsten.me2e.report.tracing.model.AggregatedNetworkTrace
@@ -110,7 +110,7 @@ class FinishedTestResult(
      * Logs that were collected for this test execution.
      * Includes test runner logs as well as Docker container logs.
      */
-    val logs: AggregatedLogEntryList,
+    val logs: List<AggregatedLogEntry>,
 
     /**
      * Resource usage statistics that were collected for this test execution.

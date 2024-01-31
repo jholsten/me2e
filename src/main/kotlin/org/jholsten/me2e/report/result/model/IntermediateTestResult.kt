@@ -2,7 +2,7 @@
 
 package org.jholsten.me2e.report.result.model
 
-import org.jholsten.me2e.report.logs.model.AggregatedLogEntryList
+import org.jholsten.me2e.report.logs.model.AggregatedLogEntry
 import org.jholsten.me2e.report.stats.model.AggregatedStatsEntryList
 import org.jholsten.me2e.report.result.mapper.TestSummaryStatusMapper
 import org.jholsten.me2e.utils.toJson
@@ -72,7 +72,7 @@ internal class IntermediateTestResult(
      * Includes test runner logs as well as Docker container logs.
      * Only set for tests for which the status is not [TestResult.Status.SKIPPED].
      */
-    val logs: AggregatedLogEntryList? = null,
+    val logs: List<AggregatedLogEntry>? = null,
 
     /**
      * Resource usage statistics that were collected for this test execution.
@@ -109,7 +109,7 @@ internal class IntermediateTestResult(
             testExecutionResult: TestExecutionResult,
             startTime: Instant?,
             reportEntries: List<ReportEntry>,
-            logs: AggregatedLogEntryList,
+            logs: List<AggregatedLogEntry>,
             stats: AggregatedStatsEntryList,
         ): IntermediateTestResult {
             return IntermediateTestResult(

@@ -5,7 +5,6 @@ import org.jholsten.me2e.container.ContainerManager
 import org.jholsten.me2e.container.microservice.MicroserviceContainer
 import org.jholsten.me2e.mock.MockServerManager
 import org.jholsten.me2e.parsing.utils.FileUtils
-import org.jholsten.me2e.report.logs.model.AggregatedLogEntryList
 import org.jholsten.me2e.report.logs.model.ServiceSpecification
 import org.jholsten.me2e.report.result.model.FinishedTestResult
 import org.jholsten.me2e.report.result.model.TestResult
@@ -78,7 +77,7 @@ internal class NetworkTraceAggregatorIT {
                 displayName = "Test A",
                 tags = setOf(),
                 reportEntries = listOf(),
-                logs = AggregatedLogEntryList(),
+                logs = listOf(),
                 stats = AggregatedStatsEntryList(),
                 throwable = null,
             )

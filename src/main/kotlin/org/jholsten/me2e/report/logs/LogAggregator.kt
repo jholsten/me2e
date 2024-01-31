@@ -3,7 +3,6 @@ package org.jholsten.me2e.report.logs
 import ch.qos.logback.classic.LoggerContext
 import ch.qos.logback.classic.PatternLayout
 import org.jholsten.me2e.container.Container
-import org.jholsten.me2e.report.logs.model.AggregatedLogEntryList
 import org.jholsten.me2e.report.logs.model.AggregatedLogEntry
 import org.jholsten.me2e.report.logs.model.ServiceSpecification
 import org.jholsten.me2e.report.result.ReportDataAggregator
@@ -61,7 +60,7 @@ class LogAggregator internal constructor() {
      * @return Collected log entries.
      */
     @JvmSynthetic
-    internal fun collectLogs(testId: String): AggregatedLogEntryList {
+    internal fun collectLogs(testId: String): List<AggregatedLogEntry> {
         val logs = mutableListOf<AggregatedLogEntry>()
         for (consumer in consumers.values) {
             logs.addAll(consumer.collect())
@@ -69,22 +68,14 @@ class LogAggregator internal constructor() {
         logs.addAll(testRunnerLogCollector.reset())
         logs.sortBy { it.timestamp }
         this.logs[testId] = logs
-        return AggregatedLogEntryList(logs)
-    }
-
-    /**
-     * Returns aggregated logs which were collected for the execution of the test with the given ID.
-     * @throws IllegalArgumentException if no logs are stored for the given test ID.
-     */
-    fun getAggregatedLogsByTestId(testId: String): AggregatedLogEntryList {
-        return requireNotNull(logs[testId]?.let { AggregatedLogEntryList(it) }) { "No logs stored for test with ID $testId." }
+        return logs.toList()
     }
 
     /**
      * Returns aggregated logs of all test executions as map of test ID and aggregated logs.
      */
-    fun getAggregatedLogs(): Map<String, AggregatedLogEntryList> {
-        return logs.map { (testId, logs) -> testId to AggregatedLogEntryList(logs) }.toMap()
+    fun getAggregatedLogs(): Map<String, List<AggregatedLogEntry>> {
+        return logs.map { (testId, logs) -> testId to logs.toList() }.toMap()
     }
 
     private fun consumeTestRunnerLogs() {

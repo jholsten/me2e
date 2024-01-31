@@ -1,7 +1,6 @@
 package org.jholsten.me2e.report.result.html.data
 
 import org.jholsten.me2e.report.logs.model.AggregatedLogEntry
-import org.jholsten.me2e.report.logs.model.AggregatedLogEntryList
 import org.jholsten.me2e.report.logs.model.ServiceSpecification
 import org.jholsten.me2e.report.result.html.HtmlReportGenerator
 import org.jholsten.me2e.report.result.model.*
@@ -46,7 +45,7 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
          * **Only available if [TestResult.status] is not [TestResult.Status.SKIPPED]**.
          * - `reportEntries:` [List]<[ReportEntry]> - Additional report entries that were published during the test execution
          * (see [FinishedTestResult.reportEntries]). **Only available if [TestResult.status] is not [TestResult.Status.SKIPPED]**.
-         * - `logs:` [AggregatedLogEntryList] - Logs that were collected for the test execution (see [FinishedTestResult.logs]).
+         * - `logs:` [List]<[AggregatedLogEntry]> - Logs that were collected for the test execution (see [FinishedTestResult.logs]).
          * **Only available if [TestResult.status] is not [TestResult.Status.SKIPPED]**.
          * - `stats:` [AggregatedStatsEntryList] - Resource usage statistics that were collected for the test execution
          * (see [FinishedTestResult.stats]). **Only available if [TestResult.status] is not [TestResult.Status.SKIPPED]**.
