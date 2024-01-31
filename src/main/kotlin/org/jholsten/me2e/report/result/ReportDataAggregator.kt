@@ -136,7 +136,7 @@ class ReportDataAggregator private constructor() {
             logger.info("Aggregating test summaries...")
             val result = aggregateSummaries(testPlan)
             networkTraceAggregator.collectPackets(result.roots.filterIsInstance<FinishedTestResult>())
-            collectLogsAndStats(result.roots.filterIsInstance<FinishedTestResult>())
+            collectContainerLogsAndStats(result.roots.filterIsInstance<FinishedTestResult>())
             // TODO: Use Report Generator from Annotation
             HtmlReportGenerator().generate(result)
         }
@@ -167,6 +167,7 @@ class ReportDataAggregator private constructor() {
          * The original roots of the test plan, i.e. the test engine such as [engine:junit-jupiter]`,
          * are not included in the tree. Instead, the roots of the tree to be built are formed by
          * the underlying children, which are typically the executed test classes.
+         * TODO: Maybe include collecting logs and stats
          */
         private fun buildTestTree(testPlan: TestPlan): List<TestResult> {
             val roots: MutableList<TestResult> = mutableListOf()
@@ -225,13 +226,11 @@ class ReportDataAggregator private constructor() {
          * in `@BeforeAll` and `@AfterAll` methods. This means that the first child receives all entries since the start of its
          * parent and the last child receives all entries recorded up to the end of its parent.
          */
-        private fun collectLogsAndStats(roots: List<FinishedTestResult>) {
-            val logs = logAggregator.collectContainerLogs() + logAggregator.collectTestRunnerLogs()
+        private fun collectContainerLogsAndStats(roots: List<FinishedTestResult>) {
+            val logs = logAggregator.collectContainerLogs()
             val stats = statsAggregator.collectStats()
-            for ((index, test) in roots.withIndex()) {
-                val start = if (index == 0) Instant.MIN else null
-                val end = if (index == roots.size - 1) Instant.MAX else null
-                matchLogsAndStatsToTest(test, start, end, logs, stats)
+            for (test in roots) {
+                matchLogsAndStatsToTest(test, logs, stats)
             }
         }
 
@@ -239,30 +238,16 @@ class ReportDataAggregator private constructor() {
          * Matches logs and stats to the given test, if it is not a test container (i.e. it does not contain any children).
          * If it is a test container however, the logs and traces are assigned to its children.
          * @param test Test for which corresponding logs and traces are to be matched.
-         * @param parentStart Start time of the test's parent. Only set if [test] is its first child.
-         * @param parentEnd End time of the test's parent. Only set if [test] is its last child.
          * @param logs All logs captured from all Docker containers and the test runner.
          * @param stats All stats captured from all Docker containers.
          */
-        private fun matchLogsAndStatsToTest(
-            test: FinishedTestResult,
-            parentStart: Instant? = null,
-            parentEnd: Instant? = null,
-            logs: List<AggregatedLogEntry>,
-            stats: List<AggregatedStatsEntry>,
-        ) {
-            val testStart = parentStart ?: test.startTime
-            val testEnd = parentEnd ?: test.endTime
-            if (test.children.isEmpty()) {
-                test.logs = (test.logs + logs.findLogsBetween(testStart, testEnd)).sortedBy { it.timestamp }
-                test.stats = stats.findStatsBetween(testStart, testEnd)
-            } else {
-                val finishedChildren = test.children.filterIsInstance<FinishedTestResult>()
-                for ((index, child) in finishedChildren.withIndex()) {
-                    val start = if (index == 0) testStart else null
-                    val end = if (index == finishedChildren.size - 1) testEnd else null
-                    matchLogsAndStatsToTest(child, start, end, logs, stats)
-                }
+        private fun matchLogsAndStatsToTest(test: FinishedTestResult, logs: List<AggregatedLogEntry>, stats: List<AggregatedStatsEntry>) {
+            test.logs = (test.logs + logs.findLogsBetween(test.startTime, test.endTime)).sortedBy { it.timestamp }
+            test.stats = stats.findStatsBetween(test.startTime, test.endTime)
+
+            val finishedChildren = test.children.filterIsInstance<FinishedTestResult>()
+            for (child in finishedChildren) {
+                matchLogsAndStatsToTest(child, logs, stats)
             }
         }
 

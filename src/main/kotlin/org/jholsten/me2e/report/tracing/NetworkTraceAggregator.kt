@@ -301,10 +301,8 @@ class NetworkTraceAggregator {
             return mapOf()
         }
         val testTraces: MutableMap<FinishedTestResult, List<AggregatedNetworkTrace>> = mutableMapOf()
-        for ((index, test) in roots.withIndex()) {
-            val start = if (index == 0) Instant.MIN else null
-            val end = if (index == roots.size - 1) Instant.MAX else null
-            matchTracesToTest(test, start, end, traces, testTraces)
+        for (test in roots) {
+            matchTracesToTest(test, traces, testTraces)
         }
         return testTraces
     }
@@ -323,22 +321,14 @@ class NetworkTraceAggregator {
      */
     private fun matchTracesToTest(
         test: FinishedTestResult,
-        parentStart: Instant? = null,
-        parentEnd: Instant? = null,
         traces: List<AggregatedNetworkTrace>,
         testTraces: MutableMap<FinishedTestResult, List<AggregatedNetworkTrace>>,
     ) {
-        val testStart = parentStart ?: test.startTime
-        val testEnd = parentEnd ?: test.endTime
-        if (test.children.isEmpty()) {
-            testTraces[test] = traces.findTracesBetween(testStart, testEnd)
-        } else {
-            val finishedChildren = test.children.filterIsInstance<FinishedTestResult>()
-            for ((index, child) in finishedChildren.withIndex()) {
-                val start = if (index == 0) testStart else null
-                val end = if (index == finishedChildren.size - 1) testEnd else null
-                matchTracesToTest(child, start, end, traces, testTraces)
-            }
+        testTraces[test] = traces.findTracesBetween(test.startTime, test.endTime)
+
+        val finishedChildren = test.children.filterIsInstance<FinishedTestResult>()
+        for (child in finishedChildren) {
+            matchTracesToTest(child, traces, testTraces)
         }
     }
 

@@ -930,10 +930,8 @@
 </script>
 
 <script th:each="test : ${allTests}" th:if="${test.status.name != 'SKIPPED' && !test.traces.isEmpty()}" th:inline="javascript">
-    const testId = /*[[${test.testId}]]*/ "";
-    const tracesId = `#traces-${$.escapeSelector(testId)}`;
     $(document).ready(function () {
-        $(tracesId).treetable({
+        $(`#traces-${$.escapeSelector([[${test.testId}]])}`).treetable({
             expandable: true,
             initialState: "expanded",
             indent: 20,

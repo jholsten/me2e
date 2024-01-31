@@ -68,7 +68,7 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
             withVariable("tags", result.tags)
             val allTests = getAllTests(result)
             withVariable("allTests", allTests)
-            withVariable("statsByContainer", getStatsByContainer(allTests))
+            withVariable("statsByContainer", getStatsByContainer(result))
             withVariable("loggingServices", getLoggingServices(allTests))
             withVariable("tracesTimeSeries", getTracesTimeSeries(allTests))
             if (result is FinishedTestResult) {
@@ -102,9 +102,12 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
             return tests
         }
 
-        private fun getStatsByContainer(allTests: List<TestResult>): Map<String, List<AggregatedStatsEntry>> {
-            val allStats = allTests.filterIsInstance<FinishedTestResult>().flatMap { it.stats }
-            return allStats.groupBy { it.service.name }
+        private fun getStatsByContainer(result: TestResult): Map<String, List<AggregatedStatsEntry>> {
+            return if (result is FinishedTestResult) {
+                return result.stats.groupBy { it.service.name }
+            } else {
+                return mapOf()
+            }
         }
 
         /**
