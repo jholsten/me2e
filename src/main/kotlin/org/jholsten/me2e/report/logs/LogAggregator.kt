@@ -11,8 +11,6 @@ import org.slf4j.LoggerFactory
 
 /**
  * Service which collects all log entries from all containers and from the Test Runner.
- * After each test execution, the logs for this test are collected from all containers
- * and from the Test Runner and stored in [logs].
  */
 class LogAggregator internal constructor() {
     /**
@@ -27,11 +25,6 @@ class LogAggregator internal constructor() {
      * Records all logs which are output to any SLF4J logger.
      */
     private lateinit var testRunnerLogCollector: TestRunnerLogCollector
-
-    /**
-     * Logs for each unique test ID that were collected so far.
-     */
-    private val logs: MutableMap<String, List<AggregatedLogEntry>> = mutableMapOf()
 
     /**
      * Initializes the collector for consuming the Test Runner's logs when the test execution started.
@@ -54,28 +47,19 @@ class LogAggregator internal constructor() {
     }
 
     /**
-     * Callback function to execute when one test execution finished.
-     * Collects logs from all containers and stores them with the
-     * reference to the corresponding test.
+     * Callback function to execute when the execution of all tests has finished.
+     * Collects logs from all containers.
      * @return Collected log entries.
      */
     @JvmSynthetic
-    internal fun collectLogs(testId: String): List<AggregatedLogEntry> {
+    internal fun collectLogs(): List<AggregatedLogEntry> {
         val logs = mutableListOf<AggregatedLogEntry>()
         for (consumer in consumers.values) {
             logs.addAll(consumer.collect())
         }
-        logs.addAll(testRunnerLogCollector.reset())
+        logs.addAll(testRunnerLogCollector.collect())
         logs.sortBy { it.timestamp }
-        this.logs[testId] = logs
         return logs.toList()
-    }
-
-    /**
-     * Returns aggregated logs of all test executions as map of test ID and aggregated logs.
-     */
-    fun getAggregatedLogs(): Map<String, List<AggregatedLogEntry>> {
-        return logs.map { (testId, logs) -> testId to logs.toList() }.toMap()
     }
 
     private fun consumeTestRunnerLogs() {

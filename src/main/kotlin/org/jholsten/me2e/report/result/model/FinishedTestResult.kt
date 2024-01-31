@@ -110,12 +110,12 @@ class FinishedTestResult(
      * Logs that were collected for this test execution.
      * Includes test runner logs as well as Docker container logs.
      */
-    val logs: List<AggregatedLogEntry>,
+    var logs: List<AggregatedLogEntry> = listOf(),
 
     /**
      * Resource usage statistics that were collected for this test execution.
      */
-    val stats: List<AggregatedStatsEntry>,
+    var stats: List<AggregatedStatsEntry> = listOf(),
 
     /**
      * HTTP network traces that were collected for this test execution.

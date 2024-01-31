@@ -2,9 +2,7 @@
 
 package org.jholsten.me2e.report.result.model
 
-import org.jholsten.me2e.report.logs.model.AggregatedLogEntry
 import org.jholsten.me2e.report.result.mapper.TestSummaryStatusMapper
-import org.jholsten.me2e.report.stats.model.AggregatedStatsEntry
 import org.jholsten.me2e.utils.toJson
 import org.junit.platform.engine.TestExecutionResult
 import org.junit.platform.launcher.TestIdentifier
@@ -68,19 +66,6 @@ internal class IntermediateTestResult(
     val reportEntries: List<ReportEntry>? = null,
 
     /**
-     * Logs that were collected for this test execution.
-     * Includes test runner logs as well as Docker container logs.
-     * Only set for tests for which the status is not [TestResult.Status.SKIPPED].
-     */
-    val logs: List<AggregatedLogEntry>? = null,
-
-    /**
-     * Resource usage statistics that were collected for this test execution.
-     * Only set for tests for which the status is not [TestResult.Status.SKIPPED].
-     */
-    val stats: List<AggregatedStatsEntry>? = null,
-
-    /**
      * Throwable that caused this result.
      * Only set for tests for which the status is not [TestResult.Status.SKIPPED].
      * @see org.junit.platform.engine.TestExecutionResult.getThrowable
@@ -100,8 +85,6 @@ internal class IntermediateTestResult(
          * @param testExecutionResult Result of the execution for the supplied [testIdentifier].
          * @param startTime Timestamp of when this test or test container has started its execution.
          * @param reportEntries Report entries that were published during the test execution.
-         * @param logs Logs that were collected during the test execution.
-         * @param stats Resource usage statistics that were collected during the test execution.
          */
         @JvmSynthetic
         internal fun finished(
@@ -109,8 +92,6 @@ internal class IntermediateTestResult(
             testExecutionResult: TestExecutionResult,
             startTime: Instant?,
             reportEntries: List<ReportEntry>,
-            logs: List<AggregatedLogEntry>,
-            stats: List<AggregatedStatsEntry>,
         ): IntermediateTestResult {
             return IntermediateTestResult(
                 testId = testIdentifier.uniqueId,
@@ -121,8 +102,6 @@ internal class IntermediateTestResult(
                 displayName = testIdentifier.displayName.substringBeforeLast("("),
                 tags = testIdentifier.tags.map { it.name }.toSet(),
                 reportEntries = reportEntries.toList(),
-                logs = logs,
-                stats = stats,
                 throwable = testExecutionResult.throwable.orElse(null),
             )
         }
@@ -204,8 +183,6 @@ internal class IntermediateTestResult(
                 displayName = displayName,
                 tags = tags,
                 reportEntries = reportEntries!!,
-                logs = logs!!,
-                stats = stats!!,
                 throwable = throwable,
             )
         }

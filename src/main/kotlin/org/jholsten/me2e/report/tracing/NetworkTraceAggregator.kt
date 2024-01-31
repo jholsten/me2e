@@ -381,13 +381,10 @@ class NetworkTraceAggregator {
 
     /**
      * Extension function to find all traces for which the request's timestamp is between the
-     * given start (inclusive) and end time (exclusive).
+     * given start (inclusive) and end time (inclusive).
      */
-    private fun List<AggregatedNetworkTrace>.findTracesBetween(
-        startInclusive: Instant,
-        endExclusive: Instant,
-    ): List<AggregatedNetworkTrace> {
-        return this.filter { it.request.timestamp >= startInclusive && it.request.timestamp < endExclusive }
+    private fun List<AggregatedNetworkTrace>.findTracesBetween(start: Instant, end: Instant): List<AggregatedNetworkTrace> {
+        return this.filter { it.request.timestamp in start..end }
     }
 
     /**

@@ -16,11 +16,6 @@ class StatsAggregator internal constructor() {
     private val consumers: MutableMap<ServiceSpecification, ContainerStatsCollector> = mutableMapOf()
 
     /**
-     * Container statistics for each unique test ID that were collected so far.
-     */
-    private val stats: MutableMap<String, List<AggregatedStatsEntry>> = mutableMapOf()
-
-    /**
      * Initializes the collector for consuming container statistics when the [container] was started.
      * Attaches statistics consumer to the container to start capturing its resource usage statistics.
      */
@@ -33,26 +28,17 @@ class StatsAggregator internal constructor() {
     }
 
     /**
-     * Callback function to execute when one test execution finished.
-     * Collects statistics from all containers and stores them with the
-     * reference to the corresponding test.
+     * Callback function to execute when the execution of all tests has finished.
+     * Collects statistics from all containers.
      * @return Collected statistics entries.
      */
     @JvmSynthetic
-    internal fun collectStats(testId: String): List<AggregatedStatsEntry> {
+    internal fun collectStats(): List<AggregatedStatsEntry> {
         val stats = mutableListOf<AggregatedStatsEntry>()
         for (consumer in consumers.values) {
             stats.addAll(consumer.collect())
         }
         stats.sortBy { it.timestamp }
-        this.stats[testId] = stats
         return stats.toList()
-    }
-
-    /**
-     * Returns aggregated statistics of all test executions as map of test ID and aggregated statistics entries.
-     */
-    fun getAggregatedStats(): Map<String, List<AggregatedStatsEntry>> {
-        return stats.map { (testId, stats) -> testId to stats.toList() }.toMap()
     }
 }

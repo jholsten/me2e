@@ -2,12 +2,14 @@ package org.jholsten.me2e.report.result
 
 import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.report.logs.LogAggregator
+import org.jholsten.me2e.report.logs.model.AggregatedLogEntry
 import org.jholsten.me2e.report.logs.model.ServiceSpecification
 import org.jholsten.me2e.report.result.html.HtmlReportGenerator
 import org.jholsten.me2e.report.stats.StatsAggregator
 import org.jholsten.me2e.report.result.mapper.ReportEntryMapper
 import org.jholsten.me2e.report.result.model.*
 import org.jholsten.me2e.report.result.model.IntermediateTestResult
+import org.jholsten.me2e.report.stats.model.AggregatedStatsEntry
 import org.jholsten.me2e.report.tracing.NetworkTraceAggregator
 import org.jholsten.me2e.utils.logger
 import org.junit.platform.engine.support.descriptor.ClassSource
@@ -82,21 +84,17 @@ class ReportDataAggregator private constructor() {
 
         /**
          * Callback function which is executed when the execution of a test or test container has finished.
-         * Collects relevant data from the Docker containers for the test report and stores the execution result.
+         * Collects relevant data for the test report and stores the intermediate execution result.
          * @param testIdentifier Identifier of the finished test or test container.
          * @param testExecutionResult Result of the execution for the supplied [testIdentifier].
          */
         @JvmSynthetic
         internal fun onTestFinished(testIdentifier: TestIdentifier, testExecutionResult: org.junit.platform.engine.TestExecutionResult) {
-            val logs = logAggregator.collectLogs(testIdentifier.uniqueId)
-            val stats = statsAggregator.collectStats(testIdentifier.uniqueId)
             val summary = IntermediateTestResult.finished(
                 testIdentifier = testIdentifier,
                 testExecutionResult = testExecutionResult,
                 startTime = startTimes[testIdentifier.uniqueId],
                 reportEntries = collectedReportEntries,
-                logs = logs,
-                stats = stats,
             )
             storeIntermediateTestResult(summary)
         }
@@ -131,11 +129,9 @@ class ReportDataAggregator private constructor() {
          */
         @JvmSynthetic
         internal fun onTestExecutionFinished(testPlan: TestPlan) {
-            val logs = logAggregator.getAggregatedLogs()
-            val stats = statsAggregator.getAggregatedStats()
-            // TODO: Collect logs and stats after all tests were executed
             val result = aggregateSummaries(testPlan)
             networkTraceAggregator.collectPackets(result.roots.filterIsInstance<FinishedTestResult>())
+            collectLogsAndStats(result.roots.filterIsInstance<FinishedTestResult>())
             // TODO: Use Report Generator from Annotation
             HtmlReportGenerator().generate(result)
             println("TODO: ON TEST EXECUTION FINISHED")
@@ -217,6 +213,59 @@ class ReportDataAggregator private constructor() {
             return this.intermediateTestResults[testIdentifier.uniqueId] ?: IntermediateTestResult.skipped(testIdentifier)
         }
 
+        /**
+         * Collects and assigns the logs and stats to the corresponding tests according to their timestamps.
+         * As this data is collected by consumers during the test execution and delays can occur (e.g. if a container is currently
+         * busy), the entries can only be assigned to the corresponding tests at the very end, after all tests have been executed.
+         * The logs and stats of the test containers are also assigned to their children in order to capture all the data collected
+         * in `@BeforeAll` and `@AfterAll` methods. This means that the first child receives all entries since the start of its
+         * parent and the last child receives all entries recorded up to the end of its parent.
+         */
+        private fun collectLogsAndStats(roots: List<FinishedTestResult>) {
+            val logs = logAggregator.collectLogs()
+            val stats = statsAggregator.collectStats()
+            for (test in roots) {
+                matchLogsAndStatsToTest(test, logs = logs, stats = stats)
+            }
+        }
+
+        /**
+         * Matches logs and stats to the given test, if it is not a test container (i.e. it does not contain any children).
+         * If it is a test container however, the logs and traces are assigned to its children.
+         * @param test Test for which corresponding logs and traces are to be matched.
+         * @param parentStart Start time of the test's parent. Only set if [test] is its first child.
+         * @param parentEnd End time of the test's parent. Only set if [test] is its last child.
+         * @param logs All logs captured from all Docker containers and the test runner.
+         * @param stats All stats captured from all Docker containers.
+         */
+        private fun matchLogsAndStatsToTest(
+            test: FinishedTestResult,
+            parentStart: Instant? = null,
+            parentEnd: Instant? = null,
+            logs: List<AggregatedLogEntry>,
+            stats: List<AggregatedStatsEntry>,
+        ) {
+            val testStart = parentStart ?: test.startTime
+            val testEnd = parentEnd ?: test.endTime
+            if (test.children.isEmpty()) {
+                test.logs = logs.findLogsBetween(testStart, testEnd)
+                test.stats = stats.findStatsBetween(testStart, testEnd)
+            } else {
+                val finishedChildren = test.children.filterIsInstance<FinishedTestResult>()
+                for ((index, child) in finishedChildren.withIndex()) {
+                    val start = when {
+                        index == 0 -> testStart
+                        else -> null
+                    }
+                    val end = when {
+                        index == finishedChildren.size - 1 -> testEnd
+                        else -> null
+                    }
+                    matchLogsAndStatsToTest(child, start, end, logs, stats)
+                }
+            }
+        }
+
         private fun getSource(testIdentifier: TestIdentifier): String? {
             val source = testIdentifier.source.getOrNull() ?: return null
             return when (source) {
@@ -232,6 +281,22 @@ class ReportDataAggregator private constructor() {
         private fun storeIntermediateTestResult(result: IntermediateTestResult) {
             intermediateTestResults[result.testId] = result
             collectedReportEntries.clear()
+        }
+
+        /**
+         * Extension function to find all logs for which the log's timestamp is between the
+         * given start (inclusive) and end time (inclusive).
+         */
+        private fun List<AggregatedLogEntry>.findLogsBetween(start: Instant, end: Instant): List<AggregatedLogEntry> {
+            return this.filter { it.timestamp in start..end }
+        }
+
+        /**
+         * Extension function to find all stats for which the stat entry's timestamp is between the
+         * given start (inclusive) and end time (inclusive).
+         */
+        private fun List<AggregatedStatsEntry>.findStatsBetween(start: Instant, end: Instant): List<AggregatedStatsEntry> {
+            return this.filter { it.timestamp in start..end }
         }
     }
 }
