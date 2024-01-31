@@ -6,7 +6,6 @@ import org.jholsten.me2e.report.result.html.HtmlReportGenerator
 import org.jholsten.me2e.report.result.model.*
 import org.jholsten.me2e.report.result.utils.getDescendants
 import org.jholsten.me2e.report.stats.model.AggregatedStatsEntry
-import org.jholsten.me2e.report.stats.model.AggregatedStatsEntryList
 import org.thymeleaf.context.Context
 import java.time.Instant
 
@@ -47,7 +46,7 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
          * (see [FinishedTestResult.reportEntries]). **Only available if [TestResult.status] is not [TestResult.Status.SKIPPED]**.
          * - `logs:` [List]<[AggregatedLogEntry]> - Logs that were collected for the test execution (see [FinishedTestResult.logs]).
          * **Only available if [TestResult.status] is not [TestResult.Status.SKIPPED]**.
-         * - `stats:` [AggregatedStatsEntryList] - Resource usage statistics that were collected for the test execution
+         * - `stats:` [List]<[AggregatedStatsEntry]> - Resource usage statistics that were collected for the test execution
          * (see [FinishedTestResult.stats]). **Only available if [TestResult.status] is not [TestResult.Status.SKIPPED]**.
          * - `throwable:` [Throwable]? - Throwable that caused the test result (see [FinishedTestResult.throwable]).
          * **Only available if [TestResult.status] is not [TestResult.Status.SKIPPED]**.

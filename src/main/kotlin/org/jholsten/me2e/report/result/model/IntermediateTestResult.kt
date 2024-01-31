@@ -3,8 +3,8 @@
 package org.jholsten.me2e.report.result.model
 
 import org.jholsten.me2e.report.logs.model.AggregatedLogEntry
-import org.jholsten.me2e.report.stats.model.AggregatedStatsEntryList
 import org.jholsten.me2e.report.result.mapper.TestSummaryStatusMapper
+import org.jholsten.me2e.report.stats.model.AggregatedStatsEntry
 import org.jholsten.me2e.utils.toJson
 import org.junit.platform.engine.TestExecutionResult
 import org.junit.platform.launcher.TestIdentifier
@@ -78,7 +78,7 @@ internal class IntermediateTestResult(
      * Resource usage statistics that were collected for this test execution.
      * Only set for tests for which the status is not [TestResult.Status.SKIPPED].
      */
-    val stats: AggregatedStatsEntryList? = null,
+    val stats: List<AggregatedStatsEntry>? = null,
 
     /**
      * Throwable that caused this result.
@@ -110,7 +110,7 @@ internal class IntermediateTestResult(
             startTime: Instant?,
             reportEntries: List<ReportEntry>,
             logs: List<AggregatedLogEntry>,
-            stats: AggregatedStatsEntryList,
+            stats: List<AggregatedStatsEntry>,
         ): IntermediateTestResult {
             return IntermediateTestResult(
                 testId = testIdentifier.uniqueId,

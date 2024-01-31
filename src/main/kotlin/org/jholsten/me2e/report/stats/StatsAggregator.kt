@@ -3,7 +3,6 @@ package org.jholsten.me2e.report.stats
 import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.report.logs.model.ServiceSpecification
 import org.jholsten.me2e.report.stats.model.AggregatedStatsEntry
-import org.jholsten.me2e.report.stats.model.AggregatedStatsEntryList
 import org.jholsten.me2e.utils.logger
 
 class StatsAggregator internal constructor() {
@@ -40,28 +39,20 @@ class StatsAggregator internal constructor() {
      * @return Collected statistics entries.
      */
     @JvmSynthetic
-    internal fun collectStats(testId: String): AggregatedStatsEntryList {
+    internal fun collectStats(testId: String): List<AggregatedStatsEntry> {
         val stats = mutableListOf<AggregatedStatsEntry>()
         for (consumer in consumers.values) {
             stats.addAll(consumer.collect())
         }
         stats.sortBy { it.timestamp }
         this.stats[testId] = stats
-        return AggregatedStatsEntryList(stats.toList())
-    }
-
-    /**
-     * Returns aggregated statistics which were collected for the execution of the test with the given ID.
-     * @throws IllegalArgumentException if no statistics are stored for the given test ID.
-     */
-    fun getAggregatedStatsByTestId(testId: String): AggregatedStatsEntryList {
-        return requireNotNull(stats[testId]?.let { AggregatedStatsEntryList(it) }) { "No stats stored for test with ID $testId" }
+        return stats.toList()
     }
 
     /**
      * Returns aggregated statistics of all test executions as map of test ID and aggregated statistics entries.
      */
-    fun getAggregatedStats(): Map<String, AggregatedStatsEntryList> {
-        return stats.map { (testId, stats) -> testId to AggregatedStatsEntryList(stats) }.toMap()
+    fun getAggregatedStats(): Map<String, List<AggregatedStatsEntry>> {
+        return stats.map { (testId, stats) -> testId to stats.toList() }.toMap()
     }
 }

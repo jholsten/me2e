@@ -8,7 +8,6 @@ import org.jholsten.me2e.parsing.utils.FileUtils
 import org.jholsten.me2e.report.logs.model.ServiceSpecification
 import org.jholsten.me2e.report.result.model.FinishedTestResult
 import org.jholsten.me2e.report.result.model.TestResult
-import org.jholsten.me2e.report.stats.model.AggregatedStatsEntryList
 import org.jholsten.me2e.report.tracing.model.AggregatedNetworkTrace
 import org.jholsten.me2e.report.tracing.model.NetworkNodeSpecification
 import org.jholsten.me2e.request.model.HttpRequestBody
@@ -78,7 +77,7 @@ internal class NetworkTraceAggregatorIT {
                 tags = setOf(),
                 reportEntries = listOf(),
                 logs = listOf(),
-                stats = AggregatedStatsEntryList(),
+                stats = listOf(),
                 throwable = null,
             )
 
