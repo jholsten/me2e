@@ -62,11 +62,6 @@ class ReportDataAggregator private constructor() {
          */
         private val collectedReportEntries: MutableList<ReportEntry> = mutableListOf()
 
-        /**
-         * Timestamps of when a test or test container was started as map of test ID and timestamp.
-         */
-        private val startTimes: MutableMap<String, Instant> = mutableMapOf()
-
         @JvmSynthetic
         internal fun onTestExecutionStarted() {
             logAggregator.initializeOnTestExecutionStarted()
@@ -79,8 +74,12 @@ class ReportDataAggregator private constructor() {
          */
         @JvmSynthetic
         internal fun onTestStarted(testIdentifier: TestIdentifier) {
+            val summary = IntermediateTestResult.started(testIdentifier)
+            intermediateTestResults[testIdentifier.uniqueId] = summary
+            if (testIdentifier.parentId.isPresent) {
+                intermediateTestResults[testIdentifier.parentId.get()]!!.logs += logAggregator.collectTestRunnerLogs()
+            }
             logger.info("Running test ${testIdentifier.displayName}...")
-            startTimes[testIdentifier.uniqueId] = Instant.now()
         }
 
         /**
@@ -92,14 +91,16 @@ class ReportDataAggregator private constructor() {
         @JvmSynthetic
         internal fun onTestFinished(testIdentifier: TestIdentifier, testExecutionResult: org.junit.platform.engine.TestExecutionResult) {
             logger.info("Executing test ${testIdentifier.displayName} finished.")
-            val summary = IntermediateTestResult.finished(
-                testIdentifier = testIdentifier,
+            val summary = intermediateTestResults[testIdentifier.uniqueId]!!
+            summary.finished(
                 testExecutionResult = testExecutionResult,
-                startTime = startTimes[testIdentifier.uniqueId],
                 reportEntries = collectedReportEntries,
                 logs = logAggregator.collectTestRunnerLogs(),
             )
-            storeIntermediateTestResult(summary)
+            collectedReportEntries.clear()
+            if (testIdentifier.parentId.isPresent) {
+                intermediateTestResults[testIdentifier.parentId.get()]!!.logs += summary.logs
+            }
         }
 
         /**
@@ -110,8 +111,8 @@ class ReportDataAggregator private constructor() {
          */
         @JvmSynthetic
         internal fun onTestSkipped(testIdentifier: TestIdentifier, reason: String?) {
-            val summary = IntermediateTestResult.skipped(testIdentifier, reason)
-            storeIntermediateTestResult(summary)
+            IntermediateTestResult.skipped(testIdentifier, reason)
+            collectedReportEntries.clear()
         }
 
         /**
@@ -275,11 +276,6 @@ class ReportDataAggregator private constructor() {
                 is PackageSource -> source.packageName
                 else -> null
             }
-        }
-
-        private fun storeIntermediateTestResult(result: IntermediateTestResult) {
-            intermediateTestResults[result.testId] = result
-            collectedReportEntries.clear()
         }
 
         /**

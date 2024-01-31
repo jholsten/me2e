@@ -34,7 +34,7 @@ internal class IntermediateTestResult(
      * Status of the test execution.
      * @see org.junit.platform.engine.TestExecutionResult.getStatus
      */
-    val status: TestResult.Status,
+    var status: TestResult.Status? = null,
 
     /**
      * Timestamp of when this test or test container has started its execution.
@@ -46,7 +46,7 @@ internal class IntermediateTestResult(
      * Timestamp of when this test or test container has finished its execution.
      * Only set for tests for which the status is not [TestResult.Status.SKIPPED].
      */
-    val endTime: Instant? = null,
+    var endTime: Instant? = null,
 
     /**
      * Human-readable name of the test or test container.
@@ -64,55 +64,37 @@ internal class IntermediateTestResult(
      * Additional report entries that were published during the test execution.
      * Only set for tests for which the status is not [TestResult.Status.SKIPPED].
      */
-    val reportEntries: List<ReportEntry>? = null,
+    var reportEntries: List<ReportEntry>? = null,
 
     /**
      * Logs that were collected for this test execution.
      * Includes test runner logs as well as Docker container logs.
      * Only set for tests for which the status is not [TestResult.Status.SKIPPED].
      */
-    val logs: List<AggregatedLogEntry>? = null,
+    val logs: MutableList<AggregatedLogEntry> = mutableListOf(),
 
     /**
      * Throwable that caused this result.
      * Only set for tests for which the status is not [TestResult.Status.SKIPPED].
      * @see org.junit.platform.engine.TestExecutionResult.getThrowable
      */
-    val throwable: Throwable? = null,
+    var throwable: Throwable? = null,
 
     /**
      * Message describing why the execution has been skipped.
      * Only set for tests with status [TestResult.Status.SKIPPED].
      */
-    val skippingReason: String? = null,
+    var skippingReason: String? = null,
 ) {
     companion object {
-        /**
-         * Creates an instance of [IntermediateTestResult] representing a test or test container for which the execution was finished.
-         * @param testIdentifier Identifier of the finished test or test container.
-         * @param testExecutionResult Result of the execution for the supplied [testIdentifier].
-         * @param startTime Timestamp of when this test or test container has started its execution.
-         * @param reportEntries Report entries that were published during the test execution.
-         */
         @JvmSynthetic
-        internal fun finished(
-            testIdentifier: TestIdentifier,
-            testExecutionResult: TestExecutionResult,
-            startTime: Instant?,
-            reportEntries: List<ReportEntry>,
-            logs: List<AggregatedLogEntry> = listOf(),
-        ): IntermediateTestResult {
+        internal fun started(testIdentifier: TestIdentifier): IntermediateTestResult {
             return IntermediateTestResult(
                 testId = testIdentifier.uniqueId,
                 parentId = testIdentifier.parentId.orElse(null),
-                status = TestSummaryStatusMapper.INSTANCE.toInternalDto(testExecutionResult.status),
-                startTime = startTime ?: Instant.now(),
-                endTime = Instant.now(),
+                startTime = Instant.now(),
                 displayName = testIdentifier.displayName.substringBeforeLast("("),
                 tags = testIdentifier.tags.map { it.name }.toSet(),
-                reportEntries = reportEntries.toList(),
-                logs = logs,
-                throwable = testExecutionResult.throwable.orElse(null),
             )
         }
 
@@ -122,10 +104,7 @@ internal class IntermediateTestResult(
          * @param reason Message describing why the execution has been skipped.
          */
         @JvmSynthetic
-        internal fun skipped(
-            testIdentifier: TestIdentifier,
-            reason: String? = null,
-        ): IntermediateTestResult {
+        internal fun skipped(testIdentifier: TestIdentifier, reason: String? = null): IntermediateTestResult {
             return IntermediateTestResult(
                 testId = testIdentifier.uniqueId,
                 parentId = testIdentifier.parentId.orElse(null),
@@ -135,6 +114,22 @@ internal class IntermediateTestResult(
                 skippingReason = reason,
             )
         }
+    }
+
+    /**
+     * Creates an instance of [IntermediateTestResult] representing a test or test container for which the execution was finished.
+     * @param testIdentifier Identifier of the finished test or test container.
+     * @param testExecutionResult Result of the execution for the supplied [testIdentifier].
+     * @param startTime Timestamp of when this test or test container has started its execution.
+     * @param reportEntries Report entries that were published during the test execution.
+     */
+    @JvmSynthetic
+    internal fun finished(testExecutionResult: TestExecutionResult, reportEntries: List<ReportEntry>, logs: List<AggregatedLogEntry>) {
+        this.status = TestSummaryStatusMapper.INSTANCE.toInternalDto(testExecutionResult.status)
+        this.endTime = Instant.now()
+        this.reportEntries = reportEntries.toList()
+        this.logs += logs
+        this.throwable = testExecutionResult.throwable.orElse(null)
     }
 
     /**
@@ -169,7 +164,7 @@ internal class IntermediateTestResult(
                 path = path,
                 parentId = parentId,
                 children = children,
-                status = status,
+                status = status!!,
                 numberOfTests = numberOfTests,
                 numberOfFailures = numberOfFailures,
                 numberOfSkipped = numberOfSkipped,
@@ -184,7 +179,7 @@ internal class IntermediateTestResult(
                 path = path,
                 parentId = parentId,
                 children = children,
-                status = status,
+                status = status!!,
                 startTime = startTime!!,
                 endTime = endTime!!,
                 numberOfTests = numberOfTests,
@@ -193,7 +188,7 @@ internal class IntermediateTestResult(
                 displayName = displayName,
                 tags = tags,
                 reportEntries = reportEntries!!,
-                logs = logs!!,
+                logs = logs,
                 throwable = throwable,
             )
         }
