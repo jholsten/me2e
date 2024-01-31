@@ -7,7 +7,6 @@ import ch.qos.logback.core.AppenderBase
 import ch.qos.logback.core.Layout
 import org.jholsten.me2e.report.logs.model.AggregatedLogEntry
 import org.jholsten.me2e.report.logs.model.ServiceSpecification
-import java.time.Instant
 
 /**
  * Collector which collects the messages logged by the Test Runner for one test execution.
@@ -32,7 +31,7 @@ internal class TestRunnerLogCollector(
         logs.add(
             AggregatedLogEntry(
                 service = service,
-                timestamp = Instant.ofEpochMilli(log.timeStamp),
+                timestamp = log.instant,
                 message = layout.doLayout(log),
             )
         )
