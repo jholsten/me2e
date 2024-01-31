@@ -61,6 +61,7 @@
 
         .log-table th {
             text-align: start;
+            padding: 10px 0;
         }
 
         .log-table th:first-child {
@@ -88,6 +89,10 @@
         .log-table tr {
             display: table;
             width: 100%;
+        }
+
+        .log-table thead {
+            background-color: #FBFBFB;
         }
 
         .stack-trace {
@@ -245,6 +250,23 @@
                     font-size: 16px;
                 }
             }
+        }
+
+        .log-table > thead > tr > th > input[type="search"] {
+            margin-left: 12px;
+        }
+
+        input[type="search"] {
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #D6DDE8;
+            padding: 8px 4px 8px 40px;
+            width: 100%;
+            background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' class='bi bi-search' viewBox='0 0 16 16'%3E%3Cpath fill='%23bbbbbb' d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'%3E%3C/path%3E%3C/svg%3E") no-repeat 13px center;
+        }
+
+        input[type="search"]::placeholder {
+            color: #bbb;
         }
     </style>
 </head>
@@ -574,6 +596,7 @@
     </div>
 
     <h4>Logs</h4>
+    <input type="search" id="log-message-search" style="margin-bottom: 12px;" oninput="filterLogs()" placeholder="Search for messages...">
     <table id="log-table" class="log-table">
         <thead>
         <tr>
@@ -596,29 +619,31 @@
                     </div>
                 </div>
             </th>
-            <th>Message</th>
+            <th>
+                Message
+            </th>
         </tr>
         </thead>
         <tbody>
         <tr>
             <td><code>12:03.235</code></td>
             <td><code>Test Runner</code></td>
-            <td><code>Hello from the Test Runner</code></td>
+            <td><code>Hillo from the Test Runner</code></td>
         </tr>
         <tr>
             <td><code>12:03.235</code></td>
             <td><code>Test Runner</code></td>
-            <td><code>Hello from the Test Runner</code></td>
+            <td><code>Hollo from the Test Runner</code></td>
         </tr>
         <tr>
             <td><code>12:03.235</code></td>
             <td><code>Test Runner</code></td>
-            <td><code>Hello from the Test Runner</code></td>
+            <td><code>Hollo from the Test Runner</code></td>
         </tr>
         <tr>
             <td><code>12:03.235</code></td>
             <td><code>Backend-Api</code></td>
-            <td><code>Hello from the Test Runner</code></td>
+            <td><code>Hollo from the Test Runner</code></td>
         </tr>
         </tbody>
     </table>
@@ -654,36 +679,36 @@
     const rows = logTable.getElementsByTagName("tr");
 
     /**
-     * Hides all rows in log table which were not logged by the selected services.
+     * Hides all rows in log table which were not logged by the selected services and do not match the search value.
      * Changes style of filter button to highlight whether filters are active.
      */
     function filterLogs() {
         const checkboxes = document.getElementsByName("log-service-filter");
         const selected = [...checkboxes].filter((c) => c.checked).map((c) => c.value);
+        const messageFilter = document.getElementById("log-message-search").value.toLowerCase();
         if (selected.length === 0) {
-            updateLogTableRows((_) => true);
             filterButton.style.color = "unset";
             filterButton.style.textShadow = "unset";
         } else {
-            updateLogTableRows((service) => selected.includes(service));
             filterButton.style.color = "#4541DD";
             filterButton.style.textShadow = "0 0 20px #4541DD";
         }
+        updateLogTableRows((service, message) => (selected.length === 0 || selected.includes(service)) && (message.toLowerCase().indexOf(messageFilter) > -1));
     }
 
     /**
      * Hides all rows in log table for which the function `shouldDisplay` returns false.
      */
     function updateLogTableRows(shouldDisplay) {
-        for (let i = 0; i < rows.length; i++) {
+        for (let i = 1; i < rows.length; i++) {
             let serviceCell = rows[i].getElementsByTagName("td")[1];
-            if (serviceCell) {
-                let service = serviceCell.textContent || serviceCell.innerText;
-                if (shouldDisplay(service)) {
-                    rows[i].style.display = "";
-                } else {
-                    rows[i].style.display = "none";
-                }
+            let messageCell = rows[i].getElementsByTagName("td")[2];
+            let service = (serviceCell.textContent || serviceCell.innerText).trim();
+            let message = messageCell.textContent || messageCell.innerText;
+            if (shouldDisplay(service, message)) {
+                rows[i].style.display = "";
+            } else {
+                rows[i].style.display = "none";
             }
         }
     }
