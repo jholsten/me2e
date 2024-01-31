@@ -108,7 +108,7 @@
                 width: 100%;
             }
 
-            & .filter-modal {
+            & .filter-modal label {
                 font-family: monospace;
                 font-size: 16px;
             }
@@ -655,12 +655,18 @@
                             <div class="filter-modal-container" style="margin-left: 12px;">
                                 <i th:id="'log-filter-' + ${test.testId}" class="filter-button fas fa-filter"></i>
                                 <div th:id="'log-filter-modal-' + ${test.testId}" class="filter-modal">
-                                    <div th:each="service : ${loggingServices.get(test.testId)}">
+                                    <div class="clear-filter">
+                                        <div th:attr="onclick=|clearServiceFilter('${test.testId}')|">
+                                            <i class="fas fa-xmark"></i>
+                                            <span>Clear filter</span>
+                                        </div>
+                                    </div>
+                                    <div th:each="service : ${loggingServices.get(test.testId)}" style="margin-top: 6px;">
                                         <input type="checkbox" th:style="'accent-color:' + ${service.color}"
                                                th:id="'logging-service-' + ${test.testId} + ${service.id}" th:value="${service.name}"
                                                th:name="'log-service-filter-' + ${test.testId}"
                                                th:attr="onclick=|filterLogs('${test.testId}')|">
-                                        <label th:text="${service.name}"
+                                        <label th:text="${service.name}" class="break-word"
                                                th:for="'logging-service-' + ${test.testId} + ${service.id}"></label>
                                     </div>
                                 </div>
@@ -674,9 +680,9 @@
                         <td><code th:text="${#temporals.format(entry.timestamp, 'HH:mm:ss.SSS')}"></code></td>
                         <td>
                             <i class="fas fa-square" style="font-size: 11px;" th:styleappend="${'color: ' + entry.service.color}"></i>
-                            <code th:text="${entry.service.name}"></code>
+                            <code th:text="${entry.service.name}" class="break-word"></code>
                         </td>
-                        <td><code th:text="${entry.message}" style="white-space: pre-wrap"></code></td>
+                        <td><code th:text="${entry.message}" style="white-space: pre-wrap" class="break-word"></code></td>
                     </tr>
                     </tbody>
                 </table>
@@ -831,6 +837,19 @@
     }
 
     /**
+     * Clears filter for logs by service.
+     */
+    function clearServiceFilter(testId) {
+        const checkboxes = document.getElementsByName(`log-service-filter-${testId}`);
+        for (const checkbox of checkboxes) {
+            checkbox.checked = false;
+        }
+        filterLogs(testId);
+        modals.get(testId).style.display = "none";
+        open.set(testId, false);
+    }
+
+    /**
      * Hides all rows in log table which were not logged by the selected services and do not match the search value.
      * Changes style of filter button to highlight whether filters are active.
      */
@@ -840,7 +859,7 @@
         const checkboxes = document.getElementsByName(`log-service-filter-${testId}`);
         const selected = [...checkboxes].filter((c) => c.checked).map((c) => c.value);
         const messageFilter = document.getElementById(`log-message-search-${testId}`).value.toLowerCase();
-        if (selected.length === 0) {
+        if (selected.length === 0 || checkboxes.length === selected.length) {
             filterButtons.get(testId).style.color = "unset";
             filterButtons.get(testId).style.textShadow = "unset";
         } else {
