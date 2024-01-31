@@ -1,6 +1,6 @@
 package org.jholsten.me2e.container.logging
 
-import org.jholsten.me2e.container.logging.model.ContainerLogEntryList
+import org.jholsten.me2e.container.logging.model.ContainerLogEntry
 import org.testcontainers.containers.ContainerState
 import org.testcontainers.containers.output.FrameConsumerResultCallback
 import org.testcontainers.containers.output.OutputFrame
@@ -27,14 +27,14 @@ class ContainerLogUtils {
          * @see org.testcontainers.utility.LogUtils.getOutput
          */
         @JvmStatic
-        fun getLogs(dockerContainer: ContainerState, since: Int, until: Int?): ContainerLogEntryList {
+        fun getLogs(dockerContainer: ContainerState, since: Int, until: Int?): List<ContainerLogEntry> {
             val collector = ContainerLogCollector()
             val wait = WaitingConsumer()
             val consumer = collector.andThen(wait)
 
             attachConsumer(dockerContainer, consumer, followStream = false, since = since, until = until).use {
                 wait.waitUntilEnd()
-                return collector.logs
+                return collector.logs.toList()
             }
         }
 

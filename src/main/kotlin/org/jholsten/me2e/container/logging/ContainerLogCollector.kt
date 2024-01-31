@@ -1,7 +1,6 @@
 package org.jholsten.me2e.container.logging
 
 import org.jholsten.me2e.container.logging.model.ContainerLogEntry
-import org.jholsten.me2e.container.logging.model.ContainerLogEntryList
 
 /**
  * Log consumer which collects all logs and stores them in
@@ -11,7 +10,7 @@ open class ContainerLogCollector : ContainerLogConsumer() {
     /**
      * Logs of the container which were collected so far.
      */
-    val logs: ContainerLogEntryList = ContainerLogEntryList()
+    val logs: MutableList<ContainerLogEntry> = mutableListOf()
 
     override fun accept(entry: ContainerLogEntry) {
         logs.add(entry)
