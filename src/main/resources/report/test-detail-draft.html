@@ -233,19 +233,7 @@
                 position: relative;
                 display: inline-block;
 
-                .filter-modal {
-                    background-color: white;
-                    border-radius: 6px;
-                    box-shadow: 0 8px 20px 0 rgba(0, 0, 0, 0.2);
-                    z-index: 1;
-                    display: none;
-                    position: absolute;
-                    top: 110%;
-                    left: 50%;
-                    margin-left: -60px;
-                    padding: 10px;
-                    width: 200px;
-                    font-weight: normal;
+                .filter-modal label {
                     font-family: monospace;
                     font-size: 16px;
                 }
@@ -606,15 +594,24 @@
                 <div class="filter-modal-container" style="margin-left: 12px;">
                     <i id="filter-1" class="filter-button fas fa-filter"></i>
                     <div id="filter-modal-1" class="filter-modal">
-                        <div>
+                        <div class="clear-filter">
+                            <!--                            <input type="checkbox" style="accent-color: #F3B469" id="select-all-services"-->
+                            <!--                                   onclick="toggleLogServiceFilter()">-->
+                            <!--                            <label for="select-all-services">Select all</label>-->
+                            <div onclick="clearServiceFilter()">
+                                <i class="fas fa-xmark"></i>
+                                <span>Clear filter</span>
+                            </div>
+                        </div>
+                        <div style="margin-top: 6px;">
                             <input type="checkbox" style="accent-color: #F3B469" id="Test Runner" value="Test Runner"
                                    name="log-service-filter" onclick="filterLogs()">
                             <label for="Test Runner">Test Runner</label>
                         </div>
-                        <div>
+                        <div style="margin-top: 6px;">
                             <input type="checkbox" style="accent-color: #4541DD" id="Backend-Api-f" value="Backend-Api"
                                    name="log-service-filter" onclick="filterLogs()">
-                            <label for="Backend-Api-f">Backend-API</label>
+                            <label class="break-word" for="Backend-Api-f">Asuperlongservicenamewhichdoesnotfitintooneline</label>
                         </div>
                     </div>
                 </div>
@@ -627,8 +624,9 @@
         <tbody>
         <tr>
             <td><code>12:03.235</code></td>
-            <td><code>Test Runner</code></td>
-            <td><code>Hillo from the Test Runner</code></td>
+            <td><code class="break-word">Asuperlongservicenachwhichdoesnotfitintooneline</code></td>
+            <td><code class="break-word">Asuperlongservicenachwhichdoesnotfitintoonelineandareallyreallylongmessagewhichalsodoesnotfitintooneline</code>
+            </td>
         </tr>
         <tr>
             <td><code>12:03.235</code></td>
@@ -678,6 +676,25 @@
     const logTable = document.getElementById("log-table");
     const rows = logTable.getElementsByTagName("tr");
 
+    function clearServiceFilter() {
+        const checkboxes = document.getElementsByName("log-service-filter");
+        for (const checkbox of checkboxes) {
+            checkbox.checked = false;
+        }
+        filterLogs();
+        modal.style.display = "none";
+        open = false;
+    }
+
+    function toggleLogServiceFilter() {
+        const selectAll = document.getElementById("select-all-services").checked;
+        const checkboxes = document.getElementsByName("log-service-filter");
+        for (const checkbox of checkboxes) {
+            checkbox.checked = selectAll;
+        }
+
+    }
+
     /**
      * Hides all rows in log table which were not logged by the selected services and do not match the search value.
      * Changes style of filter button to highlight whether filters are active.
@@ -686,7 +703,7 @@
         const checkboxes = document.getElementsByName("log-service-filter");
         const selected = [...checkboxes].filter((c) => c.checked).map((c) => c.value);
         const messageFilter = document.getElementById("log-message-search").value.toLowerCase();
-        if (selected.length === 0) {
+        if (selected.length === 0 || checkboxes.length === selected.length) {
             filterButton.style.color = "unset";
             filterButton.style.textShadow = "unset";
         } else {

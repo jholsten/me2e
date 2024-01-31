@@ -192,6 +192,19 @@ input[type="search"] {
         width: 200px;
         font-weight: normal;
     }
+
+    .clear-filter {
+        color: #4541DD;
+        font-size: 14px;
+        font-weight: bold;
+        display: flex;
+        justify-content: end;
+        margin-bottom: 6px;
+
+        > div {
+            cursor: pointer;
+        }
+    }
 }
 
 input[type="search"]::placeholder {
