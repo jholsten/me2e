@@ -64,7 +64,7 @@ internal class IntermediateTestResult(
      * Additional report entries that were published during the test execution.
      * Only set for tests for which the status is not [TestResult.Status.SKIPPED].
      */
-    var reportEntries: List<ReportEntry>? = null,
+    var reportEntries: MutableList<ReportEntry> = mutableListOf(),
 
     /**
      * Logs that were collected for this test execution.
@@ -127,7 +127,7 @@ internal class IntermediateTestResult(
     internal fun finished(testExecutionResult: TestExecutionResult, reportEntries: List<ReportEntry>, logs: List<AggregatedLogEntry>) {
         this.status = TestSummaryStatusMapper.INSTANCE.toInternalDto(testExecutionResult.status)
         this.endTime = Instant.now()
-        this.reportEntries = reportEntries.toList()
+        this.reportEntries = reportEntries.toMutableList()
         this.logs += logs
         this.throwable = testExecutionResult.throwable.orElse(null)
     }
