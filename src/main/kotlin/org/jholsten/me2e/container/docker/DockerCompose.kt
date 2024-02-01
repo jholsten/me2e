@@ -142,6 +142,15 @@ class DockerCompose(
     }
 
     /**
+     * Restarts the services with the given names.
+     * @param servicesToRestart Names of the services to restart.
+     */
+    fun restartContainers(servicesToRestart: List<String>) {
+        logger.info("Restarting services: [${servicesToRestart.joinToString(", ")}]...")
+        execute("restart ${servicesToRestart.joinToString(" ")}")
+    }
+
+    /**
      * Stops the Docker-Compose container.
      * @see DockerComposeV1.stop
      * @see DockerComposeV2.stop
@@ -155,6 +164,7 @@ class DockerCompose(
 
     /**
      * Pulls images for services with the given names.
+     * @param servicesToPull Names of the services for which images are to be pulled.
      */
     fun pull(servicesToPull: List<String>) {
         if (servicesToPull.isNotEmpty()) {
