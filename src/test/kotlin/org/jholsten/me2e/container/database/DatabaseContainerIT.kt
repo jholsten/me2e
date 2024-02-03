@@ -1,9 +1,10 @@
 package org.jholsten.me2e.container.database
 
 import org.jholsten.me2e.config.model.DockerConfig
-import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.container.ContainerManager
 import org.jholsten.me2e.container.database.model.QueryResult
+import org.jholsten.me2e.container.model.ContainerPort
+import org.jholsten.me2e.container.model.ContainerPortList
 import org.jholsten.me2e.parsing.utils.FileUtils
 import org.jholsten.util.RecursiveComparison
 import org.junit.jupiter.api.AfterAll
@@ -22,8 +23,8 @@ internal class DatabaseContainerIT {
         private val sqlDatabase: DatabaseContainer = DatabaseContainer(
             name = "sql-database",
             image = "postgres:12",
-            ports = Container.ContainerPortList(
-                ports = listOf(Container.ContainerPort(internal = 5432))
+            ports = ContainerPortList(
+                ports = listOf(ContainerPort(internal = 5432))
             ),
             environment = mapOf(
                 "POSTGRES_DB" to "testdb",
@@ -41,8 +42,8 @@ internal class DatabaseContainerIT {
         private val noSqlDatabase: DatabaseContainer = DatabaseContainer(
             name = "no-sql-database",
             image = "mongo:4.4.27",
-            ports = Container.ContainerPortList(
-                ports = listOf(Container.ContainerPort(internal = 27017))
+            ports = ContainerPortList(
+                ports = listOf(ContainerPort(internal = 27017))
             ),
             environment = mapOf(
                 "MONGO_INITDB_DATABASE" to "testdb",

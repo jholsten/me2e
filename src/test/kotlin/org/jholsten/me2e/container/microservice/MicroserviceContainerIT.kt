@@ -4,8 +4,9 @@ import org.jholsten.me2e.assertions.Assertions.Companion.assertThat
 import org.jholsten.me2e.assertions.Assertions.Companion.isEqualTo
 import org.jholsten.me2e.config.model.DockerConfig
 import org.jholsten.me2e.config.model.RequestConfig
-import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.container.ContainerManager
+import org.jholsten.me2e.container.model.ContainerPort
+import org.jholsten.me2e.container.model.ContainerPortList
 import org.jholsten.me2e.parsing.utils.FileUtils
 import org.jholsten.me2e.request.model.RelativeUrl
 import org.junit.jupiter.api.AfterAll
@@ -24,8 +25,8 @@ internal class MicroserviceContainerIT {
                     image = "gitlab.informatik.uni-bremen.de:5005/master-thesis1/test-system/backend-api:latest",
                     environment = mapOf("DB_PASSWORD" to "123", "DB_USER" to "user"),
                     requestConfig = RequestConfig(),
-                    ports = Container.ContainerPortList(
-                        ports = listOf(Container.ContainerPort(internal = 8000))
+                    ports = ContainerPortList(
+                        ports = listOf(ContainerPort(internal = 8000))
                     ),
                     hasHealthcheck = true,
                 ),

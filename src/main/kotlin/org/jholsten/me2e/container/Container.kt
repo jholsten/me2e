@@ -3,16 +3,16 @@ package org.jholsten.me2e.container
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import com.github.dockerjava.api.command.InspectContainerResponse
 import org.jholsten.me2e.config.model.DockerConfig
-import org.jholsten.me2e.config.utils.ContainerPortListDeserializer
 import org.jholsten.me2e.container.database.DatabaseContainer
 import org.jholsten.me2e.container.logging.ContainerLogConsumer
 import org.jholsten.me2e.container.logging.ContainerLogUtils
 import org.jholsten.me2e.container.logging.model.ContainerLogEntry
 import org.jholsten.me2e.container.microservice.MicroserviceContainer
+import org.jholsten.me2e.container.model.ContainerPortList
 import org.jholsten.me2e.container.model.ContainerType
+import org.jholsten.me2e.container.model.DockerContainerReference
+import org.jholsten.me2e.container.model.ExecutionResult
 import org.jholsten.me2e.container.network.ContainerNetwork
 import org.jholsten.me2e.container.network.mapper.ContainerNetworkMapper
 import org.jholsten.me2e.container.stats.ContainerStatsConsumer
@@ -83,75 +83,6 @@ open class Container(
     val pullPolicy: DockerConfig.PullPolicy = DockerConfig.PullPolicy.MISSING,
 ) {
     private val logger = logger(this)
-
-    @JsonDeserialize(using = ContainerPortListDeserializer::class)
-    class ContainerPortList(ports: List<ContainerPort> = listOf()) : ArrayList<ContainerPort>(ports) {
-        /**
-         * Returns the first [ContainerPort] instance for which the internal port is equal to the given [port]
-         * or `null`, if no such instance exists in this list.
-         */
-        fun findByInternalPort(port: Int): ContainerPort? {
-            return this.firstOrNull { it.internal == port }
-        }
-
-        /**
-         * Returns the first [ContainerPort] instance for which an external port is set or `null`, if no such
-         * instance exists in this list.
-         */
-        fun findFirstExposed(): ContainerPort? {
-            return this.firstOrNull { it.external != null }
-        }
-    }
-
-    /**
-     * Representation of a port mapping from container-internal port
-     * to port that is accessible from localhost.
-     */
-    class ContainerPort(
-        /**
-         * Container-internal port to be exposed.
-         */
-        val internal: Int,
-        /**
-         * Port from which container is accessible from localhost.
-         * This value is assigned automatically as soon as the container is started.
-         */
-        var external: Int? = null,
-    )
-
-    /**
-     * Wrapper for the reference to the corresponding [DockerContainer] and [ContainerState].
-     */
-    class DockerContainerReference(
-        /**
-         * Container which contains static and dynamic information about the Docker container.
-         */
-        val container: DockerContainer,
-        /**
-         * State which enables to execute commands in the Docker container.
-         */
-        val state: ContainerState,
-
-        var info: InspectContainerResponse,
-    )
-
-    /**
-     * Result of the execution of a command inside the Docker container.
-     */
-    data class ExecutionResult(
-        /**
-         * Exit code of the command.
-         */
-        val exitCode: Int,
-        /**
-         * Output of the command on STDOUT.
-         */
-        val stdout: String,
-        /**
-         * Output of the command on STDERR.
-         */
-        val stderr: String,
-    )
 
     /**
      * Returns whether the container is currently up and running.

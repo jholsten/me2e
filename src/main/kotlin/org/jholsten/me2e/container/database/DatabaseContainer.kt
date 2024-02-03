@@ -7,6 +7,8 @@ import org.jholsten.me2e.container.database.connection.MongoDBConnection
 import org.jholsten.me2e.container.database.connection.SQLDatabaseConnection
 import org.jholsten.me2e.container.database.exception.DatabaseException
 import org.jholsten.me2e.container.database.model.QueryResult
+import org.jholsten.me2e.container.model.ContainerPort
+import org.jholsten.me2e.container.model.ContainerPortList
 import org.jholsten.me2e.container.model.ContainerType
 import org.jholsten.me2e.utils.logger
 import org.testcontainers.containers.ContainerState

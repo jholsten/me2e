@@ -1,9 +1,11 @@
 package org.jholsten.me2e.container
 
 import com.github.dockerjava.api.command.LogContainerCmd
-import com.github.dockerjava.api.model.ContainerPort
+import com.github.dockerjava.api.model.ContainerPort as DockerContainerPort
 import com.github.dockerjava.api.model.Container as DockerContainer
 import io.mockk.*
+import org.jholsten.me2e.container.model.ContainerPort
+import org.jholsten.me2e.container.model.ContainerPortList
 import org.jholsten.me2e.container.model.ContainerType
 import org.jholsten.me2e.report.result.ReportDataAggregator
 import org.jholsten.util.RecursiveComparison
@@ -19,10 +21,10 @@ internal class ContainerTest {
         name = "backend",
         type = ContainerType.MISC,
         image = "backend:latest",
-        ports = Container.ContainerPortList(
+        ports = ContainerPortList(
             listOf(
-                Container.ContainerPort(12345, 8000),
-                Container.ContainerPort(12346, 8001),
+                ContainerPort(12345, 8000),
+                ContainerPort(12346, 8001),
             )
         ),
     )
@@ -54,38 +56,38 @@ internal class ContainerTest {
             name = "backend",
             type = ContainerType.MISC,
             image = "backend:latest",
-            ports = Container.ContainerPortList(
+            ports = ContainerPortList(
                 listOf(
-                    Container.ContainerPort(12345),
-                    Container.ContainerPort(12347),
-                    Container.ContainerPort(12348),
+                    ContainerPort(12345),
+                    ContainerPort(12347),
+                    ContainerPort(12348),
                 )
             ),
         )
 
         every { dockerContainer.getPorts() } returns arrayOf(
-            ContainerPort().withPrivatePort(12345).withPublicPort(8000),
-            ContainerPort().withPrivatePort(12346).withPublicPort(8001),
-            ContainerPort().withPrivatePort(12347).withPublicPort(null),
-            ContainerPort().withPrivatePort(null).withPublicPort(8002),
+            DockerContainerPort().withPrivatePort(12345).withPublicPort(8000),
+            DockerContainerPort().withPrivatePort(12346).withPublicPort(8001),
+            DockerContainerPort().withPrivatePort(12347).withPublicPort(null),
+            DockerContainerPort().withPrivatePort(null).withPublicPort(8002),
         )
 
         container.initialize(dockerContainer, dockerContainerState)
 
         val expected = listOf(
-            Container.ContainerPort(12345, 8000),
-            Container.ContainerPort(12347, null),
-            Container.ContainerPort(12348, null),
+            ContainerPort(12345, 8000),
+            ContainerPort(12347, null),
+            ContainerPort(12348, null),
         )
         RecursiveComparison.assertEquals(expected, container.ports)
     }
 
     @Test
     fun `Finding by internal port should return the correct port`() {
-        val ports = Container.ContainerPortList(
+        val ports = ContainerPortList(
             listOf(
-                Container.ContainerPort(12345, 8000),
-                Container.ContainerPort(12346, null),
+                ContainerPort(12345, 8000),
+                ContainerPort(12346, null),
             )
         )
 
@@ -96,10 +98,10 @@ internal class ContainerTest {
 
     @Test
     fun `Finding first exposed port should return the correct port`() {
-        val ports = Container.ContainerPortList(
+        val ports = ContainerPortList(
             listOf(
-                Container.ContainerPort(12345, null),
-                Container.ContainerPort(12346, 8000),
+                ContainerPort(12345, null),
+                ContainerPort(12346, 8000),
             )
         )
 
@@ -108,10 +110,10 @@ internal class ContainerTest {
 
     @Test
     fun `Finding first exposed port should return null if no port is exposed`() {
-        val ports = Container.ContainerPortList(
+        val ports = ContainerPortList(
             listOf(
-                Container.ContainerPort(12345, null),
-                Container.ContainerPort(12346, null),
+                ContainerPort(12345, null),
+                ContainerPort(12346, null),
             )
         )
 

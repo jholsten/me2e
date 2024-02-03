@@ -7,6 +7,8 @@ import org.jholsten.me2e.container.database.DatabaseContainer
 import org.jholsten.me2e.container.database.DatabaseManagementSystem
 import org.jholsten.me2e.container.docker.DockerCompose
 import org.jholsten.me2e.container.microservice.MicroserviceContainer
+import org.jholsten.me2e.container.model.ContainerPort
+import org.jholsten.me2e.container.model.ContainerPortList
 import org.jholsten.me2e.parsing.utils.FileUtils
 import org.jholsten.util.RecursiveComparison
 import kotlin.test.*
@@ -25,8 +27,8 @@ internal class ContainerManagerTest {
                 image = "backend-api:latest",
                 environment = mapOf("DB_PASSWORD" to "123", "DB_USER" to "user"),
                 requestConfig = RequestConfig(),
-                ports = Container.ContainerPortList(
-                    ports = listOf(Container.ContainerPort(internal = 8000))
+                ports = ContainerPortList(
+                    ports = listOf(ContainerPort(internal = 8000))
                 )
             ),
             "database" to DatabaseContainer(
@@ -69,8 +71,8 @@ internal class ContainerManagerTest {
                 image = "backend-api:latest",
                 environment = mapOf("DB_PASSWORD" to "123", "DB_USER" to "user"),
                 requestConfig = RequestConfig(),
-                ports = Container.ContainerPortList(
-                    ports = listOf(Container.ContainerPort(internal = 8000))
+                ports = ContainerPortList(
+                    ports = listOf(ContainerPort(internal = 8000))
                 )
             ),
         )

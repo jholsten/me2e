@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JacksonInject
 import com.github.dockerjava.api.model.Container as DockerContainer
 import org.jholsten.me2e.config.model.RequestConfig
 import org.jholsten.me2e.container.Container
+import org.jholsten.me2e.container.model.ContainerPortList
 import org.jholsten.me2e.container.model.ContainerType
 import org.jholsten.me2e.request.client.OkHttpClient
 import org.jholsten.me2e.request.model.*
