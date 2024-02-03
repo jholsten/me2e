@@ -9,6 +9,7 @@ import org.jholsten.me2e.container.model.ContainerPortList
 import org.jholsten.me2e.container.model.ContainerType
 import org.jholsten.me2e.request.client.OkHttpClient
 import org.jholsten.me2e.request.model.*
+import org.jholsten.me2e.utils.logger
 import org.testcontainers.containers.ContainerState
 import java.time.Instant
 import java.util.concurrent.TimeUnit
@@ -34,6 +35,8 @@ class MicroserviceContainer(
     ports = ports,
     hasHealthcheck = hasHealthcheck,
 ) {
+    private val logger = logger(this)
+
     /**
      * URL where microservice is accessible from localhost.
      * This value may either be set in the Docker-Compose file, or it is automatically set by retrieving the first exposed port.
@@ -141,6 +144,7 @@ class MicroserviceContainer(
         } else {
             predefinedUrl
         }
+        logger.info("Set base URL for microservice $name to $url.")
 
         this.httpClient = OkHttpClient.Builder()
             .withBaseUrl(Url(url!!))
