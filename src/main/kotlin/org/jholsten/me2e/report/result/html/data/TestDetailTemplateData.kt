@@ -107,9 +107,9 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
 
         private fun getStatsByContainer(result: TestResult): Map<String, List<AggregatedStatsEntry>> {
             return if (result is FinishedTestResult) {
-                return result.stats.groupBy { it.service.name }
+                result.stats.groupBy { it.service.name }
             } else {
-                return mapOf()
+                mapOf()
             }
         }
 
