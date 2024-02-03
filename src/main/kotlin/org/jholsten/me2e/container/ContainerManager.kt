@@ -12,7 +12,6 @@ import org.jholsten.me2e.container.exception.ServiceStartupException
 import org.jholsten.me2e.container.exception.ServiceNotHealthyException
 import org.jholsten.me2e.container.microservice.MicroserviceContainer
 import org.jholsten.me2e.utils.filterValuesIsInstance
-import org.testcontainers.DockerClientFactory
 import org.testcontainers.containers.ContainerLaunchException
 import org.testcontainers.containers.wait.strategy.Wait
 import java.io.File
@@ -163,10 +162,9 @@ class ContainerManager(
      * Sets corresponding [DockerContainer] and [org.testcontainers.containers.ContainerState] instances.
      */
     private fun initializeContainers() {
-        val dockerContainers = environment.dockerContainers
         for (container in containers.values) {
-            val dockerContainerState = environment.getContainerByServiceName(container.name).get()
-            container.initialize(dockerContainers[container.name]!!, dockerContainerState)
+            val state = environment.getContainerByServiceName(container.name).get()
+            container.initialize(environment.getDockerContainer(container.name), state, environment)
         }
     }
 

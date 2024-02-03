@@ -132,7 +132,7 @@ class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironmentConfig
             val labels = getImageLabels(node.get("labels"))
             node.put("name", entry.key)
             node.put("type", labels[CONTAINER_TYPE_KEY] ?: "MISC")
-            node.put("url", labels[URL_KEY])
+            node.put("predefinedUrl", labels[URL_KEY])
             node.put("pullPolicy", labels[PULL_POLICY_KEY] ?: dockerConfig.pullPolicy.name)
             node.put("hasHealthcheck", node.has("healthcheck"))
             setDatabaseProperties(node, labels, node.get("environment"), getDatabaseInitializationScripts(node.get("labels")))

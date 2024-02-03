@@ -136,7 +136,7 @@ class TestEnvironmentConfigDeserializerTest {
 
         val expectedService = expectedApiGateway()
             .put("type", "MISC")
-            .put("url", null as String?)
+            .put("predefinedUrl", null as String?)
             .put("pullPolicy", "MISSING")
         expectedService.remove("labels")
         verify { mockedMapper.treeToValue(expectedService, Container::class.java) }
@@ -503,7 +503,7 @@ class TestEnvironmentConfigDeserializerTest {
             )
             .put("name", "api-gateway")
             .put("type", "MICROSERVICE")
-            .put("url", null as String?)
+            .put("predefinedUrl", null as String?)
             .put("pullPolicy", "ALWAYS")
             .put("hasHealthcheck", true)
     }
@@ -518,7 +518,7 @@ class TestEnvironmentConfigDeserializerTest {
             )
             .put("name", "auth-server")
             .put("type", "MICROSERVICE")
-            .put("url", "http://auth-server")
+            .put("predefinedUrl", "http://auth-server")
             .put("pullPolicy", "MISSING")
             .put("hasHealthcheck", false)
     }
@@ -538,7 +538,7 @@ class TestEnvironmentConfigDeserializerTest {
             )
             .put("name", "database")
             .put("type", "DATABASE")
-            .put("url", null as String?)
+            .put("predefinedUrl", null as String?)
             .put("pullPolicy", "MISSING")
             .put("hasHealthcheck", false)
             .put("system", "POSTGRESQL")

@@ -4,6 +4,7 @@ import com.github.dockerjava.api.command.LogContainerCmd
 import com.github.dockerjava.api.model.ContainerPort as DockerContainerPort
 import com.github.dockerjava.api.model.Container as DockerContainer
 import io.mockk.*
+import org.jholsten.me2e.container.docker.DockerCompose
 import org.jholsten.me2e.container.model.ContainerPort
 import org.jholsten.me2e.container.model.ContainerPortList
 import org.jholsten.me2e.container.model.ContainerType
@@ -16,6 +17,7 @@ internal class ContainerTest {
 
     private val dockerContainer = mockk<DockerContainer>()
     private val dockerContainerState = mockk<ContainerState>()
+    private val environment = mockk<DockerCompose>()
 
     val container = Container(
         name = "backend",
@@ -72,7 +74,7 @@ internal class ContainerTest {
             DockerContainerPort().withPrivatePort(null).withPublicPort(8002),
         )
 
-        container.initialize(dockerContainer, dockerContainerState)
+        container.initialize(dockerContainer, dockerContainerState, environment)
 
         val expected = listOf(
             ContainerPort(12345, 8000),

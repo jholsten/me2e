@@ -6,6 +6,7 @@ import com.github.dockerjava.api.model.Container as DockerContainer
 import org.jholsten.me2e.container.database.connection.MongoDBConnection
 import org.jholsten.me2e.container.database.connection.SQLDatabaseConnection
 import org.jholsten.me2e.container.database.model.QueryResult
+import org.jholsten.me2e.container.docker.DockerCompose
 import org.jholsten.me2e.container.model.ContainerPort
 import org.jholsten.me2e.container.model.ContainerPortList
 import org.jholsten.me2e.report.result.ReportDataAggregator
@@ -24,6 +25,7 @@ internal class DatabaseContainerTest {
     companion object {
         private val mockedDockerContainer = mockk<DockerContainer>()
         private val mockedDockerContainerState = mockk<ContainerState>()
+        private val mockedEnvironment = mockk<DockerCompose>()
         private val mockedSQLConnection = mockk<SQLDatabaseConnection>()
         private val mockedMongoDBConnection = mockk<MongoDBConnection>()
 
@@ -147,7 +149,7 @@ internal class DatabaseContainerTest {
     @ArgumentsSource(SQLContainerArgumentProvider::class)
     @Suppress("UNUSED_PARAMETER")
     fun `Initializing database container should initialize connection`(system: DatabaseManagementSystem, container: DatabaseContainer) {
-        container.initialize(mockedDockerContainer, mockedDockerContainerState)
+        container.initialize(mockedDockerContainer, mockedDockerContainerState, mockedEnvironment)
 
         assertNotNull(container.connection)
         verify { mockedSQLConnection.executeScript("init_1", "database/init_1.sql") }

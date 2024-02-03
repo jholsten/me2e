@@ -4,11 +4,13 @@ import com.fasterxml.jackson.annotation.JacksonInject
 import com.github.dockerjava.api.model.Container as DockerContainer
 import org.jholsten.me2e.config.model.RequestConfig
 import org.jholsten.me2e.container.Container
+import org.jholsten.me2e.container.docker.DockerCompose
 import org.jholsten.me2e.container.model.ContainerPortList
 import org.jholsten.me2e.container.model.ContainerType
 import org.jholsten.me2e.request.client.OkHttpClient
 import org.jholsten.me2e.request.model.*
 import org.testcontainers.containers.ContainerState
+import java.time.Instant
 import java.util.concurrent.TimeUnit
 
 /**
@@ -19,7 +21,7 @@ class MicroserviceContainer(
     name: String,
     image: String,
     environment: Map<String, String>? = null,
-    url: String? = null,
+    private val predefinedUrl: String? = null,
     ports: ContainerPortList = ContainerPortList(),
     @JacksonInject("requestConfig")
     private val requestConfig: RequestConfig,
@@ -36,7 +38,7 @@ class MicroserviceContainer(
      * URL where microservice is accessible from localhost.
      * This value may either be set in the Docker-Compose file, or it is automatically set by retrieving the first exposed port.
      */
-    var url: String? = url
+    var url: String? = null
 
     /**
      * HTTP client for executing requests towards this microservice.
@@ -44,20 +46,14 @@ class MicroserviceContainer(
      */
     private var httpClient: OkHttpClient? = null
 
-    override fun initialize(dockerContainer: DockerContainer, dockerContainerState: ContainerState) {
-        super.initialize(dockerContainer, dockerContainerState)
-        if (url == null) {
-            val exposedPort = ports.findFirstExposed()
-            requireNotNull(exposedPort) { "Microservice $name needs at least one exposed port or a URL defined." }
-            url = "http://${dockerContainerState.host}:${exposedPort.external}"
-        }
+    override fun initialize(dockerContainer: DockerContainer, state: ContainerState, environment: DockerCompose) {
+        super.initialize(dockerContainer, state, environment)
+        setBaseUrl()
+    }
 
-        this.httpClient = OkHttpClient.Builder()
-            .withBaseUrl(Url(url!!))
-            .withConnectTimeout(requestConfig.connectTimeout, TimeUnit.SECONDS)
-            .withReadTimeout(requestConfig.readTimeout, TimeUnit.SECONDS)
-            .withWriteTimeout(requestConfig.writeTimeout, TimeUnit.SECONDS)
-            .build()
+    override fun onRestart(timestamp: Instant) {
+        super.onRestart(timestamp)
+        setBaseUrl()
     }
 
     // TODO
@@ -135,6 +131,23 @@ class MicroserviceContainer(
     fun delete(relativeUrl: RelativeUrl, body: HttpRequestBody? = null, headers: HttpHeaders = HttpHeaders.empty()): HttpResponse {
         assertThatHttpClientIsInitialized()
         return httpClient!!.delete(relativeUrl, body, headers)
+    }
+
+    private fun setBaseUrl() {
+        url = if (predefinedUrl == null) {
+            val exposedPort = ports.findFirstExposed()
+            requireNotNull(exposedPort) { "Microservice $name needs at least one exposed port or a URL defined." }
+            "http://${dockerContainer!!.state.host}:${exposedPort.external}"
+        } else {
+            predefinedUrl
+        }
+
+        this.httpClient = OkHttpClient.Builder()
+            .withBaseUrl(Url(url!!))
+            .withConnectTimeout(requestConfig.connectTimeout, TimeUnit.SECONDS)
+            .withReadTimeout(requestConfig.readTimeout, TimeUnit.SECONDS)
+            .withWriteTimeout(requestConfig.writeTimeout, TimeUnit.SECONDS)
+            .build()
     }
 
     private fun assertThatHttpClientIsInitialized() {

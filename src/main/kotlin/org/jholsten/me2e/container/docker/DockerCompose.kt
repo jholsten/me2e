@@ -53,7 +53,7 @@ class DockerCompose(
 
     /**
      * Map of service name and [DockerContainer] instance for all services defined in the docker compose file.
-     * Is only set after the docker compose is started and reset to `null` after it is stopped.
+     * Is only set after the docker compose is started or any service is restarted and reset to `null` after it is stopped.
      */
     private var _dockerContainers: Map<String, DockerContainer>? = null
 
@@ -168,7 +168,7 @@ class DockerCompose(
     }
 
     /**
-     * Starts the Docker-Compose container. Initializes [_project] and [_dockerContainers].
+     * Starts the Docker-Compose container.
      * @see DockerComposeV1.start
      * @see DockerComposeV2.start
      */
@@ -191,10 +191,11 @@ class DockerCompose(
     fun restartContainers(servicesToRestart: List<String>) {
         logger.info("Restarting services: [${servicesToRestart.joinToString(", ")}]...")
         execute("restart ${servicesToRestart.joinToString(" ")}")
+        this._dockerContainers = getDockerContainers()
     }
 
     /**
-     * Stops the Docker-Compose container. Resets [_project] and [_dockerContainers].
+     * Stops the Docker-Compose container.
      * @see DockerComposeV1.stop
      * @see DockerComposeV2.stop
      */
@@ -220,11 +221,21 @@ class DockerCompose(
 
     /**
      * Executes the given Docker-Compose command locally.
-     * Redirects output and error to logger.
+     * Redirects output and error to the [logger].
      * @throws DockerException in case of errors.
      */
     fun execute(command: String) {
         local.execute(command)
+    }
+
+    /**
+     * Returns reference to the Docker container of service with the given name.
+     * May contain outdated information and is only updated when the docker compose is started or any service is restarted.
+     * @throws IllegalStateException if docker compose is currently not running or the service does not exist.
+     */
+    @JvmSynthetic
+    internal fun getDockerContainer(serviceName: String): DockerContainer {
+        return dockerContainers[serviceName] ?: throw IllegalStateException("Unknown service $serviceName.")
     }
 
     /**

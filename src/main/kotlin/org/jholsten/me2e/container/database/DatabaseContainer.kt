@@ -7,6 +7,7 @@ import org.jholsten.me2e.container.database.connection.MongoDBConnection
 import org.jholsten.me2e.container.database.connection.SQLDatabaseConnection
 import org.jholsten.me2e.container.database.exception.DatabaseException
 import org.jholsten.me2e.container.database.model.QueryResult
+import org.jholsten.me2e.container.docker.DockerCompose
 import org.jholsten.me2e.container.model.ContainerPort
 import org.jholsten.me2e.container.model.ContainerPortList
 import org.jholsten.me2e.container.model.ContainerType
@@ -14,6 +15,7 @@ import org.jholsten.me2e.utils.logger
 import org.testcontainers.containers.ContainerState
 import java.io.File
 import java.io.FileNotFoundException
+import java.time.Instant
 import com.github.dockerjava.api.model.Container as DockerContainer
 
 /**
@@ -103,16 +105,24 @@ class DatabaseContainer(
      */
     var connection: DatabaseConnection? = null
 
-    override fun initialize(dockerContainer: DockerContainer, dockerContainerState: ContainerState) {
-        super.initialize(dockerContainer, dockerContainerState)
+    override fun initialize(dockerContainer: DockerContainer, state: ContainerState, environment: DockerCompose) {
+        super.initialize(dockerContainer, state, environment)
         val exposedPort = ports.findFirstExposed()
         if (exposedPort?.external == null) {
             logger.warn("Could not find any exposed ports for database container '$name'.")
         } else if (database == null) {
             logger.warn("Could not detect the name of the database for container '$name'.")
         } else {
-            initializeConnection(dockerContainerState, exposedPort)
+            initializeConnection(state, exposedPort)
             executeInitializationScripts()
+        }
+    }
+
+    override fun onRestart(timestamp: Instant) {
+        super.onRestart(timestamp)
+        val exposedPort = ports.findFirstExposed()
+        if (exposedPort?.external != null && database != null) {
+            initializeConnection(dockerContainer!!.state, exposedPort)
         }
     }
 

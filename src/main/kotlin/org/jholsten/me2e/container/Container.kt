@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import org.jholsten.me2e.config.model.DockerConfig
 import org.jholsten.me2e.container.database.DatabaseContainer
+import org.jholsten.me2e.container.docker.DockerCompose
 import org.jholsten.me2e.container.logging.ContainerLogConsumer
 import org.jholsten.me2e.container.logging.ContainerLogUtils
 import org.jholsten.me2e.container.logging.model.ContainerLogEntry
@@ -130,7 +131,8 @@ open class Container(
      * Reference to the Docker container which represents this container instance.
      * Is initialized as soon as the docker compose is started.
      */
-    private var dockerContainer: DockerContainerReference? = null
+    @JvmSynthetic
+    internal var dockerContainer: DockerContainerReference? = null
 
     /**
      * List of registered log consumers. Are reattached whenever the container is restarted.
@@ -152,18 +154,11 @@ open class Container(
      * container was started. Maps external ports to internal container ports, initializes [ReportDataAggregator] and adds consumer
      * to the container's `restart` events.
      */
-    // TODO: Remove DockerContainer reference
     @JvmSynthetic
-    internal open fun initialize(dockerContainer: DockerContainer, dockerContainerState: ContainerState) {
-        this.dockerContainer = DockerContainerReference(dockerContainer, dockerContainerState, dockerContainerState.containerInfo)
+    internal open fun initialize(dockerContainer: DockerContainer, state: ContainerState, environment: DockerCompose) {
+        this.dockerContainer = DockerContainerReference(dockerContainer, state, environment)
+        mapContainerPorts(dockerContainer)
 
-        val dockerPorts = dockerContainer.ports.filter { it.privatePort != null }
-        for (port in dockerPorts) {
-            val internalPort = this.ports.findByInternalPort(port.privatePort!!)
-            if (internalPort != null) {
-                internalPort.external = port.publicPort
-            }
-        }
         ReportDataAggregator.onContainerStarted(this)
         addEventConsumer(ContainerRestartListener(this), eventFilters = listOf(ContainerEvent.Type.RESTART))
     }
@@ -180,11 +175,11 @@ open class Container(
         assertThatContainerIsInitialized()
         logger.info("Received notification that container $name was restarted at $timestamp. Updating container info...")
         val state = dockerContainer!!.state
-        this.dockerContainer!!.info = state.currentContainerInfo
+        dockerContainer!!.container = dockerContainer!!.environment.getDockerContainer(name)
         logConsumers.forEach { consumer -> ContainerLogUtils.followOutput(state, consumer, since = timestamp.epochSecond.toInt()) }
         statsConsumers.forEach { consumer -> ContainerStatsUtils.followOutput(state, consumer) }
         eventConsumers.forEach { (consumer, eventFilters) -> ContainerEventsUtils.followOutput(state, consumer, eventFilters) }
-        // TODO: Update port mappings
+        mapContainerPorts(dockerContainer!!.container)
     }
 
     /**
@@ -328,6 +323,16 @@ open class Container(
     private fun getLogs(since: Int, until: Int?): List<ContainerLogEntry> {
         assertThatContainerIsInitialized()
         return ContainerLogUtils.getLogs(dockerContainer!!.state, since, until)
+    }
+
+    private fun mapContainerPorts(dockerContainer: DockerContainer) {
+        val dockerPorts = dockerContainer.ports.filter { it.privatePort != null }
+        for (port in dockerPorts) {
+            val internalPort = this.ports.findByInternalPort(port.privatePort!!)
+            if (internalPort != null) {
+                internalPort.external = port.publicPort
+            }
+        }
     }
 
     private fun assertThatContainerIsInitialized() {
