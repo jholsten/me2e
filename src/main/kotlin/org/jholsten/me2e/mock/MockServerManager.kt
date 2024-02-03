@@ -7,7 +7,7 @@ import org.awaitility.Awaitility
 import org.awaitility.Durations
 import org.awaitility.core.ConditionTimeoutException
 import org.jholsten.me2e.container.exception.ServiceStartupException
-import org.jholsten.me2e.container.exception.ServiceNotHealthyException
+import org.jholsten.me2e.container.health.exception.HealthTimeoutException
 import org.jholsten.me2e.mock.stubbing.MockServerStubNotMatchedRenderer
 import org.jholsten.me2e.request.mapper.HttpRequestMapper
 import org.jholsten.me2e.request.model.HttpRequest
@@ -50,7 +50,7 @@ class MockServerManager(
      * Initializes all mock server instances and starts mocked HTTP server.
      * Waits at most 5 seconds until the HTTP server is running.
      * @throws ServiceStartupException if server could not be started.
-     * @throws ServiceNotHealthyException if server is not running within 5 seconds.
+     * @throws HealthTimeoutException if server is not running within 5 seconds.
      * @throws IllegalStateException if mock server is already running
      */
     fun start() {
@@ -125,7 +125,7 @@ class MockServerManager(
     /**
      * Starts mocked HTTP server and waits at most 5 seconds until it's running.
      * @throws ServiceStartupException if server could not be started.
-     * @throws ServiceNotHealthyException if server is not running within 5 seconds.
+     * @throws HealthTimeoutException if server is not running within 5 seconds.
      */
     private fun startHTTPMockServer() {
         try {
@@ -136,7 +136,7 @@ class MockServerManager(
         } catch (e: FatalStartupException) {
             throw ServiceStartupException("Mock server could not be started: ${e.message}")
         } catch (e: ConditionTimeoutException) {
-            throw ServiceNotHealthyException("Mock server was not running within 5 seconds.")
+            throw HealthTimeoutException("Mock server was not running within 5 seconds.")
         }
     }
 

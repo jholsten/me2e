@@ -9,7 +9,7 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import com.github.tomakehurst.wiremock.verification.LoggedRequest
 import io.mockk.*
 import org.jholsten.me2e.container.exception.ServiceStartupException
-import org.jholsten.me2e.container.exception.ServiceNotHealthyException
+import org.jholsten.me2e.container.health.exception.HealthTimeoutException
 import org.jholsten.me2e.mock.stubbing.MockServerStubNotMatchedRenderer
 import org.jholsten.me2e.request.mapper.HttpRequestMapper
 import org.jholsten.me2e.request.model.HttpRequest
@@ -103,7 +103,7 @@ internal class MockServerManagerTest {
         every { anyConstructed<WireMockServer>().isRunning } returns false
 
         val manager = MockServerManager(mapOf())
-        assertFailsWith<ServiceNotHealthyException> { manager.start() }
+        assertFailsWith<HealthTimeoutException> { manager.start() }
 
         verify { PortUtils.isPortAvailable(80) }
         verify { PortUtils.isPortAvailable(443) }

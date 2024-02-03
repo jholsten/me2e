@@ -9,7 +9,7 @@ import org.jholsten.me2e.container.database.connection.SQLDatabaseConnection
 import org.jholsten.me2e.container.docker.DockerCompose
 import org.jholsten.me2e.container.exception.ServiceShutdownException
 import org.jholsten.me2e.container.exception.ServiceStartupException
-import org.jholsten.me2e.container.exception.ServiceNotHealthyException
+import org.jholsten.me2e.container.health.exception.HealthTimeoutException
 import org.jholsten.me2e.container.microservice.MicroserviceContainer
 import org.jholsten.me2e.utils.filterValuesIsInstance
 import org.testcontainers.containers.ContainerLaunchException
@@ -71,7 +71,7 @@ class ContainerManager(
     /**
      * Starts Docker-Compose and initializes all containers. Waits until all containers for which a healthcheck is defined are healthy.
      * @throws ServiceStartupException if Docker-Compose could not be started.
-     * @throws ServiceNotHealthyException if at least one container did not become healthy within the specified timeout.
+     * @throws HealthTimeoutException if at least one container did not become healthy within the specified timeout.
      */
     fun start() {
         pullImages()
@@ -88,7 +88,7 @@ class ContainerManager(
     fun restart(containerNames: List<String>) {
         val unknownContainers = containerNames.filter { it !in containers }
         require(unknownContainers.isEmpty()) { "Unknown container names: [${unknownContainers.joinToString(", ")}]" }
-        environment.restartContainers(containerNames)
+        environment.restartContainers(containerNames, dockerConfig.healthTimeout)
     }
 
     /**
@@ -130,7 +130,7 @@ class ContainerManager(
     /**
      * Starts Docker-Compose and waits until all containers are healthy.
      * @throws ServiceStartupException if Docker-Compose could not be started.
-     * @throws ServiceNotHealthyException if at least one container did not become healthy within the specified timeout.
+     * @throws HealthTimeoutException if at least one container did not become healthy within the specified timeout.
      */
     private fun startDockerCompose() {
         try {
@@ -139,7 +139,7 @@ class ContainerManager(
             throw ServiceStartupException("Unable to start Docker Compose: ${e.message}")
         } catch (e: RuntimeException) {
             if (e.cause is ContainerLaunchException && e.cause?.message == "Timed out waiting for container to become healthy") {
-                throw ServiceNotHealthyException("At least one container did not become healthy within the specified timeout.")
+                throw HealthTimeoutException("At least one container did not become healthy within the specified timeout.")
             }
             throw ServiceStartupException("Unable to start Docker Compose: ${e.message}")
         }
