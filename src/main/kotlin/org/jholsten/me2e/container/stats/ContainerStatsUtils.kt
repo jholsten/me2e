@@ -1,3 +1,5 @@
+@file:JvmSynthetic
+
 package org.jholsten.me2e.container.stats
 
 import com.github.dockerjava.api.model.Statistics
@@ -9,7 +11,7 @@ import java.util.function.Consumer
 /**
  * Utility class for reading statistics of a Docker container.
  */
-class ContainerStatsUtils {
+internal class ContainerStatsUtils {
     companion object {
         /**
          * Returns the current resource usage statistics of the given Docker container,

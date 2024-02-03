@@ -1,3 +1,5 @@
+@file:JvmSynthetic
+
 package org.jholsten.me2e.container.logging
 
 import org.jholsten.me2e.container.logging.model.ContainerLogEntry
@@ -13,7 +15,7 @@ import java.util.function.Consumer
  * Expands the functionality of [org.testcontainers.utility.LogUtils].
  * @see org.testcontainers.utility.LogUtils
  */
-class ContainerLogUtils {
+internal class ContainerLogUtils {
     companion object {
         /**
          * Returns all log output from the container [dockerContainer] from [since] until [until] along with their timestamps,
@@ -40,14 +42,16 @@ class ContainerLogUtils {
 
         /**
          * Attaches the given [consumer] to the container's log output in follow mode.
-         * The consumer will receive all previous and all future log frames.
+         * If [since] is set to `0`, the consumer will receive all previous and all future log frames.
+         * Otherwise, the consumer will receive only the logs frames after this timestamp.
          * @param dockerContainer Docker container to attach the log consumer to.
          * @param consumer Log consumer to be attached.
+         * @param since Only consume logs since this time, as a UNIX timestamp.
          * @return Consumer thread which can be closed to stop consuming log entries.
          * @see org.testcontainers.utility.LogUtils.followOutput
          */
-        fun followOutput(dockerContainer: ContainerState, consumer: ContainerLogConsumer): Closeable {
-            return attachConsumer(dockerContainer, consumer, followStream = true, since = 0)
+        fun followOutput(dockerContainer: ContainerState, consumer: ContainerLogConsumer, since: Int = 0): Closeable {
+            return attachConsumer(dockerContainer, consumer, followStream = true, since = since)
         }
 
         private fun attachConsumer(
