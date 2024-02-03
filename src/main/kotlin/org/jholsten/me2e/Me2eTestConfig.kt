@@ -26,4 +26,9 @@ annotation class Me2eTestConfig(
      * Report generators to use for generating the test report.
      */
     val reportGenerators: Array<KClass<out ReportGenerator>> = [HtmlReportGenerator::class],
+
+    /**
+     * Whether to assert that all containers are healthy before each test.
+     */
+    val assertHealthy: Boolean = true,
 )

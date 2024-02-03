@@ -5,11 +5,13 @@ import org.jholsten.me2e.container.ContainerManager
 import org.jholsten.me2e.container.injection.InjectionUtils
 import org.jholsten.me2e.mock.MockServerManager
 import org.jholsten.me2e.parsing.utils.FileUtils
+import org.junit.jupiter.api.extension.ExtendWith
 
 
 /**
  * Base class for the definition of ME2E-Tests.
  */
+@ExtendWith(Me2eAssertHealthyExtension::class)
 open class Me2eTest {
     companion object {
         /**
