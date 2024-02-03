@@ -50,7 +50,7 @@ abstract class ContainerLogConsumer : Consumer<OutputFrame> {
         }
         return ContainerLogEntry(
             timestamp = Instant.parse(timestamp),
-            message = message,
+            message = message.trimEnd(),
         )
     }
 
