@@ -1,12 +1,17 @@
 package org.jholsten.me2e.container.docker
 
+import com.github.dockerjava.api.command.InspectContainerResponse
 import com.github.dockerjava.api.model.Container as DockerContainer
 import org.jholsten.me2e.container.exception.DockerException
+import org.jholsten.me2e.container.health.exception.HealthTimeoutException
 import org.jholsten.me2e.utils.ResettableLazy
 import org.jholsten.me2e.utils.logger
 import org.testcontainers.DockerClientFactory
+import org.testcontainers.containers.ContainerLaunchException
 import org.testcontainers.containers.ContainerState
+import org.testcontainers.containers.wait.strategy.Wait
 import org.testcontainers.containers.wait.strategy.WaitStrategy
+import org.testcontainers.containers.wait.strategy.WaitStrategyTarget
 import org.testcontainers.shaded.com.github.dockerjava.core.LocalDirectorySSLConfig
 import org.testcontainers.shaded.com.google.common.base.Splitter
 import org.testcontainers.shaded.org.zeroturnaround.exec.InvalidExitValueException
@@ -17,12 +22,14 @@ import org.testcontainers.utility.DockerLoggerFactory
 import org.testcontainers.containers.DockerComposeContainer as DockerComposeV1
 import org.testcontainers.containers.ComposeContainer as DockerComposeV2
 import java.io.File
+import java.time.Duration
 import java.util.Optional
 
 /**
  * Custom wrapper for testcontainers Docker-Compose classes [DockerComposeV1] and [DockerComposeV2].
  * Since testcontainers uses two different classes for version 1 and 2, which do not have a common supertype, it is otherwise difficult
  * to handle instances of both classes. Therefore, this class provides a common interface for both classes.
+ * TODO: Builder
  */
 class DockerCompose(
     private val identifier: String,
@@ -196,13 +203,14 @@ class DockerCompose(
      * @param servicesToRestart Names of the services to restart.
      * @throws DockerException in case of errors.
      */
-    fun restartContainers(servicesToRestart: List<String>) {
+    fun restartContainers(servicesToRestart: List<String>, healthTimeout: Long) {
         if (servicesToRestart.isNotEmpty()) {
             isRestarting = true
             logger.info("Restarting services: [${servicesToRestart.joinToString(", ")}]...")
             execute("restart ${servicesToRestart.joinToString(" ")}")
             this._dockerContainers.reset()
             isRestarting = false
+            waitUntilHealthy(servicesToRestart, healthTimeout)
         }
     }
 
@@ -218,6 +226,32 @@ class DockerCompose(
         }
         this._dockerContainers.reset()
         this._project = null
+    }
+
+    /**
+     * Waits for up to [timeout] seconds until the services with the given names are healthy.
+     * Services for which no health check is defined in the docker compose are ignored.
+     * @throws HealthTimeoutException if at least one of the containers did not become healthy within [timeout] seconds.
+     */
+    fun waitUntilHealthy(serviceNames: List<String>, timeout: Long) {
+        val servicesWithHealthcheck = serviceNames.filter { hasHealthcheck(it) }
+        logger.info("Waiting for ${servicesWithHealthcheck.size} services to be healthy...")
+        servicesWithHealthcheck.forEach { waitUntilHealthy(it, timeout) }
+        logger.info("Services [${servicesWithHealthcheck.joinToString(", ")}] are healthy.")
+    }
+
+    class Target(private val containerId: String) : WaitStrategyTarget {
+        override fun getExposedPorts(): MutableList<Int> {
+            return mutableListOf()
+        }
+
+        override fun getContainerInfo(): InspectContainerResponse {
+            return dockerClient.inspectContainerCmd(containerId).exec()
+        }
+
+        override fun getContainerId(): String {
+            return containerId
+        }
     }
 
     /**
@@ -340,6 +374,24 @@ class DockerCompose(
                 throw DockerException("Running Docker-Compose command $cmd failed: ${e.message}")
             }
         }
+    }
+
+    private fun waitUntilHealthy(serviceName: String, timeout: Long) {
+        val waitStrategy = Wait.forHealthcheck().withStartupTimeout(Duration.ofSeconds(timeout))
+        try {
+            waitStrategy.waitUntilReady(Target(getDockerContainer(serviceName).id))
+        } catch (e: ContainerLaunchException) {
+            throw HealthTimeoutException("Timed out waiting for container $serviceName to become healthy.")
+        }
+    }
+
+    /**
+     * Returns whether there is a healthcheck defined for the service with the given name.
+     */
+    private fun hasHealthcheck(serviceName: String): Boolean {
+        val containerId = getDockerContainer(serviceName).id
+        val containerInfo = DockerClientFactory.lazyClient().inspectContainerCmd(containerId).exec()
+        return containerInfo.state.health != null
     }
 
     /**

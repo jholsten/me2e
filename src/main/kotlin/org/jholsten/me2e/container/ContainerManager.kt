@@ -13,9 +13,7 @@ import org.jholsten.me2e.container.health.exception.HealthTimeoutException
 import org.jholsten.me2e.container.microservice.MicroserviceContainer
 import org.jholsten.me2e.utils.filterValuesIsInstance
 import org.testcontainers.containers.ContainerLaunchException
-import org.testcontainers.containers.wait.strategy.Wait
 import java.io.File
-import java.time.Duration
 
 /**
  * Manager for starting and stopping all Docker containers.
@@ -75,8 +73,8 @@ class ContainerManager(
      */
     fun start() {
         pullImages()
-        registerHealthChecks()
         startDockerCompose()
+        environment.waitUntilHealthy(containers.values.map { it.name }, dockerConfig.healthTimeout)
         initializeContainers()
     }
 
@@ -111,20 +109,6 @@ class ContainerManager(
             .map { it.name }
 
         environment.pull(servicesToPullAlways)
-    }
-
-    /**
-     * Registers health checks for all containers for which a healthcheck is defined in the Docker-Compose at testcontainers.
-     */
-    private fun registerHealthChecks() {
-        for (container in containers.values) {
-            if (container.hasHealthcheck) {
-                environment.waitingFor(
-                    serviceName = container.name,
-                    waitStrategy = Wait.forHealthcheck().withStartupTimeout(Duration.ofSeconds(dockerConfig.healthTimeout))
-                )
-            }
-        }
     }
 
     /**
