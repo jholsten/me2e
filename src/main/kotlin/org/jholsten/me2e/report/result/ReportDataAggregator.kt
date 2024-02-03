@@ -24,7 +24,6 @@ import org.junit.platform.launcher.TestIdentifier
 import org.junit.platform.launcher.TestPlan
 import java.time.Instant
 import java.util.UUID
-import kotlin.jvm.optionals.getOrNull
 import kotlin.reflect.KClass
 import kotlin.reflect.full.primaryConstructor
 
@@ -289,7 +288,7 @@ class ReportDataAggregator private constructor() {
          * Returns `null` in case this value is not set or not supported.
          */
         private fun getSource(testIdentifier: TestIdentifier): String? {
-            val source = testIdentifier.source.getOrNull() ?: return null
+            val source = testIdentifier.source.orElse(null) ?: return null
             return when (source) {
                 is ClassSource -> source.className
                 is ClasspathResourceSource -> source.classpathResourceName
