@@ -2,6 +2,7 @@ package org.jholsten.me2e.container.docker
 
 import com.github.dockerjava.api.model.Container as DockerContainer
 import org.jholsten.me2e.container.exception.DockerException
+import org.jholsten.me2e.utils.ResettableLazy
 import org.jholsten.me2e.utils.logger
 import org.testcontainers.DockerClientFactory
 import org.testcontainers.containers.ContainerState
@@ -52,10 +53,12 @@ class DockerCompose(
         }
 
     /**
-     * Map of service name and [DockerContainer] instance for all services defined in the docker compose file.
-     * Is only set after the docker compose is started or any service is restarted and reset to `null` after it is stopped.
+     * Lazy reference to a map of service name and [DockerContainer] instance for all services defined in the docker compose file.
+     * Is reset after the docker compose is started, when any service is restarted or when the docker compose is stopped.
      */
-    private var _dockerContainers: Map<String, DockerContainer>? = null
+    private val _dockerContainers: ResettableLazy<Map<String, DockerContainer>> = ResettableLazy {
+        getDockerContainers()
+    }
 
     /**
      * Map of service name and [DockerContainer] instance for all services defined in the docker compose file.
@@ -64,9 +67,13 @@ class DockerCompose(
     @get:JvmSynthetic
     internal val dockerContainers: Map<String, DockerContainer>
         get() {
-            checkNotNull(_dockerContainers) { "Docker containers cannot be retrieved, since the docker compose is currently not running." }
-            return _dockerContainers!!
+            if (isRestarting) {
+                _dockerContainers.reset()
+            }
+            return _dockerContainers.value
         }
+
+    private var isRestarting: Boolean = false
 
     /**
      * Kotlin wrapper for [DockerComposeV1] to avoid type issue.
@@ -177,7 +184,7 @@ class DockerCompose(
             DockerComposeVersion.V1 -> v1.start()
             DockerComposeVersion.V2 -> v2.start()
         }
-        this._dockerContainers = getDockerContainers()
+        this._dockerContainers.reset()
         if (dockerContainers.isNotEmpty()) {
             this._project = dockerContainers.values.first().labels["com.docker.compose.project"]
         }
@@ -186,12 +193,14 @@ class DockerCompose(
     /**
      * Restarts the services with the given names.
      * @param servicesToRestart Names of the services to restart.
-     * @throws DockerException in case of errors.
+     * @throws DockerException in case of errors. TODO: Healthcheck
      */
     fun restartContainers(servicesToRestart: List<String>) {
+        isRestarting = true
         logger.info("Restarting services: [${servicesToRestart.joinToString(", ")}]...")
         execute("restart ${servicesToRestart.joinToString(" ")}")
-        this._dockerContainers = getDockerContainers()
+        this._dockerContainers.reset()
+        isRestarting = false
     }
 
     /**
@@ -204,7 +213,7 @@ class DockerCompose(
             DockerComposeVersion.V1 -> v1.stop()
             DockerComposeVersion.V2 -> v2.stop()
         }
-        this._dockerContainers = null
+        this._dockerContainers.reset()
         this._project = null
     }
 
@@ -334,6 +343,7 @@ class DockerCompose(
      * Returns map of service name and [DockerContainer] instance for all services in the Docker-Compose file.
      */
     private fun getDockerContainers(): Map<String, DockerContainer> {
+        logger.info("Retrieving docker containers...")
         return DockerClientFactory.lazyClient()
             .listContainersCmd()
             .withShowAll(true)
