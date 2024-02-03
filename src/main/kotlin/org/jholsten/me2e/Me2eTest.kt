@@ -5,6 +5,7 @@ import org.jholsten.me2e.container.ContainerManager
 import org.jholsten.me2e.container.injection.InjectionUtils
 import org.jholsten.me2e.mock.MockServerManager
 import org.jholsten.me2e.parsing.utils.FileUtils
+import org.jholsten.me2e.utils.logger
 import org.junit.jupiter.api.extension.ExtendWith
 
 
@@ -14,6 +15,8 @@ import org.junit.jupiter.api.extension.ExtendWith
 @ExtendWith(Me2eAssertHealthyExtension::class)
 open class Me2eTest {
     companion object {
+        private val logger = logger(this)
+
         /**
          * Configuration annotation that is used to configure the tests.
          */
@@ -51,8 +54,12 @@ open class Me2eTest {
         }
 
         init {
-            mockServerManager.start()
-            containerManager.start()
+            try {
+                mockServerManager.start()
+                containerManager.start()
+            } catch (e: Exception) {
+                logger.error("Unable to start environment.", e)
+            }
         }
     }
 
