@@ -8,9 +8,9 @@ import kotlin.test.*
 internal class InjectServiceAnnotationProcessorTest {
 
     private val invalidFieldTypeMessage =
-        "@org.jholsten.me2e.container.injection.InjectService annotation can only be applied to fields of type org.jholsten.me2e.container.Container and org.jholsten.me2e.mock.MockServer"
+        "@InjectService annotation can only be applied to fields of type org.jholsten.me2e.container.Container and org.jholsten.me2e.mock.MockServer"
     private val invalidEnclosingClassMessage =
-        "@org.jholsten.me2e.container.injection.InjectService annotation can only be applied to fields of classes which extend class org.jholsten.me2e.Me2eTest"
+        "@InjectService annotation can only be applied to fields of classes which extend class org.jholsten.me2e.Me2eTest"
 
     @Test
     fun `Compiling test class with valid annotations should succeed`() {

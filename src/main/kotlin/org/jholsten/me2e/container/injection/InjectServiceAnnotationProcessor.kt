@@ -46,7 +46,7 @@ class InjectServiceAnnotationProcessor : AbstractProcessor() {
         if (elementType == null || !(elementType.isOfType(Container::class.java) || elementType.isOfType(MockServer::class.java))) {
             processingEnv.messager.printMessage(
                 Diagnostic.Kind.ERROR,
-                "@${InjectService::class.java.name} annotation can only be applied to fields of type ${Container::class.java.name} and ${MockServer::class.java.name}",
+                "@InjectService annotation can only be applied to fields of type ${Container::class.java.name} and ${MockServer::class.java.name}",
                 element
             )
         }
@@ -58,7 +58,7 @@ class InjectServiceAnnotationProcessor : AbstractProcessor() {
         if (!superClasses.contains(Me2eTest::class.java.name)) {
             processingEnv.messager.printMessage(
                 Diagnostic.Kind.ERROR,
-                "@${InjectService::class.java.name} annotation can only be applied to fields of classes which extend ${Me2eTest::class.java}",
+                "@InjectService annotation can only be applied to fields of classes which extend ${Me2eTest::class.java}",
                 element
             )
         }
