@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.github.dockerjava.api.command.InspectContainerResponse
 import org.jholsten.me2e.config.model.DockerConfig
 import org.jholsten.me2e.config.utils.ContainerPortListDeserializer
 import org.jholsten.me2e.container.database.DatabaseContainer
@@ -17,8 +18,14 @@ import org.jholsten.me2e.container.network.mapper.ContainerNetworkMapper
 import org.jholsten.me2e.container.stats.ContainerStatsConsumer
 import org.jholsten.me2e.container.stats.ContainerStatsUtils
 import org.jholsten.me2e.container.stats.model.ContainerStatsEntry
+import org.jholsten.me2e.events.ContainerEventConsumer
+import org.jholsten.me2e.events.ContainerEventsUtils
+import org.jholsten.me2e.events.ContainerRestartListener
+import org.jholsten.me2e.events.model.ContainerEvent
 import org.jholsten.me2e.report.result.ReportDataAggregator
+import org.jholsten.me2e.utils.logger
 import org.testcontainers.containers.ContainerState
+import java.time.Instant
 import com.github.dockerjava.api.model.Container as DockerContainer
 
 
@@ -53,7 +60,7 @@ open class Container(
     /**
      * Image to start the container from.
      */
-    val image: String,
+    val image: String, // TODO: Check with build .
 
     /**
      * Environment variables for this container.
@@ -75,6 +82,8 @@ open class Container(
      */
     val pullPolicy: DockerConfig.PullPolicy = DockerConfig.PullPolicy.MISSING,
 ) {
+    private val logger = logger(this)
+
     @JsonDeserialize(using = ContainerPortListDeserializer::class)
     class ContainerPortList(ports: List<ContainerPort> = listOf()) : ArrayList<ContainerPort>(ports) {
         /**
@@ -122,6 +131,8 @@ open class Container(
          * State which enables to execute commands in the Docker container.
          */
         val state: ContainerState,
+
+        var info: InspectContainerResponse,
     )
 
     /**
@@ -180,7 +191,7 @@ open class Container(
     val networks: Map<String, ContainerNetwork>
         get() {
             assertThatContainerIsInitialized()
-            val networkSettings = dockerContainer!!.container.networkSettings ?: return mapOf()
+            val networkSettings = dockerContainer!!.state.containerInfo.networkSettings ?: return mapOf()
             return ContainerNetworkMapper.INSTANCE.toInternalDto(networkSettings.networks)
         }
 
@@ -191,13 +202,29 @@ open class Container(
     private var dockerContainer: DockerContainerReference? = null
 
     /**
-     * Initializes the container by setting the corresponding [DockerContainer] and [ContainerState] instance
-     * after the Docker container was started.
-     * Maps external ports to internal container ports.
+     * List of registered log consumers. Are reattached whenever the container is restarted.
      */
+    private val logConsumers: MutableList<ContainerLogConsumer> = mutableListOf()
+
+    /**
+     * List of registered resource usage statistics consumers. Are reattached whenever the container is restarted.
+     */
+    private val statsConsumers: MutableList<ContainerStatsConsumer> = mutableListOf()
+
+    /**
+     * List of registered event consumers. Are reattached whenever the container is restarted.
+     */
+    private val eventConsumers: MutableList<Pair<ContainerEventConsumer, List<ContainerEvent.Type>?>> = mutableListOf()
+
+    /**
+     * Initializes the container by setting the corresponding [DockerContainer] and [ContainerState] instance after the Docker
+     * container was started. Maps external ports to internal container ports, initializes [ReportDataAggregator] and adds consumer
+     * to the container's `restart` events.
+     */
+    // TODO: Remove DockerContainer reference
     @JvmSynthetic
     internal open fun initialize(dockerContainer: DockerContainer, dockerContainerState: ContainerState) {
-        this.dockerContainer = DockerContainerReference(dockerContainer, dockerContainerState)
+        this.dockerContainer = DockerContainerReference(dockerContainer, dockerContainerState, dockerContainerState.containerInfo)
 
         val dockerPorts = dockerContainer.ports.filter { it.privatePort != null }
         for (port in dockerPorts) {
@@ -207,6 +234,26 @@ open class Container(
             }
         }
         ReportDataAggregator.onContainerStarted(this)
+        addEventConsumer(ContainerRestartListener(this), eventFilters = listOf(ContainerEvent.Type.RESTART))
+    }
+
+    /**
+     * Callback function to execute when the corresponding Docker container was restarted.
+     * After a restart, all existing consumers are closed and the port mappings of the container can change (see
+     * [GitHub Issue #31926](https://github.com/moby/moby/issues/31926)). Therefore, all registered consumer are reattached and
+     * the port mappings are updated in the internal state.
+     * @param timestamp Timestamp of when the Docker container was restarted.
+     */
+    @JvmSynthetic
+    internal open fun onRestart(timestamp: Instant) {
+        assertThatContainerIsInitialized()
+        logger.info("Received notification that container $name was restarted at $timestamp. Updating container info...")
+        val state = dockerContainer!!.state
+        this.dockerContainer!!.info = state.currentContainerInfo
+        logConsumers.forEach { consumer -> ContainerLogUtils.followOutput(state, consumer, since = timestamp.epochSecond.toInt()) }
+        statsConsumers.forEach { consumer -> ContainerStatsUtils.followOutput(state, consumer) }
+        eventConsumers.forEach { (consumer, eventFilters) -> ContainerEventsUtils.followOutput(state, consumer, eventFilters) }
+        // TODO: Update port mappings
     }
 
     /**
@@ -297,6 +344,7 @@ open class Container(
      */
     fun addLogConsumer(consumer: ContainerLogConsumer) {
         assertThatContainerIsInitialized()
+        logConsumers.add(consumer)
         ContainerLogUtils.followOutput(dockerContainer!!.state, consumer)
     }
 
@@ -319,7 +367,21 @@ open class Container(
      */
     fun addStatsConsumer(consumer: ContainerStatsConsumer) {
         assertThatContainerIsInitialized()
+        statsConsumers.add(consumer)
         ContainerStatsUtils.followOutput(dockerContainer!!.state, consumer)
+    }
+
+    /**
+     * Attaches the given [consumer] to the container's events.
+     * Docker instantiates a live data stream for the container and for each event received by Docker, the consumer is notified.
+     * @param consumer Event consumer to be attached.
+     * @param eventFilters If provided, only events of the given types are consumed.
+     */
+    @JvmOverloads
+    fun addEventConsumer(consumer: ContainerEventConsumer, eventFilters: List<ContainerEvent.Type>? = null) {
+        assertThatContainerIsInitialized()
+        eventConsumers.add(consumer to eventFilters)
+        ContainerEventsUtils.followOutput(dockerContainer!!.state, consumer, eventFilters)
     }
 
     /**
