@@ -25,6 +25,11 @@ class TestExecutionResult(
     val numberOfSkipped: Int,
 
     /**
+     * Total number of tests which were aborted.
+     */
+    val numberOfAborted: Int,
+
+    /**
      * Roots of all tests that have been performed along with their detailed test results.
      * Typically, this list contains the executed test classes, whose children in turn contain
      * the executed tests. Along with nested classes and parameterized tests, this forms a tree

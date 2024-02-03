@@ -28,6 +28,7 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
          * - `numberOfTests:` [Int] - Number of tests that the result contains (see [TestResult.numberOfTests]).
          * - `numberOfFailures:` [Int] - Number of failed tests that the result contains (see [TestResult.numberOfFailures]).
          * - `numberOfSkipped`: [Int] - Number of skipped tests that the result contains (see [TestResult.numberOfSkipped]).
+         * - `numberOfAborted`: [Int] - Number of aborted tests that the result contains (see [TestResult.numberOfAborted]).
          * - `successRate`: [Int]? - Relative share of successful tests in the number of tests that the result contains (see [TestResult.successRate]).
          * - `displayName:` [String] - Human-readable name of the test or test container (see [TestResult.displayName]).
          * - `tags:` [Set]<[String]> - Tags associated with the test or test container (see [TestResult.tags]).
@@ -63,6 +64,8 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
             withVariable("status", result.status)
             withVariable("numberOfTests", result.numberOfTests)
             withVariable("numberOfFailures", result.numberOfFailures)
+            withVariable("numberOfSkipped", result.numberOfSkipped)
+            withVariable("numberOfAborted", result.numberOfAborted)
             withVariable("successRate", result.successRate)
             withVariable("displayName", result.displayName)
             withVariable("tags", result.tags)

@@ -72,6 +72,14 @@ class SkippedTestResult(
     numberOfSkipped: Int,
 
     /**
+     * Number of aborted tests that this result contains.
+     * Since this result relates to a skipped test or test container and
+     * therefore all of its [children] were skipped as well, this value
+     * is set to `0`.
+     */
+    numberOfAborted: Int,
+
+    /**
      * Human-readable name of the test or test container.
      * @see org.junit.platform.launcher.TestIdentifier.getDisplayName
      */
@@ -97,6 +105,7 @@ class SkippedTestResult(
     numberOfTests = numberOfTests,
     numberOfFailures = numberOfFailures,
     numberOfSkipped = numberOfSkipped,
+    numberOfAborted = numberOfAborted,
     displayName = displayName,
     tags = tags,
 ) {

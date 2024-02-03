@@ -73,6 +73,7 @@ internal class NetworkTraceAggregatorIT {
                 numberOfTests = 1,
                 numberOfFailures = 0,
                 numberOfSkipped = 0,
+                numberOfAborted = 0,
                 displayName = "Test A",
                 tags = setOf(),
                 reportEntries = listOf(),

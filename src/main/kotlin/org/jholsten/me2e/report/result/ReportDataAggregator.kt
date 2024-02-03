@@ -183,6 +183,7 @@ class ReportDataAggregator private constructor() {
                 numberOfTests = roots.sumOf { it.numberOfTests },
                 numberOfFailures = roots.sumOf { it.numberOfFailures },
                 numberOfSkipped = roots.sumOf { it.numberOfSkipped },
+                numberOfAborted = roots.sumOf { it.numberOfAborted },
                 roots = roots,
             )
         }

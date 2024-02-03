@@ -266,7 +266,7 @@
             <th class="align-left">Test</th>
             <th>Tests</th>
             <th>Failures</th>
-            <th>Skipped</th>
+            <th>Ignored</th>
             <th>Duration</th>
             <th>Success Rate</th>
         </tr>
@@ -274,7 +274,7 @@
         <tbody>
         <tr th:each="test : ${allTests}" th:data-tt-id="${test.testId}" th:data-tt-parent-id="${test.parentId}">
             <td class="align-left">
-                <a th:style="${'color: ' + (test.status.name == 'SKIPPED' ? '#A6A6A6' : (test.numberOfFailures > 0 ? '#FF5F56' : '#0BBD58'))}"
+                <a th:classappend="${test.status.name == 'SKIPPED' ? 'skipped' : (test.numberOfFailures > 0 ? 'failure' : (test.numberOfAborted > 0 ? 'aborted' : 'success'))}"
                    th:href="${'../sources/' + test.source + '.html#' + test.testId}"
                 >
                     <span th:text="${test.displayName}"></span>
@@ -282,11 +282,10 @@
             </td>
             <td th:text="${test.numberOfTests}"></td>
             <td th:text="${test.numberOfFailures}"></td>
-            <td th:text="${test.numberOfSkipped}"></td>
+            <td th:text="${test.numberOfSkipped + test.numberOfAborted}"></td>
             <td th:text="${test.status.name != 'SKIPPED' ? test.duration + 's' : '-'}"></td>
-            <td
-                    th:classappend="${test.status.name == 'SKIPPED' ? 'skipped' : (test.numberOfFailures > 0 ? 'failure' : 'success')}"
-                    th:text="${test.successRate != null ? test.successRate + ' %' : '-'}"
+            <td th:classappend="${test.status.name == 'SKIPPED' ? 'skipped' : (test.numberOfFailures > 0 ? 'failure' : (test.numberOfAborted > 0 ? 'aborted' : 'success'))}"
+                th:text="${(test.successRate != null && test.status.name != 'ABORTED') ? test.successRate + ' %' : '-'}"
             ></td>
         </tr>
         </tbody>

@@ -90,6 +90,15 @@ class FinishedTestResult(
     numberOfSkipped: Int,
 
     /**
+     * Number of aborted tests that this result contains.
+     * If this result relates to a single test (i.e. the list of [children]
+     * is empty), the value is set to `0` or `1`, depending on the status.
+     * However, if this result relates to a test container, the value
+     * reflects the number of skipped tests contained in the container.
+     */
+    numberOfAborted: Int,
+
+    /**
      * Human-readable name of the test or test container.
      * @see org.junit.platform.launcher.TestIdentifier.getDisplayName
      */
@@ -137,6 +146,7 @@ class FinishedTestResult(
     numberOfTests = numberOfTests,
     numberOfFailures = numberOfFailures,
     numberOfSkipped = numberOfSkipped,
+    numberOfAborted = numberOfAborted,
     displayName = displayName,
     tags = tags,
 ) {
