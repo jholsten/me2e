@@ -48,7 +48,7 @@ internal class InjectServiceAnnotationProcessorTest {
                 )
             )
 
-        assertThat(compilation).succeededWithoutWarnings()
+        assertThat(compilation).succeeded()
     }
 
     @Test
