@@ -192,15 +192,18 @@ class DockerCompose(
 
     /**
      * Restarts the services with the given names.
+     * Note that it may take a couple of seconds until the containers are healthy.
      * @param servicesToRestart Names of the services to restart.
-     * @throws DockerException in case of errors. TODO: Healthcheck
+     * @throws DockerException in case of errors.
      */
     fun restartContainers(servicesToRestart: List<String>) {
-        isRestarting = true
-        logger.info("Restarting services: [${servicesToRestart.joinToString(", ")}]...")
-        execute("restart ${servicesToRestart.joinToString(" ")}")
-        this._dockerContainers.reset()
-        isRestarting = false
+        if (servicesToRestart.isNotEmpty()) {
+            isRestarting = true
+            logger.info("Restarting services: [${servicesToRestart.joinToString(", ")}]...")
+            execute("restart ${servicesToRestart.joinToString(" ")}")
+            this._dockerContainers.reset()
+            isRestarting = false
+        }
     }
 
     /**

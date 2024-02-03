@@ -31,6 +31,9 @@ class Me2eAssertHealthyExtension : BeforeEachCallback {
 
     private fun checkContainerHealth() {
         val unhealthyContainers = Me2eTest.containerManager.containers.values.filter { it.hasHealthcheck && !it.isHealthy }.map { it.name }
+        if (unhealthyContainers.isEmpty()) {
+            return
+        }
         logger.warn("Found ${unhealthyContainers.size} containers to be unhealthy.")
         val containersToRestart = unhealthyContainers.filter { it !in restartedContainers }
         if (unhealthyContainers.size != containersToRestart.size) {
