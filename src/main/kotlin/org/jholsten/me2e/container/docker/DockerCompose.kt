@@ -1,8 +1,8 @@
 package org.jholsten.me2e.container.docker
 
-import com.github.dockerjava.api.command.InspectContainerResponse
 import com.github.dockerjava.api.model.Container as DockerContainer
 import org.jholsten.me2e.container.exception.DockerException
+import org.jholsten.me2e.container.health.ContainerWaitStrategyTarget
 import org.jholsten.me2e.container.health.exception.HealthTimeoutException
 import org.jholsten.me2e.utils.ResettableLazy
 import org.jholsten.me2e.utils.logger
@@ -11,7 +11,6 @@ import org.testcontainers.containers.ContainerLaunchException
 import org.testcontainers.containers.ContainerState
 import org.testcontainers.containers.wait.strategy.Wait
 import org.testcontainers.containers.wait.strategy.WaitStrategy
-import org.testcontainers.containers.wait.strategy.WaitStrategyTarget
 import org.testcontainers.shaded.com.github.dockerjava.core.LocalDirectorySSLConfig
 import org.testcontainers.shaded.com.google.common.base.Splitter
 import org.testcontainers.shaded.org.zeroturnaround.exec.InvalidExitValueException
@@ -36,6 +35,11 @@ class DockerCompose(
     private val file: File,
     private val version: DockerComposeVersion
 ) {
+    class Builder(val version: DockerComposeVersion) {
+        private var identifier: String? = null
+        private var file: File? = null
+    }
+
     private val logger = logger(this)
 
     /**
@@ -240,20 +244,6 @@ class DockerCompose(
         logger.info("Services [${servicesWithHealthcheck.joinToString(", ")}] are healthy.")
     }
 
-    class Target(private val containerId: String) : WaitStrategyTarget {
-        override fun getExposedPorts(): MutableList<Int> {
-            return mutableListOf()
-        }
-
-        override fun getContainerInfo(): InspectContainerResponse {
-            return dockerClient.inspectContainerCmd(containerId).exec()
-        }
-
-        override fun getContainerId(): String {
-            return containerId
-        }
-    }
-
     /**
      * Pulls images for services with the given names.
      * @param servicesToPull Names of the services for which images are to be pulled.
@@ -379,7 +369,7 @@ class DockerCompose(
     private fun waitUntilHealthy(serviceName: String, timeout: Long) {
         val waitStrategy = Wait.forHealthcheck().withStartupTimeout(Duration.ofSeconds(timeout))
         try {
-            waitStrategy.waitUntilReady(Target(getDockerContainer(serviceName).id))
+            waitStrategy.waitUntilReady(ContainerWaitStrategyTarget(getDockerContainer(serviceName).id))
         } catch (e: ContainerLaunchException) {
             throw HealthTimeoutException("Timed out waiting for container $serviceName to become healthy.")
         }
