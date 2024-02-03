@@ -1,9 +1,9 @@
 package org.jholsten.me2e.container.docker
 
+import com.github.dockerjava.api.model.Container as DockerContainer
 import org.jholsten.me2e.container.exception.DockerException
 import org.jholsten.me2e.utils.logger
 import org.testcontainers.DockerClientFactory
-import org.testcontainers.containers.ComposeContainer
 import org.testcontainers.containers.ContainerState
 import org.testcontainers.containers.wait.strategy.WaitStrategy
 import org.testcontainers.shaded.com.github.dockerjava.core.LocalDirectorySSLConfig
@@ -24,11 +24,49 @@ import java.util.Optional
  * to handle instances of both classes. Therefore, this class provides a common interface for both classes.
  */
 class DockerCompose(
-    identifier: String,
+    private val identifier: String,
     private val file: File,
     private val version: DockerComposeVersion
 ) {
     private val logger = logger(this)
+
+    /**
+     * Name of the docker compose project, which is composed of the [identifier] as a prefix
+     * and an alphanumeric suffix, which is randomly generated each time the docker compose is started.
+     * Is only set after the docker compose is started and reset to `null` after it is stopped.
+     */
+    private var _project: String? = null
+
+    /**
+     * Name of the docker compose project, which is composed of the [identifier] as a prefix
+     * and an alphanumeric suffix, which is randomly generated each time the docker compose is started.
+     * @throws IllegalStateException if docker compose is currently not running.
+     */
+    val project: String
+        get() {
+            checkNotNull(_project) {
+                "Docker compose is currently not running. Since the project name is " +
+                    "randomly generated on each start, the name cannot be retrieved."
+            }
+            return _project!!
+        }
+
+    /**
+     * Map of service name and [DockerContainer] instance for all services defined in the docker compose file.
+     * Is only set after the docker compose is started and reset to `null` after it is stopped.
+     */
+    private var _dockerContainers: Map<String, DockerContainer>? = null
+
+    /**
+     * Map of service name and [DockerContainer] instance for all services defined in the docker compose file.
+     * @throws IllegalStateException if docker compose is currently not running.
+     */
+    @get:JvmSynthetic
+    internal val dockerContainers: Map<String, DockerContainer>
+        get() {
+            checkNotNull(_dockerContainers) { "Docker containers cannot be retrieved, since the docker compose is currently not running." }
+            return _dockerContainers!!
+        }
 
     /**
      * Kotlin wrapper for [DockerComposeV1] to avoid type issue.
@@ -53,7 +91,7 @@ class DockerCompose(
     /**
      * Component to execute custom Docker-Compose commands locally.
      */
-    private val local: Local by lazy { Local() }
+    val local: Local by lazy { Local() }
 
     /**
      * Whether to use a local Docker-Compose binary instead of a container.
@@ -118,7 +156,7 @@ class DockerCompose(
     }
 
     /**
-     * Returns [ContainerState] for the service with the given name.
+     * Returns [ContainerState] instance for the service with the given name.
      * @see DockerComposeV1.getContainerByServiceName
      * @see DockerComposeV2.getContainerByServiceName
      */
@@ -130,7 +168,7 @@ class DockerCompose(
     }
 
     /**
-     * Starts the Docker-Compose container.
+     * Starts the Docker-Compose container. Initializes [_project] and [_dockerContainers].
      * @see DockerComposeV1.start
      * @see DockerComposeV2.start
      */
@@ -139,11 +177,16 @@ class DockerCompose(
             DockerComposeVersion.V1 -> v1.start()
             DockerComposeVersion.V2 -> v2.start()
         }
+        this._dockerContainers = getDockerContainers()
+        if (dockerContainers.isNotEmpty()) {
+            this._project = dockerContainers.values.first().labels["com.docker.compose.project"]
+        }
     }
 
     /**
      * Restarts the services with the given names.
      * @param servicesToRestart Names of the services to restart.
+     * @throws DockerException in case of errors.
      */
     fun restartContainers(servicesToRestart: List<String>) {
         logger.info("Restarting services: [${servicesToRestart.joinToString(", ")}]...")
@@ -151,7 +194,7 @@ class DockerCompose(
     }
 
     /**
-     * Stops the Docker-Compose container.
+     * Stops the Docker-Compose container. Resets [_project] and [_dockerContainers].
      * @see DockerComposeV1.stop
      * @see DockerComposeV2.stop
      */
@@ -160,6 +203,8 @@ class DockerCompose(
             DockerComposeVersion.V1 -> v1.stop()
             DockerComposeVersion.V2 -> v2.stop()
         }
+        this._dockerContainers = null
+        this._project = null
     }
 
     /**
@@ -215,7 +260,7 @@ class DockerCompose(
          */
         private val environment = mutableMapOf(
             "DOCKER_HOST" to transportConfig.dockerHost.toString(),
-            "COMPOSE_FILE" to file.absolutePath
+            "COMPOSE_FILE" to file.absolutePath,
         )
 
         init {
@@ -247,9 +292,11 @@ class DockerCompose(
          * @throws DockerException in case of errors.
          */
         fun execute(command: String) {
+            val environment = this.environment + mapOf("COMPOSE_PROJECT_NAME" to _project)
+
             val baseCommand = when (version) {
-                DockerComposeVersion.V1 -> ComposeContainer.COMPOSE_EXECUTABLE
-                DockerComposeVersion.V2 -> ComposeContainer.COMPOSE_EXECUTABLE + " compose"
+                DockerComposeVersion.V1 -> DockerComposeV1.COMPOSE_EXECUTABLE
+                DockerComposeVersion.V2 -> DockerComposeV2.COMPOSE_EXECUTABLE + " compose"
             }
 
             val cmd = Splitter
@@ -270,6 +317,18 @@ class DockerCompose(
                 throw DockerException("Running Docker-Compose command $cmd failed: ${e.message}")
             }
         }
+    }
+
+    /**
+     * Returns map of service name and [DockerContainer] instance for all services in the Docker-Compose file.
+     */
+    private fun getDockerContainers(): Map<String, DockerContainer> {
+        return DockerClientFactory.lazyClient()
+            .listContainersCmd()
+            .withShowAll(true)
+            .exec()
+            .filter { container -> container.names.any { name -> name.startsWith("/$identifier") } }
+            .associateBy { container -> container.labels["com.docker.compose.service"]!! }
     }
 
     private fun DockerComposeRemoveImagesStrategy.toV1(): DockerComposeV1.RemoveImages? {

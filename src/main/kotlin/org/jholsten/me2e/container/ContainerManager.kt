@@ -48,14 +48,22 @@ class ContainerManager(
     val databases: Map<String, DatabaseContainer> = containers.filterValuesIsInstance<String, DatabaseContainer>()
 
     /**
-     * Identifier of the services to start. Will be used as a prefix for all container names.
+     * Identifier of the services to start. Will be used as a prefix for the project and therefore for all container names.
      */
     private val identifier: String = "me2e_${RandomStringUtils.randomAlphabetic(3)}".lowercase()
 
     /**
+     * Name of the docker compose project, which is composed of the [identifier] as a prefix
+     * and an alphanumeric suffix, which is randomly generated each time the docker compose is started.
+     * @throws IllegalStateException if docker compose is currently not running.
+     */
+    val project: String
+        get() = environment.project
+
+    /**
      * Reference to the Docker-Compose Container.
      */
-    private val environment = DockerCompose(identifier, dockerComposeFile, version = dockerConfig.dockerComposeVersion)
+    val environment = DockerCompose(identifier, dockerComposeFile, version = dockerConfig.dockerComposeVersion)
         .withLocalCompose(true)
         .withBuild(dockerConfig.buildImages)
         .withRemoveImages(dockerConfig.removeImages)
@@ -71,6 +79,17 @@ class ContainerManager(
         registerHealthChecks()
         startDockerCompose()
         initializeContainers()
+    }
+
+    /**
+     * Restarts the containers in the environment with the given names.
+     * @param containerNames Names of the containers to restart.
+     * @throws IllegalArgumentException In case any of the given container names does not exist in the Docker-Compose.
+     */
+    fun restart(containerNames: List<String>) {
+        val unknownContainers = containerNames.filter { it !in containers }
+        require(unknownContainers.isEmpty()) { "Unknown container names: [${unknownContainers.joinToString(", ")}]" }
+        environment.restartContainers(containerNames)
     }
 
     /**
@@ -144,23 +163,11 @@ class ContainerManager(
      * Sets corresponding [DockerContainer] and [org.testcontainers.containers.ContainerState] instances.
      */
     private fun initializeContainers() {
-        val dockerContainers = getDockerContainers()
+        val dockerContainers = environment.dockerContainers
         for (container in containers.values) {
             val dockerContainerState = environment.getContainerByServiceName(container.name).get()
             container.initialize(dockerContainers[container.name]!!, dockerContainerState)
         }
-    }
-
-    /**
-     * Returns map of service name and [DockerContainer] instance for all services in the Docker-Compose file.
-     */
-    private fun getDockerContainers(): Map<String, DockerContainer> {
-        return DockerClientFactory.lazyClient()
-            .listContainersCmd()
-            .withShowAll(true)
-            .exec()
-            .filter { container -> container.names.any { name -> name.startsWith("/$identifier") } }
-            .associateBy { container -> container.labels["com.docker.compose.service"]!! }
     }
 
     private fun closeDatabaseConnections() {
