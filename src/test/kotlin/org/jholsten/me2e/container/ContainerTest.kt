@@ -1,5 +1,6 @@
 package org.jholsten.me2e.container
 
+import com.github.dockerjava.api.command.EventsCmd
 import com.github.dockerjava.api.command.LogContainerCmd
 import com.github.dockerjava.api.model.ContainerPort as DockerContainerPort
 import com.github.dockerjava.api.model.Container as DockerContainer
@@ -39,6 +40,11 @@ internal class ContainerTest {
                 every { withSince(any()) } returns this
                 every { withStdOut(any()) } returns this
                 every { withStdErr(any()) } returns this
+                every { exec(any()) } returns mockk()
+            }
+            every { eventsCmd() } returns mockk<EventsCmd> {
+                every { withContainerFilter(any()) } returns this
+                every { withEventFilter(any()) } returns this
                 every { exec(any()) } returns mockk()
             }
         }

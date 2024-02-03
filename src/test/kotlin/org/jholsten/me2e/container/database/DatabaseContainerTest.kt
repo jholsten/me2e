@@ -1,5 +1,8 @@
 package org.jholsten.me2e.container.database
 
+import com.github.dockerjava.api.DockerClient
+import com.github.dockerjava.api.command.EventsCmd
+import com.github.dockerjava.api.command.LogContainerCmd
 import com.github.dockerjava.api.model.ContainerPort as DockerContainerPort
 import io.mockk.*
 import com.github.dockerjava.api.model.Container as DockerContainer
@@ -120,6 +123,21 @@ internal class DatabaseContainerTest {
             DockerContainerPort().withIp("127.0.0.1").withType("tcp").withPrivatePort(12345).withPublicPort(12345),
         )
         every { mockedDockerContainerState.host } returns "localhost"
+        every { mockedDockerContainerState.containerId } returns "containerId"
+        every { mockedDockerContainerState.dockerClient } returns mockk {
+            every { logContainerCmd(any()) } returns mockk<LogContainerCmd> {
+                every { withFollowStream(any()) } returns this
+                every { withSince(any()) } returns this
+                every { withStdOut(any()) } returns this
+                every { withStdErr(any()) } returns this
+                every { exec(any()) } returns mockk()
+            }
+            every { eventsCmd() } returns mockk<EventsCmd> {
+                every { withContainerFilter(any()) } returns this
+                every { withEventFilter(any()) } returns this
+                every { exec(any()) } returns mockk()
+            }
+        }
         every { mockedSQLConnection.tables } returns listOf("company")
         every { mockedSQLConnection.getAllFromTable(any()) } returns QueryResult(listOf(mapOf("id" to "1")))
         every { mockedSQLConnection.executeScript(any(), any<File>()) } just runs
