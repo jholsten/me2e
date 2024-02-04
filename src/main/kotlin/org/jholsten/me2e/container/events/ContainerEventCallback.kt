@@ -17,6 +17,7 @@ internal class ContainerEventCallback : ResultCallbackTemplate<ContainerEventCal
     /**
      * Registers the given consumer to be notified when a new event is received.
      */
+    @JvmSynthetic
     fun addConsumer(consumer: Consumer<Event>) {
         consumers.add(consumer)
     }
@@ -25,6 +26,7 @@ internal class ContainerEventCallback : ResultCallbackTemplate<ContainerEventCal
      * Callback function which is executed when a new event is received.
      * Notifies all registered consumers.
      */
+    @JvmSynthetic
     override fun onNext(obj: Event?) {
         if (obj != null) {
             consumers.forEach { it.accept(obj) }

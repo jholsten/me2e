@@ -8,8 +8,10 @@ import org.mapstruct.factory.Mappers
 @Mapper
 internal abstract class TestSummaryStatusMapper {
     companion object {
+        @JvmSynthetic
         val INSTANCE: TestSummaryStatusMapper = Mappers.getMapper(TestSummaryStatusMapper::class.java)
     }
 
+    @JvmSynthetic
     abstract fun toInternalDto(status: TestExecutionResult.Status): TestResult.Status
 }

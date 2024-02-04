@@ -11,6 +11,7 @@ import org.jholsten.me2e.utils.logger
 internal class ConfigValidator : Validator<TestConfig> {
     private val logger = logger(this)
 
+    @JvmSynthetic
     override fun validate(value: TestConfig) {
         validateMockServers(value)
         validateMockServerStubs(value)

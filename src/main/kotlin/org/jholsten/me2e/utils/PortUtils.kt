@@ -7,6 +7,7 @@ internal class PortUtils {
         /**
          * Returns whether the given [port] is available on localhost and can be used for binding.
          */
+        @JvmSynthetic
         fun isPortAvailable(port: Int): Boolean {
             return try {
                 ServerSocket(port).close()

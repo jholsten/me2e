@@ -9,9 +9,11 @@ import org.mapstruct.factory.Mappers
 @Mapper
 internal abstract class HttpMethodMapper {
     companion object {
+        @JvmSynthetic
         val INSTANCE: HttpMethodMapper = Mappers.getMapper(HttpMethodMapper::class.java)
     }
 
     @ValueMapping(source = MappingConstants.ANY_REMAINING, target = "UNKNOWN")
+    @JvmSynthetic
     abstract fun toInternalDto(value: String): HttpMethod
 }

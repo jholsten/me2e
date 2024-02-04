@@ -13,10 +13,12 @@ import java.util.TimeZone
 @Mapper
 internal abstract class ReportEntryMapper {
     companion object {
+        @JvmSynthetic
         val INSTANCE: ReportEntryMapper = Mappers.getMapper(ReportEntryMapper::class.java)
     }
 
     @Mapping(target = "timestamp", source = "timestamp", qualifiedByName = ["mapTimestamp"])
+    @JvmSynthetic
     abstract fun toInternalDto(reportEntry: org.junit.platform.engine.reporting.ReportEntry): ReportEntry
 
     @Named("mapTimestamp")

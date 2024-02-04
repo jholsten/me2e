@@ -10,17 +10,20 @@ import org.mapstruct.factory.Mappers
 @Mapper
 internal abstract class MediaTypeMapper {
     companion object {
+        @JvmSynthetic
         val INSTANCE: MediaTypeMapper = Mappers.getMapper(MediaTypeMapper::class.java)
     }
 
     @Mapping(target = "value", source = "okHttpMediaType", qualifiedByName = ["getOkHttpMediaType"])
+    @JvmSynthetic
     abstract fun toInternalDto(okHttpMediaType: okhttp3.MediaType): MediaType
 
     @Mapping(target = "value", expression = "java(contentTypeHeader.mimeTypePart())")
+    @JvmSynthetic
     abstract fun toInternalDto(contentTypeHeader: ContentTypeHeader): MediaType
 
     @Named("getOkHttpMediaType")
-    fun getOkHttpMediaType(okHttpMediaType: okhttp3.MediaType): String {
+    protected fun getOkHttpMediaType(okHttpMediaType: okhttp3.MediaType): String {
         return okHttpMediaType.type + "/" + okHttpMediaType.subtype
     }
 }

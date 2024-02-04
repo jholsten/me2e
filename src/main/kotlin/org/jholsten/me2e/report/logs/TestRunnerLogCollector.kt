@@ -25,6 +25,7 @@ internal class TestRunnerLogCollector(
      */
     private val logs: MutableList<AggregatedLogEntry> = mutableListOf()
 
+    @JvmSynthetic
     override fun append(log: ILoggingEvent) {
         logs.add(
             AggregatedLogEntry(
@@ -39,7 +40,8 @@ internal class TestRunnerLogCollector(
      * Resets the list of collected log entries.
      * Returns all entries that were collected so far.
      */
-    internal fun collect(): List<AggregatedLogEntry> {
+    @JvmSynthetic
+    fun collect(): List<AggregatedLogEntry> {
         val entries = logs.toList()
         logs.clear()
         return entries

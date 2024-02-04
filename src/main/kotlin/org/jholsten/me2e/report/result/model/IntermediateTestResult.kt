@@ -19,6 +19,7 @@ internal class IntermediateTestResult(
      * Unique identifier of the test or test container.
      * @see org.junit.platform.launcher.TestIdentifier.getUniqueId
      */
+    @JvmSynthetic
     val testId: String,
 
     /**
@@ -26,42 +27,49 @@ internal class IntermediateTestResult(
      * An identifier without a parent is called a `root`.
      * @see org.junit.platform.launcher.TestIdentifier.getParentId
      */
+    @JvmSynthetic
     var parentId: String?,
 
     /**
      * Status of the test execution.
      * @see org.junit.platform.engine.TestExecutionResult.getStatus
      */
+    @JvmSynthetic
     var status: TestResult.Status? = null,
 
     /**
      * Timestamp of when this test or test container has started its execution.
      * Only set for tests for which the status is not [TestResult.Status.SKIPPED].
      */
+    @JvmSynthetic
     val startTime: Instant? = null,
 
     /**
      * Timestamp of when this test or test container has finished its execution.
      * Only set for tests for which the status is not [TestResult.Status.SKIPPED].
      */
+    @JvmSynthetic
     var endTime: Instant? = null,
 
     /**
      * Human-readable name of the test or test container.
      * @see org.junit.platform.launcher.TestIdentifier.getDisplayName
      */
+    @JvmSynthetic
     val displayName: String,
 
     /**
      * Tags associated with the represented test or test container.
      * @see org.junit.platform.launcher.TestIdentifier.getTags
      */
+    @JvmSynthetic
     val tags: Set<String>,
 
     /**
      * Additional report entries that were published during the test execution.
      * Only set for tests for which the status is not [TestResult.Status.SKIPPED].
      */
+    @JvmSynthetic
     var reportEntries: MutableList<ReportEntry> = mutableListOf(),
 
     /**
@@ -69,6 +77,7 @@ internal class IntermediateTestResult(
      * Includes test runner logs as well as Docker container logs.
      * Only set for tests for which the status is not [TestResult.Status.SKIPPED].
      */
+    @JvmSynthetic
     val logs: MutableList<AggregatedLogEntry> = mutableListOf(),
 
     /**
@@ -76,17 +85,19 @@ internal class IntermediateTestResult(
      * Only set for tests for which the status is not [TestResult.Status.SKIPPED].
      * @see org.junit.platform.engine.TestExecutionResult.getThrowable
      */
+    @JvmSynthetic
     var throwable: Throwable? = null,
 
     /**
      * Message describing why the execution has been skipped.
      * Only set for tests with status [TestResult.Status.SKIPPED].
      */
+    @JvmSynthetic
     var skippingReason: String? = null,
 ) {
     companion object {
         @JvmSynthetic
-        internal fun started(testIdentifier: TestIdentifier): IntermediateTestResult {
+        fun started(testIdentifier: TestIdentifier): IntermediateTestResult {
             return IntermediateTestResult(
                 testId = testIdentifier.uniqueId,
                 parentId = testIdentifier.parentId.orElse(null),
@@ -102,7 +113,7 @@ internal class IntermediateTestResult(
          * @param reason Message describing why the execution has been skipped.
          */
         @JvmSynthetic
-        internal fun skipped(testIdentifier: TestIdentifier, reason: String? = null): IntermediateTestResult {
+        fun skipped(testIdentifier: TestIdentifier, reason: String? = null): IntermediateTestResult {
             return IntermediateTestResult(
                 testId = testIdentifier.uniqueId,
                 parentId = testIdentifier.parentId.orElse(null),
@@ -122,7 +133,7 @@ internal class IntermediateTestResult(
      * @param reportEntries Report entries that were published during the test execution.
      */
     @JvmSynthetic
-    internal fun finished(testExecutionResult: TestExecutionResult, reportEntries: List<ReportEntry>, logs: List<AggregatedLogEntry>) {
+    fun finished(testExecutionResult: TestExecutionResult, reportEntries: List<ReportEntry>, logs: List<AggregatedLogEntry>) {
         this.status = TestSummaryStatusMapper.INSTANCE.toInternalDto(testExecutionResult.status)
         this.endTime = Instant.now()
         this.reportEntries = reportEntries.toMutableList()
@@ -137,7 +148,7 @@ internal class IntermediateTestResult(
      * @param children Children of this test or test container.
      */
     @JvmSynthetic
-    internal fun toTestResult(source: String, parents: List<IntermediateTestResult>, children: List<TestResult>): TestResult {
+    fun toTestResult(source: String, parents: List<IntermediateTestResult>, children: List<TestResult>): TestResult {
         val numberOfTests = when {
             children.isNotEmpty() -> children.sumOf { it.numberOfTests }
             else -> 1

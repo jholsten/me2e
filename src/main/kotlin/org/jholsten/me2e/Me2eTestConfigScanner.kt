@@ -12,7 +12,8 @@ internal class Me2eTestConfigScanner {
          * Finds [Me2eTestConfig] annotation definition in the project.
          * If multiple annotations are defined, the first one is used.
          */
-        internal fun findFirstTestConfigAnnotation(): Me2eTestConfig? {
+        @JvmSynthetic
+        fun findFirstTestConfigAnnotation(): Me2eTestConfig? {
             val scanResult = ClassGraph().enableAnnotationInfo().scan()
             val annotatedClasses = scanResult.getClassesWithAnnotation(Me2eTestConfig::class.java)
             if (annotatedClasses.isEmpty()) {

@@ -9,7 +9,7 @@ import org.jholsten.me2e.report.stats.model.AggregatedStatsEntry
  * Container stats collector which collects the resource usage statistics for the
  * service with the given name for one test execution.
  */
-internal class ContainerStatsCollector(val service: ServiceSpecification) : ContainerStatsConsumer() {
+class ContainerStatsCollector(val service: ServiceSpecification) : ContainerStatsConsumer() {
     private val stats: MutableList<AggregatedStatsEntry> = mutableListOf()
 
     override fun accept(entry: ContainerStatsEntry) {
@@ -29,7 +29,7 @@ internal class ContainerStatsCollector(val service: ServiceSpecification) : Cont
      * Resets the list of collected statistics entries.
      * Returns all entries that were collected so far.
      */
-    internal fun collect(): List<AggregatedStatsEntry> {
+    fun collect(): List<AggregatedStatsEntry> {
         val entries = stats.toList()
         stats.clear()
         return entries

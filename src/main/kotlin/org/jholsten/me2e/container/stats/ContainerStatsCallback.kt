@@ -16,6 +16,7 @@ internal class ContainerStatsCallback : ResultCallbackTemplate<ContainerStatsCal
     /**
      * Registers the given consumer to be notified when a new statistics entry is received.
      */
+    @JvmSynthetic
     fun addConsumer(consumer: Consumer<Statistics>) {
         consumers.add(consumer)
     }
@@ -24,6 +25,7 @@ internal class ContainerStatsCallback : ResultCallbackTemplate<ContainerStatsCal
      * Callback function which is executed when a new statistics entry is received.
      * Notifies all registered consumers.
      */
+    @JvmSynthetic
     override fun onNext(obj: Statistics?) {
         if (obj != null) {
             consumers.forEach { it.accept(obj) }

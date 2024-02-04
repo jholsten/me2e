@@ -30,7 +30,8 @@ internal class InjectionUtils<T : Me2eTest>(
      * with [InjectService]. Retrieves instances to inject from the [Me2eTest.containerManager] and
      * [Me2eTest.mockServerManager].
      */
-    internal fun injectServices() {
+    @JvmSynthetic
+    fun injectServices() {
         val annotatedFields = FieldUtils.getFieldsWithAnnotation(testClassInstance.javaClass, InjectService::class.java)
         logger.debug(
             "Injecting container and mock server instances into {} fields of class {}.",

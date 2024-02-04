@@ -19,6 +19,7 @@ import org.mapstruct.factory.Mappers
 @Mapper
 internal abstract class HttpRequestMapper {
     companion object {
+        @JvmSynthetic
         val INSTANCE: HttpRequestMapper = Mappers.getMapper(HttpRequestMapper::class.java)
     }
 
@@ -26,12 +27,14 @@ internal abstract class HttpRequestMapper {
     @Mapping(target = "method", source = "okHttpRequest", qualifiedByName = ["mapHttpMethod"])
     @Mapping(target = "headers", source = "okHttpRequest", qualifiedByName = ["mapHeaders"])
     @Mapping(target = "body", source = "okHttpRequest", qualifiedByName = ["mapBody"])
+    @JvmSynthetic
     abstract fun toInternalDto(okHttpRequest: Request): HttpRequest
 
     @Mapping(target = "url", expression = "java(new Url(request.getAbsoluteUrl()))")
     @Mapping(target = "method", source = "request.method", qualifiedByName = ["mapHttpMethod"])
     @Mapping(target = "headers", source = "request.headers", qualifiedByName = ["mapHeaders"])
     @Mapping(target = "body", source = "request", qualifiedByName = ["mapBody"])
+    @JvmSynthetic
     abstract fun toInternalDto(request: com.github.tomakehurst.wiremock.http.Request): HttpRequest
 
     @Mapping(target = "url", expression = "java(HttpUrl.parse(request.getUrl().toString()))")
@@ -39,25 +42,27 @@ internal abstract class HttpRequestMapper {
     @Mapping(target = "body", source = "body", qualifiedByName = ["mapBodyToOkHttp"])
     @Mapping(target = "tags\$okhttp", ignore = true)
     @Mapping(target = "tags", expression = "java(new java.util.HashMap<>())")
+    @JvmSynthetic
     abstract fun toOkHttpRequest(request: HttpRequest): Request
 
     @Named("mapHttpMethod")
-    fun mapHttpMethod(okHttpRequest: Request): HttpMethod {
+    protected fun mapHttpMethod(okHttpRequest: Request): HttpMethod {
         return HttpMethodMapper.INSTANCE.toInternalDto(okHttpRequest.method)
     }
 
     @Named("mapHttpMethod")
-    fun mapHttpMethod(requestMethod: RequestMethod): HttpMethod {
+    protected fun mapHttpMethod(requestMethod: RequestMethod): HttpMethod {
         return HttpMethodMapper.INSTANCE.toInternalDto(requestMethod.value())
     }
 
     @Named("mapHeaders")
-    fun mapHeaders(okHttpRequest: Request): HttpHeaders {
+    protected fun mapHeaders(okHttpRequest: Request): HttpHeaders {
         return mapHeaders(okHttpRequest.headers)
     }
 
     @Named("mapHeaders")
-    fun mapHeaders(headers: Headers): HttpHeaders {
+    @JvmSynthetic
+    internal fun mapHeaders(headers: Headers): HttpHeaders {
         val builder = HttpHeaders.Builder()
         for (i in 0 until headers.size) {
             builder.add(headers.name(i), headers.value(i))
@@ -66,12 +71,12 @@ internal abstract class HttpRequestMapper {
     }
 
     @Named("mapHeaders")
-    fun mapHeaders(headers: com.github.tomakehurst.wiremock.http.HttpHeaders): HttpHeaders {
+    protected fun mapHeaders(headers: com.github.tomakehurst.wiremock.http.HttpHeaders): HttpHeaders {
         return HttpHeaders(headers.all().associate { it.key() to it.values() })
     }
 
     @Named("mapBody")
-    fun mapBody(okHttpRequest: Request): HttpRequestBody? {
+    protected fun mapBody(okHttpRequest: Request): HttpRequestBody? {
         val body = okHttpRequest.body ?: return null
         val buffer = Buffer()
         body.writeTo(buffer)
@@ -82,7 +87,7 @@ internal abstract class HttpRequestMapper {
     }
 
     @Named("mapBody")
-    fun mapBody(request: com.github.tomakehurst.wiremock.http.Request): HttpRequestBody? {
+    protected fun mapBody(request: com.github.tomakehurst.wiremock.http.Request): HttpRequestBody? {
         if (request.body == null || request.body.isEmpty()) {
             return null
         }
@@ -93,7 +98,7 @@ internal abstract class HttpRequestMapper {
     }
 
     @Named("mapHeadersToOkHttp")
-    fun mapHeadersToOkHttp(headers: HttpHeaders): Headers {
+    protected fun mapHeadersToOkHttp(headers: HttpHeaders): Headers {
         val builder = Headers.Builder()
         for (header in headers.entries) {
             header.value.forEach { builder.add(header.key, it) }
@@ -103,7 +108,7 @@ internal abstract class HttpRequestMapper {
     }
 
     @Named("mapBodyToOkHttp")
-    fun mapBodyToOkHttp(body: HttpRequestBody?): RequestBody? {
+    protected fun mapBodyToOkHttp(body: HttpRequestBody?): RequestBody? {
         if (body == null) {
             return null
         }

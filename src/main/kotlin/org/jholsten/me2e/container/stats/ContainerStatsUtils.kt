@@ -16,6 +16,7 @@ internal class ContainerStatsUtils {
          * by executing `docker stats --no-stream $containerId`.
          * @param dockerContainer Docker Container for which statistics are to be retrieved.
          */
+        @JvmSynthetic
         fun getStats(dockerContainer: ContainerState): ContainerStatsEntry {
             val collector = ContainerStatsCollector()
             val wait = ContainerStatsWaitingConsumer()
@@ -36,6 +37,7 @@ internal class ContainerStatsUtils {
          * @param consumer Statistics consumer to be attached.
          * @return Consumer thread which can be closed to stop consuming statistics entries.
          */
+        @JvmSynthetic
         fun followOutput(dockerContainer: ContainerState, consumer: ContainerStatsConsumer): Closeable {
             return attachConsumer(dockerContainer, consumer, followStream = true)
         }

@@ -8,7 +8,7 @@ internal class MockServerStubResponseMapper private constructor() {
         /**
          * Maps the given stub response to Wire Mock equivalent.
          */
-        @JvmStatic
+        @JvmSynthetic
         fun toWireMockResponseDefinition(stubResponse: MockServerStubResponse): ResponseDefinitionBuilder {
             val builder = aResponse().withStatus(stubResponse.code)
             for (header in stubResponse.headers) {

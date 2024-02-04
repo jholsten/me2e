@@ -16,7 +16,8 @@ class OkHttpClient private constructor(
     /**
      * Base URL to set for all requests.
      */
-    var baseUrl: Url,
+    @JvmSynthetic
+    internal var baseUrl: Url,
 
     /**
      * Configuration of the HTTP client.
@@ -159,46 +160,54 @@ class OkHttpClient private constructor(
         /**
          * Configured client which executes the requests.
          */
+        @JvmSynthetic
         var httpClient: okhttp3.OkHttpClient = okhttp3.OkHttpClient()
-
-        var baseUrl: Url? = null
 
         /**
          * List of request interceptors to use for outgoing requests.
          */
+        @JvmSynthetic
         var requestInterceptors: MutableList<RequestInterceptor> = mutableListOf()
 
         /**
          * Connect timeout in milliseconds.
          */
+        @JvmSynthetic
         var connectTimeout: Long = 10000
 
         /**
          * Read timeout in milliseconds.
          */
+        @JvmSynthetic
         var readTimeout: Long = 10000
 
         /**
          * Write timeout in milliseconds.
          */
+        @JvmSynthetic
         var writeTimeout: Long = 10000
 
+        @JvmSynthetic
         override fun setRequestInterceptors(interceptors: List<RequestInterceptor>) = apply {
             requestInterceptors = interceptors.toMutableList()
         }
 
+        @JvmSynthetic
         override fun addRequestInterceptor(interceptor: RequestInterceptor) = apply {
             requestInterceptors.add(interceptor)
         }
 
+        @JvmSynthetic
         override fun setConnectTimeout(timeout: Long, unit: TimeUnit) = apply {
             connectTimeout = checkTimeout(timeout, unit)
         }
 
+        @JvmSynthetic
         override fun setReadTimeout(timeout: Long, unit: TimeUnit) = apply {
             readTimeout = checkTimeout(timeout, unit)
         }
 
+        @JvmSynthetic
         override fun setWriteTimeout(timeout: Long, unit: TimeUnit) = apply {
             writeTimeout = checkTimeout(timeout, unit)
         }
@@ -207,6 +216,7 @@ class OkHttpClient private constructor(
          * Applies the configuration to the OkHttp client.
          * Since the client's fields are immutable, a new instance is created.
          */
+        @JvmSynthetic
         fun apply() {
             val builder = okhttp3.OkHttpClient.Builder()
                 .connectTimeout(connectTimeout, TimeUnit.MILLISECONDS)

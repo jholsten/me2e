@@ -19,6 +19,7 @@ internal class ContainerEventsUtils {
          * @param eventFilters If provided, only events of the given types are consumed.
          * @return Consumer thread which can be closed to stop consuming events.
          */
+        @JvmSynthetic
         fun followOutput(
             dockerContainer: ContainerState,
             consumer: ContainerEventConsumer,

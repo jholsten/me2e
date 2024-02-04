@@ -12,6 +12,7 @@ import java.util.function.Consumer
 internal class ContainerStatsWaitingConsumer : Consumer<Statistics> {
     private val entries: LinkedBlockingDeque<Statistics> = LinkedBlockingDeque()
 
+    @JvmSynthetic
     override fun accept(t: Statistics) {
         entries.add(t)
     }
@@ -20,6 +21,7 @@ internal class ContainerStatsWaitingConsumer : Consumer<Statistics> {
      * Wait until Docker closes the stream of output.
      * @see org.testcontainers.containers.output.WaitingConsumer.waitUntilEnd
      */
+    @JvmSynthetic
     fun waitUntilEnd() {
         while (System.currentTimeMillis() < Long.MAX_VALUE) {
             try {

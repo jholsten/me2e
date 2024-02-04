@@ -18,6 +18,7 @@ import kotlin.jvm.Throws
 @Mapper(uses = [HttpRequestMapper::class])
 internal abstract class HttpResponseMapper {
     companion object {
+        @JvmSynthetic
         val INSTANCE: HttpResponseMapper = Mappers.getMapper(HttpResponseMapper::class.java)
     }
 
@@ -27,26 +28,27 @@ internal abstract class HttpResponseMapper {
     @Mapping(target = "code", expression = "java(okHttpResponse.code())")
     @Mapping(target = "headers", source = "okHttpResponse", qualifiedByName = ["mapHeaders"])
     @Mapping(target = "body", source = "okHttpResponse", qualifiedByName = ["mapResponseBody"])
+    @JvmSynthetic
     abstract fun toInternalDto(okHttpResponse: Response): HttpResponse
 
     @Mapping(target = "protocol", expression = "java(Protocol.get(response.getProtocol()))")
     @Mapping(target = "headers", source = "response.headers", qualifiedByName = ["mapHeadersToOkHttp"])
     @Mapping(target = "body", source = "body", qualifiedByName = ["mapResponseBodyToOkHttp"])
-    @Throws(IOException::class)
+    @JvmSynthetic
     abstract fun toOkHttpResponse(response: HttpResponse): Response
 
     @Named("mapRequest")
-    fun mapRequest(okHttpResponse: Response): HttpRequest {
+    protected fun mapRequest(okHttpResponse: Response): HttpRequest {
         return HttpRequestMapper.INSTANCE.toInternalDto(okHttpResponse.request)
     }
 
     @Named("mapHeaders")
-    fun mapHeaders(okHttpResponse: Response): HttpHeaders {
+    protected fun mapHeaders(okHttpResponse: Response): HttpHeaders {
         return HttpRequestMapper.INSTANCE.mapHeaders(okHttpResponse.headers)
     }
 
     @Named("mapResponseBody")
-    fun mapResponseBody(okHttpResponse: Response): HttpResponseBody? {
+    protected fun mapResponseBody(okHttpResponse: Response): HttpResponseBody? {
         val okHttpResponseBody = okHttpResponse.body ?: return null
 
         okHttpResponseBody.use { body ->
@@ -59,7 +61,7 @@ internal abstract class HttpResponseMapper {
     }
 
     @Named("mapResponseBodyToOkHttp")
-    fun mapResponseBodyToOkHttp(responseBody: HttpResponseBody?): ResponseBody? {
+    protected fun mapResponseBodyToOkHttp(responseBody: HttpResponseBody?): ResponseBody? {
         if (responseBody == null) {
             return null
         }

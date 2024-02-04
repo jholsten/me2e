@@ -26,6 +26,7 @@ internal class ContainerLogUtils {
          * @param until Only return logs before this time, as a UNIX timestamp. If set to `null`, all log entries until now are returned.
          * @see org.testcontainers.utility.LogUtils.getOutput
          */
+        @JvmSynthetic
         fun getLogs(dockerContainer: ContainerState, since: Int, until: Int?): List<ContainerLogEntry> {
             val collector = ContainerLogCollector()
             val wait = WaitingConsumer()
@@ -47,6 +48,7 @@ internal class ContainerLogUtils {
          * @return Consumer thread which can be closed to stop consuming log entries.
          * @see org.testcontainers.utility.LogUtils.followOutput
          */
+        @JvmSynthetic
         fun followOutput(dockerContainer: ContainerState, consumer: ContainerLogConsumer, since: Int = 0): Closeable {
             return attachConsumer(dockerContainer, consumer, followStream = true, since = since)
         }
