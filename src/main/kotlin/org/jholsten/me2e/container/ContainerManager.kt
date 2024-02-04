@@ -12,7 +12,7 @@ import org.jholsten.me2e.container.exception.ServiceStartupException
 import org.jholsten.me2e.container.health.exception.HealthTimeoutException
 import org.jholsten.me2e.container.microservice.MicroserviceContainer
 import org.jholsten.me2e.utils.filterValuesIsInstance
-import org.testcontainers.containers.ContainerLaunchException
+import org.jholsten.me2e.utils.logger
 import java.io.File
 
 /**
@@ -34,6 +34,8 @@ class ContainerManager(
      */
     val containers: Map<String, Container>,
 ) {
+    private val logger = logger(this)
+
     /**
      * [containers] with container type [org.jholsten.me2e.container.model.ContainerType.MICROSERVICE].
      */
@@ -70,11 +72,11 @@ class ContainerManager(
     /**
      * Starts Docker-Compose and initializes all containers. Waits until all containers for which a healthcheck is defined are healthy.
      * @throws ServiceStartupException if Docker-Compose could not be started.
-     * @throws HealthTimeoutException if at least one container did not become healthy within the specified timeout.
+     * @throws HealthTimeoutException if at least one container did not become healthy within [DockerConfig.healthTimeout] seconds.
      */
     fun start() {
         pullImages()
-        startDockerCompose()
+        environment.start()
         environment.waitUntilHealthy(containers.values.map { it.name }, dockerConfig.healthTimeout)
         initializeContainers()
     }
@@ -96,7 +98,7 @@ class ContainerManager(
      */
     fun stop() {
         closeDatabaseConnections()
-        stopDockerCompose()
+        environment.stop()
     }
 
     /**
@@ -113,43 +115,20 @@ class ContainerManager(
     }
 
     /**
-     * Starts Docker-Compose and waits until all containers are healthy.
-     * @throws ServiceStartupException if Docker-Compose could not be started.
-     * @throws HealthTimeoutException if at least one container did not become healthy within the specified timeout.
-     */
-    private fun startDockerCompose() {
-        try {
-            environment.start()
-        } catch (e: ContainerLaunchException) {
-            throw ServiceStartupException("Unable to start Docker Compose: ${e.message}")
-        } catch (e: RuntimeException) {
-            if (e.cause is ContainerLaunchException && e.cause?.message == "Timed out waiting for container to become healthy") {
-                throw HealthTimeoutException("At least one container did not become healthy within the specified timeout.")
-            }
-            throw ServiceStartupException("Unable to start Docker Compose: ${e.message}")
-        }
-    }
-
-    /**
-     * Stops the Docker-Compose environment.
-     * @throws ServiceShutdownException if Docker-Compose could not be stopped.
-     */
-    private fun stopDockerCompose() {
-        try {
-            environment.stop()
-        } catch (e: Exception) {
-            throw ServiceShutdownException("Unable to stop Docker-Compose: ${e.message}")
-        }
-    }
-
-    /**
      * Initializes containers after the Docker-Compose is started.
      * Sets corresponding [DockerContainer] and [org.testcontainers.containers.ContainerState] instances.
      */
     private fun initializeContainers() {
         for (container in containers.values) {
-            val state = environment.getContainerByServiceName(container.name).get()
-            container.initialize(environment.getDockerContainer(container.name), state, environment)
+            val state = environment.getContainerByServiceName(container.name)!!
+            try {
+                container.initialize(environment.getDockerContainer(container.name), state, environment)
+            } catch (e: Exception) {
+                logger.error(
+                    "Unable to initialize container ${container.name}. " +
+                        "It is possible that some of the functions do not work properly.", e
+                )
+            }
         }
     }
 

@@ -8,7 +8,9 @@ import java.io.File
 
 /**
  * Representation of the connection to an SQL or No-SQL database.
- * Allows to query and reset the state of a database instance.
+ * Allows to initialize, query and reset the state of a database instance.
+ * @sample SQLDatabaseConnection
+ * @sample MongoDBConnection
  */
 abstract class DatabaseConnection protected constructor(
     /**
@@ -17,7 +19,7 @@ abstract class DatabaseConnection protected constructor(
     val host: String,
 
     /**
-     * Port on which the database container is running.
+     * Port on which the database container is accessible from [host].
      */
     val port: Int,
 
@@ -73,8 +75,7 @@ abstract class DatabaseConnection protected constructor(
     }
 
     /**
-     * Executes the script on the given path.
-     * Path needs to be located in `resources` folder.
+     * Executes the script located on the given path. Path needs to be located in `resources` folder.
      * @param name Name of the script (for logging purposes).
      * @param path Path to the file which contains the script. Needs to be located in `resources` folder.
      * @throws java.io.FileNotFoundException if file does not exist.
@@ -85,8 +86,7 @@ abstract class DatabaseConnection protected constructor(
     }
 
     /**
-     * Executes the script on the given path.
-     * Path needs to be located in `resources` folder.
+     * Executes the script located on the given path. Path needs to be located in `resources` folder.
      * @param path Path to the file which contains the script. Needs to be located in `resources` folder.
      * @throws java.io.FileNotFoundException if file does not exist.
      * @throws DatabaseException if script could not be executed.
@@ -131,6 +131,10 @@ abstract class DatabaseConnection protected constructor(
 
         /**
          * Sets the hostname on which the database container is running.
+         * As this is a Docker container, the name of the host on which
+         * the Docker engine is running should be entered here.
+         * @param host Name of the host on which the container is running.
+         * @return Builder instance, to use for chaining.
          */
         fun withHost(host: String): SELF {
             this.host = host
@@ -138,7 +142,9 @@ abstract class DatabaseConnection protected constructor(
         }
 
         /**
-         * Sets the port on which the database container is running.
+         * Sets the port on which the database container is accessible.
+         * @param port Port number on which the container is accessible.
+         * @return Builder instance, to use for chaining.
          */
         fun withPort(port: Int): SELF {
             this.port = port
@@ -147,6 +153,8 @@ abstract class DatabaseConnection protected constructor(
 
         /**
          * Sets the name of the database to which the connection should be established.
+         * @param database Name of the database.
+         * @return Builder instance, to use for chaining.
          */
         fun withDatabase(database: String): SELF {
             this.database = database
@@ -155,6 +163,9 @@ abstract class DatabaseConnection protected constructor(
 
         /**
          * Sets the username to use for logging in.
+         * @param username Username to use for logging in to the database.
+         * @see withPassword
+         * @return Builder instance, to use for chaining.
          */
         fun withUsername(username: String?): SELF {
             this.username = username
@@ -163,14 +174,25 @@ abstract class DatabaseConnection protected constructor(
 
         /**
          * Sets the password to use for logging in.
+         * @param password Password to use for logging in to the database.
+         * @see withUsername
+         * @return Builder instance, to use for chaining.
          */
         fun withPassword(password: String?): SELF {
             this.password = password
             return self()
         }
 
+        /**
+         * Returns the instantiated Builder instance.
+         * For subtypes of this class, this method should use the type of the subclass as the return type.
+         * Only then will it be possible to chain method invocations of this class and the subclass.
+         */
         protected abstract fun self(): SELF
 
+        /**
+         * Builds an instance of the [DatabaseConnection] using the properties set in this builder.
+         */
         abstract fun build(): DatabaseConnection
     }
 }

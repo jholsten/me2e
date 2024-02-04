@@ -3,8 +3,7 @@ package org.jholsten.me2e.container.logging
 import org.jholsten.me2e.container.logging.model.ContainerLogEntry
 
 /**
- * Log consumer which collects all logs and stores them in
- * a local variable [logs].
+ * Log consumer which collects all logs and stores them in a local variable [logs].
  */
 open class ContainerLogCollector : ContainerLogConsumer() {
     /**

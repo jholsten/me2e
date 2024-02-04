@@ -14,7 +14,7 @@ import java.sql.Statement
 
 /**
  * Representation of the connection to an SQL database.
- * Allows to query and reset the state of a database instance.
+ * Allows to initialize, query and reset the state of an SQL database instance.
  */
 class SQLDatabaseConnection private constructor(
     /**
@@ -23,7 +23,7 @@ class SQLDatabaseConnection private constructor(
     host: String,
 
     /**
-     * Port on which the database container is running.
+     * Port on which the database container is accessible from [host].
      */
     port: Int,
 
@@ -54,7 +54,6 @@ class SQLDatabaseConnection private constructor(
      */
     val schema: String,
 ) : DatabaseConnection(host, port, database, username, password, system) {
-
     private val logger = logger(this)
 
     /**
@@ -144,6 +143,8 @@ class SQLDatabaseConnection private constructor(
 
         /**
          * Sets the database management system which contains the database.
+         * @param system Database management system which contains the database.
+         * @return Builder instance, to use for chaining.
          */
         fun withSystem(system: DatabaseManagementSystem) = apply {
             this.system = system
@@ -153,6 +154,8 @@ class SQLDatabaseConnection private constructor(
          * Sets the name of the schema to which this database belongs.
          * In case of [DatabaseManagementSystem.MY_SQL] and [DatabaseManagementSystem.MARIA_DB], this should be the name of the database.
          * For [DatabaseManagementSystem.POSTGRESQL], the schema is different to the database and is set to `public` by default.
+         * @param schema Name of the schema to which this database belongs.
+         * @return Builder instance, to use for chaining.
          */
         fun withSchema(schema: String?) = apply {
             this.schema = schema
@@ -200,7 +203,7 @@ class SQLDatabaseConnection private constructor(
     }
 
     /**
-     * Established JDBC connection to the database and registers the
+     * Establishes JDBC connection to the database and registers the
      * corresponding driver for the [system].
      */
     private fun connect(): Connection {
@@ -282,8 +285,8 @@ class SQLDatabaseConnection private constructor(
     }
 
     /**
-     * Executes [block] using this [Statement].
-     * Rolls back the connection on exceptions and closes the statement.
+     * Executes [block] using this [Statement] and closes the statement afterward.
+     * Rolls back the connection on exceptions.
      */
     private inline fun <T> Statement.runWithAutoRollback(block: (Statement) -> T): T {
         try {

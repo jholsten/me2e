@@ -26,7 +26,6 @@ internal class ContainerLogUtils {
          * @param until Only return logs before this time, as a UNIX timestamp. If set to `null`, all log entries until now are returned.
          * @see org.testcontainers.utility.LogUtils.getOutput
          */
-        @JvmStatic
         fun getLogs(dockerContainer: ContainerState, since: Int, until: Int?): List<ContainerLogEntry> {
             val collector = ContainerLogCollector()
             val wait = WaitingConsumer()

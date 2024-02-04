@@ -31,7 +31,7 @@ import com.github.dockerjava.api.model.Container as DockerContainer
 
 
 /**
- * Model representing one Docker container.
+ * Representation of one Docker container.
  * This may be a microservice, a database or any other kind of supporting service.
  */
 @JsonTypeInfo(
@@ -151,8 +151,11 @@ open class Container(
 
     /**
      * Initializes the container by setting the corresponding [DockerContainer] and [ContainerState] instance after the Docker
-     * container was started. Maps external ports to internal container ports, initializes [ReportDataAggregator] and adds consumer
+     * container was started. Maps internal ports to external container ports, initializes [ReportDataAggregator] and adds consumer
      * to the container's `restart` events.
+     * @param dockerContainer Reference to the corresponding Docker container.
+     * @param state Reference to the corresponding Docker container state. Required to interact with the container.
+     * @param environment Docker-Compose environment which the container is part of.
      */
     @JvmSynthetic
     internal open fun initialize(dockerContainer: DockerContainer, state: ContainerState, environment: DockerCompose) {
@@ -166,7 +169,7 @@ open class Container(
     /**
      * Callback function to execute when the corresponding Docker container was restarted.
      * After a restart, all existing consumers are closed and the port mappings of the container can change (see
-     * [GitHub Issue #31926](https://github.com/moby/moby/issues/31926)). Therefore, all registered consumer are reattached and
+     * [GitHub Issue #31926](https://github.com/moby/moby/issues/31926)). Therefore, all registered consumers are reattached and
      * the port mappings are updated in the internal state.
      * @param timestamp Timestamp of when the Docker container was restarted.
      */
@@ -183,8 +186,7 @@ open class Container(
     }
 
     /**
-     * Executes the given command inside the container, as using
-     * [`docker exec`](https://docs.docker.com/engine/reference/commandline/exec/).
+     * Executes the given command inside the container, as using [`docker exec`](https://docs.docker.com/engine/reference/commandline/exec/).
      * @param command Command to execute in array format. Example: `["echo", "a", "&&", "echo", "b"]`
      * @return Result of the execution.
      */
@@ -221,7 +223,7 @@ open class Container(
      *
      * To retrieve all log entries starting from the creation of the container, set [since] to `0`.
      * @param since Only return logs since this time, as a UNIX timestamp.
-     * @throws IllegalStateException if container is not initialized
+     * @throws IllegalStateException if container is not initialized, i.e. not started.
      */
     fun getLogsSince(since: Int): List<ContainerLogEntry> {
         return getLogs(since = since, until = null)
@@ -233,7 +235,7 @@ open class Container(
      *
      * To retrieve all log entries until now, set [until] to `null`.
      * @param until Only return logs before this time, as a UNIX timestamp. If set to `null`, all log entries until now are returned.
-     * @throws IllegalStateException if container is not initialized
+     * @throws IllegalStateException if container is not initialized, i.e. not started.
      */
     fun getLogsUntil(until: Int?): List<ContainerLogEntry> {
         return getLogs(since = 0, until = until)
@@ -247,7 +249,7 @@ open class Container(
      * To retrieve all log entries until now, set [until] to `null`.
      * @param since Only return logs since this time, as a UNIX timestamp.
      * @param until Only return logs before this time, as a UNIX timestamp. If set to `null`, all log entries until now are returned.
-     * @throws IllegalStateException if container is not initialized
+     * @throws IllegalStateException if container is not initialized, i.e. not started.
      */
     fun getLogsBetween(since: Int, until: Int?): List<ContainerLogEntry> {
         return getLogs(since = since, until = until)
@@ -256,7 +258,7 @@ open class Container(
     /**
      * Returns all log output from the container from the creation of the container until now along with their timestamps,
      * by executing `docker logs --timestamps $containerId`.
-     * @throws IllegalStateException if container is not initialized
+     * @throws IllegalStateException if container is not initialized, i.e. not started.
      */
     fun getLogs(): List<ContainerLogEntry> {
         return getLogs(since = 0, until = null)
@@ -266,7 +268,7 @@ open class Container(
      * Attaches the given [consumer] to this container's log outputs.
      * The consumer receives all previous and all future log frames.
      * @param consumer Log consumer to be attached.
-     * @throws IllegalStateException if container is not initialized
+     * @throws IllegalStateException if container is not initialized, i.e. not started.
      */
     fun addLogConsumer(consumer: ContainerLogConsumer) {
         assertThatContainerIsInitialized()
@@ -276,7 +278,7 @@ open class Container(
 
     /**
      * Returns current resource usage statistics of the container, by executing `docker stats --no-stream $containerId`.
-     * @throws IllegalStateException if container is not initialized
+     * @throws IllegalStateException if container is not initialized, i.e. not started.
      */
     fun getStats(): ContainerStatsEntry {
         assertThatContainerIsInitialized()
@@ -285,11 +287,10 @@ open class Container(
 
     /**
      * Attaches the given [consumer] to the container's resource usage statistics.
-     * Docker instantiates a live data stream for the container and for each
-     * statistics entry received by Docker, the consumer is notified.
-     * Docker sends new resource usage information every second.
+     * Docker instantiates a live data stream for the container and sends new resource usage information every second.
+     * For each statistics entry received by Docker, the consumer is notified.
      * @param consumer Statistics consumer to be attached.
-     * @throws IllegalStateException if container is not initialized
+     * @throws IllegalStateException if container is not initialized, i.e. not started.
      */
     fun addStatsConsumer(consumer: ContainerStatsConsumer) {
         assertThatContainerIsInitialized()
@@ -302,6 +303,7 @@ open class Container(
      * Docker instantiates a live data stream for the container and for each event received by Docker, the consumer is notified.
      * @param consumer Event consumer to be attached.
      * @param eventFilters If provided, only events of the given types are consumed.
+     * @throws IllegalStateException if container is not initialized, i.e. not started.
      */
     @JvmOverloads
     fun addEventConsumer(consumer: ContainerEventConsumer, eventFilters: List<ContainerEvent.Type>? = null) {
@@ -318,13 +320,19 @@ open class Container(
      * To retrieve all log entries until now, set [until] to `null`.
      * @param since Only return logs since this time, as a UNIX timestamp.
      * @param until Only return logs before this time, as a UNIX timestamp. If set to `null`, all log entries until now are returned.
-     * @throws IllegalStateException if container is not initialized
+     * @throws IllegalStateException if container is not initialized, i.e. not started.
      */
     private fun getLogs(since: Int, until: Int?): List<ContainerLogEntry> {
         assertThatContainerIsInitialized()
         return ContainerLogUtils.getLogs(dockerContainer!!.state, since, until)
     }
 
+    /**
+     * Maps all internal ports defined for the Docker container (i.e. all entries in the `ports` section of the Docker-Compose) to
+     * the external, publicly accessible port. If the external port is specified in the port binding and is therefore fixed, this
+     * specified value is used. However, if no external port is defined in the Docker-Compose, Docker selects a random external port.
+     * The port bindings are updated in the [ports] of this container instance.
+     */
     private fun mapContainerPorts(dockerContainer: DockerContainer) {
         val dockerPorts = dockerContainer.ports.filter { it.privatePort != null }
         for (port in dockerPorts) {
@@ -336,6 +344,6 @@ open class Container(
     }
 
     private fun assertThatContainerIsInitialized() {
-        checkNotNull(dockerContainer) { "Docker container is not properly initialized" }
+        checkNotNull(dockerContainer) { "Docker container is not properly initialized. Did you start the container first?" }
     }
 }

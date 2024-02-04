@@ -15,16 +15,19 @@ import javax.lang.model.element.TypeElement
 import javax.tools.Diagnostic
 
 /**
- * Annotation processor for fields annotated with [InjectService] which ensures
- * that the prerequisites are fulfilled.
- * Requires field to be of type [Container] or [MockServer] and the enclosing class
- * to extend [Me2eTest]. If any of these requirements is not met, the compiler will
- * show an error.
+ * Annotation processor for fields annotated with [InjectService] which ensures that all prerequisites are fulfilled.
+ * Requires field to be of type [Container] or [MockServer] and the enclosing class to extend [Me2eTest].
+ * If any of these requirements is not met, the compiler will show an error.
  */
 @AutoService(Processor::class)
 @SupportedSourceVersion(SourceVersion.RELEASE_16)
 @SupportedAnnotationTypes("org.jholsten.me2e.container.injection.InjectService")
 class InjectServiceAnnotationProcessor : AbstractProcessor() {
+
+    /**
+     * Ensures that the prerequisites are fulfilled for all fields annotated with [InjectService].
+     * This method is invoked upon compilation.
+     */
     override fun process(annotations: MutableSet<out TypeElement>, roundEnv: RoundEnvironment): Boolean {
         for (annotation in annotations) {
             val annotatedElements = roundEnv.getElementsAnnotatedWith(annotation)
@@ -37,6 +40,11 @@ class InjectServiceAnnotationProcessor : AbstractProcessor() {
         return true
     }
 
+    /**
+     * Ensures that the datatype of the annotated field is either of type [Container] or [MockServer].
+     * In case this prerequisite is not fulfilled, an error message is transferred to the compiler.
+     * @param element Field annotated with [InjectService].
+     */
     private fun assertThatFieldTypeIsValid(element: Element) {
         val elementType = try {
             Class.forName(element.asType().toString())
@@ -52,6 +60,11 @@ class InjectServiceAnnotationProcessor : AbstractProcessor() {
         }
     }
 
+    /**
+     * Ensures that the class in which the annotated field is defined inherits from [Me2eTest].
+     * In case this prerequisite is not fulfilled, an error message is transferred to the compiler.
+     * @param element Field annotated with [InjectService].
+     */
     private fun assertThatEnclosingClassIsValid(element: Element) {
         val enclosingClass = element.enclosingElement.asType()
         val superClasses = processingEnv.typeUtils.directSupertypes(enclosingClass).map { it.toString() }
@@ -64,6 +77,10 @@ class InjectServiceAnnotationProcessor : AbstractProcessor() {
         }
     }
 
+    /**
+     * Returns whether this class is of type [clazz], i.e. if they are equal or if this class is a
+     * subtype of [clazz].
+     */
     private fun Class<*>.isOfType(clazz: Class<*>): Boolean {
         return clazz.isAssignableFrom(this)
     }

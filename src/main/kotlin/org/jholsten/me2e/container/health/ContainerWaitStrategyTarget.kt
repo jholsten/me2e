@@ -7,15 +7,11 @@ import org.testcontainers.containers.wait.strategy.WaitStrategyTarget
  * Wait strategy for a container as part of a Docker compose.
  */
 internal class ContainerWaitStrategyTarget(private val containerId: String) : WaitStrategyTarget {
-    override fun getExposedPorts(): MutableList<Int> {
-        return mutableListOf()
-    }
+    override fun getExposedPorts(): MutableList<Int> = mutableListOf()
 
     override fun getContainerInfo(): InspectContainerResponse {
         return dockerClient.inspectContainerCmd(containerId).exec()
     }
 
-    override fun getContainerId(): String {
-        return containerId
-    }
+    override fun getContainerId(): String = containerId
 }

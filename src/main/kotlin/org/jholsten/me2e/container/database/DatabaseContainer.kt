@@ -19,8 +19,9 @@ import java.time.Instant
 import com.github.dockerjava.api.model.Container as DockerContainer
 
 /**
- * Model representing one database container.
- * Offers commands for resetting the state and inserting data.
+ * Representation of a Docker container which contains a database.
+ * Offers commands for interacting with the database, if the [system] is supported, i.e. if it is set to any value
+ * other than [DatabaseManagementSystem.OTHER].
  */
 class DatabaseContainer(
     /**
@@ -84,8 +85,7 @@ class DatabaseContainer(
 
     /**
      * Database initialization scripts to run when the container is started as map of `(name, path)`.
-     * Only applicable if connection to the database via the [DatabaseConnection]
-     * could be established.
+     * Only applicable if connection to the database via the [DatabaseConnection] could be established.
      */
     val initializationScripts: Map<String, String> = mapOf(),
 ) : Container(
@@ -105,6 +105,7 @@ class DatabaseContainer(
      */
     var connection: DatabaseConnection? = null
 
+    @JvmSynthetic
     override fun initialize(dockerContainer: DockerContainer, state: ContainerState, environment: DockerCompose) {
         super.initialize(dockerContainer, state, environment)
         val exposedPort = ports.findFirstExposed()
@@ -112,16 +113,17 @@ class DatabaseContainer(
             logger.warn("Could not find any exposed ports for database container '$name'.")
         } else if (database == null) {
             logger.warn("Could not detect the name of the database for container '$name'.")
-        } else {
+        } else if (system != DatabaseManagementSystem.OTHER) {
             initializeConnection(state, exposedPort)
             executeInitializationScripts()
         }
     }
 
+    @JvmSynthetic
     override fun onRestart(timestamp: Instant) {
         super.onRestart(timestamp)
         val exposedPort = ports.findFirstExposed()
-        if (exposedPort?.external != null && database != null) {
+        if (system != DatabaseManagementSystem.OTHER && exposedPort?.external != null && database != null) {
             initializeConnection(dockerContainer!!.state, exposedPort)
         }
     }
@@ -182,8 +184,7 @@ class DatabaseContainer(
     }
 
     /**
-     * Executes the script on the given path.
-     * Path needs to be located in `resources` folder.
+     * Executes the script on the given path. Path needs to be located in `resources` folder.
      * @param path Path to the file which contains the script. Needs to be located in `resources` folder.
      * @throws java.io.FileNotFoundException if file does not exist.
      * @throws DatabaseException if script could not be executed.
@@ -232,11 +233,16 @@ class DatabaseContainer(
         connection!!.reset()
     }
 
-    private fun initializeConnection(dockerContainerState: ContainerState, exposedPort: ContainerPort) {
+    /**
+     * Initializes the connection to the database of this container.
+     * @param state Reference to the corresponding Docker container state.
+     * @param exposedPort Port on which the database is accessible.
+     */
+    private fun initializeConnection(state: ContainerState, exposedPort: ContainerPort) {
         if (system == DatabaseManagementSystem.MONGO_DB) {
             connection = MongoDBConnection.Builder()
-                .withContainer(dockerContainerState)
-                .withHost(dockerContainerState.host)
+                .withContainer(state)
+                .withHost(state.host)
                 .withPort(exposedPort.external!!)
                 .withDatabase(database!!)
                 .withUsername(username)
@@ -244,7 +250,7 @@ class DatabaseContainer(
                 .build()
         } else if (system.isSQL) {
             connection = SQLDatabaseConnection.Builder()
-                .withHost(dockerContainerState.host)
+                .withHost(state.host)
                 .withPort(exposedPort.external!!)
                 .withSystem(system)
                 .withDatabase(database!!)
@@ -264,6 +270,18 @@ class DatabaseContainer(
     }
 
     private fun assertThatDatabaseConnectionIsEstablished() {
-        checkNotNull(connection) { "Unable to interact with database, since a connection to the database could not be established." }
+        if (connection == null) {
+            val message = when (system) {
+                DatabaseManagementSystem.OTHER -> "Interaction with the database via the `connection` instance is only supported for " +
+                    "a certain selection of database management systems, of which this system is not a part. " +
+                    "To be able to use these methods, you can implement the `org.jholsten.me2e.container.database.DatabaseConnection` " +
+                    "class yourself and set the connection attribute to an instance of this class."
+
+                else -> "Unable to interact with the database, since a connection could not be established. Make sure that you have " +
+                    "defined at least one port binding for the container and specified the name of the database in the " +
+                    "`org.jholsten.me2e.database.name` label."
+            }
+            throw IllegalStateException(message)
+        }
     }
 }

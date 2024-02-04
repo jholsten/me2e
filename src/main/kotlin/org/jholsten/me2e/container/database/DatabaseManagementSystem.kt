@@ -49,6 +49,11 @@ enum class DatabaseManagementSystem(
     ),
     OTHER(EnvironmentKeys(), isSQL = false);
 
+    /**
+     * Keys that are used in the Docker-Compose to define certain properties of a database container as environment variables.
+     * If the database name, username and/or password are not set in the corresponding labels, an attempt is made to read these
+     * values from the corresponding environment variables.
+     */
     data class EnvironmentKeys(
         val databaseName: String? = null,
         val username: String? = null,

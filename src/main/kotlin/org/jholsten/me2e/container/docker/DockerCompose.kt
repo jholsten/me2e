@@ -2,6 +2,8 @@ package org.jholsten.me2e.container.docker
 
 import com.github.dockerjava.api.model.Container as DockerContainer
 import org.jholsten.me2e.container.exception.DockerException
+import org.jholsten.me2e.container.exception.ServiceShutdownException
+import org.jholsten.me2e.container.exception.ServiceStartupException
 import org.jholsten.me2e.container.health.ContainerWaitStrategyTarget
 import org.jholsten.me2e.container.health.exception.HealthTimeoutException
 import org.jholsten.me2e.utils.ResettableLazy
@@ -22,7 +24,6 @@ import org.testcontainers.containers.DockerComposeContainer as DockerComposeV1
 import org.testcontainers.containers.ComposeContainer as DockerComposeV2
 import java.io.File
 import java.time.Duration
-import java.util.Optional
 
 /**
  * Service for instantiating and interacting with a Docker-Compose environment using either Docker-Compose version v1 or v2.
@@ -32,6 +33,7 @@ import java.util.Optional
  * Since testcontainers uses two different classes for version 1 and 2, which do not have a common supertype, it is otherwise
  * difficult to handle instances of both classes. Therefore, this class provides a common interface for both versions.
  */
+@Suppress("DEPRECATION")
 class DockerCompose private constructor(
     /**
      * Unique identifier of the Docker-Compose project.
@@ -142,10 +144,10 @@ class DockerCompose private constructor(
      * @see DockerComposeV2.getContainerByServiceName
      */
     @JvmSynthetic
-    internal fun getContainerByServiceName(serviceName: String): Optional<ContainerState> {
+    internal fun getContainerByServiceName(serviceName: String): ContainerState? {
         return when (this.version) {
-            DockerComposeVersion.V1 -> v1.getContainerByServiceName(serviceName)
-            DockerComposeVersion.V2 -> v2.getContainerByServiceName(serviceName)
+            DockerComposeVersion.V1 -> v1.getContainerByServiceName(serviceName).orElse(null)
+            DockerComposeVersion.V2 -> v2.getContainerByServiceName(serviceName).orElse(null)
         }
     }
 
@@ -153,11 +155,16 @@ class DockerCompose private constructor(
      * Starts the Docker-Compose container. Retrieves the Docker-Compose's project name from the container's labels.
      * @see DockerComposeV1.start
      * @see DockerComposeV2.start
+     * @throws ServiceStartupException if Docker-Compose could not be started.
      */
     fun start() {
-        when (this.version) {
-            DockerComposeVersion.V1 -> v1.start()
-            DockerComposeVersion.V2 -> v2.start()
+        try {
+            when (this.version) {
+                DockerComposeVersion.V1 -> v1.start()
+                DockerComposeVersion.V2 -> v2.start()
+            }
+        } catch (e: Exception) {
+            throw ServiceStartupException("Unable to start Docker-Compose: ${e.message}")
         }
         this._dockerContainers.reset()
         if (dockerContainers.isNotEmpty()) {
@@ -187,11 +194,16 @@ class DockerCompose private constructor(
      * Stops the Docker-Compose container.
      * @see DockerComposeV1.stop
      * @see DockerComposeV2.stop
+     * @throws ServiceShutdownException if Docker-Compose could not be stopped.
      */
     fun stop() {
-        when (this.version) {
-            DockerComposeVersion.V1 -> v1.stop()
-            DockerComposeVersion.V2 -> v2.stop()
+        try {
+            when (this.version) {
+                DockerComposeVersion.V1 -> v1.stop()
+                DockerComposeVersion.V2 -> v2.stop()
+            }
+        } catch (e: Exception) {
+            throw ServiceShutdownException("Unable to stop Docker-Compose: ${e.message}")
         }
         this._dockerContainers.reset()
         this._project = null
@@ -212,6 +224,7 @@ class DockerCompose private constructor(
     /**
      * Pulls images for services with the given names.
      * @param servicesToPull Names of the services for which images are to be pulled.
+     * @throws DockerException if at least one of the images could not be pulled.
      */
     fun pull(servicesToPull: List<String>) {
         if (servicesToPull.isNotEmpty()) {
@@ -327,7 +340,7 @@ class DockerCompose private constructor(
                     .exitValueNormal()
                     .executeNoTimeout()
             } catch (e: InvalidExitValueException) {
-                throw DockerException("Running Docker-Compose command $cmd failed: ${e.message}", e.cause)
+                throw DockerException("Running Docker-Compose command $cmd failed: ${e.message}", e)
             }
         }
     }
