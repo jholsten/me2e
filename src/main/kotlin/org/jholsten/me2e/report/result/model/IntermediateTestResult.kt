@@ -1,5 +1,3 @@
-@file:JvmSynthetic
-
 package org.jholsten.me2e.report.result.model
 
 import org.jholsten.me2e.report.logs.model.AggregatedLogEntry

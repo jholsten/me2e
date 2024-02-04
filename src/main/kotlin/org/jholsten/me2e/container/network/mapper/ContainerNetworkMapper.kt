@@ -1,5 +1,3 @@
-@file:JvmSynthetic
-
 package org.jholsten.me2e.container.network.mapper
 
 import org.jholsten.me2e.container.network.ContainerNetwork

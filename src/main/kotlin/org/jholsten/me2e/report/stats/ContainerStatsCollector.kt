@@ -1,5 +1,3 @@
-@file:JvmSynthetic
-
 package org.jholsten.me2e.report.stats
 
 import org.jholsten.me2e.container.stats.ContainerStatsConsumer

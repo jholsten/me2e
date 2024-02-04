@@ -1,5 +1,3 @@
-@file:JvmSynthetic
-
 package org.jholsten.me2e.report.logs
 
 import org.jholsten.me2e.container.logging.ContainerLogConsumer

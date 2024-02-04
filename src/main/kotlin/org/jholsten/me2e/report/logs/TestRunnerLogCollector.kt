@@ -1,5 +1,3 @@
-@file:JvmSynthetic
-
 package org.jholsten.me2e.report.logs
 
 import ch.qos.logback.classic.spi.ILoggingEvent

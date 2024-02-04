@@ -1,5 +1,3 @@
-@file:JvmSynthetic
-
 package org.jholsten.me2e.container.stats
 
 import com.github.dockerjava.api.async.ResultCallbackTemplate

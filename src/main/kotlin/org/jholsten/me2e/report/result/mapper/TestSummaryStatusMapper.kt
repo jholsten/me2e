@@ -1,5 +1,3 @@
-@file:JvmSynthetic
-
 package org.jholsten.me2e.report.result.mapper
 
 import org.jholsten.me2e.report.result.model.TestResult

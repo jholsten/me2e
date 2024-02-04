@@ -1,5 +1,3 @@
-@file:JvmSynthetic
-
 package org.jholsten.me2e.container.health
 
 import com.github.dockerjava.api.command.InspectContainerResponse

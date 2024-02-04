@@ -1,5 +1,3 @@
-@file:JvmSynthetic
-
 package org.jholsten.me2e
 
 import org.jholsten.me2e.config.model.TestConfig

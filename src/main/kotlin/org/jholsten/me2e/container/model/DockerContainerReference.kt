@@ -1,5 +1,3 @@
-@file:JvmSynthetic
-
 package org.jholsten.me2e.container.model
 
 import org.jholsten.me2e.container.docker.DockerCompose
