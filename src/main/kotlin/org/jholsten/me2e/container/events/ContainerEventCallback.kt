@@ -1,6 +1,6 @@
 @file:JvmSynthetic
 
-package org.jholsten.me2e.events
+package org.jholsten.me2e.container.events
 
 import com.github.dockerjava.api.async.ResultCallbackTemplate
 import com.github.dockerjava.api.model.Event

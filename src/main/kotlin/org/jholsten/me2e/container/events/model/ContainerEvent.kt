@@ -1,4 +1,4 @@
-package org.jholsten.me2e.events.model
+package org.jholsten.me2e.container.events.model
 
 import java.time.Instant
 

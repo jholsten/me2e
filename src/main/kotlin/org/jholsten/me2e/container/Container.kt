@@ -19,10 +19,10 @@ import org.jholsten.me2e.container.network.mapper.ContainerNetworkMapper
 import org.jholsten.me2e.container.stats.ContainerStatsConsumer
 import org.jholsten.me2e.container.stats.ContainerStatsUtils
 import org.jholsten.me2e.container.stats.model.ContainerStatsEntry
-import org.jholsten.me2e.events.ContainerEventConsumer
-import org.jholsten.me2e.events.ContainerEventsUtils
-import org.jholsten.me2e.events.ContainerRestartListener
-import org.jholsten.me2e.events.model.ContainerEvent
+import org.jholsten.me2e.container.events.ContainerEventConsumer
+import org.jholsten.me2e.container.events.ContainerEventsUtils
+import org.jholsten.me2e.container.events.ContainerRestartListener
+import org.jholsten.me2e.container.events.model.ContainerEvent
 import org.jholsten.me2e.report.result.ReportDataAggregator
 import org.jholsten.me2e.utils.logger
 import org.testcontainers.containers.ContainerState

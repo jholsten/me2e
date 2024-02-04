@@ -1,7 +1,7 @@
-package org.jholsten.me2e.events
+package org.jholsten.me2e.container.events
 
 import org.jholsten.me2e.container.Container
-import org.jholsten.me2e.events.model.ContainerEvent
+import org.jholsten.me2e.container.events.model.ContainerEvent
 
 /**
  * Consumer which listens to a Container's `restart` events.

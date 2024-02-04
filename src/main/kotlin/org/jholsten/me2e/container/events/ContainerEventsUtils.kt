@@ -1,7 +1,7 @@
-package org.jholsten.me2e.events
+package org.jholsten.me2e.container.events
 
 import com.github.dockerjava.api.model.Event
-import org.jholsten.me2e.events.model.ContainerEvent
+import org.jholsten.me2e.container.events.model.ContainerEvent
 import org.testcontainers.containers.ContainerState
 import java.io.Closeable
 import java.util.function.Consumer

@@ -1,7 +1,7 @@
-package org.jholsten.me2e.events
+package org.jholsten.me2e.container.events
 
 import com.github.dockerjava.api.model.Event
-import org.jholsten.me2e.events.model.ContainerEvent
+import org.jholsten.me2e.container.events.model.ContainerEvent
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.util.function.Consumer
