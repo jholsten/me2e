@@ -204,7 +204,7 @@ class DockerCompose private constructor(
      */
     fun waitUntilHealthy(serviceNames: List<String>, timeout: Long) {
         val servicesWithHealthcheck = serviceNames.filter { hasHealthcheck(it) }
-        logger.info("Waiting for ${servicesWithHealthcheck.size} services to be healthy...")
+        logger.info("Waiting at most $timeout seconds for ${servicesWithHealthcheck.size} services to become healthy...")
         servicesWithHealthcheck.forEach { waitUntilHealthy(it, timeout) }
         logger.info("Services [${servicesWithHealthcheck.joinToString(", ")}] are healthy.")
     }
@@ -459,7 +459,9 @@ class DockerCompose private constructor(
     private fun waitUntilHealthy(serviceName: String, timeout: Long) {
         val waitStrategy = Wait.forHealthcheck().withStartupTimeout(Duration.ofSeconds(timeout))
         try {
+            logger.debug("Waiting for service $serviceName to become healthy...")
             waitStrategy.waitUntilReady(ContainerWaitStrategyTarget(getDockerContainer(serviceName).id))
+            logger.debug("Service $serviceName is healthy.")
         } catch (e: ContainerLaunchException) {
             throw HealthTimeoutException("Timed out waiting for container $serviceName to become healthy.")
         }
