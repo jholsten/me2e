@@ -105,29 +105,6 @@ class DatabaseContainer(
      */
     var connection: DatabaseConnection? = null
 
-    @JvmSynthetic
-    override fun initialize(dockerContainer: DockerContainer, state: ContainerState, environment: DockerCompose) {
-        super.initialize(dockerContainer, state, environment)
-        val exposedPort = ports.findFirstExposed()
-        if (exposedPort?.external == null) {
-            logger.warn("Could not find any exposed ports for database container '$name'.")
-        } else if (database == null) {
-            logger.warn("Could not detect the name of the database for container '$name'.")
-        } else if (system != DatabaseManagementSystem.OTHER) {
-            initializeConnection(state, exposedPort)
-            executeInitializationScripts()
-        }
-    }
-
-    @JvmSynthetic
-    override fun onRestart(timestamp: Instant) {
-        super.onRestart(timestamp)
-        val exposedPort = ports.findFirstExposed()
-        if (system != DatabaseManagementSystem.OTHER && exposedPort?.external != null && database != null) {
-            initializeConnection(dockerContainer!!.state, exposedPort)
-        }
-    }
-
     /**
      * Executes all database initialization scripts given in [initializationScripts].
      * @throws IllegalStateException if connection to database is not established.
@@ -232,6 +209,30 @@ class DatabaseContainer(
         assertThatDatabaseConnectionIsEstablished()
         connection!!.reset()
     }
+
+    @JvmSynthetic
+    override fun initialize(dockerContainer: DockerContainer, state: ContainerState, environment: DockerCompose) {
+        super.initialize(dockerContainer, state, environment)
+        val exposedPort = ports.findFirstExposed()
+        if (exposedPort?.external == null) {
+            logger.warn("Could not find any exposed ports for database container '$name'.")
+        } else if (database == null) {
+            logger.warn("Could not detect the name of the database for container '$name'.")
+        } else if (system != DatabaseManagementSystem.OTHER) {
+            initializeConnection(state, exposedPort)
+            executeInitializationScripts()
+        }
+    }
+
+    @JvmSynthetic
+    override fun onRestart(timestamp: Instant) {
+        super.onRestart(timestamp)
+        val exposedPort = ports.findFirstExposed()
+        if (system != DatabaseManagementSystem.OTHER && exposedPort?.external != null && database != null) {
+            initializeConnection(dockerContainer!!.state, exposedPort)
+        }
+    }
+
 
     /**
      * Initializes the connection to the database of this container.

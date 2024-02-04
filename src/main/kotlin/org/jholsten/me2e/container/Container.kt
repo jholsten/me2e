@@ -150,42 +150,6 @@ open class Container(
     private val eventConsumers: MutableList<Pair<ContainerEventConsumer, List<ContainerEvent.Type>?>> = mutableListOf()
 
     /**
-     * Initializes the container by setting the corresponding [DockerContainer] and [ContainerState] instance after the Docker
-     * container was started. Maps internal ports to external container ports, initializes [ReportDataAggregator] and adds consumer
-     * to the container's `restart` events.
-     * @param dockerContainer Reference to the corresponding Docker container.
-     * @param state Reference to the corresponding Docker container state. Required to interact with the container.
-     * @param environment Docker-Compose environment which the container is part of.
-     */
-    @JvmSynthetic
-    internal open fun initialize(dockerContainer: DockerContainer, state: ContainerState, environment: DockerCompose) {
-        this.dockerContainer = DockerContainerReference(dockerContainer, state, environment)
-        mapContainerPorts(dockerContainer)
-
-        ReportDataAggregator.onContainerStarted(this)
-        addEventConsumer(ContainerRestartListener(this), eventFilters = listOf(ContainerEvent.Type.RESTART))
-    }
-
-    /**
-     * Callback function to execute when the corresponding Docker container was restarted.
-     * After a restart, all existing consumers are closed and the port mappings of the container can change (see
-     * [GitHub Issue #31926](https://github.com/moby/moby/issues/31926)). Therefore, all registered consumers are reattached and
-     * the port mappings are updated in the internal state.
-     * @param timestamp Timestamp of when the Docker container was restarted.
-     */
-    @JvmSynthetic
-    internal open fun onRestart(timestamp: Instant) {
-        assertThatContainerIsInitialized()
-        logger.info("Received notification that container $name was restarted at $timestamp. Updating container info...")
-        val state = dockerContainer!!.state
-        dockerContainer!!.container = dockerContainer!!.environment.getDockerContainer(name)
-        logConsumers.forEach { consumer -> ContainerLogUtils.followOutput(state, consumer, since = timestamp.epochSecond.toInt()) }
-        statsConsumers.forEach { consumer -> ContainerStatsUtils.followOutput(state, consumer) }
-        eventConsumers.forEach { (consumer, eventFilters) -> ContainerEventsUtils.followOutput(state, consumer, eventFilters) }
-        mapContainerPorts(dockerContainer!!.container)
-    }
-
-    /**
      * Executes the given command inside the container, as using [`docker exec`](https://docs.docker.com/engine/reference/commandline/exec/).
      * @param command Command to execute in array format. Example: `["echo", "a", "&&", "echo", "b"]`
      * @return Result of the execution.
@@ -310,6 +274,42 @@ open class Container(
         assertThatContainerIsInitialized()
         eventConsumers.add(consumer to eventFilters)
         ContainerEventsUtils.followOutput(dockerContainer!!.state, consumer, eventFilters)
+    }
+
+    /**
+     * Initializes the container by setting the corresponding [DockerContainer] and [ContainerState] instance after the Docker
+     * container was started. Maps internal ports to external container ports, initializes [ReportDataAggregator] and adds consumer
+     * to the container's `restart` events.
+     * @param dockerContainer Reference to the corresponding Docker container.
+     * @param state Reference to the corresponding Docker container state. Required to interact with the container.
+     * @param environment Docker-Compose environment which the container is part of.
+     */
+    @JvmSynthetic
+    internal open fun initialize(dockerContainer: DockerContainer, state: ContainerState, environment: DockerCompose) {
+        this.dockerContainer = DockerContainerReference(dockerContainer, state, environment)
+        mapContainerPorts(dockerContainer)
+
+        ReportDataAggregator.onContainerStarted(this)
+        addEventConsumer(ContainerRestartListener(this), eventFilters = listOf(ContainerEvent.Type.RESTART))
+    }
+
+    /**
+     * Callback function to execute when the corresponding Docker container was restarted.
+     * After a restart, all existing consumers are closed and the port mappings of the container can change (see
+     * [GitHub Issue #31926](https://github.com/moby/moby/issues/31926)). Therefore, all registered consumers are reattached and
+     * the port mappings are updated in the internal state.
+     * @param timestamp Timestamp of when the Docker container was restarted.
+     */
+    @JvmSynthetic
+    internal open fun onRestart(timestamp: Instant) {
+        assertThatContainerIsInitialized()
+        logger.info("Received notification that container $name was restarted at $timestamp. Updating container info...")
+        val state = dockerContainer!!.state
+        dockerContainer!!.container = dockerContainer!!.environment.getDockerContainer(name)
+        logConsumers.forEach { consumer -> ContainerLogUtils.followOutput(state, consumer, since = timestamp.epochSecond.toInt()) }
+        statsConsumers.forEach { consumer -> ContainerStatsUtils.followOutput(state, consumer) }
+        eventConsumers.forEach { (consumer, eventFilters) -> ContainerEventsUtils.followOutput(state, consumer, eventFilters) }
+        mapContainerPorts(dockerContainer!!.container)
     }
 
     /**
