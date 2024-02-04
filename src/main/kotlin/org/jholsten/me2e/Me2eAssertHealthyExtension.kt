@@ -67,10 +67,11 @@ class Me2eAssertHealthyExtension : BeforeEachCallback {
         try {
             Me2eTest.containerManager.restart(containersToRestart)
         } catch (e: HealthTimeoutException) {
-            throw TestAbortedException(
-                "Test was aborted since at least one of the containers in the environment did not become healthy after a restart.",
-                e
-            )
+            val message =
+                "Test was aborted since at least one of the containers in the environment did not become healthy after a restart. " +
+                    "To disable this behavior, set 'assertHealthy' in the 'Me2eTestConfig' to false."
+            logger.warn(message)
+            throw TestAbortedException(message, e)
         }
     }
 }
