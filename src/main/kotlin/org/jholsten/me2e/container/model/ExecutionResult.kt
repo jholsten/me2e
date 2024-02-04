@@ -8,10 +8,12 @@ data class ExecutionResult(
      * Exit code of the command.
      */
     val exitCode: Int,
+
     /**
      * Output of the command on STDOUT.
      */
     val stdout: String,
+
     /**
      * Output of the command on STDERR.
      */

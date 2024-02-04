@@ -9,6 +9,7 @@ data class ContainerPort(
      * Container-internal port to be exposed.
      */
     val internal: Int,
+
     /**
      * Port from which container is accessible from localhost.
      * This value is assigned automatically as soon as the container is started.

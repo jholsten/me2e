@@ -76,11 +76,10 @@ data class ContainerNetwork(
     )
 
     /**
-     * Represents a network link between two Docker containers.
-     * The container with the name [name] is made available in the target container
-     * with the aliased name [alias]. This involves creating an entry in `/etc/hosts`
-     * and some environment variables in the target container as well as creating a
-     * network bridge between both containers.
+     * Representation of a network link between two Docker containers.
+     * The container with the name [name] is made available in the target container with the aliased name [alias].
+     * This involves creating an entry in `/etc/hosts` and some environment variables in the target container as
+     * well as creating a network bridge between both containers.
      * @see com.github.dockerjava.api.model.Link
      */
     data class Link(
@@ -91,8 +90,7 @@ data class ContainerNetwork(
         val name: String,
 
         /**
-         * Aliased name under which the linked container will be available
-         * in the target container.
+         * Aliased name under which the linked container will be available in the target container.
          * @see com.github.dockerjava.api.model.Link.getAlias
          */
         val alias: String,

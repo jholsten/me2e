@@ -5,7 +5,7 @@ import java.time.Instant
 
 /**
  * Model representing one statistics entry of a container returned by `docker stats`.
- * Contains aggregated resource usage information about CPU, memory and network usage.
+ * Contains aggregated resource usage information about CPU, memory and network input and output.
  * @see com.github.dockerjava.api.model.Statistics
  */
 open class ContainerStatsEntry(
