@@ -25,25 +25,27 @@ import java.time.Duration
 import java.util.Optional
 
 /**
- * Custom wrapper for testcontainers Docker-Compose classes [DockerComposeV1] and [DockerComposeV2].
- * Since testcontainers uses two different classes for version 1 and 2, which do not have a common supertype, it is otherwise difficult
- * to handle instances of both classes. Therefore, this class provides a common interface for both classes.
- * TODO: Builder
+ * Service for instantiating and interacting with a Docker-Compose environment using either Docker-Compose version v1 or v2.
+ * To instantiate the environment, use the [Builder].
+ *
+ * This service is a custom wrapper for testcontainers Docker-Compose classes [DockerComposeV1] and [DockerComposeV2].
+ * Since testcontainers uses two different classes for version 1 and 2, which do not have a common supertype, it is otherwise
+ * difficult to handle instances of both classes. Therefore, this class provides a common interface for both versions.
  */
 class DockerCompose private constructor(
     /**
-     * Unique identifier of the docker compose project.
+     * Unique identifier of the Docker-Compose project.
      * Is used as a prefix for the [project] name.
      */
     private val identifier: String,
 
     /**
-     * Reference to the Docker compose file to use.
+     * Reference to the Docker-Compose file to use.
      */
     private val file: File,
 
     /**
-     * Docker Compose version to use for executing commands.
+     * Docker-Compose version to use for executing commands.
      */
     private val version: DockerComposeVersion,
 
@@ -57,13 +59,12 @@ class DockerCompose private constructor(
      */
     v2: Lazy<DockerComposeV2>,
 ) {
-
     private val logger = logger(this)
 
     /**
-     * Name of the docker compose project, which is composed of the [identifier] as a prefix
-     * and an alphanumeric suffix, which is randomly generated each time the docker compose is started.
-     * Is only set after the docker compose is started and reset to `null` after it is stopped.
+     * Name of the Docker-Compose project, which is composed of the [identifier] as a prefix
+     * and an alphanumeric suffix, which is randomly generated each time the Docker-Compose is started.
+     * Is only set after the Docker-Compose is started and reset to `null` after it is stopped.
      */
     private var _project: String? = null
 
@@ -75,22 +76,25 @@ class DockerCompose private constructor(
     val project: String
         get() {
             checkNotNull(_project) {
-                "Docker compose is currently not running. Since the project name is " +
+                "Docker-Compose is currently not running. Since the project name is " +
                     "randomly generated on each start, the name cannot be retrieved."
             }
             return _project!!
         }
 
     /**
-     * Lazy reference to a map of service name and [DockerContainer] instance for all services defined in the docker compose file.
-     * Is reset after the docker compose is started, when any service is restarted or when the docker compose is stopped.
+     * Lazy reference to a map of service name and [DockerContainer] instance for all services defined in the Docker-Compose [file].
+     * Is reset after the Docker-Compose is started, when any service is restarted or when the Docker-Compose is stopped.
      */
     private val _dockerContainers: ResettableLazy<Map<String, DockerContainer>> = ResettableLazy {
         getDockerContainers()
     }
 
     /**
-     * Map of service name and [DockerContainer] instance for all services defined in the docker compose file.
+     * Map of service name and [DockerContainer] instance for all services defined in the Docker-Compose [file].
+     * As the port mapping of containers can change during a restart, this map is retrieved directly from Docker each time during
+     * a restart in order to obtain the up-to-date information. Subsequently, the data is stored in the internal memory is accessed
+     * which may be outdated, especially in terms of the container's statuses.
      * @throws IllegalStateException if docker compose is currently not running.
      */
     @get:JvmSynthetic
@@ -102,10 +106,17 @@ class DockerCompose private constructor(
             return _dockerContainers.value
         }
 
+    /**
+     * When containers are restarted, they are informed asynchronously via a corresponding [org.jholsten.me2e.container.events.model.ContainerEvent].
+     * As the port mappings may have changed, the restarted containers retrieve their current information from the [dockerContainers].
+     * Since the process is asynchronous and the containers are restarted one after the other, the current information must be retrieved
+     * from Docker each time during the restart process. This procedure is controlled with this variable, which is set to `true` before
+     * a restart and to `false` after all containers have finished restarting.
+     */
     private var isRestarting: Boolean = false
 
     /**
-     * Kotlin wrapper for [DockerComposeV1] to avoid type issue.
+     * Kotlin wrapper for [DockerComposeV1] to avoid typing issue.
      * See [GitHub Issue #1010](https://github.com/testcontainers/testcontainers-java/issues/1010)
      */
     internal class KDockerComposeV1(identifier: String, file: File) : DockerComposeV1<KDockerComposeV1>(identifier, file)
@@ -130,7 +141,8 @@ class DockerCompose private constructor(
      * @see DockerComposeV1.getContainerByServiceName
      * @see DockerComposeV2.getContainerByServiceName
      */
-    fun getContainerByServiceName(serviceName: String): Optional<ContainerState> {
+    @JvmSynthetic
+    internal fun getContainerByServiceName(serviceName: String): Optional<ContainerState> {
         return when (this.version) {
             DockerComposeVersion.V1 -> v1.getContainerByServiceName(serviceName)
             DockerComposeVersion.V2 -> v2.getContainerByServiceName(serviceName)
@@ -138,7 +150,7 @@ class DockerCompose private constructor(
     }
 
     /**
-     * Starts the Docker-Compose container.
+     * Starts the Docker-Compose container. Retrieves the Docker-Compose's project name from the container's labels.
      * @see DockerComposeV1.start
      * @see DockerComposeV2.start
      */
@@ -154,10 +166,11 @@ class DockerCompose private constructor(
     }
 
     /**
-     * Restarts the services with the given names.
-     * Note that it may take a couple of seconds until the containers are healthy.
+     * Restarts the services with the given names and waits for them to become healthy within the specified [healthTimeout].
      * @param servicesToRestart Names of the services to restart.
+     * @param healthTimeout Maximum number of seconds to wait until the services become healthy.
      * @throws DockerException in case of errors.
+     * @throws HealthTimeoutException if at least one of the services did not become healthy within [healthTimeout] seconds.
      */
     fun restartContainers(servicesToRestart: List<String>, healthTimeout: Long) {
         if (servicesToRestart.isNotEmpty()) {
@@ -186,7 +199,7 @@ class DockerCompose private constructor(
 
     /**
      * Waits for up to [timeout] seconds until the services with the given names are healthy.
-     * Services for which no health check is defined in the docker compose are ignored.
+     * Services for which no health check is defined in the Docker-Compose are ignored.
      * @throws HealthTimeoutException if at least one of the containers did not become healthy within [timeout] seconds.
      */
     fun waitUntilHealthy(serviceNames: List<String>, timeout: Long) {
@@ -217,9 +230,9 @@ class DockerCompose private constructor(
     }
 
     /**
-     * Returns reference to the Docker container of service with the given name.
-     * May contain outdated information and is only updated when the docker compose is started or any service is restarted.
-     * @throws IllegalStateException if docker compose is currently not running or the service does not exist.
+     * Returns reference to the [DockerContainer] instance of the service with the given name.
+     * May contain outdated information and is only updated when the Docker-Compose is started or any service is restarted.
+     * @throws IllegalStateException if Docker-Compose is currently not running or the service does not exist.
      */
     @JvmSynthetic
     internal fun getDockerContainer(serviceName: String): DockerContainer {
@@ -303,6 +316,7 @@ class DockerCompose private constructor(
                 .omitEmptyStrings()
                 .splitToList("$baseCommand $command")
 
+            logger.debug("Running Docker-Compose command {}...", cmd)
             try {
                 ProcessExecutor()
                     .command(cmd)
@@ -313,11 +327,14 @@ class DockerCompose private constructor(
                     .exitValueNormal()
                     .executeNoTimeout()
             } catch (e: InvalidExitValueException) {
-                throw DockerException("Running Docker-Compose command $cmd failed: ${e.message}")
+                throw DockerException("Running Docker-Compose command $cmd failed: ${e.message}", e.cause)
             }
         }
     }
 
+    /**
+     * Builder to instantiate a [DockerCompose] instance.
+     */
     class Builder(
         private val identifier: String,
         private val file: File,
@@ -412,6 +429,9 @@ class DockerCompose private constructor(
             )
         }
 
+        /**
+         * Maps [DockerComposeRemoveImagesStrategy] to the equivalent for [DockerComposeV1].
+         */
         private fun DockerComposeRemoveImagesStrategy.toV1(): DockerComposeV1.RemoveImages? {
             return when (this) {
                 DockerComposeRemoveImagesStrategy.NONE -> null
@@ -420,6 +440,9 @@ class DockerCompose private constructor(
             }
         }
 
+        /**
+         * Maps [DockerComposeRemoveImagesStrategy] to the equivalent for [DockerComposeV2].
+         */
         private fun DockerComposeRemoveImagesStrategy.toV2(): DockerComposeV2.RemoveImages? {
             return when (this) {
                 DockerComposeRemoveImagesStrategy.NONE -> null
@@ -429,6 +452,10 @@ class DockerCompose private constructor(
         }
     }
 
+    /**
+     * Waits at most [timeout] seconds until the service with the given name becomes healthy.
+     * @throws HealthTimeoutException if the service did not become healthy within [timeout] seconds.
+     */
     private fun waitUntilHealthy(serviceName: String, timeout: Long) {
         val waitStrategy = Wait.forHealthcheck().withStartupTimeout(Duration.ofSeconds(timeout))
         try {
@@ -448,10 +475,11 @@ class DockerCompose private constructor(
     }
 
     /**
-     * Returns map of service name and [DockerContainer] instance for all services in the Docker-Compose file.
+     * Returns map of service name and [DockerContainer] instance for all services in the Docker-Compose file,
+     * by executing `docker ps`. Includes only containers which are part of the Docker-Compose [file], i.e. whose
+     * container name starts with the [identifier].
      */
     private fun getDockerContainers(): Map<String, DockerContainer> {
-        logger.info("Retrieving docker containers...")
         return DockerClientFactory.lazyClient()
             .listContainersCmd()
             .withShowAll(true)
