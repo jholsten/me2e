@@ -31,16 +31,19 @@ class DatabaseContainer(
 
     /**
      * Image to start the container from.
+     * Corresponds to the value given for the `image` keyword in Docker-Compose.
      */
     image: String,
 
     /**
      * Environment variables for this container.
+     * Corresponds to the values given in the `environment` section of the Docker-Compose.
      */
     environment: Map<String, String>? = null,
 
     /**
      * Ports that should be exposed to localhost.
+     * Corresponds to the `ports` section of the Docker-Compose.
      */
     ports: ContainerPortList = ContainerPortList(),
 
@@ -51,40 +54,50 @@ class DatabaseContainer(
 
     /**
      * Pull policy for this Docker container.
+     * Corresponds to the value of the label `org.jholsten.me2e.pull-policy` in the Docker-Compose.
      */
     pullPolicy: DockerConfig.PullPolicy = DockerConfig.PullPolicy.MISSING,
 
     /**
      * Database management system of this database container.
+     * Corresponds to the value of the label `org.jholsten.me2e.database.system` in the Docker-Compose.
      */
     val system: DatabaseManagementSystem = DatabaseManagementSystem.OTHER,
 
     /**
      * Name of the database of this database container.
+     * Corresponds to the value of the label `org.jholsten.me2e.database.name` in the Docker-Compose or - if this value is not
+     * set - the value from the corresponding environment variable (see [DatabaseManagementSystem.EnvironmentKeys.databaseName]).
      * Only required for interacting with the database via the [DatabaseConnection].
      */
     val database: String? = null,
 
     /**
      * Name of the schema to which this database belongs.
+     * Corresponds to the value of the label `org.jholsten.me2e.database.schema` in the Docker-Compose.
      * Only applicable to SQL databases and only required for interacting with the database via the [DatabaseConnection].
      */
     val schema: String? = null,
 
     /**
      * Username to use for logging in.
+     * Corresponds to the value of the label `org.jholsten.me2e.database.username` in the Docker-Compose or - if this value is not
+     * set - the value from the corresponding environment variable (see [DatabaseManagementSystem.EnvironmentKeys.username]).
      * Only required for interacting with the database via the [DatabaseConnection].
      */
     val username: String? = null,
 
     /**
      * Password to use for logging in.
+     * Corresponds to the value of the label `org.jholsten.me2e.database.password` in the Docker-Compose or - if this value is not
+     * set - the value from the corresponding environment variable (see [DatabaseManagementSystem.EnvironmentKeys.password]).
      * Only required for interacting with the database via the [DatabaseConnection].
      */
     val password: String? = null,
 
     /**
      * Database initialization scripts to run when the container is started as map of `(name, path)`.
+     * Corresponds to the values of the labels with pattern `org.jholsten.me2e.database.init-script.$name` in the Docker-Compose.
      * Only applicable if connection to the database via the [DatabaseConnection] could be established.
      */
     val initializationScripts: Map<String, String> = mapOf(),

@@ -24,7 +24,7 @@ import org.jholsten.me2e.container.events.ContainerEventsUtils
 import org.jholsten.me2e.container.events.ContainerRestartListener
 import org.jholsten.me2e.container.events.model.ContainerEvent
 import org.jholsten.me2e.report.result.ReportDataAggregator
-import org.jholsten.me2e.utils.logger
+import org.slf4j.LoggerFactory
 import org.testcontainers.containers.ContainerState
 import java.time.Instant
 import com.github.dockerjava.api.model.Container as DockerContainer
@@ -55,21 +55,25 @@ open class Container(
 
     /**
      * Type of this container.
+     * Corresponds to the value of the label `org.jholsten.me2e.container-type` in the Docker-Compose.
      */
     val type: ContainerType = ContainerType.MISC,
 
     /**
      * Image to start the container from.
+     * Corresponds to the value given for the `image` keyword in Docker-Compose.
      */
     val image: String, // TODO: Check with build .
 
     /**
      * Environment variables for this container.
+     * Corresponds to the values given in the `environment` section of the Docker-Compose.
      */
     val environment: Map<String, String>? = null,
 
     /**
      * Ports that should be exposed to localhost.
+     * Corresponds to the `ports` section of the Docker-Compose.
      */
     val ports: ContainerPortList = ContainerPortList(),
 
@@ -80,10 +84,11 @@ open class Container(
 
     /**
      * Pull policy for this Docker container.
+     * Corresponds to the value of the label `org.jholsten.me2e.pull-policy` in the Docker-Compose.
      */
     val pullPolicy: DockerConfig.PullPolicy = DockerConfig.PullPolicy.MISSING,
 ) {
-    private val logger = logger(this)
+    private val logger = LoggerFactory.getLogger(Container::class.java)
 
     /**
      * Returns whether the container is currently up and running.
