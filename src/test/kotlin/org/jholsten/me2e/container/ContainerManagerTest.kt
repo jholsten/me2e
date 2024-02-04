@@ -51,7 +51,7 @@ internal class ContainerManagerTest {
 
     @BeforeTest
     fun beforeTest() {
-        mockkConstructor(DockerCompose::class)
+        mockkConstructor(DockerCompose.Builder::class)
         every { anyConstructed<DockerCompose.Builder>().withLocalCompose(any()) } returns dockerComposeBuilder
         every { anyConstructed<DockerCompose.Builder>().withBuild(any()) } returns dockerComposeBuilder
         every { anyConstructed<DockerCompose.Builder>().withRemoveImages(any()) } returns dockerComposeBuilder
