@@ -9,10 +9,14 @@ import java.util.concurrent.TimeUnit
  */
 interface HttpClient {
 
+    fun setBaseUrl(baseUrl: Url)
+
     /**
      * Sets the given interceptors for all outgoing requests.
      */
     fun setRequestInterceptors(interceptors: List<RequestInterceptor>)
+
+    fun addRequestInterceptor(interceptor: RequestInterceptor)
 
     /**
      * Executes an HTTP GET request to the given URL relative to the base URL.

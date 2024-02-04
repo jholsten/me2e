@@ -5,6 +5,7 @@ import org.jholsten.me2e.assertions.Assertions.Companion.isEqualTo
 import org.jholsten.me2e.config.model.DockerConfig
 import org.jholsten.me2e.config.model.RequestConfig
 import org.jholsten.me2e.container.ContainerManager
+import org.jholsten.me2e.container.microservice.authentication.UsernamePasswordAuthentication
 import org.jholsten.me2e.container.model.ContainerPort
 import org.jholsten.me2e.container.model.ContainerPortList
 import org.jholsten.me2e.parsing.utils.FileUtils
@@ -54,5 +55,17 @@ internal class MicroserviceContainerIT {
 
         assertThat(response).statusCode(isEqualTo(200))
         assertThat(response).body(isEqualTo("OK"))
+    }
+
+    @Test
+    fun `Executing authenticated GET request should succeed`() {
+        val backendApi = manager.microservices["backend-api"]!!
+        backendApi.authenticate(UsernamePasswordAuthentication("admin", "secret"))
+
+        val response = backendApi.get(RelativeUrl("/secured"))
+
+        assertThat(response).statusCode(isEqualTo(200))
+        assertThat(response).body(isEqualTo("admin"))
+        backendApi.resetRequestInterceptors()
     }
 }

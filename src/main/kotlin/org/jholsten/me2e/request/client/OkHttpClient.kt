@@ -16,7 +16,7 @@ class OkHttpClient private constructor(
     /**
      * Base URL to set for all requests.
      */
-    val baseUrl: Url,
+    var baseUrl: Url,
 
     /**
      * Configuration of the HTTP client.
@@ -38,8 +38,16 @@ class OkHttpClient private constructor(
     }
      */
 
+    override fun setBaseUrl(baseUrl: Url) {
+        this.baseUrl = baseUrl
+    }
+
     override fun setRequestInterceptors(interceptors: List<RequestInterceptor>) {
         configuration.setRequestInterceptors(interceptors).apply()
+    }
+
+    override fun addRequestInterceptor(interceptor: RequestInterceptor) {
+        configuration.addRequestInterceptor(interceptor).apply()
     }
 
     override fun get(relativeUrl: RelativeUrl, headers: HttpHeaders): HttpResponse {
@@ -152,6 +160,8 @@ class OkHttpClient private constructor(
          * Configured client which executes the requests.
          */
         var httpClient: okhttp3.OkHttpClient = okhttp3.OkHttpClient()
+
+        var baseUrl: Url? = null
 
         /**
          * List of request interceptors to use for outgoing requests.

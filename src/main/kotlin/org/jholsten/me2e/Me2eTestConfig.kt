@@ -31,4 +31,9 @@ annotation class Me2eTestConfig(
      * Whether to assert that all containers are healthy before each test.
      */
     val assertHealthy: Boolean = true,
+
+    /**
+     * Whether to reset all request interceptors of all microservice containers after each test.
+     */
+    val resetRequestInterceptors: Boolean = true,
 )

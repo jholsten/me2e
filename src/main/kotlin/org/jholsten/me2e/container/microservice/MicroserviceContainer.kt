@@ -1,32 +1,76 @@
 package org.jholsten.me2e.container.microservice
 
 import com.fasterxml.jackson.annotation.JacksonInject
+import org.jholsten.me2e.config.model.DockerConfig
 import com.github.dockerjava.api.model.Container as DockerContainer
 import org.jholsten.me2e.config.model.RequestConfig
 import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.container.docker.DockerCompose
+import org.jholsten.me2e.container.microservice.authentication.Authenticator
 import org.jholsten.me2e.container.model.ContainerPortList
 import org.jholsten.me2e.container.model.ContainerType
+import org.jholsten.me2e.request.client.HttpClient
 import org.jholsten.me2e.request.client.OkHttpClient
 import org.jholsten.me2e.request.model.*
 import org.jholsten.me2e.utils.logger
+import org.jholsten.me2e.Me2eTestConfig
 import org.testcontainers.containers.ContainerState
 import java.time.Instant
 import java.util.concurrent.TimeUnit
 
 /**
- * Model representing one Microservice container.
- * In this context, a Microservice is expected to offer a REST API.
+ * Representation of a Docker container which represents a microservice.
+ * In this context, a Microservice is expected to offer a REST API. Therefore, this class offers commands
+ * for executing HTTP requests towards the container.
  */
 class MicroserviceContainer(
+    /**
+     * Unique name of this container.
+     */
     name: String,
+
+    /**
+     * Image to start the container from.
+     * Corresponds to the value given for the `image` keyword in Docker-Compose.
+     */
     image: String,
+
+    /**
+     * Environment variables for this container.
+     * Corresponds to the values given in the `environment` section of the Docker-Compose.
+     */
     environment: Map<String, String>? = null,
+
+    /**
+     * URL where this container's REST API is accessible from localhost. Corresponds to the value of the label
+     * `org.jholsten.me2e.url` in the Docker-Compose. If not set, the URL is composed of the Docker host and
+     * the first publicly accessible port of this container.
+     */
     private val predefinedUrl: String? = null,
+
+    /**
+     * Ports that should be exposed to localhost.
+     * Corresponds to the `ports` section of the Docker-Compose.
+     */
     ports: ContainerPortList = ContainerPortList(),
+
+    /**
+     * Configuration for executing HTTP requests.
+     * Corresponds to the `requests` section of the ME2E configuration file.
+     */
     @JacksonInject("requestConfig")
     private val requestConfig: RequestConfig,
+
+    /**
+     * Whether there is a healthcheck defined for this container in the Docker-Compose file.
+     */
     hasHealthcheck: Boolean = false,
+
+    /**
+     * Pull policy for this Docker container.
+     * Corresponds to the value of the label `org.jholsten.me2e.pull-policy` in the Docker-Compose.
+     */
+    pullPolicy: DockerConfig.PullPolicy = DockerConfig.PullPolicy.MISSING,
 ) : Container(
     name = name,
     image = image,
@@ -34,12 +78,15 @@ class MicroserviceContainer(
     environment = environment,
     ports = ports,
     hasHealthcheck = hasHealthcheck,
+    pullPolicy = pullPolicy,
 ) {
     private val logger = logger(this)
 
     /**
      * URL where microservice is accessible from localhost.
-     * This value may either be set in the Docker-Compose file, or it is automatically set by retrieving the first exposed port.
+     * This value may either be set as the value of the label `org.jholsten.me2e.url` in the Docker-Compose file
+     * (which will be deserialized to this instance's [predefinedUrl]), or it is automatically set by retrieving
+     * the first exposed port.
      */
     var url: String? = null
 
@@ -47,30 +94,20 @@ class MicroserviceContainer(
      * HTTP client for executing requests towards this microservice.
      * Is initialized when the container was started in order to derive the base URL by the publicly accessible port.
      */
-    private var httpClient: OkHttpClient? = null
+    var httpClient: HttpClient? = null
 
-    override fun initialize(dockerContainer: DockerContainer, state: ContainerState, environment: DockerCompose) {
-        super.initialize(dockerContainer, state, environment)
-        setBaseUrl()
-    }
-
-    override fun onRestart(timestamp: Instant) {
-        super.onRestart(timestamp)
-        setBaseUrl()
-    }
-
-    // TODO
-    fun authenticate() {
-        //httpClient.setRequestInterceptors(Auth())
-    }
-
-    /*
-    TODO: Authentication:
-
-    backend.authenticate(UsernamePasswordAuthentication("user", "password"))
-
-    This will lead to all requests having the token as header
+    /**
+     * Performs authentication for requests to this microservice using the given [authenticator].
+     * The [Authenticator.getRequestInterceptor] is executed for every subsequent request in the current test so that all
+     * of the following requests are authenticated. Note that - unless deactivated in [Me2eTestConfig.resetRequestInterceptors] -
+     * all request interceptors are reset after each test so that the authentication only applies to the current test.
+     * @param authenticator Authenticator to use for authenticating the HTTP requests.
      */
+    fun authenticate(authenticator: Authenticator) {
+        assertThatHttpClientIsInitialized()
+        authenticator.initialize(this)
+        httpClient!!.addRequestInterceptor(authenticator.getRequestInterceptor())
+    }
 
     /**
      * Executes an HTTP GET request to this microservice. Sets the given headers if provided.
@@ -136,8 +173,42 @@ class MicroserviceContainer(
         return httpClient!!.delete(relativeUrl, body, headers)
     }
 
-    private fun setBaseUrl() {
-        url = if (predefinedUrl == null) {
+    @JvmSynthetic
+    override fun initialize(dockerContainer: DockerContainer, state: ContainerState, environment: DockerCompose) {
+        super.initialize(dockerContainer, state, environment)
+        val baseUrl = setBaseUrl()
+        httpClient = OkHttpClient.Builder()
+            .withBaseUrl(baseUrl)
+            .withConnectTimeout(requestConfig.connectTimeout, TimeUnit.SECONDS)
+            .withReadTimeout(requestConfig.readTimeout, TimeUnit.SECONDS)
+            .withWriteTimeout(requestConfig.writeTimeout, TimeUnit.SECONDS)
+            .build()
+    }
+
+    @JvmSynthetic
+    override fun onRestart(timestamp: Instant) {
+        super.onRestart(timestamp)
+        val baseUrl = setBaseUrl()
+        httpClient?.setBaseUrl(baseUrl)
+    }
+
+    /**
+     * Resets all request interceptors of this microservice's HTTP client.
+     */
+    @JvmSynthetic
+    internal fun resetRequestInterceptors() {
+        if (httpClient != null) {
+            httpClient!!.setRequestInterceptors(listOf())
+        }
+    }
+
+    /**
+     * Sets base URL of this microservice. If the URL is predefined in the label `org.jholsten.me2e.url`,
+     * this value is used. Otherwise, the URL is composed of the Docker host and the first publicly accessible port
+     * of this container.
+     */
+    private fun setBaseUrl(): Url {
+        this.url = if (predefinedUrl == null) {
             val exposedPort = ports.findFirstExposed()
             requireNotNull(exposedPort) { "Microservice $name needs at least one exposed port or a URL defined." }
             "http://${dockerContainer!!.state.host}:${exposedPort.external}"
@@ -145,22 +216,10 @@ class MicroserviceContainer(
             predefinedUrl
         }
         logger.info("Set base URL for microservice $name to $url.")
-
-        this.httpClient = OkHttpClient.Builder()
-            .withBaseUrl(Url(url!!))
-            .withConnectTimeout(requestConfig.connectTimeout, TimeUnit.SECONDS)
-            .withReadTimeout(requestConfig.readTimeout, TimeUnit.SECONDS)
-            .withWriteTimeout(requestConfig.writeTimeout, TimeUnit.SECONDS)
-            .build()
+        return Url(this.url!!)
     }
 
     private fun assertThatHttpClientIsInitialized() {
-        checkNotNull(httpClient) { "HTTP client was not properly initialized." }
+        checkNotNull(httpClient) { "HTTP client was not properly initialized. Are you sure the container $name is started?" }
     }
-
-    /**
-     * TODO: Desired interface:
-     * @Microservice("backend")
-     * private val backend: MicroserviceContainer
-     */
 }
