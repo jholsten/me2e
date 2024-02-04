@@ -30,15 +30,33 @@ import java.util.Optional
  * to handle instances of both classes. Therefore, this class provides a common interface for both classes.
  * TODO: Builder
  */
-class DockerCompose(
+class DockerCompose private constructor(
+    /**
+     * Unique identifier of the docker compose project.
+     * Is used as a prefix for the [project] name.
+     */
     private val identifier: String,
+
+    /**
+     * Reference to the Docker compose file to use.
+     */
     private val file: File,
-    private val version: DockerComposeVersion
+
+    /**
+     * Docker Compose version to use for executing commands.
+     */
+    private val version: DockerComposeVersion,
+
+    /**
+     * Lazy reference to testcontainers implementation for Docker-Compose version 1.
+     */
+    v1: Lazy<KDockerComposeV1>,
+
+    /**
+     * Lazy reference to testcontainers implementation for Docker-Compose version 2.
+     */
+    v2: Lazy<DockerComposeV2>,
 ) {
-    class Builder(val version: DockerComposeVersion) {
-        private var identifier: String? = null
-        private var file: File? = null
-    }
 
     private val logger = logger(this)
 
@@ -95,83 +113,17 @@ class DockerCompose(
     /**
      * Lazy reference to testcontainers implementation for Docker-Compose version 1.
      */
-    private val v1: KDockerComposeV1 by lazy {
-        KDockerComposeV1(identifier, file)
-    }
+    private val v1: KDockerComposeV1 by v1
 
     /**
      * Lazy reference to testcontainers implementation for Docker-Compose version 2.
      */
-    private val v2: DockerComposeV2 by lazy {
-        DockerComposeV2(identifier, file)
-    }
+    private val v2: DockerComposeV2 by v2
 
     /**
      * Component to execute custom Docker-Compose commands locally.
      */
     val local: Local by lazy { Local() }
-
-    /**
-     * Whether to use a local Docker-Compose binary instead of a container.
-     * @see DockerComposeV1.withLocalCompose
-     * @see DockerComposeV2.withLocalCompose
-     */
-    fun withLocalCompose(localCompose: Boolean) = apply {
-        when (this.version) {
-            DockerComposeVersion.V1 -> v1.withLocalCompose(localCompose)
-            DockerComposeVersion.V2 -> v2.withLocalCompose(localCompose)
-        }
-    }
-
-    /**
-     * Whether to always build images before starting containers.
-     * @see DockerComposeV1.withBuild
-     * @see DockerComposeV2.withBuild
-     */
-    fun withBuild(build: Boolean) = apply {
-        when (this.version) {
-            DockerComposeVersion.V1 -> v1.withBuild(build)
-            DockerComposeVersion.V2 -> v2.withBuild(build)
-        }
-    }
-
-    /**
-     * Whether to remove images after containers shut down.
-     * @see DockerComposeV1.withRemoveImages
-     * @see DockerComposeV2.withRemoveImages
-     */
-    fun withRemoveImages(removeImages: DockerComposeRemoveImagesStrategy) = apply {
-        when (this.version) {
-            DockerComposeVersion.V1 -> v1.withRemoveImages(removeImages.toV1())
-            DockerComposeVersion.V2 -> v2.withRemoveImages(removeImages.toV2())
-        }
-    }
-
-    /**
-     * Whether to remove volumes after containers shut down.
-     * @see DockerComposeV1.withRemoveVolumes
-     * @see DockerComposeV2.withRemoveVolumes
-     */
-    fun withRemoveVolumes(removeVolumes: Boolean) = apply {
-        when (this.version) {
-            DockerComposeVersion.V1 -> v1.withRemoveVolumes(removeVolumes)
-            DockerComposeVersion.V2 -> v2.withRemoveVolumes(removeVolumes)
-        }
-    }
-
-    /**
-     * Specify the [WaitStrategy] to use to determine if the container is ready.
-     * @param serviceName the name of the service to wait for
-     * @param waitStrategy the wait strategy to use
-     * @see DockerComposeV1.waitingFor
-     * @see DockerComposeV2.waitingFor
-     */
-    fun waitingFor(serviceName: String, waitStrategy: WaitStrategy) = apply {
-        when (this.version) {
-            DockerComposeVersion.V1 -> v1.waitingFor(serviceName, waitStrategy)
-            DockerComposeVersion.V2 -> v2.waitingFor(serviceName, waitStrategy)
-        }
-    }
 
     /**
      * Returns [ContainerState] instance for the service with the given name.
@@ -366,6 +318,117 @@ class DockerCompose(
         }
     }
 
+    class Builder(
+        private val identifier: String,
+        private val file: File,
+        private val version: DockerComposeVersion,
+    ) {
+        /**
+         * Lazy reference to testcontainers implementation for Docker-Compose version 1.
+         */
+        private val v1: Lazy<KDockerComposeV1> = lazy {
+            KDockerComposeV1(identifier, file)
+        }
+
+        /**
+         * Lazy reference to testcontainers implementation for Docker-Compose version 2.
+         */
+        private val v2: Lazy<DockerComposeV2> = lazy {
+            DockerComposeV2(identifier, file)
+        }
+
+        /**
+         * Whether to use a local Docker-Compose binary instead of a container.
+         * @see DockerComposeV1.withLocalCompose
+         * @see DockerComposeV2.withLocalCompose
+         */
+        fun withLocalCompose(localCompose: Boolean) = apply {
+            when (this.version) {
+                DockerComposeVersion.V1 -> v1.value.withLocalCompose(localCompose)
+                DockerComposeVersion.V2 -> v2.value.withLocalCompose(localCompose)
+            }
+        }
+
+        /**
+         * Whether to always build images before starting containers.
+         * @see DockerComposeV1.withBuild
+         * @see DockerComposeV2.withBuild
+         */
+        fun withBuild(build: Boolean) = apply {
+            when (this.version) {
+                DockerComposeVersion.V1 -> v1.value.withBuild(build)
+                DockerComposeVersion.V2 -> v2.value.withBuild(build)
+            }
+        }
+
+        /**
+         * Whether to remove images after containers shut down.
+         * @see DockerComposeV1.withRemoveImages
+         * @see DockerComposeV2.withRemoveImages
+         */
+        fun withRemoveImages(removeImages: DockerComposeRemoveImagesStrategy) = apply {
+            when (this.version) {
+                DockerComposeVersion.V1 -> v1.value.withRemoveImages(removeImages.toV1())
+                DockerComposeVersion.V2 -> v2.value.withRemoveImages(removeImages.toV2())
+            }
+        }
+
+        /**
+         * Whether to remove volumes after containers shut down.
+         * @see DockerComposeV1.withRemoveVolumes
+         * @see DockerComposeV2.withRemoveVolumes
+         */
+        fun withRemoveVolumes(removeVolumes: Boolean) = apply {
+            when (this.version) {
+                DockerComposeVersion.V1 -> v1.value.withRemoveVolumes(removeVolumes)
+                DockerComposeVersion.V2 -> v2.value.withRemoveVolumes(removeVolumes)
+            }
+        }
+
+        /**
+         * Specify the [WaitStrategy] to use to determine if the container is ready.
+         * @param serviceName the name of the service to wait for
+         * @param waitStrategy the wait strategy to use
+         * @see DockerComposeV1.waitingFor
+         * @see DockerComposeV2.waitingFor
+         */
+        fun waitingFor(serviceName: String, waitStrategy: WaitStrategy) = apply {
+            when (this.version) {
+                DockerComposeVersion.V1 -> v1.value.waitingFor(serviceName, waitStrategy)
+                DockerComposeVersion.V2 -> v2.value.waitingFor(serviceName, waitStrategy)
+            }
+        }
+
+        /**
+         * Builds [DockerCompose] instance with the properties set.
+         */
+        fun build(): DockerCompose {
+            return DockerCompose(
+                identifier = identifier,
+                file = file,
+                version = version,
+                v1 = v1,
+                v2 = v2,
+            )
+        }
+
+        private fun DockerComposeRemoveImagesStrategy.toV1(): DockerComposeV1.RemoveImages? {
+            return when (this) {
+                DockerComposeRemoveImagesStrategy.NONE -> null
+                DockerComposeRemoveImagesStrategy.ALL -> DockerComposeV1.RemoveImages.ALL
+                DockerComposeRemoveImagesStrategy.LOCAL -> DockerComposeV1.RemoveImages.LOCAL
+            }
+        }
+
+        private fun DockerComposeRemoveImagesStrategy.toV2(): DockerComposeV2.RemoveImages? {
+            return when (this) {
+                DockerComposeRemoveImagesStrategy.NONE -> null
+                DockerComposeRemoveImagesStrategy.ALL -> DockerComposeV2.RemoveImages.ALL
+                DockerComposeRemoveImagesStrategy.LOCAL -> DockerComposeV2.RemoveImages.LOCAL
+            }
+        }
+    }
+
     private fun waitUntilHealthy(serviceName: String, timeout: Long) {
         val waitStrategy = Wait.forHealthcheck().withStartupTimeout(Duration.ofSeconds(timeout))
         try {
@@ -395,21 +458,5 @@ class DockerCompose(
             .exec()
             .filter { container -> container.names.any { name -> name.startsWith("/$identifier") } }
             .associateBy { container -> container.labels["com.docker.compose.service"]!! }
-    }
-
-    private fun DockerComposeRemoveImagesStrategy.toV1(): DockerComposeV1.RemoveImages? {
-        return when (this) {
-            DockerComposeRemoveImagesStrategy.NONE -> null
-            DockerComposeRemoveImagesStrategy.ALL -> DockerComposeV1.RemoveImages.ALL
-            DockerComposeRemoveImagesStrategy.LOCAL -> DockerComposeV1.RemoveImages.LOCAL
-        }
-    }
-
-    private fun DockerComposeRemoveImagesStrategy.toV2(): DockerComposeV2.RemoveImages? {
-        return when (this) {
-            DockerComposeRemoveImagesStrategy.NONE -> null
-            DockerComposeRemoveImagesStrategy.ALL -> DockerComposeV2.RemoveImages.ALL
-            DockerComposeRemoveImagesStrategy.LOCAL -> DockerComposeV2.RemoveImages.LOCAL
-        }
     }
 }

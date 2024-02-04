@@ -16,7 +16,7 @@ import kotlin.test.*
 internal class ContainerManagerTest {
 
     private val dockerComposeFile = FileUtils.getResourceAsFile("docker-compose-parsing-test.yml")
-    private val dockerCompose = mockk<DockerCompose>()
+    private val dockerComposeBuilder = mockk<DockerCompose.Builder>()
 
     private val manager = ContainerManager(
         dockerComposeFile = dockerComposeFile,
@@ -52,10 +52,10 @@ internal class ContainerManagerTest {
     @BeforeTest
     fun beforeTest() {
         mockkConstructor(DockerCompose::class)
-        every { anyConstructed<DockerCompose>().withLocalCompose(any()) } returns dockerCompose
-        every { anyConstructed<DockerCompose>().withBuild(any()) } returns dockerCompose
-        every { anyConstructed<DockerCompose>().withRemoveImages(any()) } returns dockerCompose
-        every { anyConstructed<DockerCompose>().withRemoveVolumes(any()) } returns dockerCompose
+        every { anyConstructed<DockerCompose.Builder>().withLocalCompose(any()) } returns dockerComposeBuilder
+        every { anyConstructed<DockerCompose.Builder>().withBuild(any()) } returns dockerComposeBuilder
+        every { anyConstructed<DockerCompose.Builder>().withRemoveImages(any()) } returns dockerComposeBuilder
+        every { anyConstructed<DockerCompose.Builder>().withRemoveVolumes(any()) } returns dockerComposeBuilder
     }
 
     @AfterTest

@@ -60,11 +60,12 @@ class ContainerManager(
     /**
      * Reference to the Docker-Compose Container.
      */
-    val environment = DockerCompose(identifier, dockerComposeFile, version = dockerConfig.dockerComposeVersion)
+    val environment = DockerCompose.Builder(identifier, dockerComposeFile, version = dockerConfig.dockerComposeVersion)
         .withLocalCompose(true)
         .withBuild(dockerConfig.buildImages)
         .withRemoveImages(dockerConfig.removeImages)
         .withRemoveVolumes(dockerConfig.removeVolumes)
+        .build()
 
     /**
      * Starts Docker-Compose and initializes all containers. Waits until all containers for which a healthcheck is defined are healthy.

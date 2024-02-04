@@ -30,13 +30,14 @@ internal class DockerComposeTest {
 
     @Test
     fun `Using Docker-Compose V1 should use V1 implementation`() {
-        val compose = DockerCompose("identifier", dockerComposeFile, version = DockerComposeVersion.V1)
+        val builder = DockerCompose.Builder("identifier", dockerComposeFile, version = DockerComposeVersion.V1)
 
-        compose.withLocalCompose(true)
+        builder.withLocalCompose(true)
             .withBuild(true)
             .withRemoveImages(DockerComposeRemoveImagesStrategy.ALL)
             .withRemoveVolumes(true)
-        compose.waitingFor("service", waitStrategy)
+        builder.waitingFor("service", waitStrategy)
+        val compose = builder.build()
         compose.getContainerByServiceName("service")
         compose.start()
 
@@ -45,13 +46,14 @@ internal class DockerComposeTest {
 
     @Test
     fun `Using Docker-Compose V2 should use V2 implementation`() {
-        val compose = DockerCompose("identifier", dockerComposeFile, version = DockerComposeVersion.V2)
+        val builder = DockerCompose.Builder("identifier", dockerComposeFile, version = DockerComposeVersion.V2)
 
-        compose.withLocalCompose(true)
+        builder.withLocalCompose(true)
             .withBuild(true)
             .withRemoveImages(DockerComposeRemoveImagesStrategy.ALL)
             .withRemoveVolumes(true)
-        compose.waitingFor("service", waitStrategy)
+        builder.waitingFor("service", waitStrategy)
+        val compose = builder.build()
         compose.getContainerByServiceName("service")
         compose.start()
 
@@ -69,7 +71,7 @@ internal class DockerComposeTest {
         strategy: DockerComposeRemoveImagesStrategy,
         v1Enum: DockerComposeV1.RemoveImages?
     ) {
-        val compose = DockerCompose("identifier", dockerComposeFile, version = DockerComposeVersion.V1)
+        val compose = DockerCompose.Builder("identifier", dockerComposeFile, version = DockerComposeVersion.V1)
 
         compose.withRemoveImages(strategy)
 
@@ -87,7 +89,7 @@ internal class DockerComposeTest {
         strategy: DockerComposeRemoveImagesStrategy,
         v2Enum: DockerComposeV2.RemoveImages?
     ) {
-        val compose = DockerCompose("identifier", dockerComposeFile, version = DockerComposeVersion.V2)
+        val compose = DockerCompose.Builder("identifier", dockerComposeFile, version = DockerComposeVersion.V2)
 
         compose.withRemoveImages(strategy)
 
