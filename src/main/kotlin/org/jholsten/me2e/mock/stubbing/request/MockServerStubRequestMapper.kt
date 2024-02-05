@@ -9,6 +9,9 @@ import com.github.tomakehurst.wiremock.matching.MatchResult
 import com.github.tomakehurst.wiremock.matching.RequestMatcherExtension
 import com.github.tomakehurst.wiremock.matching.WeightedMatchResult.weight
 
+/**
+ * Mapper for instantiating a WireMock [MappingBuilder] from a [MockServerStubRequestMatcher] instance.
+ */
 internal class MockServerStubRequestMapper private constructor() {
     companion object {
         /**
@@ -25,7 +28,7 @@ internal class MockServerStubRequestMapper private constructor() {
 
         /**
          * Maps stub request to equivalent stub for WireMock. Uses weighted matching to show nearly missed stubs.
-         * @see [com.github.tomakehurst.wiremock.matching.RequestPattern]
+         * @see com.github.tomakehurst.wiremock.matching.RequestPattern
          */
         @JvmSynthetic
         fun toWireMockStubRequestMatcher(mockServerName: String, stubRequest: MockServerStubRequestMatcher): MappingBuilder {

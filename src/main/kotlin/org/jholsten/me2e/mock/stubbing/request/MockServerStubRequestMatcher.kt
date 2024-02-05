@@ -24,36 +24,37 @@ class MockServerStubRequestMatcher(
     val hostname: String,
 
     /**
-     * HTTP method of the request
+     * HTTP method of the request to stub.
      */
     val method: HttpMethod? = null,
 
     /**
-     * URL path of the request
+     * URL path of the request to stub.
      */
     val path: StringMatcher? = null,
 
     /**
-     * Headers of the request as map of header name and string matcher
+     * Headers of the request to stub as map of header name and string matcher.
      */
     val headers: Map<String, StringMatcher>? = null,
 
     /**
-     * Query parameters of the request as map of query parameter name and string matcher for the values
+     * Query parameters of the request to stub as map of query parameter name and string matcher for the values.
      */
     @JsonProperty("query-parameters")
     val queryParameters: Map<String, StringMatcher>? = null,
 
     /**
-     * Patterns to match the request body
+     * Patterns to match the request body to stub.
      */
     @JsonProperty("body-patterns")
     val bodyPatterns: List<StringMatcher>? = null,
 ) {
     /**
      * Returns whether the given WireMock request matches the requirements of this stub request.
-     * @param request Actual request that was executed.
+     * @param request Actual request that the mock server received.
      */
+    @JvmSynthetic
     internal fun matches(request: Request): Boolean {
         if (!hostnameMatches(request.host)) {
             return false
@@ -72,10 +73,12 @@ class MockServerStubRequestMatcher(
         return true
     }
 
+    @JvmSynthetic
     internal fun hostnameMatches(actualHostname: String): Boolean {
         return this.hostname == actualHostname
     }
 
+    @JvmSynthetic
     internal fun methodMatches(actualMethod: RequestMethod): Boolean {
         if (this.method == null) {
             return true
@@ -84,6 +87,7 @@ class MockServerStubRequestMatcher(
         return this.method.name == actualMethod.name
     }
 
+    @JvmSynthetic
     internal fun pathMatches(actualUrl: String): Boolean {
         if (this.path == null) {
             return true
@@ -96,6 +100,7 @@ class MockServerStubRequestMatcher(
         return this.path.matches(actualPath)
     }
 
+    @JvmSynthetic
     internal fun headersMatch(headers: HttpHeaders?): Boolean {
         if (this.headers.isNullOrEmpty()) {
             return true
@@ -113,6 +118,7 @@ class MockServerStubRequestMatcher(
         return true
     }
 
+    @JvmSynthetic
     internal fun queryParametersMatch(request: Request): Boolean {
         if (this.queryParameters.isNullOrEmpty()) {
             return true
@@ -128,6 +134,7 @@ class MockServerStubRequestMatcher(
         return true
     }
 
+    @JvmSynthetic
     internal fun bodyPatternsMatch(request: Request): Boolean {
         if (this.bodyPatterns.isNullOrEmpty()) {
             return true
