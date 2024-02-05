@@ -85,7 +85,9 @@ open class HtmlReportGenerator(
     protected open fun copyAdditionalResources() {
         for ((source, destination) in additionalResources) {
             val resource = FileUtils.getResourceAsStream(source)
-            Files.copy(resource, File("$outputDirectory/$destination").toPath(), StandardCopyOption.REPLACE_EXISTING)
+            val destinationFile = File("$outputDirectory/$destination")
+            destinationFile.mkdirs()
+            Files.copy(resource, destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
         }
     }
 }
