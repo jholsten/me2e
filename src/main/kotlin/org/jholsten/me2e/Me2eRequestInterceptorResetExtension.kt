@@ -24,7 +24,7 @@ class Me2eRequestInterceptorResetExtension : AfterEachCallback {
     private fun resetRequestInterceptors() {
         val microservices = Me2eTest.containerManager.microservices.values
         if (microservices.isNotEmpty()) {
-            logger.info("Resetting ${microservices.size} request interceptors of microservice containers...")
+            logger.debug("Resetting ${microservices.size} request interceptors of microservice containers.")
             for (microservice in microservices) {
                 microservice.resetRequestInterceptors()
             }

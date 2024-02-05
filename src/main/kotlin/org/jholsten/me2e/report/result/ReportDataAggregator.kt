@@ -93,6 +93,7 @@ class ReportDataAggregator private constructor() {
          */
         @JvmSynthetic
         internal fun onTestStarted(testIdentifier: TestIdentifier) {
+            logger.debug("Running test ${testIdentifier.displayName}...")
             intermediateTestResults[testIdentifier.uniqueId] = IntermediateTestResult.started(testIdentifier)
             if (testIdentifier.parentId.isPresent) {
                 intermediateTestResults[testIdentifier.parentId.get()]!!.logs += logAggregator.collectTestRunnerLogs()
@@ -111,6 +112,7 @@ class ReportDataAggregator private constructor() {
          */
         @JvmSynthetic
         internal fun onTestFinished(testIdentifier: TestIdentifier, testExecutionResult: JUnitExecutionResult) {
+            logger.debug("Execution of test ${testIdentifier.displayName} has finished.")
             val summary = intermediateTestResults[testIdentifier.uniqueId]!!
             summary.finished(testExecutionResult, collectReportEntries(), logAggregator.collectTestRunnerLogs())
             if (testIdentifier.parentId.isPresent) {
@@ -128,6 +130,7 @@ class ReportDataAggregator private constructor() {
          */
         @JvmSynthetic
         internal fun onTestSkipped(testIdentifier: TestIdentifier, reason: String?) {
+            logger.debug("Test ${testIdentifier.displayName} has been skipped.")
             val summary = IntermediateTestResult.skipped(testIdentifier, reason)
             intermediateTestResults[testIdentifier.uniqueId] = summary
         }
