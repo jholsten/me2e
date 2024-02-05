@@ -16,6 +16,8 @@ internal abstract class ContainerNetworkMapper {
     @Mapping(target = "networkId", source = "networkID")
     @Mapping(target = "globalIPV6Address", source = "globalIPv6Address")
     @Mapping(target = "globalIPV6PrefixLen", source = "globalIPv6PrefixLen")
+    @Mapping(target = "ipamConfig.ipV4Address", source = "ipamConfig.ipv4Address")
+    @Mapping(target = "ipamConfig.ipV6Address", source = "ipamConfig.ipv6Address")
     internal abstract fun toInternalDto(network: DockerContainerNetwork): ContainerNetwork
 
     internal abstract fun toInternalDto(networks: Map<String, DockerContainerNetwork>): Map<String, ContainerNetwork>

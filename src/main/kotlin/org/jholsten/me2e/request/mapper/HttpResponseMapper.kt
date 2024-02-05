@@ -13,7 +13,7 @@ import org.mapstruct.Mapping
 import org.mapstruct.Named
 import org.mapstruct.factory.Mappers
 import java.io.IOException
-import kotlin.jvm.Throws
+import kotlin.Throws
 
 @Mapper(uses = [HttpRequestMapper::class])
 internal abstract class HttpResponseMapper {
@@ -33,7 +33,14 @@ internal abstract class HttpResponseMapper {
     @Mapping(target = "protocol", expression = "java(Protocol.get(response.getProtocol()))")
     @Mapping(target = "headers", source = "response.headers", qualifiedByName = ["mapHeadersToOkHttp"])
     @Mapping(target = "body", source = "body", qualifiedByName = ["mapResponseBodyToOkHttp"])
-    @JvmSynthetic
+    @Mapping(target = "handshake", ignore = true)
+    @Mapping(target = "networkResponse", ignore = true)
+    @Mapping(target = "cacheResponse", ignore = true)
+    @Mapping(target = "priorResponse", ignore = true)
+    @Mapping(target = "sentRequestAtMillis", ignore = true)
+    @Mapping(target = "receivedResponseAtMillis", ignore = true)
+    @Mapping(target = "exchange", ignore = true)
+    @Throws(IOException::class)
     internal abstract fun toOkHttpResponse(response: HttpResponse): Response
 
     @Named("mapRequest")
