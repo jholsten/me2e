@@ -4,8 +4,6 @@ import com.github.dockerjava.api.model.Container as DockerContainer
 import org.apache.commons.lang3.RandomStringUtils
 import org.jholsten.me2e.config.model.DockerConfig
 import org.jholsten.me2e.container.database.DatabaseContainer
-import org.jholsten.me2e.container.database.connection.MongoDBConnection
-import org.jholsten.me2e.container.database.connection.SQLDatabaseConnection
 import org.jholsten.me2e.container.docker.DockerCompose
 import org.jholsten.me2e.container.exception.ServiceShutdownException
 import org.jholsten.me2e.container.exception.ServiceStartupException
@@ -16,7 +14,8 @@ import org.jholsten.me2e.utils.logger
 import java.io.File
 
 /**
- * Manager for starting and stopping all Docker containers.
+ * Manager for starting, stopping and managing all Docker containers.
+ * Contains references to all [containers], [microservices] and [databases].
  */
 class ContainerManager(
     /**
@@ -26,11 +25,13 @@ class ContainerManager(
 
     /**
      * Configuration options for Docker.
+     * Corresponds to the `docker` section of the ME2E configuration file.
      */
     private val dockerConfig: DockerConfig,
 
     /**
-     * Self-managed containers from Docker-Compose file.
+     * Self-managed containers from Docker-Compose file as map of name and [Container] instance.
+     * Corresponds to the services defined in the Docker-Compose.
      */
     val containers: Map<String, Container>,
 ) {
@@ -47,20 +48,20 @@ class ContainerManager(
     val databases: Map<String, DatabaseContainer> = containers.filterValuesIsInstance<String, DatabaseContainer>()
 
     /**
-     * Identifier of the services to start. Will be used as a prefix for the project and therefore for all container names.
+     * Identifier of the services to start. Will be used as a prefix for the project name and therefore for all container names.
      */
     private val identifier: String = "me2e_${RandomStringUtils.randomAlphabetic(3)}".lowercase()
 
     /**
-     * Name of the docker compose project, which is composed of the [identifier] as a prefix
-     * and an alphanumeric suffix, which is randomly generated each time the docker compose is started.
-     * @throws IllegalStateException if docker compose is currently not running.
+     * Name of the Docker-Compose project, which is composed of the [identifier] as a prefix
+     * and an alphanumeric suffix, which is randomly generated each time theDocker-Compose is started.
+     * @throws IllegalStateException if Docker-Compose is currently not running.
      */
     val project: String
         get() = environment.project
 
     /**
-     * Reference to the Docker-Compose Container.
+     * Reference to the Docker-Compose environment.
      */
     val environment = DockerCompose.Builder(identifier, dockerComposeFile, version = dockerConfig.dockerComposeVersion)
         .withLocalCompose(true)
@@ -77,7 +78,7 @@ class ContainerManager(
     fun start() {
         pullImages()
         environment.start()
-        environment.waitUntilHealthy(containers.values.map { it.name }, dockerConfig.healthTimeout)
+        environment.waitUntilHealthy(containers.keys.toList(), dockerConfig.healthTimeout)
         initializeContainers()
     }
 
@@ -89,6 +90,7 @@ class ContainerManager(
     fun restart(containerNames: List<String>) {
         val unknownContainers = containerNames.filter { it !in containers }
         require(unknownContainers.isEmpty()) { "Unknown container names: [${unknownContainers.joinToString(", ")}]" }
+        closeDatabaseConnections(containerNames)
         environment.restartContainers(containerNames, dockerConfig.healthTimeout)
     }
 
@@ -97,7 +99,7 @@ class ContainerManager(
      * @throws ServiceShutdownException if Docker-Compose could not be stopped.
      */
     fun stop() {
-        closeDatabaseConnections()
+        closeDatabaseConnections(databases.keys.toList())
         environment.stop()
     }
 
@@ -132,14 +134,14 @@ class ContainerManager(
         }
     }
 
-    private fun closeDatabaseConnections() {
-        val databaseConnections = databases.values.mapNotNull { it.connection }
+    /**
+     * Before the database containers are stopped, their connections need to be stopped, otherwise this may lead to a memory leak.
+     * This method closes all existing connections to all SQL and No-SQL databases.
+     */
+    private fun closeDatabaseConnections(servicesToClose: List<String>) {
+        val databaseConnections = databases.values.filter { it.name in servicesToClose }.mapNotNull { it.connection }
         for (connection in databaseConnections) {
-            if (connection is SQLDatabaseConnection) {
-                connection.connection.close()
-            } else if (connection is MongoDBConnection) {
-                connection.client.close()
-            }
+            connection.close()
         }
     }
 }

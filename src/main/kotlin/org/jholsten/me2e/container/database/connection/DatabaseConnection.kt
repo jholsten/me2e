@@ -122,6 +122,11 @@ abstract class DatabaseConnection protected constructor(
      */
     abstract fun reset()
 
+    /**
+     * Closes the connection to the database.
+     */
+    abstract fun close()
+
     abstract class Builder<SELF : Builder<SELF>> {
         protected var host: String? = null
         protected var port: Int? = null

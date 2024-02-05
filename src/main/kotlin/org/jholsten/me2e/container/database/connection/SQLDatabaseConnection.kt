@@ -135,6 +135,10 @@ class SQLDatabaseConnection private constructor(
         }
     }
 
+    override fun close() {
+        connection.close()
+    }
+
     class Builder : DatabaseConnection.Builder<Builder>() {
         private val logger = logger(this)
 
