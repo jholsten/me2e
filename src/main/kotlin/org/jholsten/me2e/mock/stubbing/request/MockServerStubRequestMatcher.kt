@@ -17,42 +17,51 @@ import org.jholsten.me2e.utils.toJson
 class MockServerStubRequestMatcher(
     /**
      * Hostname of the third-party service to be mocked.
-     * The value is set to the [org.jholsten.me2e.mock.MockServer]'s hostname while deserializing
-     * (see [org.jholsten.me2e.config.utils.MockServerDeserializer.parseStubFiles]).
+     * The value is set to the [org.jholsten.me2e.mock.MockServer]'s hostname while deserializing.
+     * @see org.jholsten.me2e.config.utils.MockServerDeserializer.parseStubFiles
      */
     @JacksonInject("hostname")
     val hostname: String,
 
     /**
-     * HTTP method of the request to stub.
+     * HTTP method of the request to which the stub should respond. A value of `null` indicates that the
+     * request method can be ignored and this stub should respond to all methods.
      */
     val method: HttpMethod? = null,
 
     /**
-     * URL path of the request to stub.
+     * URL path of the request to which the stub should respond. A value of `null` indicates that the
+     * path can be ignored and this stub should respond to all paths.
      */
     val path: StringMatcher? = null,
 
     /**
-     * Headers of the request to stub as map of header name and string matcher.
+     * Headers of the request to which the stub should respond as map of header name and string matcher.
+     * A value of `null` or an empty map indicates that the request headers can be ignored and this stub
+     * should respond to all headers.
      */
     val headers: Map<String, StringMatcher>? = null,
 
     /**
-     * Query parameters of the request to stub as map of query parameter name and string matcher for the values.
+     * Query parameters of the request to which the stub should respond as map of query parameter name and string
+     * matcher for the values. A value of `null` or an empty map indicates that the query parameters can be ignored
+     * and this stub should respond to all query parameters.
      */
     @JsonProperty("query-parameters")
     val queryParameters: Map<String, StringMatcher>? = null,
 
     /**
-     * Patterns to match the request body to stub.
+     * Patterns to match the request body to which the stub should respond. A value of `null` or an empty list
+     * indicates that the request body can be ignored and this stub should respond to all methods.
      */
     @JsonProperty("body-patterns")
     val bodyPatterns: List<StringMatcher>? = null,
 ) {
+
     /**
      * Returns whether the given WireMock request matches the requirements of this stub request.
      * @param request Actual request that the mock server received.
+     * @return Whether the given request matches this request pattern.
      */
     @JvmSynthetic
     internal fun matches(request: Request): Boolean {
@@ -73,11 +82,22 @@ class MockServerStubRequestMatcher(
         return true
     }
 
+    /**
+     * Returns whether the actual hostname of the request matches the [hostname] defined for this stub.
+     * @param actualHostname Actual hostname of the captured request.
+     * @return Whether the actual hostname matches the hostname defined for this stub.
+     */
     @JvmSynthetic
     internal fun hostnameMatches(actualHostname: String): Boolean {
         return this.hostname == actualHostname
     }
 
+    /**
+     * Returns whether the actual request method of the request matches the [method] defined for this stub.
+     * @param actualMethod Actual request method of the captured request.
+     * @return True if either the [method] defined for this stub should be ignored or if the actual method
+     * of the captured request is equal to the [method] defined for this stub.
+     */
     @JvmSynthetic
     internal fun methodMatches(actualMethod: RequestMethod): Boolean {
         if (this.method == null) {
@@ -87,6 +107,12 @@ class MockServerStubRequestMatcher(
         return this.method.name == actualMethod.name
     }
 
+    /**
+     * Returns whether the actual path of the request matches the [path] defined for this stub. Ignores query parameters.
+     * @param actualUrl Actual path of the captured request.
+     * @return True if either the [path] defined for this stub should be ignored or if the actual path
+     * of the captured request is equal to the [path] defined for this stub.
+     */
     @JvmSynthetic
     internal fun pathMatches(actualUrl: String): Boolean {
         if (this.path == null) {
@@ -100,6 +126,14 @@ class MockServerStubRequestMatcher(
         return this.path.matches(actualPath)
     }
 
+    /**
+     * Returns whether the actual headers of the request match the [headers] defined for this stub.
+     * The headers are considered as matched if each of the [headers] is present in the actual request and their values
+     * are as defined in the corresponding [StringMatcher]. Additional headers in the actual request are ignored.
+     * @param headers Actual headers of the captured request.
+     * @return True if either the [headers] defined for this stub should be ignored or if the actual headers
+     * of the captured request match the [headers] defined for this stub.
+     */
     @JvmSynthetic
     internal fun headersMatch(headers: HttpHeaders?): Boolean {
         if (this.headers.isNullOrEmpty()) {
@@ -118,6 +152,15 @@ class MockServerStubRequestMatcher(
         return true
     }
 
+    /**
+     * Returns whether the actual query parameters of the request match the [queryParameters] defined for this stub.
+     * The query parameters are considered as matched if each of the [queryParameters] is present in the actual request
+     * and their values are as defined in the corresponding [StringMatcher]. Additional query parameters in the actual
+     * request are ignored.
+     * @param request Actual captured request.
+     * @return True if either the [queryParameters] defined for this stub should be ignored or if the actual query
+     * parameters of the captured request match the [queryParameters] defined for this stub.
+     */
     @JvmSynthetic
     internal fun queryParametersMatch(request: Request): Boolean {
         if (this.queryParameters.isNullOrEmpty()) {
@@ -134,6 +177,12 @@ class MockServerStubRequestMatcher(
         return true
     }
 
+    /**
+     * Returns whether the actual body of the request matches the [bodyPatterns] defined for this stub.
+     * @param request Actual captured request.
+     * @return True if either the [bodyPatterns] defined for this stub should be ignored or if the actual body
+     * of the captured request match all the [bodyPatterns] defined for this stub.
+     */
     @JvmSynthetic
     internal fun bodyPatternsMatch(request: Request): Boolean {
         if (this.bodyPatterns.isNullOrEmpty()) {
