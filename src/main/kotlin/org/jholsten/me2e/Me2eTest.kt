@@ -50,7 +50,10 @@ open class Me2eTest {
          */
         @get:JvmStatic
         val mockServerManager: MockServerManager by lazy {
-            MockServerManager(mockServers = config.environment.mockServers)
+            MockServerManager(
+                mockServers = config.environment.mockServers,
+                mockServerConfig = config.mockServers,
+            )
         }
 
         init {

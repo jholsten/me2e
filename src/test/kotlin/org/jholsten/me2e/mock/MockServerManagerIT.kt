@@ -10,6 +10,7 @@ import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.HttpEntity
 import org.apache.hc.core5.http.io.entity.StringEntity
+import org.jholsten.me2e.config.model.MockServerConfig
 import org.jholsten.me2e.container.exception.ServiceStartupException
 import org.jholsten.me2e.mock.stubbing.MockServerStub
 import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequestMatcher
@@ -79,6 +80,8 @@ internal class MockServerManagerIT {
             )
         )
     )
+
+    private val mockServerConfig = MockServerConfig()
 
     @AfterTest
     fun afterTest() {
@@ -189,8 +192,8 @@ internal class MockServerManagerIT {
 
     @Test
     fun `Trying to start mock server if port is already in use should throw exception`() {
-        val manager1 = MockServerManager(mapOf())
-        val manager2 = MockServerManager(mapOf())
+        val manager1 = MockServerManager(mapOf(), mockServerConfig)
+        val manager2 = MockServerManager(mapOf(), mockServerConfig)
 
         try {
             manager1.start()
@@ -207,7 +210,7 @@ internal class MockServerManagerIT {
             "google-service" to googleServer,
         )
     ): MockServerManager {
-        val manager = MockServerManager(mockServers)
+        val manager = MockServerManager(mockServers, mockServerConfig)
         manager.start()
 
         JvmProxyConfigurer.configureFor(manager.httpPort)

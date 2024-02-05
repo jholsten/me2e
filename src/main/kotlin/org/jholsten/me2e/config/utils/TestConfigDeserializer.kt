@@ -7,10 +7,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
-import org.jholsten.me2e.config.model.DockerConfig
-import org.jholsten.me2e.config.model.RequestConfig
-import org.jholsten.me2e.config.model.TestConfig
-import org.jholsten.me2e.config.model.TestEnvironmentConfig
+import org.jholsten.me2e.config.model.*
 import org.jholsten.me2e.parsing.utils.DeserializerFactory
 
 /**
@@ -30,10 +27,13 @@ class TestConfigDeserializer : JsonDeserializer<TestConfig>() {
         val dockerConfig = deserializeDockerConfig(node.get("docker"))
         injectDockerConfig(injectableValues, dockerConfig)
 
+        val mockServerConfig = deserializeMockServerConfig(node.get("mock-servers"))
+
         val environmentConfig = mapper.treeToValue(node.get("environment"), TestEnvironmentConfig::class.java)
         return TestConfig(
             docker = dockerConfig,
             requests = requestConfig,
+            mockServers = mockServerConfig,
             environment = environmentConfig,
         )
     }
@@ -58,5 +58,12 @@ class TestConfigDeserializer : JsonDeserializer<TestConfig>() {
             return DockerConfig()
         }
         return mapper.treeToValue(dockerConfigNode, DockerConfig::class.java)
+    }
+
+    private fun deserializeMockServerConfig(mockServerConfigNode: JsonNode?): MockServerConfig {
+        if (mockServerConfigNode == null) {
+            return MockServerConfig()
+        }
+        return mapper.treeToValue(mockServerConfigNode, MockServerConfig::class.java)
     }
 }

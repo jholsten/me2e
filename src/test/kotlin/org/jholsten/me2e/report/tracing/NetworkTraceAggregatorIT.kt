@@ -34,7 +34,10 @@ internal class NetworkTraceAggregatorIT {
             containers = config.environment.containers,
         )
 
-        private val mockServerManager: MockServerManager = MockServerManager(mockServers = config.environment.mockServers)
+        private val mockServerManager: MockServerManager = MockServerManager(
+            mockServers = config.environment.mockServers,
+            mockServerConfig = config.mockServers,
+        )
 
         private val startTime = Instant.now()
 

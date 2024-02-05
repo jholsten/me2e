@@ -6,6 +6,7 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import org.awaitility.Awaitility
 import org.awaitility.Durations
 import org.awaitility.core.ConditionTimeoutException
+import org.jholsten.me2e.config.model.MockServerConfig
 import org.jholsten.me2e.container.exception.ServiceStartupException
 import org.jholsten.me2e.container.health.exception.HealthTimeoutException
 import org.jholsten.me2e.mock.stubbing.MockServerStubNotMatchedRenderer
@@ -24,6 +25,11 @@ class MockServerManager(
      * Mock servers mocking third-party services.
      */
     val mockServers: Map<String, MockServer>,
+
+    /**
+     * Configuration for all [org.jholsten.me2e.mock.MockServer] instances.
+     */
+    private val mockServerConfig: MockServerConfig,
 ) {
     companion object {
         private const val HTTP_PORT = 80
@@ -35,14 +41,23 @@ class MockServerManager(
     /**
      * Mock server instance that handles incoming requests
      */
-    private val wireMockServer: WireMockServer = WireMockServer(
-        WireMockConfiguration()
-            .port(HTTP_PORT)
-            .httpsPort(HTTPS_PORT)
-            .notMatchedRenderer(MockServerStubNotMatchedRenderer())
-    )
+    private val wireMockServer: WireMockServer
 
     init {
+        val configuration = WireMockConfiguration()
+            .port(HTTP_PORT)
+            .httpsPort(HTTPS_PORT)
+            .keystoreType(mockServerConfig.keystoreType)
+            .trustStoreType(mockServerConfig.truststoreType)
+            .notMatchedRenderer(MockServerStubNotMatchedRenderer())
+        mockServerConfig.keystorePath?.let { configuration.keystorePath(it) }
+        mockServerConfig.keystorePassword?.let { configuration.keystorePassword(it) }
+        mockServerConfig.keyManagerPassword?.let { configuration.keyManagerPassword(it) }
+        mockServerConfig.keyManagerPassword?.let { configuration.keyManagerPassword(it) }
+        mockServerConfig.truststorePath?.let { configuration.trustStorePath(it) }
+        mockServerConfig.truststorePassword?.let { configuration.trustStorePassword(it) }
+
+        wireMockServer = WireMockServer(configuration)
         initializeMockServers()
     }
 

@@ -5,10 +5,13 @@
   "type": "object",
   "properties": {
     "docker": {
-      "$ref": "#/definitions/docker"
+      "$ref": "#/definitions/docker-config"
     },
     "requests": {
-      "$ref": "#/definitions/requests"
+      "$ref": "#/definitions/requests-config"
+    },
+    "mock-servers": {
+      "$ref": "#/definitions/mock-server-config"
     },
     "environment": {
       "$id": "#/properties/environment",
@@ -38,8 +41,8 @@
   ],
   "additionalProperties": false,
   "definitions": {
-    "docker": {
-      "$id": "#/definitions/docker",
+    "docker-config": {
+      "$id": "#/definitions/docker-config",
       "description": "Configuration for Docker/Docker-Compose.",
       "type": "object",
       "properties": {
@@ -89,8 +92,8 @@
       },
       "additionalProperties": false
     },
-    "requests": {
-      "$id": "#/definitions/requests",
+    "requests-config": {
+      "$id": "#/definitions/requests-config",
       "description": "Configuration of HTTP requests to Microservice containers.",
       "type": "object",
       "properties": {
@@ -111,6 +114,43 @@
         }
       },
       "additionalProperties": false
+    },
+    "mock-server-config": {
+      "$id": "#/definitions/mock-server-config",
+      "description": "Configuration for all mock server instances.",
+      "type": "object",
+      "properties": {
+        "keystore-path": {
+          "type": "string",
+          "description": "Path to the keystore containing the TLS keystore."
+        },
+        "keystore-password": {
+          "type": "string",
+          "description": "Password used to access the keystore. Required for TLS."
+        },
+        "key-manager-password": {
+          "type": "string",
+          "description": "Password used to access individual keys in the keystore. Required for TLS."
+        },
+        "keystore-type": {
+          "type": "string",
+          "description": "Type of the keystore. Required for TLS.",
+          "default": "JKS"
+        },
+        "truststore-path": {
+          "type": "string",
+          "description": "Path to the truststore to use for the mock server instances. Required for client authentication."
+        },
+        "truststore-password": {
+          "type": "string",
+          "description": "Password used to access the truststore. Required for client authentication."
+        },
+        "truststore-type": {
+          "type": "string",
+          "description": "Type of the truststore. Required for client authentication.",
+          "default": "JKS"
+        }
+      }
     },
     "mock-server": {
       "$id": "#/definitions/mock-server",

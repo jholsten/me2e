@@ -7,6 +7,7 @@ import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.HttpEntity
 import org.apache.hc.core5.http.io.entity.StringEntity
+import org.jholsten.me2e.config.model.MockServerConfig
 import org.jholsten.me2e.mock.exception.VerificationException
 import org.jholsten.me2e.mock.stubbing.MockServerStub
 import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequestMatcher
@@ -61,7 +62,9 @@ class MockServerIT {
         )
     )
 
-    private val manager = MockServerManager(mapOf("example-service" to exampleServer))
+    private val mockServerConfig = MockServerConfig()
+
+    private val manager = MockServerManager(mapOf("example-service" to exampleServer), mockServerConfig)
 
     @BeforeTest
     fun beforeTest() {

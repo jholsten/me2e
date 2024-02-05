@@ -8,6 +8,7 @@ import com.github.tomakehurst.wiremock.stubbing.ServeEvent
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import com.github.tomakehurst.wiremock.verification.LoggedRequest
 import io.mockk.*
+import org.jholsten.me2e.config.model.MockServerConfig
 import org.jholsten.me2e.container.exception.ServiceStartupException
 import org.jholsten.me2e.container.health.exception.HealthTimeoutException
 import org.jholsten.me2e.mock.stubbing.MockServerStubNotMatchedRenderer
@@ -20,6 +21,7 @@ import kotlin.test.*
 internal class MockServerManagerTest {
 
     private val httpRequestMapper = mockk<HttpRequestMapper>()
+    private val mockServerConfig = MockServerConfig()
 
     @BeforeTest
     fun beforeTest() {
@@ -59,7 +61,7 @@ internal class MockServerManagerTest {
         every { anyConstructed<WireMockServer>().start() } just runs
         every { anyConstructed<WireMockServer>().isRunning } returns false andThen true
 
-        val manager = MockServerManager(mapOf())
+        val manager = MockServerManager(mapOf(), mockServerConfig)
         manager.start()
 
         verify { PortUtils.isPortAvailable(80) }
@@ -72,7 +74,7 @@ internal class MockServerManagerTest {
     fun `Starting mock server manager should fail if wire mock is already running`() {
         every { anyConstructed<WireMockServer>().isRunning } returns true
 
-        val manager = MockServerManager(mapOf())
+        val manager = MockServerManager(mapOf(), mockServerConfig)
         assertFailsWith<IllegalStateException> { manager.start() }
     }
 
@@ -82,7 +84,7 @@ internal class MockServerManagerTest {
         every { PortUtils.isPortAvailable(443) } returns true
         every { anyConstructed<WireMockServer>().isRunning } returns false
 
-        val manager = MockServerManager(mapOf())
+        val manager = MockServerManager(mapOf(), mockServerConfig)
         assertFailsWith<ServiceStartupException> { manager.start() }
     }
 
@@ -92,7 +94,7 @@ internal class MockServerManagerTest {
         every { PortUtils.isPortAvailable(443) } returns false
         every { anyConstructed<WireMockServer>().isRunning } returns false
 
-        val manager = MockServerManager(mapOf())
+        val manager = MockServerManager(mapOf(), mockServerConfig)
         assertFailsWith<ServiceStartupException> { manager.start() }
     }
 
@@ -102,7 +104,7 @@ internal class MockServerManagerTest {
         every { anyConstructed<WireMockServer>().start() } just runs
         every { anyConstructed<WireMockServer>().isRunning } returns false
 
-        val manager = MockServerManager(mapOf())
+        val manager = MockServerManager(mapOf(), mockServerConfig)
         assertFailsWith<HealthTimeoutException> { manager.start() }
 
         verify { PortUtils.isPortAvailable(80) }
@@ -117,7 +119,7 @@ internal class MockServerManagerTest {
         every { anyConstructed<WireMockServer>().start() } throws FatalStartupException(RuntimeException())
         every { anyConstructed<WireMockServer>().isRunning } returns false
 
-        val manager = MockServerManager(mapOf())
+        val manager = MockServerManager(mapOf(), mockServerConfig)
         val e = assertFailsWith<ServiceStartupException> { manager.start() }
 
         assertContains(e.message!!, "Mock server could not be started")
@@ -129,7 +131,7 @@ internal class MockServerManagerTest {
         every { anyConstructed<WireMockServer>().stop() } just runs
         every { anyConstructed<WireMockServer>().isRunning } returns true
 
-        val manager = MockServerManager(mapOf())
+        val manager = MockServerManager(mapOf(), mockServerConfig)
         manager.stop()
 
         verify { anyConstructed<WireMockServer>().stop() }
@@ -139,7 +141,7 @@ internal class MockServerManagerTest {
     fun `Stopping mock server should fail if wire mock is not running`() {
         every { anyConstructed<WireMockServer>().isRunning } returns false
 
-        val manager = MockServerManager(mapOf())
+        val manager = MockServerManager(mapOf(), mockServerConfig)
         assertFailsWith<IllegalStateException> { manager.stop() }
     }
 
@@ -162,7 +164,7 @@ internal class MockServerManagerTest {
         every { httpRequestMapper.toInternalDto(request2) } returns mappedRequest2
         every { httpRequestMapper.toInternalDto(request3) } returns mappedRequest3
 
-        val manager = MockServerManager(mapOf())
+        val manager = MockServerManager(mapOf(), mockServerConfig)
         val requests = manager.requestsReceived
 
         assertEquals(3, requests.size)
@@ -206,7 +208,7 @@ internal class MockServerManagerTest {
             every { reset() } just runs
             every { initialize(any()) } just runs
         }
-        return MockServerManager(mapOf("service-1" to server1, "service-2" to server2))
+        return MockServerManager(mapOf("service-1" to server1, "service-2" to server2), mockServerConfig)
     }
 
     private fun mockedLoggedRequest(hostname: String, loggedDate: Date): LoggedRequest {

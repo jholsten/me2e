@@ -15,6 +15,8 @@ import org.jholsten.me2e.request.model.MediaType
 import org.jholsten.me2e.request.model.RelativeUrl
 import org.jholsten.me2e.utils.logger
 import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import kotlin.test.*
 
 @Me2eTestConfig(
@@ -72,9 +74,14 @@ class Me2eTestIT : Me2eTest() {
         assertSame(mockServerManager.mockServers["payment-service"], paymentServiceAlt)
     }
 
-    @Test
-    fun `Invoking mock server in container should succeed`() {
-        val response = backendApi.post(RelativeUrl("/search"), HttpRequestBody(content = "{\"id\": 123}", MediaType.JSON_UTF8))
+    @ParameterizedTest(name = "[{index}] with {1}")
+    @CsvSource(
+        "/search, HTTP",
+        "/https, HTTPS",
+    )
+    @Suppress("UNUSED_PARAMETER")
+    fun `Invoking mock server in container should succeed`(relativeUrl: String, description: String) {
+        val response = backendApi.post(RelativeUrl(relativeUrl), HttpRequestBody(content = "{\"id\": 123}", MediaType.JSON_UTF8))
 
         logger.info(backendApi.getLogs().toString())
         assertThat(response).statusCode(isEqualTo(200))
