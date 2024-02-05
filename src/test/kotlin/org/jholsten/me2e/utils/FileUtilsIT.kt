@@ -8,6 +8,11 @@ import kotlin.test.assertTrue
 class FileUtilsIT {
 
     @Test
+    fun `Reading file contents from resource should succeed`() {
+        assertEquals("Test", FileUtils.readFileContentsFromResources("test-file.txt"))
+    }
+
+    @Test
     fun `Retrieving resource as file should succeed`() {
         val filename = "test-file.txt"
 
