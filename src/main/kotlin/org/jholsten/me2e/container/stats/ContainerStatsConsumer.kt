@@ -14,6 +14,7 @@ import java.util.function.Consumer
 /**
  * Base class for consuming statistics of a container.
  * Whenever docker sends a new statistics entry for the container, the callback function [accept] is executed.
+ * @sample ContainerStatsCollector
  */
 abstract class ContainerStatsConsumer : Consumer<Statistics> {
     private val logger = LoggerFactory.getLogger(ContainerStatsConsumer::class.java)

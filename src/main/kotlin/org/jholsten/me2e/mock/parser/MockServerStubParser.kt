@@ -7,13 +7,13 @@ import java.io.FileNotFoundException
 import kotlin.jvm.Throws
 
 /**
- * Interface for parsing a stub definition.
+ * Interface for parsing a mock server stub definition.
  */
 internal interface MockServerStubParser : Parser<MockServerStub> {
 
     /**
      * Parses the stub definition from the given file.
-     * @param filename Name of the file. Needs to be located in resources folder.
+     * @param filename Name of the file. Needs to be located in `resources` folder.
      * @return Parsed stub definition.
      */
     @Throws(FileNotFoundException::class, ParseException::class)

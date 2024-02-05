@@ -12,8 +12,8 @@ import java.util.function.Consumer
 internal class ContainerStatsUtils {
     companion object {
         /**
-         * Returns the current resource usage statistics of the given Docker container,
-         * by executing `docker stats --no-stream $containerId`.
+         * Returns the current resource usage statistics of the given Docker container, by executing
+         * `docker stats --no-stream $containerId`.
          * @param dockerContainer Docker Container for which statistics are to be retrieved.
          */
         @JvmSynthetic
@@ -29,10 +29,9 @@ internal class ContainerStatsUtils {
         }
 
         /**
-         * Attaches the given [consumer] to the container's resource usage statistics,
-         * by executing `docker stats $containerId`.
-         * Docker instantiates a live data stream for the container and for each statistics
-         * entry received by Docker, the consumer is notified.
+         * Attaches the given [consumer] to the container's resource usage statistics, by executing `docker stats $containerId`.
+         * Docker instantiates a live data stream for the container and for each statistics entry received by Docker, the
+         * consumer is notified.
          * @param dockerContainer Docker container to attach the consumer to.
          * @param consumer Statistics consumer to be attached.
          * @return Consumer thread which can be closed to stop consuming statistics entries.

@@ -121,7 +121,7 @@ class MockServer(
         if (verification.times != null && verification.times != matchResults.size) {
             throw VerificationException.forTimesNotMatching(name, verification.times, matcher, matchResults, wireMockRequestsReceived)
         } else if (verification.times == null && matchResults.isEmpty()) {
-            throw VerificationException.forNotReceivedAtLeastOnce(name, matcher, matchResults, wireMockRequestsReceived)
+            throw VerificationException.forNotReceivedAtLeastOnce(name, matcher, wireMockRequestsReceived)
         } else if (verification.noOther && wireMockRequestsReceived.size != matchResults.size) {
             throw VerificationException.forOtherRequests(name, matcher, matchResults, wireMockRequestsReceived)
         }

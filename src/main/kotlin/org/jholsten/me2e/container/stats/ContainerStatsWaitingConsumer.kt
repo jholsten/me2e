@@ -18,7 +18,7 @@ internal class ContainerStatsWaitingConsumer : Consumer<Statistics> {
     }
 
     /**
-     * Wait until Docker closes the stream of output.
+     * Waits until Docker closes the stream of output.
      * @see org.testcontainers.containers.output.WaitingConsumer.waitUntilEnd
      */
     @JvmSynthetic
