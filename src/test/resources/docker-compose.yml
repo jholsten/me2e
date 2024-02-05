@@ -6,6 +6,7 @@ services:
     environment:
       DB_PASSWORD: 123
       DB_USER: user
+      REQUESTS_CA_BUNDLE: /usr/local/share/ca-certificates/mock_server_certificate.pem
     healthcheck:
       test: [ "CMD-SHELL", "curl --fail http://localhost:8000/health || exit 1" ]
       interval: 3s
@@ -13,15 +14,25 @@ services:
       retries: 10
     extra_hosts:
       - "payment.example.com:${RUNNER_IP:-host-gateway}"
+    volumes:
+      - "./mock_server_certificate.pem:/usr/local/share/ca-certificates/mock_server_certificate.pem"
     labels:
       "org.jholsten.me2e.container-type": "MICROSERVICE"
       "org.jholsten.me2e.pull-policy": "ALWAYS"
 
   database:
     image: postgres:12
+    ports:
+      - 5432
     environment:
       POSTGRES_PASSWORD: 123
       POSTGRES_USER: user
+      POSTGRES_DB: testdb
     labels:
       "org.jholsten.me2e.container-type": "DATABASE"
       "org.jholsten.me2e.database.system": "POSTGRESQL"
+    healthcheck:
+      test: "pg_isready -d db_prod"
+      interval: 3s
+      timeout: 3s
+      retries: 10

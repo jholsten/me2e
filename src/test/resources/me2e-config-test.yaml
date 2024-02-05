@@ -1,3 +1,8 @@
+mock-servers:
+  keystore-path: mock_server_keystore.jks
+  keystore-password: mock_server
+  key-manager-password: mock_server
+
 environment:
   docker-compose: docker-compose.yml
   mock-servers:
