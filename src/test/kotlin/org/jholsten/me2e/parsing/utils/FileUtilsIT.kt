@@ -20,11 +20,24 @@ internal class FileUtilsIT {
     }
 
     @Test
-    fun `File instance should be returned for existing file`() {
-        val file = FileUtils.getResourceAsFile("test-file.txt")
-        val contents = file.readText()
-        assertEquals("Test", contents)
-        assertTrue(file.name.startsWith("tmp_"))
+    fun `Retrieving resource as file should succeed`() {
+        val filename = "test-file.txt"
+
+        val file = FileUtils.getResourceAsFile(filename)
+
+        assertEquals(filename, file.name)
+        assertTrue(file.isFile)
+    }
+
+    @Test
+    fun `Retrieving resource as file in subfolder succeed`() {
+        val filename = "database/mongo_script.js"
+
+        val file = FileUtils.getResourceAsFile(filename)
+
+        assertEquals("database", file.parentFile.name)
+        assertEquals("mongo_script.js", file.name)
+        assertTrue(file.isFile)
     }
 
     @Test
