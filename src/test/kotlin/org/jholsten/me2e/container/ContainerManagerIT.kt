@@ -31,12 +31,16 @@ internal class ContainerManagerIT {
                 name = "database",
                 image = "postgres:12",
                 environment = mapOf("POSTGRES_PASSWORD" to "123", "POSTGRES_USER" to "user"),
+                ports = ContainerPortList(
+                    ports = listOf(ContainerPort(internal = 5432))
+                ),
                 system = DatabaseManagementSystem.POSTGRESQL,
                 database = "postgres",
                 schema = "public",
                 username = "user",
                 password = "123",
                 initializationScripts = mapOf(),
+                hasHealthcheck = true,
             ),
         )
     )
