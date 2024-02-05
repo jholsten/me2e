@@ -78,8 +78,8 @@ class ContainerManager(
     fun start() {
         pullImages()
         environment.start()
-        environment.waitUntilHealthy(containers.keys.toList(), dockerConfig.healthTimeout)
         initializeContainers()
+        environment.waitUntilHealthy(containers.keys.toList(), dockerConfig.healthTimeout)
     }
 
     /**
