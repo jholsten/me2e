@@ -293,3 +293,18 @@ RUN sh get-docker.sh
 
 CMD ./gradlew test
 ```
+
+## Mock Server Authentication
+### Generate Keystore
+https://gist.github.com/dentys/1bdd2897a53b1a8b56007a480243c33a
+https://www.ivankrizsan.se/2018/03/03/mocking-http-services-with-wiremock-part-2/
+
+```shell
+keytool -genkey -keyalg RSA -keysize 2048 -alias mock_server -validity 3650 -keypass mock_server -keystore mock_server_keystore.jks -storepass mock_server -ext SAN=dns:example.com,dns:payment.example.com
+```
+
+### Generate Server Certificate
+```shell
+keytool -exportcert -alias mock_server -keystore mock_server_keystore.jks -storepass mock_server -file mock_server_certificate.crt
+openssl x509 -inform der -in mock_server_certificate.crt -out mock_server_certificate.pem
+```
