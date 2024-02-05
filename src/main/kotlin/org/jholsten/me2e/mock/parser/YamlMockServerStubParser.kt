@@ -2,7 +2,6 @@ package org.jholsten.me2e.mock.parser
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.jholsten.me2e.mock.stubbing.MockServerStub
-import org.jholsten.me2e.mock.utils.MockServerStubSchemaValidator
 import org.jholsten.me2e.parsing.YamlParser
 import org.jholsten.me2e.parsing.utils.DeserializerFactory
 

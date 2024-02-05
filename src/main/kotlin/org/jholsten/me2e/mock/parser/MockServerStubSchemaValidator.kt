@@ -1,4 +1,4 @@
-package org.jholsten.me2e.mock.utils
+package org.jholsten.me2e.mock.parser
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.jholsten.me2e.parsing.utils.SchemaValidator
