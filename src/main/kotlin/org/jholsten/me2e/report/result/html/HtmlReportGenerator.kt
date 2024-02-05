@@ -9,6 +9,9 @@ import org.jholsten.me2e.report.result.model.TestExecutionResult
 import org.jholsten.me2e.report.result.model.TestResult
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.nio.file.FileSystems
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 import java.time.Instant
 
 /**
@@ -55,7 +58,8 @@ open class HtmlReportGenerator(
         for (root in result.roots) {
             generateTestDetailHtml(root)
         }
-        logger.info("Generated and stored HTML report at $outputDirectory/index.html.")
+        val absolutePath = FileSystems.getDefault().getPath("$outputDirectory/index.html").toAbsolutePath().toString().replace("\\", "/")
+        logger.info("Generated and stored HTML report at file:///$absolutePath.")
     }
 
     protected open fun generateIndexHtml() {
@@ -80,8 +84,8 @@ open class HtmlReportGenerator(
 
     protected open fun copyAdditionalResources() {
         for ((source, destination) in additionalResources) {
-            val file = FileUtils.getResourceAsFile(source)
-            org.apache.commons.io.FileUtils.copyFile(file, File("$outputDirectory/$destination"))
+            val resource = FileUtils.getResourceAsStream(source)
+            Files.copy(resource, File("$outputDirectory/$destination").toPath(), StandardCopyOption.REPLACE_EXISTING)
         }
     }
 }

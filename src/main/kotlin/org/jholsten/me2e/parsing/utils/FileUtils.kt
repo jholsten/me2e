@@ -3,9 +3,7 @@ package org.jholsten.me2e.parsing.utils
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.InputStream
-import java.nio.file.Files
-import java.nio.file.StandardCopyOption
-import kotlin.Throws
+
 
 /**
  * Utility class for reading file contents.
@@ -39,10 +37,9 @@ internal class FileUtils private constructor() {
          */
         @JvmSynthetic
         fun getResourceAsFile(filename: String): File {
-            val tempFile = File.createTempFile("tmp_", null)
-            tempFile.deleteOnExit()
-            Files.copy(getResourceAsStream(filename), tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
-            return tempFile
+            val resource = FileUtils::class.java.classLoader.getResource(filename)
+                ?: throw FileNotFoundException("File $filename could not be found in resources folder.")
+            return File(resource.path)
         }
     }
 }
