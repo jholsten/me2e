@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.databind.node.ObjectNode
 import org.jholsten.me2e.container.docker.DockerComposeVersion
 import org.jholsten.me2e.config.model.DockerConfig
+import org.jholsten.me2e.config.model.MockServerConfig
 import org.jholsten.me2e.config.model.RequestConfig
 import org.jholsten.me2e.config.model.TestConfig
 import org.jholsten.me2e.container.Container
@@ -41,6 +42,17 @@ internal class YamlConfigParserIT {
                 removeImages = DockerComposeRemoveImagesStrategy.ALL,
                 removeVolumes = false,
                 healthTimeout = 30,
+            ), config
+        )
+        assertMockServerConfigAsExpected(
+            MockServerConfig(
+                keystorePath = "keystore.jks",
+                keystorePassword = "keystore-password",
+                keyManagerPassword = "key-manager-password",
+                keystoreType = "BKS",
+                truststorePath = "truststore.jks",
+                truststorePassword = "truststore-password",
+                truststoreType = "BKS",
             ), config
         )
     }
@@ -82,11 +94,11 @@ internal class YamlConfigParserIT {
     }
 
     private fun assertDockerConfigAsExpected(expectedDockerConfig: DockerConfig, testConfig: TestConfig) {
-        RecursiveComparison.assertEquals(expectedDockerConfig, testConfig.docker)
+        RecursiveComparison.assertEquals(expectedDockerConfig, testConfig.settings.docker)
     }
 
     private fun assertRequestConfigAsExpected(expectedRequestConfig: RequestConfig, testConfig: TestConfig) {
-        RecursiveComparison.assertEquals(expectedRequestConfig, testConfig.requests)
+        RecursiveComparison.assertEquals(expectedRequestConfig, testConfig.settings.requests)
     }
 
     private fun assertApiGatewayAsExpected(containers: Map<String, Container>, pullPolicy: DockerConfig.PullPolicy? = null) {
@@ -251,5 +263,9 @@ internal class YamlConfigParserIT {
         assertEquals(name, mockServer.name)
         assertEquals(hostname, mockServer.hostname)
         RecursiveComparison.assertEquals(stubs, mockServer.stubs)
+    }
+
+    private fun assertMockServerConfigAsExpected(expected: MockServerConfig, config: TestConfig) {
+        RecursiveComparison.assertEquals(expected, config.settings.mockServers)
     }
 }

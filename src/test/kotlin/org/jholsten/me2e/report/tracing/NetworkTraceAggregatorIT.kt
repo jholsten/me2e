@@ -30,13 +30,13 @@ internal class NetworkTraceAggregatorIT {
 
         private val containerManager: ContainerManager = ContainerManager(
             dockerComposeFile = FileUtils.getResourceAsFile(config.environment.dockerCompose),
-            dockerConfig = config.docker,
+            dockerConfig = config.settings.docker,
             containers = config.environment.containers,
         )
 
         private val mockServerManager: MockServerManager = MockServerManager(
             mockServers = config.environment.mockServers,
-            mockServerConfig = config.mockServers,
+            mockServerConfig = config.settings.mockServers,
         )
 
         private val startTime = Instant.now()

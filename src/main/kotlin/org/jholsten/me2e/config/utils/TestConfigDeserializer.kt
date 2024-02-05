@@ -20,29 +20,23 @@ class TestConfigDeserializer : JsonDeserializer<TestConfig>() {
         mapper = p.codec as ObjectMapper
         val node = p.readValueAsTree<ObjectNode>()
 
+        val settings = deserializeSettings(node.get("settings"))
         val injectableValues = InjectableValues.Std()
-        val requestConfig = deserializeRequestConfig(node.get("requests"))
-        injectRequestConfig(injectableValues, requestConfig)
-
-        val dockerConfig = deserializeDockerConfig(node.get("docker"))
-        injectDockerConfig(injectableValues, dockerConfig)
-
-        val mockServerConfig = deserializeMockServerConfig(node.get("mock-servers"))
+        injectRequestConfig(injectableValues, settings.requests)
+        injectDockerConfig(injectableValues, settings.docker)
 
         val environmentConfig = mapper.treeToValue(node.get("environment"), TestEnvironmentConfig::class.java)
         return TestConfig(
-            docker = dockerConfig,
-            requests = requestConfig,
-            mockServers = mockServerConfig,
+            settings = settings,
             environment = environmentConfig,
         )
     }
 
-    private fun deserializeRequestConfig(requestConfigNode: JsonNode?): RequestConfig {
-        if (requestConfigNode == null) {
-            return RequestConfig()
+    private fun deserializeSettings(settingsNode: JsonNode?): TestSettings {
+        if (settingsNode == null) {
+            return TestSettings()
         }
-        return mapper.treeToValue(requestConfigNode, RequestConfig::class.java)
+        return mapper.treeToValue(settingsNode, TestSettings::class.java)
     }
 
     private fun injectRequestConfig(injectableValues: InjectableValues.Std, requestConfig: RequestConfig) {
@@ -51,19 +45,5 @@ class TestConfigDeserializer : JsonDeserializer<TestConfig>() {
 
     private fun injectDockerConfig(injectableValues: InjectableValues.Std, dockerConfig: DockerConfig) {
         mapper.setInjectableValues(injectableValues.addValue("dockerConfig", dockerConfig))
-    }
-
-    private fun deserializeDockerConfig(dockerConfigNode: JsonNode?): DockerConfig {
-        if (dockerConfigNode == null) {
-            return DockerConfig()
-        }
-        return mapper.treeToValue(dockerConfigNode, DockerConfig::class.java)
-    }
-
-    private fun deserializeMockServerConfig(mockServerConfigNode: JsonNode?): MockServerConfig {
-        if (mockServerConfigNode == null) {
-            return MockServerConfig()
-        }
-        return mapper.treeToValue(mockServerConfigNode, MockServerConfig::class.java)
     }
 }

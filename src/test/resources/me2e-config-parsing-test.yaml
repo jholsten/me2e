@@ -1,15 +1,25 @@
-docker:
-  docker-compose-version: V1
-  pull-policy: ALWAYS
-  build-images: true
-  remove-images: ALL
-  remove-volumes: false
-  health-timeout: 30
+settings:
+  docker:
+    docker-compose-version: V1
+    pull-policy: ALWAYS
+    build-images: true
+    remove-images: ALL
+    remove-volumes: false
+    health-timeout: 30
 
-requests:
-  connect-timeout: 10
-  read-timeout: 15
-  write-timeout: 20
+  requests:
+    connect-timeout: 10
+    read-timeout: 15
+    write-timeout: 20
+
+  mock-servers:
+    keystore-path: keystore.jks
+    keystore-password: keystore-password
+    key-manager-password: key-manager-password
+    keystore-type: BKS
+    truststore-path: truststore.jks
+    truststore-password: truststore-password
+    truststore-type: BKS
 
 environment:
   docker-compose: docker-compose-parsing-test.yml

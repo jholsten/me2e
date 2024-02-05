@@ -4,14 +4,8 @@
   "description": "Test Configuration for the Me2e Library",
   "type": "object",
   "properties": {
-    "docker": {
-      "$ref": "#/definitions/docker-config"
-    },
-    "requests": {
-      "$ref": "#/definitions/requests-config"
-    },
-    "mock-servers": {
-      "$ref": "#/definitions/mock-server-config"
+    "settings": {
+      "$ref": "#/definitions/settings"
     },
     "environment": {
       "$id": "#/properties/environment",
@@ -41,6 +35,23 @@
   ],
   "additionalProperties": false,
   "definitions": {
+    "settings": {
+      "$id": "#/definitions/settings",
+      "description": "Settings for running the End-to-End tests.",
+      "type": "object",
+      "properties": {
+        "docker": {
+          "$ref": "#/definitions/docker-config"
+        },
+        "requests": {
+          "$ref": "#/definitions/requests-config"
+        },
+        "mock-servers": {
+          "$ref": "#/definitions/mock-server-config"
+        }
+      },
+      "additionalProperties": false
+    },
     "docker-config": {
       "$id": "#/definitions/docker-config",
       "description": "Configuration for Docker/Docker-Compose.",
@@ -150,7 +161,8 @@
           "description": "Type of the truststore. Required for client authentication.",
           "default": "JKS"
         }
-      }
+      },
+      "additionalProperties": false
     },
     "mock-server": {
       "$id": "#/definitions/mock-server",

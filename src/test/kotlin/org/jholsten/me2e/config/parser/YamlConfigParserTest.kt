@@ -11,6 +11,7 @@ import org.jholsten.me2e.parsing.exception.InvalidFormatException
 import org.jholsten.me2e.parsing.exception.ValidationException
 import org.jholsten.me2e.config.model.TestConfig
 import org.jholsten.me2e.config.model.TestEnvironmentConfig
+import org.jholsten.me2e.config.model.TestSettings
 import org.jholsten.me2e.config.utils.ConfigSchemaValidator
 import org.jholsten.me2e.parsing.utils.DeserializerFactory
 import org.jholsten.me2e.parsing.utils.FileUtils
@@ -110,6 +111,7 @@ internal class YamlConfigParserTest {
 
     private fun testConfig(dockerComposeFile: String): TestConfig {
         return TestConfig(
+            settings = TestSettings(),
             environment = TestEnvironmentConfig(
                 dockerCompose = dockerComposeFile,
                 containers = mapOf(

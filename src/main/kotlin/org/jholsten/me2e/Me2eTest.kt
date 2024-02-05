@@ -40,7 +40,7 @@ open class Me2eTest {
         val containerManager: ContainerManager by lazy {
             ContainerManager(
                 dockerComposeFile = FileUtils.getResourceAsFile(config.environment.dockerCompose),
-                dockerConfig = config.docker,
+                dockerConfig = config.settings.docker,
                 containers = config.environment.containers,
             )
         }
@@ -52,7 +52,7 @@ open class Me2eTest {
         val mockServerManager: MockServerManager by lazy {
             MockServerManager(
                 mockServers = config.environment.mockServers,
-                mockServerConfig = config.mockServers,
+                mockServerConfig = config.settings.mockServers,
             )
         }
 
