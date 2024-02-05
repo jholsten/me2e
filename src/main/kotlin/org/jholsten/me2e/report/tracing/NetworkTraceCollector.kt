@@ -12,7 +12,7 @@ import java.lang.Exception
 /**
  * Service which collects all HTTP packets sent in the Docker network with ID [networkId].
  * Uses the [docker-traffic-capturer](https://gitlab.informatik.uni-bremen.de/jholsten/docker-traffic-capturer)
- * to sniff the packets which were sent in the network.
+ * to sniff the packets which were sent in the network. Note that HTTPS packets are not captured.
  * As there can be delays when receiving and processing the captured packets in the `docker-traffic-capturer`
  * and the packets are not available immediately after the test execution, they are only collected after all
  * tests have been executed. The assignment of the packets to the tests then takes place using the timestamps
