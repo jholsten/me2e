@@ -28,14 +28,13 @@ internal abstract class HttpResponseMapper {
     @Mapping(target = "code", expression = "java(okHttpResponse.code())")
     @Mapping(target = "headers", source = "okHttpResponse", qualifiedByName = ["mapHeaders"])
     @Mapping(target = "body", source = "okHttpResponse", qualifiedByName = ["mapResponseBody"])
-    @JvmSynthetic
-    abstract fun toInternalDto(okHttpResponse: Response): HttpResponse
+    internal abstract fun toInternalDto(okHttpResponse: Response): HttpResponse
 
     @Mapping(target = "protocol", expression = "java(Protocol.get(response.getProtocol()))")
     @Mapping(target = "headers", source = "response.headers", qualifiedByName = ["mapHeadersToOkHttp"])
     @Mapping(target = "body", source = "body", qualifiedByName = ["mapResponseBodyToOkHttp"])
     @JvmSynthetic
-    abstract fun toOkHttpResponse(response: HttpResponse): Response
+    internal abstract fun toOkHttpResponse(response: HttpResponse): Response
 
     @Named("mapRequest")
     protected fun mapRequest(okHttpResponse: Response): HttpRequest {

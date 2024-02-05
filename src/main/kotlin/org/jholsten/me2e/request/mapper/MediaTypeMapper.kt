@@ -15,12 +15,11 @@ internal abstract class MediaTypeMapper {
     }
 
     @Mapping(target = "value", source = "okHttpMediaType", qualifiedByName = ["getOkHttpMediaType"])
-    @JvmSynthetic
-    abstract fun toInternalDto(okHttpMediaType: okhttp3.MediaType): MediaType
+    internal abstract fun toInternalDto(okHttpMediaType: okhttp3.MediaType): MediaType
 
     @Mapping(target = "value", expression = "java(contentTypeHeader.mimeTypePart())")
     @JvmSynthetic
-    abstract fun toInternalDto(contentTypeHeader: ContentTypeHeader): MediaType
+    internal abstract fun toInternalDto(contentTypeHeader: ContentTypeHeader): MediaType
 
     @Named("getOkHttpMediaType")
     protected fun getOkHttpMediaType(okHttpMediaType: okhttp3.MediaType): String {

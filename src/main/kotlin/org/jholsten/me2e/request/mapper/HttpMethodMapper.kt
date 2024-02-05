@@ -14,6 +14,5 @@ internal abstract class HttpMethodMapper {
     }
 
     @ValueMapping(source = MappingConstants.ANY_REMAINING, target = "UNKNOWN")
-    @JvmSynthetic
-    abstract fun toInternalDto(value: String): HttpMethod
+    internal abstract fun toInternalDto(value: String): HttpMethod
 }

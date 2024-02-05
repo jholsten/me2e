@@ -12,6 +12,5 @@ internal abstract class TestSummaryStatusMapper {
         val INSTANCE: TestSummaryStatusMapper = Mappers.getMapper(TestSummaryStatusMapper::class.java)
     }
 
-    @JvmSynthetic
-    abstract fun toInternalDto(status: TestExecutionResult.Status): TestResult.Status
+    internal abstract fun toInternalDto(status: TestExecutionResult.Status): TestResult.Status
 }

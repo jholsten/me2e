@@ -18,8 +18,7 @@ internal abstract class ReportEntryMapper {
     }
 
     @Mapping(target = "timestamp", source = "timestamp", qualifiedByName = ["mapTimestamp"])
-    @JvmSynthetic
-    abstract fun toInternalDto(reportEntry: org.junit.platform.engine.reporting.ReportEntry): ReportEntry
+    internal abstract fun toInternalDto(reportEntry: org.junit.platform.engine.reporting.ReportEntry): ReportEntry
 
     @Named("mapTimestamp")
     protected fun mapTimestamp(timestamp: LocalDateTime): Instant {
