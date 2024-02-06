@@ -3,6 +3,8 @@ package org.jholsten.me2e.container
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.github.dockerjava.api.exception.DockerClientException
+import com.github.dockerjava.api.exception.NotFoundException
 import org.jholsten.me2e.config.model.DockerConfig
 import org.jholsten.me2e.container.database.DatabaseContainer
 import org.jholsten.me2e.container.docker.DockerCompose
@@ -23,9 +25,13 @@ import org.jholsten.me2e.container.events.ContainerEventConsumer
 import org.jholsten.me2e.container.events.ContainerEventsUtils
 import org.jholsten.me2e.container.events.ContainerRestartListener
 import org.jholsten.me2e.container.events.model.ContainerEvent
+import org.jholsten.me2e.container.exception.DockerException
 import org.jholsten.me2e.report.result.ReportDataAggregator
 import org.slf4j.LoggerFactory
 import org.testcontainers.containers.ContainerState
+import org.testcontainers.utility.MountableFile
+import java.io.File
+import java.io.FileNotFoundException
 import java.time.Instant
 import com.github.dockerjava.api.model.Container as DockerContainer
 
@@ -113,7 +119,7 @@ open class Container(
 
     /**
      * Returns the ID of the associated Docker container.
-     * @throws IllegalStateException if container is not initialized
+     * @throws IllegalStateException if container is not initialized, i.e. not started.
      */
     val containerId: String
         get() {
@@ -124,7 +130,7 @@ open class Container(
     /**
      * Returns information about all networks that the container is connected to
      * as a map of network name and network information.
-     * @throws IllegalStateException if container is not initialized
+     * @throws IllegalStateException if container is not initialized, i.e. not started.
      */
     @get:JsonIgnore
     val networks: Map<String, ContainerNetwork>
@@ -157,9 +163,11 @@ open class Container(
     private val eventConsumers: MutableList<Pair<ContainerEventConsumer, List<ContainerEvent.Type>?>> = mutableListOf()
 
     /**
-     * Executes the given command inside the container, as using [`docker exec`](https://docs.docker.com/engine/reference/commandline/exec/).
+     * Executes the given command inside the container in the container's working directory,
+     * as using [`docker exec`](https://docs.docker.com/engine/reference/commandline/exec/).
      * @param command Command to execute in array format. Example: `["echo", "a", "&&", "echo", "b"]`
      * @return Result of the execution.
+     * @throws IllegalStateException if container is not initialized, i.e. not started.
      */
     fun execute(vararg command: String): ExecutionResult {
         assertThatContainerIsInitialized()
@@ -172,11 +180,12 @@ open class Container(
     }
 
     /**
-     * Executes the given command inside the container as the given user, as using
+     * Executes the given command inside the container as the given user in the container's working directory, as using
      * [`docker exec -u user`](https://docs.docker.com/engine/reference/commandline/exec/).
      * @param user Username or UID to execute command with. Format is one of: `user`, `user:group`, `uid` or `uid:gid`.
      * @param command Command to execute in array format. Example: `["echo", "a", "&&", "echo", "b"]`
      * @return Result of the execution.
+     * @throws IllegalStateException if container is not initialized, i.e. not started.
      */
     fun executeAsUser(user: String, vararg command: String): ExecutionResult {
         assertThatContainerIsInitialized()
@@ -186,6 +195,64 @@ open class Container(
             stdout = result.stdout,
             stderr = result.stderr,
         )
+    }
+
+    /**
+     * Copies the file or directory from this host at the given path located in the `resources` folder to the given
+     * path inside the container.
+     * @param sourcePath Path to the file or directory in `resources` folder to be copied.
+     * @param containerPath Absolute path to the destination file or directory inside the container. Note that this is
+     * always considered as an absolute path inside the container, independent of the container's working directory.
+     * @throws IllegalStateException if container is not initialized, i.e. not started.
+     * @throws java.io.FileNotFoundException if file at [sourcePath] does not exist.
+     * @throws DockerException if file or directory could not be copied.
+     */
+    fun copyResourceToContainer(sourcePath: String, containerPath: String) {
+        val sourceFile = try {
+            MountableFile.forClasspathResource(sourcePath)
+        } catch (e: IllegalArgumentException) {
+            throw FileNotFoundException(e.message)
+        }
+        copyFileToContainer(sourceFile, containerPath)
+    }
+
+    /**
+     * Copies the file or directory from this host at the given path to the given path inside the container.
+     * @param sourcePath Absolute path to the file or directory on this host to be copied.
+     * @param containerPath Absolute path to the destination file or directory inside the container. Note that this is
+     * always considered as an absolute path inside the container, independent of the container's working directory.
+     * @throws IllegalStateException if container is not initialized, i.e. not started.
+     * @throws java.io.FileNotFoundException if file at [sourcePath] does not exist.
+     * @throws DockerException if file or directory could not be copied.
+     */
+    fun copyFileToContainer(sourcePath: String, containerPath: String) {
+        if (!File(sourcePath).exists()) {
+            throw FileNotFoundException("File or directory with absolute path '$sourcePath' could not be found on the host.")
+        }
+        copyFileToContainer(MountableFile.forHostPath(sourcePath), containerPath)
+    }
+
+    /**
+     * Copies the single file inside the container at the given path to the given path on this host.
+     * Note that this method only supports copying single files and not directories.
+     * @param containerPath Absolute path to the file to be copied inside the container. Note that this is always
+     * considered as an absolute path inside the container, independent of the container's working directory.
+     * @param destinationPath Absolute path to the destination file on this host.
+     * @throws IllegalStateException if container is not initialized, i.e. not started.
+     * @throws java.io.FileNotFoundException if file at [containerPath] does not exist.
+     * @throws DockerException if file could not be copied.
+     */
+    fun copyFileFromContainer(containerPath: String, destinationPath: String) {
+        assertThatContainerIsInitialized()
+        logger.debug("Copying file '$containerPath' from container $name to host at path '$destinationPath'...")
+        try {
+            File(destinationPath).parentFile?.mkdirs()
+            dockerContainer!!.state.copyFileFromContainer(containerPath, destinationPath)
+        } catch (e: NotFoundException) {
+            throw FileNotFoundException("File '$containerPath' could not be found in container $name.")
+        } catch (e: DockerClientException) {
+            throw DockerException("File '$containerPath' could not be copied from container $name.", e)
+        }
     }
 
     /**
@@ -347,6 +414,25 @@ open class Container(
             if (internalPort != null) {
                 internalPort.external = port.publicPort
             }
+        }
+    }
+
+    /**
+     * Copies the file or directory from this host to the given path inside the container.
+     * @param sourceFile File or directory on this host to be copied.
+     * @param containerPath Absolute path to the destination file or directory inside the container. Note that this is
+     * always considered as an absolute path inside the container, independent of the container's working directory.
+     * @throws IllegalStateException if container is not initialized, i.e. not started.
+     * @throws java.io.FileNotFoundException if file [sourceFile] does not exist.
+     * @throws DockerException if file or directory could not be copied.
+     */
+    private fun copyFileToContainer(sourceFile: MountableFile, containerPath: String) {
+        assertThatContainerIsInitialized()
+        logger.debug("Copying file or directory '${sourceFile.resolvedPath}' to container $name at path '$containerPath'...")
+        try {
+            dockerContainer!!.state.copyFileToContainer(sourceFile, containerPath)
+        } catch (e: DockerClientException) {
+            throw DockerException("File or directory '${sourceFile.resolvedPath}' could not be copied to container $name.", e)
         }
     }
 

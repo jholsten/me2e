@@ -17,21 +17,21 @@ import kotlin.test.Test
 internal class MicroserviceContainerIT {
 
     companion object {
+        private val backendApi = MicroserviceContainer(
+            name = "backend-api",
+            image = "gitlab.informatik.uni-bremen.de:5005/master-thesis1/test-system/backend-api:latest",
+            environment = mapOf("DB_PASSWORD" to "123", "DB_USER" to "user"),
+            requestConfig = RequestConfig(),
+            ports = ContainerPortList(
+                ports = listOf(ContainerPort(internal = 8000))
+            ),
+            hasHealthcheck = true,
+        )
+
         private val manager = ContainerManager(
             dockerComposeFile = FileUtils.getResourceAsFile("docker-compose.yml"),
             dockerConfig = DockerConfig(),
-            containers = mapOf(
-                "backend-api" to MicroserviceContainer(
-                    name = "backend-api",
-                    image = "gitlab.informatik.uni-bremen.de:5005/master-thesis1/test-system/backend-api:latest",
-                    environment = mapOf("DB_PASSWORD" to "123", "DB_USER" to "user"),
-                    requestConfig = RequestConfig(),
-                    ports = ContainerPortList(
-                        ports = listOf(ContainerPort(internal = 8000))
-                    ),
-                    hasHealthcheck = true,
-                ),
-            )
+            containers = mapOf("backend-api" to backendApi)
         )
 
         @BeforeAll
@@ -49,8 +49,6 @@ internal class MicroserviceContainerIT {
 
     @Test
     fun `Executing GET request should succeed`() {
-        val backendApi = manager.microservices["backend-api"]!!
-
         val response = backendApi.get(RelativeUrl("/health"))
 
         assertThat(response).statusCode(isEqualTo(200))
@@ -59,7 +57,6 @@ internal class MicroserviceContainerIT {
 
     @Test
     fun `Executing authenticated GET request should succeed`() {
-        val backendApi = manager.microservices["backend-api"]!!
         backendApi.authenticate(UsernamePasswordAuthentication("admin", "secret"))
 
         val response = backendApi.get(RelativeUrl("/secured"))
