@@ -1,6 +1,7 @@
 package org.jholsten.me2e.report.result.mapper
 
 import org.jholsten.me2e.report.result.model.ReportEntry
+import org.junit.platform.engine.reporting.ReportEntry as JUnitReportEntry
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
 import org.mapstruct.Named
@@ -18,7 +19,7 @@ internal abstract class ReportEntryMapper {
     }
 
     @Mapping(target = "timestamp", source = "timestamp", qualifiedByName = ["mapTimestamp"])
-    internal abstract fun toInternalDto(reportEntry: org.junit.platform.engine.reporting.ReportEntry): ReportEntry
+    internal abstract fun toInternalDto(reportEntry: JUnitReportEntry): ReportEntry
 
     @Named("mapTimestamp")
     protected fun mapTimestamp(timestamp: LocalDateTime): Instant {

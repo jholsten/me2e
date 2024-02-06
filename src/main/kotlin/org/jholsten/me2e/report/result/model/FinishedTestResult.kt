@@ -42,7 +42,7 @@ class FinishedTestResult(
     /**
      * Summaries of the children of this test or test container.
      * For instance, if this summary describes a Test Class, the children include all tests of this class.
-     * For a leaf, this list is empty.
+     * For a leaf, i.e. a single test and not a test container, this list is empty.
      */
     children: List<TestResult>,
 
@@ -64,37 +64,33 @@ class FinishedTestResult(
 
     /**
      * Number of tests that this result contains.
-     * If this result relates to a single test (i.e. the list of [children]
-     * is empty), the value is set to `1`.
-     * However, if this result relates to a test container, the value
-     * reflects the number of tests contained in the container.
+     * If this result relates to a single test (i.e. the list of [children] is empty), the value is set to `1`.
+     * However, if this result relates to a test container, the value reflects the number of tests contained
+     * in the container.
      */
     numberOfTests: Int,
 
     /**
      * Number of failed tests that this result contains.
-     * If this result relates to a single test (i.e. the list of [children]
-     * is empty), the value is set to `0` or `1`, depending on the status.
-     * However, if this result relates to a test container, the value
-     * reflects the number of failed tests contained in the container.
+     * If this result relates to a single test (i.e. the list of [children] is empty), the value is set to `0` or `1`,
+     * depending on the [status]. However, if this result relates to a test container, the value reflects the number of
+     * failed tests contained in the container.
      */
     numberOfFailures: Int,
 
     /**
      * Number of skipped tests that this result contains.
-     * If this result relates to a single test (i.e. the list of [children]
-     * is empty), the value is set to `0`.
-     * However, if this result relates to a test container, the value
-     * reflects the number of skipped tests contained in the container.
+     * If this result relates to a single test (i.e. the list of [children] is empty), the value is set to `0`.
+     * However, if this result relates to a test container, the value reflects the number of skipped tests contained
+     * in the container.
      */
     numberOfSkipped: Int,
 
     /**
      * Number of aborted tests that this result contains.
-     * If this result relates to a single test (i.e. the list of [children]
-     * is empty), the value is set to `0` or `1`, depending on the status.
-     * However, if this result relates to a test container, the value
-     * reflects the number of skipped tests contained in the container.
+     * If this result relates to a single test (i.e. the list of [children] is empty), the value is set to `0` or `1`,
+     * depending on the [status]. However, if this result relates to a test container, the value reflects the number of
+     * aborted tests contained in the container.
      */
     numberOfAborted: Int,
 
@@ -105,24 +101,24 @@ class FinishedTestResult(
     displayName: String,
 
     /**
-     * Tags associated with the represented test or test container.
+     * Tags associated with this test or test container.
      * @see org.junit.platform.launcher.TestIdentifier.getTags
      */
     tags: Set<String>,
 
     /**
-     * Additional report entries that were published during the test execution.
+     * Additional report entries that were published during the execution of this test or test container.
      */
     val reportEntries: List<ReportEntry>,
 
     /**
      * Logs that were collected for this test execution.
-     * Includes test runner logs as well as Docker container logs.
+     * Includes Test Runner logs as well as Docker container logs.
      */
     var logs: List<AggregatedLogEntry> = listOf(),
 
     /**
-     * Resource usage statistics that were collected for this test execution.
+     * Resource usage statistics of all Docker containers that were collected for this test execution.
      */
     var stats: List<AggregatedStatsEntry> = listOf(),
 

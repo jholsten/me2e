@@ -1,3 +1,5 @@
+@file:JvmSynthetic
+
 package org.jholsten.me2e.report.result.utils
 
 import org.jholsten.me2e.report.result.model.TestResult
@@ -8,9 +10,8 @@ import java.time.Instant
 
 /**
  * Calculates the success rate of a test result using the given metrics.
- * The success rate is defined as the relative share of successful tests
- * in the total number of tests, while ignoring skipped tests.
- * Returns `null` in case the result contains only skipped tests (i.e.
+ * The success rate is defined as the relative share of successful tests in the total number of tests,
+ * while ignoring skipped tests. Returns `null` in case the result contains only skipped tests (i.e.
  * [numberOfSkipped] is equal to [numberOfTests]).
  * @param numberOfTests Number of tests that were executed.
  * @param numberOfFailures Number of failed tests.
@@ -38,8 +39,7 @@ internal fun calculateDurationInSeconds(startTime: Instant, endTime: Instant): B
 }
 
 /**
- * Returns all descendants of the supplied [parent], i.e. all of its
- * children and their children, recursively.
+ * Returns all descendants of the supplied [parent], i.e. all of its children and their children, recursively.
  */
 internal fun getDescendants(parent: TestResult): List<TestResult> {
     val descendants: MutableList<TestResult> = mutableListOf()

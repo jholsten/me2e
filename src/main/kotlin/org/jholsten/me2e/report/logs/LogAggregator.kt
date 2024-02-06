@@ -13,19 +13,18 @@ import org.slf4j.LoggerFactory
 /**
  * Service which collects all log entries from all containers and from the Test Runner.
  */
-class LogAggregator internal constructor() {
+internal class LogAggregator internal constructor() {
     private val logger = logger(this)
 
     /**
-     * Map of container specification and log collector.
-     * For each container instance, there is one collector which collects
-     * the container's logs of the current test execution.
+     * Map of container specification and corresponding log collector.
+     * For each container instance, there is one collector which captures the container's logs.
      */
-    private val consumers: MutableMap<ServiceSpecification, ContainerLogCollector> = mutableMapOf()
+    private val containerLogCollectors: MutableMap<ServiceSpecification, ContainerLogCollector> = mutableMapOf()
 
     /**
      * Consumer of the Test Runner's logs.
-     * Records all logs which are output to any SLF4J logger.
+     * Records all log entries which are output to any SLF4J logger.
      */
     private lateinit var testRunnerLogCollector: TestRunnerLogCollector
 
@@ -42,19 +41,22 @@ class LogAggregator internal constructor() {
     /**
      * Initializes the collector for consuming container logs when the [container] was started.
      * Attaches log consumer to the container to start capturing its logs.
+     * @param container Container which has been started and whose logs should be captured.
+     * @param specification Representation of the [container] instance.
      */
     @JvmSynthetic
     internal fun onContainerStarted(container: Container, specification: ServiceSpecification) {
         val consumer = ContainerLogCollector(specification)
-        this.consumers[specification] = consumer
+        this.containerLogCollectors[specification] = consumer
         container.addLogConsumer(consumer)
         logger.info("Attached log consumer to container ${container.name}.")
     }
 
     /**
-     * Callback function to execute when the execution of all tests has finished.
-     * Collects logs from the test runner.
-     * @return Collected log entries.
+     * Callback function to execute when the execution of one test has finished. Collects logs from the Test Runner.
+     * When invoking this method, the log entries previously collected in the collector are reset so that the logs
+     * can be distinctly assigned to the tests.
+     * @return Collected log entries from the Test Runner.
      */
     @JvmSynthetic
     internal fun collectTestRunnerLogs(): List<AggregatedLogEntry> {
@@ -62,20 +64,27 @@ class LogAggregator internal constructor() {
     }
 
     /**
-     * Callback function to execute when the execution of all tests has finished.
-     * Collects logs from all containers.
-     * @return Collected log entries.
+     * Callback function to execute when the execution of all tests has finished. Collects logs from all containers.
+     * Unlike the collector of the Test Runner's logs, there may be delays in the arrival of the log entries with the
+     * containers. If a container is currently busy, its logs may not be consumed until later which would lead to the
+     * logs being assigned to the wrong test. Therefore, the logs of the containers are only collected after all tests
+     * have been executed and assigned to the corresponding tests via their timestamps.
+     * @return Collected log entries from all containers.
      */
     @JvmSynthetic
     internal fun collectContainerLogs(): List<AggregatedLogEntry> {
         val logs = mutableListOf<AggregatedLogEntry>()
-        for (consumer in consumers.values) {
+        for (consumer in containerLogCollectors.values) {
             logs.addAll(consumer.collect())
         }
         logs.sortBy { it.timestamp }
         return logs.toList()
     }
 
+    /**
+     * Attaches log consumer [testRunnerLogCollector] to the Test Runner's root logger.
+     * Formats each captured log message using a predefined format.
+     */
     private fun consumeTestRunnerLogs() {
         val loggerContext = LoggerFactory.getILoggerFactory() as LoggerContext
         val testRunnerLayout = PatternLayout()

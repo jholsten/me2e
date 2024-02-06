@@ -5,8 +5,7 @@ import java.math.BigDecimal
 
 /**
  * Result of the execution of all tests.
- * Contains metrics about the number of tests and their duration
- * as well as the details of each test execution.
+ * Contains metrics about the number of tests and their duration as well as the details of each test execution.
  */
 class TestExecutionResult(
     /**
@@ -30,7 +29,7 @@ class TestExecutionResult(
     val numberOfAborted: Int,
 
     /**
-     * Roots of all tests that have been performed along with their detailed test results.
+     * Roots of all tests included in this result along with their detailed test results.
      * Typically, this list contains the executed test classes, whose children in turn contain
      * the executed tests. Along with nested classes and parameterized tests, this forms a tree
      * of the results of all executed tests, which may span over several levels.
@@ -52,6 +51,10 @@ class TestExecutionResult(
      */
     val duration: BigDecimal? = calculateDuration()
 
+    /**
+     * Calculates the overall duration of the test execution by building the sum over the execution
+     * of all finished tests. Returns `null` in case all tests were skipped.
+     */
     private fun calculateDuration(): BigDecimal? {
         val finishedTests = roots.filterIsInstance<FinishedTestResult>()
         if (finishedTests.isEmpty()) {
@@ -59,6 +62,4 @@ class TestExecutionResult(
         }
         return finishedTests.sumOf { it.duration }
     }
-
-
 }

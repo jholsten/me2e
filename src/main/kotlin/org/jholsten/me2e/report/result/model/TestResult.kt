@@ -7,6 +7,8 @@ import org.jholsten.me2e.utils.toJson
  * Summary of the execution of a single test or test container.
  * A test container may be for example a Test Class, [org.junit.jupiter.api.Nested] Class
  * or a [org.junit.jupiter.params.ParameterizedTest].
+ * @see FinishedTestResult
+ * @see SkippedTestResult
  */
 abstract class TestResult(
     /**
@@ -38,7 +40,7 @@ abstract class TestResult(
     /**
      * Summaries of the children of this test or test container.
      * For instance, if this summary describes a Test Class, the children include all tests of this class.
-     * For a leaf, this list is empty.
+     * For a leaf, i.e. a single test and not a test container, this list is empty.
      */
     val children: List<TestResult>,
 
@@ -50,37 +52,33 @@ abstract class TestResult(
 
     /**
      * Number of tests that this result contains.
-     * If this result relates to a single test (i.e. the list of [children]
-     * is empty), the value is set to `1`.
-     * However, if this result relates to a test container, the value
-     * reflects the number of tests contained in the container.
+     * If this result relates to a single test (i.e. the list of [children] is empty), the value is set to `1`.
+     * However, if this result relates to a test container, the value reflects the number of tests contained
+     * in the container.
      */
     val numberOfTests: Int,
 
     /**
      * Number of failed tests that this result contains.
-     * If this result relates to a single test (i.e. the list of [children]
-     * is empty), the value is set to `0` or `1`, depending on the status.
-     * However, if this result relates to a test container, the value
-     * reflects the number of failed tests contained in the container.
+     * If this result relates to a single test (i.e. the list of [children] is empty), the value is set to `0` or
+     * `1`, depending on the [status]. However, if this result relates to a test container, the value reflects the
+     * number of failed tests contained in the container.
      */
     val numberOfFailures: Int,
 
     /**
      * Number of skipped tests that this result contains.
-     * If this result relates to a single test (i.e. the list of [children]
-     * is empty), the value is set to `0` or `1`, depending on the status.
-     * However, if this result relates to a test container, the value
-     * reflects the number of skipped tests contained in the container.
+     * If this result relates to a single test (i.e. the list of [children] is empty), the value is set to `0` or
+     * `1`, depending on the [status]. However, if this result relates to a test container, the value reflects the
+     * number of skipped tests contained in the container.
      */
     val numberOfSkipped: Int,
 
     /**
      * Number of aborted tests that this result contains.
-     * If this result relates to a single test (i.e. the list of [children]
-     * is empty), the value is set to `0` or `1`, depending on the status.
-     * However, if this result relates to a test container, the value
-     * reflects the number of skipped tests contained in the container.
+     * If this result relates to a single test (i.e. the list of [children] is empty), the value is set to `0` or
+     * `1`, depending on the [status]. However, if this result relates to a test container, the value reflects the
+     * number of aborted tests contained in the container.
      */
     val numberOfAborted: Int,
 
@@ -91,7 +89,7 @@ abstract class TestResult(
     val displayName: String,
 
     /**
-     * Tags associated with the represented test or test container.
+     * Tags associated with this test or test container.
      * @see org.junit.platform.launcher.TestIdentifier.getTags
      */
     val tags: Set<String>,
@@ -119,7 +117,7 @@ abstract class TestResult(
         ABORTED,
 
         /**
-         * Indicates that the execution of the test or test container failed.
+         * Indicates that the execution of the test or test container has failed.
          */
         FAILED,
 

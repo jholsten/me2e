@@ -6,7 +6,10 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.time.Instant
 
 /**
- * Represents one captured HTTP packet.
+ * Representation of one captured HTTP packet. May be either a request or a response.
+ * Corresponds to the DTO which is transferred by the [docker-traffic-capturer](https://gitlab.informatik.uni-bremen.de/jholsten/docker-traffic-capturer).
+ * @see HttpRequestPacket
+ * @see HttpResponsePacket
  */
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,

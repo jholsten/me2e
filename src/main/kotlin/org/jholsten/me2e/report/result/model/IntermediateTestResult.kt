@@ -9,9 +9,8 @@ import java.time.Instant
 
 /**
  * Intermediate summary of the execution of a single test or test container.
- * Contains all data for a test and its result during the test execution.
- * As certain information can only be determined after all tests have been
- * executed, this model is converted into a [TestResult] after the execution
+ * Contains all data for a test and its result during the test execution. As certain information can only be
+ * determined after all tests have been executed, this model is converted into a [TestResult] after the execution
  * of all tests has finished.
  */
 internal class IntermediateTestResult(
@@ -19,8 +18,7 @@ internal class IntermediateTestResult(
      * Unique identifier of the test or test container.
      * @see org.junit.platform.launcher.TestIdentifier.getUniqueId
      */
-    @JvmSynthetic
-    val testId: String,
+    private val testId: String,
 
     /**
      * ID of the parent of this test or test container.
@@ -34,47 +32,41 @@ internal class IntermediateTestResult(
      * Status of the test execution.
      * @see org.junit.platform.engine.TestExecutionResult.getStatus
      */
-    @JvmSynthetic
-    var status: TestResult.Status? = null,
+    private var status: TestResult.Status? = null,
 
     /**
      * Timestamp of when this test or test container has started its execution.
      * Only set for tests for which the status is not [TestResult.Status.SKIPPED].
      */
-    @JvmSynthetic
-    val startTime: Instant? = null,
+    private val startTime: Instant? = null,
 
     /**
      * Timestamp of when this test or test container has finished its execution.
      * Only set for tests for which the status is not [TestResult.Status.SKIPPED].
      */
-    @JvmSynthetic
-    var endTime: Instant? = null,
+    private var endTime: Instant? = null,
 
     /**
      * Human-readable name of the test or test container.
      * @see org.junit.platform.launcher.TestIdentifier.getDisplayName
      */
-    @JvmSynthetic
-    val displayName: String,
+    private val displayName: String,
 
     /**
-     * Tags associated with the represented test or test container.
+     * Tags associated with this test or test container.
      * @see org.junit.platform.launcher.TestIdentifier.getTags
      */
-    @JvmSynthetic
-    val tags: Set<String>,
+    private val tags: Set<String>,
 
     /**
-     * Additional report entries that were published during the test execution.
+     * Additional report entries that were published during the execution of this test or test container.
      * Only set for tests for which the status is not [TestResult.Status.SKIPPED].
      */
     @JvmSynthetic
     var reportEntries: MutableList<ReportEntry> = mutableListOf(),
 
     /**
-     * Logs that were collected for this test execution.
-     * Includes test runner logs as well as Docker container logs.
+     * Logs from the Test Runner that were collected for this test execution.
      * Only set for tests for which the status is not [TestResult.Status.SKIPPED].
      */
     @JvmSynthetic
@@ -85,17 +77,21 @@ internal class IntermediateTestResult(
      * Only set for tests for which the status is not [TestResult.Status.SKIPPED].
      * @see org.junit.platform.engine.TestExecutionResult.getThrowable
      */
-    @JvmSynthetic
-    var throwable: Throwable? = null,
+    private var throwable: Throwable? = null,
 
     /**
      * Message describing why the execution has been skipped.
      * Only set for tests with status [TestResult.Status.SKIPPED].
      */
-    @JvmSynthetic
-    var skippingReason: String? = null,
+    private var skippingReason: String? = null,
 ) {
     companion object {
+        /**
+         * Creates and instance of [IntermediateTestResult] representing a test or test container for which the
+         * execution has just been started. Parses information from the given identifier supplied by JUnit and
+         * sets the start time of the test to the current timestamp.
+         * @param testIdentifier Identifier of the started test.
+         */
         @JvmSynthetic
         fun started(testIdentifier: TestIdentifier): IntermediateTestResult {
             return IntermediateTestResult(
@@ -108,7 +104,9 @@ internal class IntermediateTestResult(
         }
 
         /**
-         * Creates an instance of [IntermediateTestResult] representing a test or test container for which the execution was skipped.
+         * Creates an instance of [IntermediateTestResult] representing a test or test container for which the
+         * execution was skipped. Parses information from the given identifier supplied by JUnit and sets the
+         * reason of why the execution has been skipped.
          * @param testIdentifier Identifier of the skipped test.
          * @param reason Message describing why the execution has been skipped.
          */
@@ -126,11 +124,11 @@ internal class IntermediateTestResult(
     }
 
     /**
-     * Creates an instance of [IntermediateTestResult] representing a test or test container for which the execution was finished.
-     * @param testIdentifier Identifier of the finished test or test container.
-     * @param testExecutionResult Result of the execution for the supplied [testIdentifier].
-     * @param startTime Timestamp of when this test or test container has started its execution.
-     * @param reportEntries Report entries that were published during the test execution.
+     * Marks the test represented by this instance as finished. Sets the provided additional information which
+     * are available only after the execution has finished.
+     * @param testExecutionResult Result of the execution for this test or test container.
+     * @param reportEntries Report entries that were published during the execution of this test or test container.
+     * @param logs Logs which were captured during the execution of this test or test container.
      */
     @JvmSynthetic
     fun finished(testExecutionResult: TestExecutionResult, reportEntries: List<ReportEntry>, logs: List<AggregatedLogEntry>) {
@@ -142,7 +140,7 @@ internal class IntermediateTestResult(
     }
 
     /**
-     * Generates [TestResult] instance from this intermediate result.
+     * Generates [TestResult] instance from this intermediate result with the provided information.
      * @param source Source where this test or test container is defined.
      * @param parents Parents of this result in the overall test execution tree.
      * @param children Children of this test or test container.

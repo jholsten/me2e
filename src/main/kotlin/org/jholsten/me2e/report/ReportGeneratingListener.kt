@@ -9,16 +9,14 @@ import org.junit.platform.launcher.TestIdentifier
 import org.junit.platform.launcher.TestPlan
 
 /**
- * Test executing listener which collects relevant data after each test execution
- * and generates the test report after all tests were executed.
- * This listener is automatically detected by JUnit.
+ * Test execution listener which collects relevant data after each test execution and generates the
+ * test report after all tests were executed. This listener is automatically detected by JUnit.
  */
 @AutoService(TestExecutionListener::class)
-class ReportGeneratingListener : TestExecutionListener {
+internal class ReportGeneratingListener : TestExecutionListener {
 
     /**
      * Callback function which is executed when the execution of a test or test container is about to be started.
-     * Records the start time of the test for the test report.
      * @param testIdentifier Identifier of the test or test container about to be started.
      */
     override fun executionStarted(testIdentifier: TestIdentifier?) {
@@ -31,7 +29,6 @@ class ReportGeneratingListener : TestExecutionListener {
      * Callback function which is executed when the execution of a test or a test container has finished.
      * Is called after all [org.junit.jupiter.api.AfterEach] and [org.junit.jupiter.api.AfterAll] methods
      * have finished running.
-     * Collects relevant data from the Docker containers for the test report and stores the execution result.
      * @param testIdentifier Identifier of the finished test or container.
      * @param testExecutionResult Result of the execution for the supplied [testIdentifier]
      */
@@ -43,7 +40,6 @@ class ReportGeneratingListener : TestExecutionListener {
 
     /**
      * Callback function which is executed when a test or a test container has been skipped.
-     * Stores relevant data for the test report.
      * @param testIdentifier Identifier of the skipped test or container.
      * @param reason Message describing why the execution has been skipped.
      */
@@ -56,7 +52,6 @@ class ReportGeneratingListener : TestExecutionListener {
     /**
      * Callback function which is executed when additional test reporting data has been published
      * via the [org.junit.jupiter.api.TestReporter].
-     * Includes entry in test report.
      * @param testIdentifier Describes the test or container to which the entry pertains.
      * @param entry The published [ReportEntry].
      */
@@ -68,7 +63,6 @@ class ReportGeneratingListener : TestExecutionListener {
 
     /**
      * Callback function which is executed before the execution of the tests starts.
-     * Initializes all data collectors.
      * @param testPlan Describes the tree of tests about to be executed.
      */
     override fun testPlanExecutionStarted(testPlan: TestPlan?) {
@@ -77,7 +71,6 @@ class ReportGeneratingListener : TestExecutionListener {
 
     /**
      * Callback function which is executed after all tests have been executed.
-     * Generates report using the [org.jholsten.me2e.report.result.ReportGenerator].
      * @param testPlan Describes the tree of tests that have been executed.
      */
     override fun testPlanExecutionFinished(testPlan: TestPlan) {

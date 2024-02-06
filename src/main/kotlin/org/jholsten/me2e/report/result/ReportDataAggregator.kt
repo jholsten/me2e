@@ -34,7 +34,7 @@ import kotlin.reflect.full.primaryConstructor
  * Once all tests have been executed, the collected data is aggregated and transferred to the
  * [ReportGenerator] to generate the test report.
  */
-class ReportDataAggregator private constructor() {
+internal class ReportDataAggregator private constructor() {
     companion object {
         private val logger = logger(this)
 

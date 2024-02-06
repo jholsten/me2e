@@ -14,14 +14,14 @@ class IndexTemplateData(context: Context) : TemplateData(context) {
     class Builder : TemplateData.Builder<Builder>() {
         /**
          * Sets variables for the data contained in the given [result].
-         * The following variables are available in the template:
+         * Subsequently, following variables are available in the template:
          * - `numberOfTests:` [Int] - Total number of tests that were executed (see [TestExecutionResult.numberOfTests]).
          * - `numberOfFailures:` [Int] - Total number of failed tests (see [TestExecutionResult.numberOfFailures]).
          * - `numberOfSkipped:` [Int] - Total number of tests which were skipped (see [TestExecutionResult.numberOfSkipped]).
          * - `numberOfAborted:` [Int] - Total number of tests which were aborted (see [TestExecutionResult.numberOfAborted]).
          * - `successRate:` [Int]? - Relative share of successful tests in the number of tests that the result contains (see [TestExecutionResult.successRate]).
          * - `duration:` [java.math.BigDecimal]? - Number of seconds that executing all tests took (see [TestExecutionResult.duration]).
-         * - `roots:` [List]<[TestResult]> - Roots of all tests that have been performed (see [TestExecutionResult.roots]).
+         * - `roots:` [List]<[TestResult]> - Roots of all tests included in the result (see [TestExecutionResult.roots]).
          * - `allTests:` [List]<[TestResult]> - All tests and test containers included in the result, i.e. all of the [TestExecutionResult.roots],
          * their children and their children, recursively.
          */
@@ -44,6 +44,11 @@ class IndexTemplateData(context: Context) : TemplateData(context) {
             return this
         }
 
+        /**
+         * Returns all tests and test containers included in the result, i.e. all of the [TestExecutionResult.roots],
+         * their children and their children, recursively.
+         * @param result Test execution result for which all tests should be retrieved.
+         */
         private fun getAllTests(result: TestExecutionResult): List<TestResult> {
             val tests: MutableList<TestResult> = mutableListOf()
             for (root in result.roots) {

@@ -9,7 +9,6 @@ import java.nio.charset.Charset
 
 /**
  * Engine which fills HTML templates using Thymeleaf.
- * TODO: https://stackoverflow.com/questions/75954551/how-to-use-javax-mail-with-thymeleaf
  */
 class TemplateEngine(
     /**

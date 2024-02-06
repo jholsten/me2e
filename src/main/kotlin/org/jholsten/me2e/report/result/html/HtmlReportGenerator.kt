@@ -16,24 +16,30 @@ import java.time.Instant
 
 /**
  * Report generator which generates an HTML test report.
+ * Includes an overview of all test results in an `index.html` file and detailed results for each test
+ * class, each in a separate HTML file. To generate the HTML files, [Thymeleaf](https://www.thymeleaf.org/)
+ * is used, which generates files from a template using a [org.thymeleaf.context.Context] instance, which
+ * is filled with variables containing the test results.
+ * To extend or modify this report generator, implement a subclass and set its reference in your project's
+ * [org.jholsten.me2e.Me2eTestConfig.reportGenerators].
  */
 open class HtmlReportGenerator(
     /**
      * Path to the Thymeleaf template to use for the `index.html`.
-     * Needs to be located in resources folder.
+     * Needs to be located in `resources` folder.
      */
     protected val indexTemplate: String = "report/templates/index.html",
 
     /**
-     * Path to the Thymeleaf template to use for the details of the execution of one test.
-     * Needs to be located in resources folder.
+     * Path to the Thymeleaf template to use for the details of the execution of one test class.
+     * Needs to be located in `resources` folder.
      */
     protected val testDetailTemplate: String = "report/templates/test-detail.html",
 
     /**
      * Additional resources required for the templates (e.g. `.css` or `.js` files) to be
      * copied to the [outputDirectory] as map of source path and destination path.
-     * All source files need to be located in resources folder.
+     * All source files need to be located in `resources` folder.
      */
     protected val additionalResources: Map<String, String> = mapOf(
         "report/css/report-style.css" to "css/report-style.css",
@@ -47,8 +53,23 @@ open class HtmlReportGenerator(
     protected val outputDirectory: String = "build/reports/me2e"
 ) : ReportGenerator() {
     private val logger = LoggerFactory.getLogger(HtmlReportGenerator::class.java)
+
+    /**
+     * Result of the test execution for which report is to be generated.
+     * Is set after the test execution has finished when [generate] is invoked.
+     */
     protected lateinit var result: TestExecutionResult
-    private lateinit var generationTimestamp: Instant
+
+    /**
+     * Timestamp of when this report was generated.
+     */
+    protected lateinit var generationTimestamp: Instant
+
+    /**
+     * URL to the HTML file which contains the overview of the test results.
+     * Is logged after the report has been generated so that the user can open the report directly.
+     */
+    protected open val outputLink: String = "file:///${getAbsolutePath("$outputDirectory/index.html")}"
 
     override fun generate(result: TestExecutionResult) {
         generationTimestamp = Instant.now()
@@ -58,10 +79,13 @@ open class HtmlReportGenerator(
         for (root in result.roots) {
             generateTestDetailHtml(root)
         }
-        val absolutePath = FileSystems.getDefault().getPath("$outputDirectory/index.html").toAbsolutePath().toString().replace("\\", "/")
-        logger.info("Generated and stored HTML report at file:///$absolutePath.")
+        logger.info("Generated and stored HTML report at $outputLink.")
     }
 
+    /**
+     * Generates HTML file containing an overview of the test execution's result.
+     * Should create a file named `index.html` in the [outputDirectory].
+     */
     protected open fun generateIndexHtml() {
         val data = IndexTemplateData.Builder()
             .withGenerationTimestamp(generationTimestamp)
@@ -70,6 +94,11 @@ open class HtmlReportGenerator(
         generateHtml(indexTemplate, data, "$outputDirectory/index.html")
     }
 
+    /**
+     * Generates HTML file containing the details of the given test result.
+     * The result represents one test class, which may contain multiple tests and nested test classes.
+     * Should create a file named [TestResult.source]`.html` in directory `sources` in the [outputDirectory].
+     */
     protected open fun generateTestDetailHtml(result: TestResult) {
         val data = TestDetailTemplateData.Builder()
             .withGenerationTimestamp(generationTimestamp)
@@ -78,10 +107,20 @@ open class HtmlReportGenerator(
         generateHtml(testDetailTemplate, data, "$outputDirectory/sources/${result.source}.html")
     }
 
+    /**
+     * Generates HTML file using the given [template], filled with the given [data] and stores the
+     * file in the given [outputPath].
+     * @param template Path to the Thymeleaf template to be filled. Needs to be located in `resources` folder.
+     * @param data Data containing the test results to be inserted into the Thymeleaf template.
+     * @param outputPath Path where generated HTML file should be stored.
+     */
     protected open fun generateHtml(template: String, data: TemplateData, outputPath: String) {
         TemplateEngine(template, data, outputPath).process()
     }
 
+    /**
+     * Copies additional resources required for the test report in the [outputDirectory].
+     */
     protected open fun copyAdditionalResources() {
         for ((source, destination) in additionalResources) {
             val resource = FileUtils.getResourceAsStream(source)
@@ -89,5 +128,13 @@ open class HtmlReportGenerator(
             destinationFile.mkdirs()
             Files.copy(resource, destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
         }
+    }
+
+    /**
+     * Returns absolute path to the given [relativePath], relative to this classpath.
+     * Replaces backslashes with forward slashes to generate OS independent URL.
+     */
+    private fun getAbsolutePath(relativePath: String): String {
+        return FileSystems.getDefault().getPath(relativePath).toAbsolutePath().toString().replace("\\", "/")
     }
 }

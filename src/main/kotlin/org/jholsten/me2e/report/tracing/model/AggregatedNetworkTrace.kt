@@ -25,8 +25,8 @@ data class AggregatedNetworkTrace(
      * If a server itself sends a request to another server to answer a request, the
      * second request is regarded as nested and receives the ID of the original trace
      * as its parent ID. The assignment of parents and children cannot be clearly
-     * determined and is derived on the basis of the timestamps and IP addresses of
-     * the packets.
+     * determined and is derived on the basis of the timestamps, IP addresses and ports
+     * of the packets.
      */
     var parentId: UUID? = null,
 

@@ -17,11 +17,11 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
     class Builder : TemplateData.Builder<Builder>() {
         /**
          * Sets variables for the data contained in the given [result].
-         * The following variables are available in the template:
+         * Subsequently, the following variables are available in the template:
          * - `testId:` [String] - Unique identifier of the test or test container (see [TestResult.testId]).
          * - `source:` [String] - Source of the [TestExecutionResult.roots] where this test or test container is defined (see [TestResult.source]).
          * - `path:` [List]<[Pair]<[String],[String]>> - Path of this result in the overall test execution tree from the root to this test (see [TestResult.path]).
-         * - `children:` [List]<[TestResult]> - Summaries of the children of the test or test container (see [TestResult.children]).
+         * - `children:` [List]<[TestResult]> - Results of the children of the test or test container (see [TestResult.children]).
          * - `allTests:` [List]<[TestResult]> - All tests and test containers included in the result, i.e. the [result], all of the
          * [TestResult.children], their children and their children, recursively.
          * - `status:` [TestResult.Status] - Status of the test execution (see [TestResult.status]).
@@ -37,9 +37,9 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
          * which logged at least one entry for this test. Includes only tests for which logs were captured. Can be used to filter logs by service.
          * - `tracesTimeSeries:` [Map]<[String], [List]<[Instant]>> - Map of `testId` and the timestamps of which the time series of the
          * test's traces is composed of. Includes only tests for which traces were captured.
-         * - `startTime:` [java.time.Instant] - Timestamp of the test or test container has started its execution
+         * - `startTime:` [java.time.Instant] - Timestamp of when the test or test container has started its execution
          * (see [FinishedTestResult.startTime]). **Only available if [TestResult.status] is not [TestResult.Status.SKIPPED]**.
-         * - `endTime:` [java.time.Instant] - Timestamp of the test or test container has finished its execution
+         * - `endTime:` [java.time.Instant] - Timestamp of when the test or test container has finished its execution
          * (see [FinishedTestResult.endTime]). **Only available if [TestResult.status] is not [TestResult.Status.SKIPPED]**.
          * - `duration:` [Long] - Number of seconds that the test execution took (see [FinishedTestResult.duration]).
          * **Only available if [TestResult.status] is not [TestResult.Status.SKIPPED]**.
@@ -96,6 +96,11 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
             return this
         }
 
+        /**
+         * Returns all tests and test containers included in the result, i.e. the [result], all of its children
+         * and their children, recursively.
+         * @param result Test result for which all tests should be retrieved.
+         */
         private fun getAllTests(result: TestResult): List<TestResult> {
             val tests: MutableList<TestResult> = mutableListOf(result)
             for (child in result.children) {
@@ -105,6 +110,11 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
             return tests
         }
 
+        /**
+         * Returns map of container name and their resource usage statistics which were captured for the execution
+         * of the [result] and its children.
+         * @param result Test result for which container statistics grouped by container names should be retrieved.
+         */
         private fun getStatsByContainer(result: TestResult): Map<String, List<AggregatedStatsEntry>> {
             return if (result is FinishedTestResult) {
                 result.stats.groupBy { it.service.name }
@@ -114,8 +124,10 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
         }
 
         /**
-         * Returns map of [TestResult.testId] and a sorted list of services which logged entries
-         * for this test. Can be used to filter logs by services.
+         * Returns map of [TestResult.testId] and a sorted list of services which logged entries for this test.
+         * Can be used to filter logs by services.
+         * @param allTests All tests and test containers included in the result.
+         * @return Map of test ID and the services which logged at least one entry for this test.
          */
         private fun getLoggingServices(allTests: List<TestResult>): Map<String, List<ServiceSpecification>> {
             val result: MutableMap<String, List<ServiceSpecification>> = mutableMapOf()
@@ -128,7 +140,10 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
 
         /**
          * Returns map of [TestResult.testId] and the list of timestamps of which the time series of
-         * the test's traces is composed of. Only includes tests for which traces were captured.
+         * the test's traces is composed of. Each timeslot is 100 milliseconds long.
+         * Only includes tests for which traces were captured.
+         * @param allTests All tests and test containers included in the result.
+         * @return Map of test ID and the timeslots of which the trace's time series is composed of.
          */
         private fun getTracesTimeSeries(allTests: List<TestResult>): Map<String, List<Instant>> {
             val result: MutableMap<String, List<Instant>> = mutableMapOf()
@@ -156,6 +171,12 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
             return this.floor().plusMillis(100)
         }
 
+        /**
+         * Returns all timeslots starting from [seriesStart] up to [seriesEnd], each of which is 100 milliseconds long.
+         * @param seriesStart First timestamp of the series.
+         * @param seriesEnd Last timestamp of the series.
+         * @return List of 100 milliseconds timeslots starting from [seriesStart] up to [seriesEnd].
+         */
         private fun getTimeSeries(seriesStart: Instant, seriesEnd: Instant): List<Instant> {
             val result: MutableList<Instant> = mutableListOf()
             var current = seriesStart

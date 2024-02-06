@@ -5,11 +5,11 @@ import org.jholsten.me2e.report.logs.model.ServiceSpecification
 import java.time.Instant
 
 /**
- * Model representing one resource usage statistics entry from one service.
+ * Model representing one resource usage statistics entry from one Docker container.
  */
 class AggregatedStatsEntry(
     /**
-     * Service for which this entry was collected.
+     * Container for which this entry was collected.
      */
     val service: ServiceSpecification,
 

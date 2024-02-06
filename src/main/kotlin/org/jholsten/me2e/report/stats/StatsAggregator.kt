@@ -5,19 +5,23 @@ import org.jholsten.me2e.report.logs.model.ServiceSpecification
 import org.jholsten.me2e.report.stats.model.AggregatedStatsEntry
 import org.jholsten.me2e.utils.logger
 
-class StatsAggregator internal constructor() {
+/**
+ * Service which collects all statistics entries for all containers.
+ */
+internal class StatsAggregator internal constructor() {
     private val logger = logger(this)
 
     /**
      * Map of container specification and statistics entry collector.
-     * For each container, there is one collector which collects the container's
-     * resource usage statistics for the current test execution.
+     * For each container, there is one collector which captures the container's resource usage statistics.
      */
     private val consumers: MutableMap<ServiceSpecification, ContainerStatsCollector> = mutableMapOf()
 
     /**
      * Initializes the collector for consuming container statistics when the [container] was started.
      * Attaches statistics consumer to the container to start capturing its resource usage statistics.
+     * @param container Container which has been started and whose resource usage should be captured.
+     * @param specification Representation of the [container] instance.
      */
     @JvmSynthetic
     internal fun onContainerStarted(container: Container, specification: ServiceSpecification) {
@@ -28,8 +32,7 @@ class StatsAggregator internal constructor() {
     }
 
     /**
-     * Callback function to execute when the execution of all tests has finished.
-     * Collects statistics from all containers.
+     * Callback function to execute when the execution of all tests has finished. Collects statistics from all containers.
      * @return Collected statistics entries.
      */
     @JvmSynthetic

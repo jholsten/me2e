@@ -14,11 +14,10 @@ import java.lang.Exception
 import java.time.Instant
 
 /**
- * Service which aggregates all HTTP packets sent in the Docker networks,
- * which the containers are part of. Enables to trace requests and responses.
- * Matches IP addresses to the associated services.
+ * Service which aggregates all HTTP packets sent in the Docker networks, which the containers are part of.
+ * Enables to trace requests and responses. Matches IP addresses to the associated services.
  */
-class NetworkTraceAggregator {
+internal class NetworkTraceAggregator {
     companion object {
         private val logger = logger(this)
 
@@ -112,6 +111,8 @@ class NetworkTraceAggregator {
      * Initializes collectors for capturing HTTP traffic in the networks of the given [container].
      * Registers the container with its IP address and instantiates a network trace collector for
      * each of its networks, if this network is not already being monitored.
+     * @param container Container which has been started and for which the network traffic should be captured.
+     * @param specification Representation of the [container] instance.
      */
     @JvmSynthetic
     internal fun onContainerStarted(container: Container, specification: ServiceSpecification) {
@@ -119,8 +120,10 @@ class NetworkTraceAggregator {
             try {
                 initializeNetworkTraceCollector(networkName, network)
             } catch (e: Exception) {
-                logger.warn("Unable to initialize network trace collector for network $network. Cannot capture HTTP traffic for this network.")
-                e.printStackTrace()
+                logger.warn(
+                    "Unable to initialize network trace collector for network $network. Cannot capture HTTP traffic for this network.",
+                    e
+                )
                 continue
             }
             registerContainer(network, container, specification)
@@ -131,8 +134,10 @@ class NetworkTraceAggregator {
     /**
      * Collects and aggregates all captured packets in all networks.
      * Associates packets with the corresponding tests by their timestamps.
+     * @param roots Roots of the test execution tree.
      */
-    fun collectPackets(roots: List<FinishedTestResult>) {
+    @JvmSynthetic
+    internal fun collectPackets(roots: List<FinishedTestResult>) {
         logger.info("Collecting packets...")
         // Since network capturing may be delayed by a couple of milliseconds, we wait a little bit
         Thread.sleep(1000)
@@ -153,6 +158,7 @@ class NetworkTraceAggregator {
      * Aggregates the given packets into [AggregatedNetworkTrace] instances, each of which represents an
      * HTTP request along with the associated HTTP response. Matches source and destination IP addresses
      * to the corresponding network nodes.
+     * @param packets All HTTP packets captured in all registered networks.
      */
     private fun aggregateTraces(packets: MutableList<HttpPacket>): MutableList<AggregatedNetworkTrace> {
         val requestResponses: Map<HttpRequestPacket, HttpResponsePacket> = findRequestResponsePairs(packets)
@@ -200,6 +206,7 @@ class NetworkTraceAggregator {
      * Finds all pairs of request and response packet in the given list of all captured packets.
      * If no corresponding request can be found for a response, it is ignored.
      * @return Map of all associated request and response pairs.
+     * @param packets All HTTP packets captured in all registered networks.
      */
     private fun findRequestResponsePairs(packets: MutableList<HttpPacket>): Map<HttpRequestPacket, HttpResponsePacket> {
         packets.sortBy { it.timestamp }
@@ -308,15 +315,9 @@ class NetworkTraceAggregator {
     }
 
     /**
-     * Matches network traces to the given test, if it is not a test container (i.e. it does not contain any children).
-     * If it is a test container, however, the traces are assigned to its children. The first child receives all traces
-     * since the start of its parent, to capture all traces that were triggered in a `@BeforeAll` method. The last child
-     * receives all traces that were recorded up to the end of its parent in order to also capture the traces triggered
-     * in a `@AfterAll` method.
+     * Matches network traces to the given test according to their timestamps.
      * @param test Test for which corresponding traces are to be matched.
-     * @param parentStart Start time of the test's parent. Only set if [test] is its first child.
-     * @param parentEnd End time of the test's parent. Only set if [test] is its last child.
-     * @param traces All traces captured from all networks.
+     * @param traces All traces captured from registered all networks.
      * @param testTraces Tests with their associated traces assigned so far.
      */
     private fun matchTracesToTest(
@@ -412,7 +413,7 @@ class NetworkTraceAggregator {
     }
 
     /**
-     * Initializes a network trace collector for the given network if it not already being monitored.
+     * Initializes a network trace collector for the given network if it is not already being monitored.
      * Registers a network node specification for the network's gateway, if available.
      */
     private fun initializeNetworkTraceCollector(networkName: String, network: ContainerNetwork) {

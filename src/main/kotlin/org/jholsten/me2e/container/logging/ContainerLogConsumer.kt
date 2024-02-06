@@ -15,9 +15,9 @@ abstract class ContainerLogConsumer : Consumer<OutputFrame> {
     private val logger = LoggerFactory.getLogger(ContainerLogConsumer::class.java)
 
     /**
-     * Callback function to execute when a container logs a new entry. Empty messages are ignored
-     * by the underlying consumer, so that this function is not called when a message does not
-     * contain any non-whitespace characters.
+     * Callback function which is executed when a container logs a new entry. Empty messages are
+     * ignored by the underlying consumer, so that this function is not called when a message does
+     * not contain any non-whitespace characters.
      * When registering the consumer, all previous log entries are received.
      * @param entry Log entry received from the Docker container.
      */

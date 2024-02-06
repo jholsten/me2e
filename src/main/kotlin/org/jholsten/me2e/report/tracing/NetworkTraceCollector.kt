@@ -12,13 +12,13 @@ import java.lang.Exception
 /**
  * Service which collects all HTTP packets sent in the Docker network with ID [networkId].
  * Uses the [docker-traffic-capturer](https://gitlab.informatik.uni-bremen.de/jholsten/docker-traffic-capturer)
- * to sniff the packets which were sent in the network. Note that HTTPS packets are not captured.
+ * to sniff the packets which were sent in the network. Note that HTTPS packets are *not* captured.
  * As there can be delays when receiving and processing the captured packets in the `docker-traffic-capturer`
  * and the packets are not available immediately after the test execution, they are only collected after all
  * tests have been executed. The assignment of the packets to the tests then takes place using the timestamps
  * of the captured packets.
  */
-class NetworkTraceCollector(
+internal class NetworkTraceCollector(
     /**
      * ID of the Docker bridge network for which HTTP packets should be collected.
      */
@@ -38,6 +38,7 @@ class NetworkTraceCollector(
     /**
      * Starts container for capturing HTTP packets in the network.
      */
+    @JvmSynthetic
     fun start() {
         capturer.start()
         logger.info("Started network traffic capturer for network ID $networkId")
@@ -47,6 +48,7 @@ class NetworkTraceCollector(
      * Collects HTTP packets sent in this network from the [capturer].
      * @return All packets captured in this network.
      */
+    @JvmSynthetic
     fun collect(): List<HttpPacket> {
         logger.info("Collecting packets from network $networkId...")
         try {
@@ -68,7 +70,14 @@ class NetworkTraceCollector(
     }
 
     companion object {
+        /**
+         * Image to use for the [docker-traffic-capturer](https://gitlab.informatik.uni-bremen.de/jholsten/docker-traffic-capturer).
+         */
         private const val DOCKER_TRAFFIC_CAPTURER_IMAGE = "gitlab.informatik.uni-bremen.de:5005/jholsten/docker-traffic-capturer:latest"
+
+        /**
+         * Deserializer to use for parsing the responses from the [docker-traffic-capturer](https://gitlab.informatik.uni-bremen.de/jholsten/docker-traffic-capturer).
+         */
         private val DESERIALIZER = DeserializerFactory.getObjectMapper()
     }
 }
