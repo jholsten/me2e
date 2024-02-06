@@ -32,6 +32,26 @@ internal class StringMatcherTest {
     }
 
     @Test
+    fun `String matcher with not equals should match`() {
+        val matcher = StringMatcher(notEquals = "ABC")
+
+        assertTrue(matcher.matchesEqual("abc"))
+        assertTrue(matcher.matchesEqual("def"))
+        assertTrue(matcher.matches("abc"))
+        assertTrue(matcher.matches("def"))
+    }
+
+    @Test
+    fun `String matcher with not equals should match ignoring case`() {
+        val matcher = StringMatcher(notEquals = "ABC", ignoreCase = true)
+
+        assertFalse(matcher.matchesEqual("abc"))
+        assertTrue(matcher.matchesEqual("def"))
+        assertFalse(matcher.matches("abc"))
+        assertTrue(matcher.matches("def"))
+    }
+
+    @Test
     fun `String matcher with pattern should match`() {
         val matcher = StringMatcher(matches = "^[A-Z0-9._-]{7}\$", ignoreCase = false)
 
@@ -197,6 +217,12 @@ internal class StringMatcherTest {
             return Stream.of(
                 Arguments.of("equalTo", StringMatcher(equals = value), StringMatcher.equalTo(value)),
                 Arguments.of("equalToIgnoreCase", StringMatcher(equals = value, ignoreCase = true), StringMatcher.equalToIgnoreCase(value)),
+                Arguments.of("notEqualTo", StringMatcher(notEquals = value), StringMatcher.notEqualTo(value)),
+                Arguments.of(
+                    "notEqualToIgnoreCase",
+                    StringMatcher(notEquals = value, ignoreCase = true),
+                    StringMatcher.notEqualToIgnoreCase(value),
+                ),
                 Arguments.of("matching", StringMatcher(matches = value), StringMatcher.matching(value)),
                 Arguments.of("notMatching", StringMatcher(notMatches = value), StringMatcher.notMatching(value)),
                 Arguments.of("containing", StringMatcher(contains = value), StringMatcher.containing(value)),
