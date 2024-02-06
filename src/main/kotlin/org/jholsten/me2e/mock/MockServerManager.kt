@@ -87,24 +87,20 @@ class MockServerManager(
 
     /**
      * Registers all stubs defined for all Mock Servers.
-     * This leads to the Mock Servers responding with the specified response whenever the request matches the specified stub.
+     * This leads to the Mock Servers responding with the specified response whenever the request matches the corresponding stub.
      * @throws IllegalStateException if the Mock Server is not initialized.
      */
-    fun registerAllStubs() {
+    private fun registerAllStubs() {
         for (mockServer in mockServers.values) {
             mockServer.registerStubs()
         }
     }
 
     /**
-     * Resets all stubs and registered requests for all Mock Servers.
-     * @throws IllegalStateException if the Mock Server is not initialized.
+     * Resets all captured requests for all Mock Servers.
      */
     fun resetAll() {
-        for (mockServer in mockServers.values) {
-            mockServer.reset()
-        }
-        wireMockServer.resetAll()
+        wireMockServer.resetRequests()
     }
 
     /**

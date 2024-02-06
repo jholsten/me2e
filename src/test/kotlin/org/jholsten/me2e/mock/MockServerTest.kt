@@ -62,13 +62,11 @@ internal class MockServerTest {
 
     @Test
     fun `Resetting Mock Server should reset stubs and requests`() {
-        every { wireMockServer.removeStubsByMetadata(any()) } just runs
         every { wireMockServer.removeServeEventsForStubsMatchingMetadata(any()) } returns mockk()
         server.initialize(wireMockServer)
         server.reset()
 
         val metadataMatcher = WireMock.matchingJsonPath("$.name", WireMock.equalTo(server.name))
-        verify { wireMockServer.removeStubsByMetadata(metadataMatcher) }
         verify { wireMockServer.removeServeEventsForStubsMatchingMetadata(metadataMatcher) }
     }
 

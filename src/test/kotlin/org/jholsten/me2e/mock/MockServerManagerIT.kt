@@ -165,7 +165,7 @@ internal class MockServerManagerIT {
     }
 
     @Test
-    fun `Resetting Mock Servers should reset stubs and requests`() {
+    fun `Resetting Mock Servers should reset requests`() {
         val manager = startManager()
 
         val response1 = client.execute(HttpGet("http://example.com"))
