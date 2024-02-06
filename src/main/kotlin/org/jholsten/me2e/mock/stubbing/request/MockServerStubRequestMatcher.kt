@@ -30,22 +30,24 @@ class MockServerStubRequestMatcher(
     val method: HttpMethod? = null,
 
     /**
-     * URL path of the request to which the stub should respond. A value of `null` indicates that the
-     * path can be ignored and this stub should respond to all paths.
+     * URL path of the request to which the stub should respond. A value of `null` indicates that the path
+     * can be ignored and this stub should respond to all paths.
+     * To be able to constrain the match to specific path variables, use [StringMatcher.matches] with an
+     * appropriate regular expression.
      */
     val path: StringMatcher? = null,
 
     /**
-     * Headers of the request to which the stub should respond as map of header name and string matcher.
+     * Headers of the request to which the stub should respond as map of case-insensitive header name and string matcher.
      * A value of `null` or an empty map indicates that the request headers can be ignored and this stub
      * should respond to all headers.
      */
     val headers: Map<String, StringMatcher>? = null,
 
     /**
-     * Query parameters of the request to which the stub should respond as map of query parameter name and string
-     * matcher for the values. A value of `null` or an empty map indicates that the query parameters can be ignored
-     * and this stub should respond to all query parameters.
+     * Query parameters of the request to which the stub should respond as map of case-insensitive query parameter name
+     * and string matcher for the values. A value of `null` or an empty map indicates that the query parameters can be
+     * ignored and this stub should respond to all query parameters.
      */
     @JsonProperty("query-parameters")
     val queryParameters: Map<String, StringMatcher>? = null,
@@ -130,6 +132,7 @@ class MockServerStubRequestMatcher(
      * Returns whether the actual headers of the request match the [headers] defined for this stub.
      * The headers are considered as matched if each of the [headers] is present in the actual request and their values
      * are as defined in the corresponding [StringMatcher]. Additional headers in the actual request are ignored.
+     * The keys of the headers are case-insensitive.
      * @param headers Actual headers of the captured request.
      * @return True if either the [headers] defined for this stub should be ignored or if the actual headers
      * of the captured request match the [headers] defined for this stub.
@@ -143,7 +146,7 @@ class MockServerStubRequestMatcher(
         }
 
         for (header in this.headers) {
-            val actualHeader = headers.getHeader(header.key)
+            val actualHeader = headers.getHeader(header.key.lowercase())
             if (!actualHeader.isPresent || !actualHeader.values().any { header.value.matches(it) }) {
                 return false
             }
@@ -156,7 +159,7 @@ class MockServerStubRequestMatcher(
      * Returns whether the actual query parameters of the request match the [queryParameters] defined for this stub.
      * The query parameters are considered as matched if each of the [queryParameters] is present in the actual request
      * and their values are as defined in the corresponding [StringMatcher]. Additional query parameters in the actual
-     * request are ignored.
+     * request are ignored. The keys of the query parameters are case-insensitive.
      * @param request Actual captured request.
      * @return True if either the [queryParameters] defined for this stub should be ignored or if the actual query
      * parameters of the captured request match the [queryParameters] defined for this stub.
@@ -168,7 +171,7 @@ class MockServerStubRequestMatcher(
         }
 
         for (parameter in this.queryParameters) {
-            val actualParameter = request.queryParameter(parameter.key)
+            val actualParameter = request.queryParameter(parameter.key.lowercase())
             if (!actualParameter.isPresent || !actualParameter.values().any { parameter.value.matches(it) }) {
                 return false
             }

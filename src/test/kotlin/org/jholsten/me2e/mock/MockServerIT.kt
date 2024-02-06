@@ -103,6 +103,7 @@ class MockServerIT {
                     .withPath(equalTo("/search"))
                     .withMethod(HttpMethod.POST)
                     .withQueryParameter("id", equalTo("123"))
+                    .withQueryParameter("ID", equalTo("123"))
                     .andNoOther()
             )
         }
@@ -135,8 +136,10 @@ class MockServerIT {
                     .withPath(equalTo("/search"))
                     .withMethod(HttpMethod.POST)
                     .withQueryParameter("id", equalTo("123"))
+                    .withQueryParameter("ID", equalTo("123"))
                     .withRequestBody(containing("some-key").and(containing("some-value")))
                     .withHeader("header1", equalTo("headerValue"))
+                    .withHeader("HEADER1", equalTo("headerValue"))
                     .andNoOther()
             )
         }
