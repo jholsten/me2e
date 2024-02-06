@@ -578,7 +578,7 @@
                                                             <span th:if="${client != null}">
                                                                 <i class="fas fa-square" th:styleappend="'color:' + ${client.color}"
                                                                    style="font-size: 14px; vertical-align: 1px;"></i>
-                                                                <span th:if="${client.nodeType.name == 'SERVICE'}">
+                                                                <span th:if="${client.nodeType.name == 'CONTAINER' || client.nodeType.name == 'TEST_RUNNER'}">
                                                                     <span th:text="${client.name}"></span>
                                                                 </span>
                                                                 <span th:if="${client.nodeType.name == 'MOCK_SERVER'}">
@@ -602,7 +602,7 @@
                                                             <span th:if="${server != null}">
                                                                 <i class="fas fa-square" th:styleappend="'color:' + ${server.color}"
                                                                    style="font-size: 14px; vertical-align: 1px;"></i>
-                                                                <span th:if="${server.nodeType.name == 'SERVICE'}">
+                                                                <span th:if="${server.nodeType.name == 'CONTAINER' || server.nodeType.name == 'TEST_RUNNER'}">
                                                                     <span th:text="${server.name}"></span>
                                                                 </span>
                                                                 <span th:if="${server.nodeType.name == 'MOCK_SERVER'}">
@@ -656,7 +656,7 @@
                                                             <span th:if="${server != null}">
                                                                 <i class="fas fa-square" th:styleappend="'color:' + ${server.color}"
                                                                    style="font-size: 14px; vertical-align: 1px;"></i>
-                                                                <span th:if="${server.nodeType.name == 'SERVICE'}">
+                                                                <span th:if="${server.nodeType.name == 'CONTAINER' || server.nodeType.name == 'TEST_RUNNER'}">
                                                                     <span th:text="${server.name}"></span>
                                                                 </span>
                                                                 <span th:if="${server.nodeType.name == 'MOCK_SERVER'}">
@@ -680,7 +680,7 @@
                                                             <span th:if="${client != null}">
                                                                 <i class="fas fa-square" th:styleappend="'color:' + ${client.color}"
                                                                    style="font-size: 14px; vertical-align: 1px;"></i>
-                                                                <span th:if="${client.nodeType.name == 'SERVICE'}">
+                                                                <span th:if="${client.nodeType.name == 'CONTAINER' || client.nodeType.name == 'TEST_RUNNER'}">
                                                                     <span th:text="${client.name}"></span>
                                                                 </span>
                                                                 <span th:if="${client.nodeType.name == 'MOCK_SERVER'}">

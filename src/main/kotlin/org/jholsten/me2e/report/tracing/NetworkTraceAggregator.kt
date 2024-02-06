@@ -102,7 +102,7 @@ class NetworkTraceAggregator {
      */
     private val testRunner: NetworkNodeSpecification by lazy {
         NetworkNodeSpecification(
-            nodeType = NetworkNodeSpecification.NodeType.SERVICE,
+            nodeType = NetworkNodeSpecification.NodeType.TEST_RUNNER,
             ipAddress = hostIpAddress,
             specification = ReportDataAggregator.testRunner,
         )
@@ -133,7 +133,7 @@ class NetworkTraceAggregator {
      * Associates packets with the corresponding tests by their timestamps.
      */
     fun collectPackets(roots: List<FinishedTestResult>) {
-        logger.info("Collection packets...")
+        logger.info("Collecting packets...")
         // Since network capturing may be delayed by a couple of milliseconds, we wait a little bit
         Thread.sleep(1000)
         val packets: MutableList<HttpPacket> = mutableListOf()
@@ -403,7 +403,7 @@ class NetworkTraceAggregator {
         }
         val networkContainers = monitoredNetworks[network.networkId] ?: mutableMapOf()
         networkContainers[network.ipAddress] = NetworkNodeSpecification(
-            nodeType = NetworkNodeSpecification.NodeType.SERVICE,
+            nodeType = NetworkNodeSpecification.NodeType.CONTAINER,
             ipAddress = network.ipAddress,
             specification = specification,
         )
