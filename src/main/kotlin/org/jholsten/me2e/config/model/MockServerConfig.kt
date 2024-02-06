@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
  */
 data class MockServerConfig(
     /**
-     * Path to the keystore containing the TLS keystore to use for the [org.jholsten.me2e.mock.MockServer] instances.
+     * Path to the keystore containing the TLS certificate to use for the [org.jholsten.me2e.mock.MockServer] instances.
      * Can be either an absolute path to a file or a resource on the classpath.
      */
     @JsonProperty("keystore-path")
@@ -49,4 +49,10 @@ data class MockServerConfig(
      */
     @JsonProperty("truststore-type")
     val truststoreType: String = "JKS",
+
+    /**
+     * Whether TLS needs client authentication.
+     */
+    @JsonProperty("needs-client-auth")
+    val needsClientAuth: Boolean = false,
 )

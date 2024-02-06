@@ -133,7 +133,7 @@
       "properties": {
         "keystore-path": {
           "type": "string",
-          "description": "Path to the keystore containing the TLS keystore."
+          "description": "Path to the keystore containing the TLS certificate."
         },
         "keystore-password": {
           "type": "string",
@@ -160,6 +160,11 @@
           "type": "string",
           "description": "Type of the truststore. Required for client authentication.",
           "default": "JKS"
+        },
+        "needs-client-auth": {
+          "type": "boolean",
+          "description": "Whether TLS needs client authentication.",
+          "default": false
         }
       },
       "additionalProperties": false

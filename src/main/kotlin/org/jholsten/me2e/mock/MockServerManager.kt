@@ -49,6 +49,7 @@ class MockServerManager(
             .httpsPort(HTTPS_PORT)
             .keystoreType(mockServerConfig.keystoreType)
             .trustStoreType(mockServerConfig.truststoreType)
+            .needClientAuth(mockServerConfig.needsClientAuth)
             .notMatchedRenderer(MockServerStubNotMatchedRenderer())
         mockServerConfig.keystorePath?.let { configuration.keystorePath(it) }
         mockServerConfig.keystorePassword?.let { configuration.keystorePassword(it) }

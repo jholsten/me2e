@@ -53,6 +53,7 @@ internal class YamlConfigParserIT {
                 truststorePath = "truststore.jks",
                 truststorePassword = "truststore-password",
                 truststoreType = "BKS",
+                needsClientAuth = true,
             ), config
         )
     }

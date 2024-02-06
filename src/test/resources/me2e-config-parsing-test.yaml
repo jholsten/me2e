@@ -20,6 +20,7 @@ settings:
     truststore-path: truststore.jks
     truststore-password: truststore-password
     truststore-type: BKS
+    needs-client-auth: true
 
 environment:
   docker-compose: docker-compose-parsing-test.yml
