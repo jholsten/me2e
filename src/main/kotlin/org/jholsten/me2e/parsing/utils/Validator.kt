@@ -9,9 +9,9 @@ internal interface Validator<T> {
 
     /**
      * Validates the given [value].
-     * @param value Value to validate
-     * @throws ValidationException if validation failed
+     * @param value Value to validate.
+     * @throws ValidationException if validation failed.
      */
-    @Throws(ValidationException::class)
+    @JvmSynthetic
     fun validate(value: T)
 }

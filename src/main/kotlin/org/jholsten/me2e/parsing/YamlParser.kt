@@ -11,11 +11,12 @@ import org.jholsten.me2e.parsing.utils.Validator
 import java.lang.Exception
 
 /**
- * Generic service that parses YAML contents.
+ * Generic service that parses YAML contents to instances of type [T].
+ * @param T Model to which values should be parsed.
  */
 internal open class YamlParser<T>(
     /**
-     * Schema validator to use
+     * JSON Schema validator to use for validating the value.
      */
     private val schemaValidator: SchemaValidator,
 
@@ -25,7 +26,7 @@ internal open class YamlParser<T>(
     private val additionalValueValidators: List<Validator<T>> = listOf(),
 
     /**
-     * Model to which value should be parsed
+     * Model to which value should be parsed.
      */
     private val clazz: Class<T>,
 

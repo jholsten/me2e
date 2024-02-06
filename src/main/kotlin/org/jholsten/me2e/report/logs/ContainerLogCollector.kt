@@ -6,10 +6,12 @@ import org.jholsten.me2e.report.logs.model.AggregatedLogEntry
 import org.jholsten.me2e.report.logs.model.ServiceSpecification
 
 /**
- * Log collector which collects the logs of the service with the given name
- * for one test execution.
+ * Log collector which collects the logs of the container with the given name.
  */
 class ContainerLogCollector(val service: ServiceSpecification) : ContainerLogConsumer() {
+    /**
+     * Logs which were collected so far from the corresponding container.
+     */
     private val logs: MutableList<AggregatedLogEntry> = mutableListOf()
 
     override fun accept(entry: ContainerLogEntry) {
@@ -23,8 +25,9 @@ class ContainerLogCollector(val service: ServiceSpecification) : ContainerLogCon
     }
 
     /**
-     * Resets the list of collected log entries.
-     * Returns all entries that were collected so far.
+     * Returns all log entries that were collected so far. Resets the list of collected entries
+     * afterwards to be able to distinctly assign logs to the corresponding tests.
+     * @return Log entries collected so far from the corresponding container.
      */
     fun collect(): List<AggregatedLogEntry> {
         val entries = logs.toList()
