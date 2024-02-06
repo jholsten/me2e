@@ -4,18 +4,18 @@ import org.jholsten.me2e.mock.stubbing.request.StringMatcher
 import org.jholsten.me2e.request.model.HttpMethod
 
 /**
- * Model for verifying that a mock server received a certain request.
+ * Model for verifying that a Mock Server received a certain request.
  */
 class MockServerVerification internal constructor(
     /**
-     * Number of times that the mock server should have received this request.
-     * If set to `null`, it is verified that the mock server received the specified request at least once.
+     * Number of times that the Mock Server should have received this request.
+     * If set to `null`, it is verified that the Mock Server received the specified request at least once.
      */
     internal val times: Int?,
 ) {
     companion object {
         /**
-         * Entrypoint for specifying a request that a mock server should have received at least once.
+         * Entrypoint for specifying a request that a Mock Server should have received at least once.
          */
         @JvmStatic
         fun receivedRequest(): MockServerVerification {
@@ -23,8 +23,8 @@ class MockServerVerification internal constructor(
         }
 
         /**
-         * Entrypoint for specifying a request that a mock server should have received exactly [times] number of times.
-         * @param times Number of times that the mock server should have received this request.
+         * Entrypoint for specifying a request that a Mock Server should have received exactly [times] number of times.
+         * @param times Number of times that the Mock Server should have received this request.
          */
         @JvmStatic
         fun receivedRequest(times: Int): MockServerVerification {
@@ -96,7 +96,7 @@ class MockServerVerification internal constructor(
     }
 
     /**
-     * Expect that the mock server only received this specified request and no other.
+     * Expect that the Mock Server only received this specified request and no other.
      */
     fun andNoOther() = apply {
         this.noOther = true

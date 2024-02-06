@@ -20,7 +20,7 @@ import org.jholsten.me2e.request.model.HttpRequest
 @JsonDeserialize(using = MockServerDeserializer::class)
 class MockServer(
     /**
-     * Unique name of this mock server.
+     * Unique name of this Mock Server.
      */
     val name: String,
 
@@ -30,19 +30,19 @@ class MockServer(
     val hostname: String,
 
     /**
-     * Definition of stubs for this mock server
+     * Definition of stubs for this Mock Server
      */
     val stubs: List<MockServerStub> = listOf(),
 ) {
 
     /**
-     * Returns whether the mock server is currently up and running.
+     * Returns whether the Mock Server is currently up and running.
      */
     val isRunning: Boolean
         get() = wireMockServer?.isRunning == true
 
     /**
-     * Mock server instance that handles incoming requests
+     * Mock Server instance that handles incoming requests
      */
     private var wireMockServer: WireMockServer? = null
 
@@ -51,31 +51,31 @@ class MockServer(
     }
 
     /**
-     * Registers all stubs defined for this mock server.
-     * This leads to the mock server responding with the specified response whenever the request matches the specified stub.
-     * @throws IllegalStateException if the mock server is not initialized.
+     * Registers all stubs defined for this Mock Server.
+     * This leads to the Mock Server responding with the specified response whenever the request matches the specified stub.
+     * @throws IllegalStateException if the Mock Server is not initialized.
      */
     fun registerStubs() {
-        checkNotNull(wireMockServer) { "Mock server needs to be initialized" }
+        checkNotNull(wireMockServer) { "Mock Server needs to be initialized" }
         for (stub in this.stubs) {
             stub.registerAt(name, wireMockServer!!)
         }
     }
 
     /**
-     * Resets all stubs and registered requests for this mock server.
-     * @throws IllegalStateException if the mock server is not initialized.
+     * Resets all stubs and registered requests for this Mock Server.
+     * @throws IllegalStateException if the Mock Server is not initialized.
      */
     fun reset() {
-        checkNotNull(wireMockServer) { "Mock server needs to be initialized" }
+        checkNotNull(wireMockServer) { "Mock Server needs to be initialized" }
         val metadataMatcher = WireMock.matchingJsonPath("$.$METADATA_MOCK_SERVER_NAME_KEY", WireMock.equalTo(name))
         wireMockServer!!.removeStubsByMetadata(metadataMatcher)
         wireMockServer!!.removeServeEventsForStubsMatchingMetadata(metadataMatcher)
     }
 
     /**
-     * Returns all requests that this mock server received sorted by their timestamp.
-     * @throws IllegalStateException if the HTTP mock server is not initialized or not running.
+     * Returns all requests that this Mock Server received sorted by their timestamp.
+     * @throws IllegalStateException if the HTTP Mock Server is not initialized or not running.
      */
     val requestsReceived: List<HttpRequest>
         get() {
@@ -85,22 +85,22 @@ class MockServer(
         }
 
     /**
-     * Returns all requests as [ServeEvent] instances that this mock server received.
-     * @throws IllegalStateException if the HTTP mock server is not initialized or not running.
+     * Returns all requests as [ServeEvent] instances that this Mock Server received.
+     * @throws IllegalStateException if the HTTP Mock Server is not initialized or not running.
      */
     private val wireMockRequestsReceived: List<ServeEvent>
         get() {
-            check(wireMockServer != null && wireMockServer!!.isRunning) { "Received requests can only be retrieved when mock server is running" }
+            check(wireMockServer != null && wireMockServer!!.isRunning) { "Received requests can only be retrieved when Mock Server is running" }
             return wireMockServer!!.allServeEvents.filter { it.request.host == hostname }
         }
 
     /**
-     * Verifies that this mock server instance received requests which match the given pattern.
-     * @throws IllegalStateException if the HTTP mock server is not initialized.
-     * @throws VerificationException if mock server did not receive the expected number of requests
+     * Verifies that this Mock Server instance received requests which match the given pattern.
+     * @throws IllegalStateException if the HTTP Mock Server is not initialized.
+     * @throws VerificationException if Mock Server did not receive the expected number of requests
      */
     fun verify(verification: MockServerVerification) {
-        checkNotNull(wireMockServer) { "Mock server needs to be initialized" }
+        checkNotNull(wireMockServer) { "Mock Server needs to be initialized" }
         val matcher = if (verification.stubName != null) {
             val stub = this.stubs.firstOrNull { it.name == verification.stubName }
             requireNotNull(stub) { "No stub with name ${verification.stubName} exists" }

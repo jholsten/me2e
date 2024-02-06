@@ -83,7 +83,7 @@ class MockServerIT {
     }
 
     @Test
-    fun `Mock server should respond with stubbed response`() {
+    fun `Mock Server should respond with stubbed response`() {
         val expectedReceivedRequest = HttpRequest(
             url = Url("http://example.com/search?id=123"),
             method = HttpMethod.POST,
@@ -109,7 +109,7 @@ class MockServerIT {
     }
 
     @Test
-    fun `Mock server should respond with stubbed response for request with body`() {
+    fun `Mock Server should respond with stubbed response for request with body`() {
         val expectedReceivedRequest = HttpRequest(
             url = Url("http://example.com/search?id=123"),
             method = HttpMethod.POST,
@@ -143,7 +143,7 @@ class MockServerIT {
     }
 
     @Test
-    fun `Mock server verification should succeed for named stub`() {
+    fun `Mock Server verification should succeed for named stub`() {
         val response = client.execute(HttpGet("http://example.com"))
 
         assertEquals(200, response.code)
@@ -157,7 +157,7 @@ class MockServerIT {
     }
 
     @Test
-    fun `Mock server verification should fail for non-existing named stub`() {
+    fun `Mock Server verification should fail for non-existing named stub`() {
         val response = client.execute(HttpGet("http://example.com"))
 
         assertEquals(200, response.code)
@@ -171,7 +171,7 @@ class MockServerIT {
     }
 
     @Test
-    fun `Mock server verification should fail if expected request was not received`() {
+    fun `Mock Server verification should fail if expected request was not received`() {
         val response = client.execute(HttpGet("http://example.com"))
 
         assertEquals(200, response.code)
@@ -194,7 +194,7 @@ class MockServerIT {
     }
 
     @Test
-    fun `Mock server verification should fail if expected request was not received at least once`() {
+    fun `Mock Server verification should fail if expected request was not received at least once`() {
         assertEquals(0, exampleServer.requestsReceived.size)
         assertFailsWith<VerificationException> {
             exampleServer.verify(
@@ -206,7 +206,7 @@ class MockServerIT {
     }
 
     @Test
-    fun `Mock server verification should fail if other requests were received`() {
+    fun `Mock Server verification should fail if other requests were received`() {
         val response1 = client.execute(HttpGet("http://example.com"))
         val response2 = client.execute(HttpPost("http://example.com/search?id=123"))
 
@@ -232,7 +232,7 @@ class MockServerIT {
     }
 
     @Test
-    fun `Mock server should respond with 404 if no stub mapping matches`() {
+    fun `Mock Server should respond with 404 if no stub mapping matches`() {
         val response = client.execute(HttpGet("http://example.com/not-stubbed"))
 
         assertEquals(404, response.code)
@@ -248,7 +248,7 @@ class MockServerIT {
     }
 
     @Test
-    fun `Resetting mock server should reset stubs and requests`() {
+    fun `Resetting Mock Server should reset stubs and requests`() {
         val response = client.execute(HttpGet("http://example.com"))
 
         assertEquals(200, response.code)

@@ -128,7 +128,7 @@
     },
     "mock-server-config": {
       "$id": "#/definitions/mock-server-config",
-      "description": "Configuration for all mock server instances.",
+      "description": "Configuration for all Mock Server instances.",
       "type": "object",
       "properties": {
         "keystore-path": {
@@ -150,7 +150,7 @@
         },
         "truststore-path": {
           "type": "string",
-          "description": "Path to the truststore to use for the mock server instances. Required for client authentication."
+          "description": "Path to the truststore to use for the Mock Server instances. Required for client authentication."
         },
         "truststore-password": {
           "type": "string",
@@ -170,7 +170,7 @@
       "properties": {
         "hostname": {
           "type": "string",
-          "description": "Hostname of the service to be represented by this mock server",
+          "description": "Hostname of the service to be represented by this Mock Server",
           "pattern": "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$"
         },
         "stubs": {

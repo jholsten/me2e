@@ -26,7 +26,7 @@ class MockServerDeserializerIT {
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
     @Test
-    fun `Deserializing mock server should succeed`() {
+    fun `Deserializing Mock Server should succeed`() {
         val contents = """
             name: mock-server
             hostname: example.com
@@ -81,7 +81,7 @@ class MockServerDeserializerIT {
         """,
         ]
     )
-    fun `Deserializing mock server without stubs should succeed`(contents: String) {
+    fun `Deserializing Mock Server without stubs should succeed`(contents: String) {
         val mockServer = yamlMapper.readValue(contents, MockServer::class.java)
 
         val expected = MockServer(
@@ -94,7 +94,7 @@ class MockServerDeserializerIT {
     }
 
     @Test
-    fun `Deserializing mock server with non-existing stub file should fail`() {
+    fun `Deserializing Mock Server with non-existing stub file should fail`() {
         val contents = """
             name: mock-server
             hostname: example.com
@@ -108,7 +108,7 @@ class MockServerDeserializerIT {
     }
 
     @Test
-    fun `Deserializing mock server with invalid stub definition should fail`() {
+    fun `Deserializing Mock Server with invalid stub definition should fail`() {
         val contents = """
             name: mock-server
             hostname: example.com

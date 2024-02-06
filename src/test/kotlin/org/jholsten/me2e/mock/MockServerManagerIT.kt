@@ -89,7 +89,7 @@ internal class MockServerManagerIT {
     }
 
     @Test
-    fun `Mock server should respond with stubbed response`() {
+    fun `Mock Server should respond with stubbed response`() {
         val expectedReceivedRequest = HttpRequest(
             url = Url("http://example.com/search"),
             method = HttpMethod.POST,
@@ -119,7 +119,7 @@ internal class MockServerManagerIT {
     }
 
     @Test
-    fun `Mock server should respond with 404 if no stub mapping matches`() {
+    fun `Mock Server should respond with 404 if no stub mapping matches`() {
         val manager = startManager()
 
         val request = HttpPost("http://example.com/not-stubbed")
@@ -143,7 +143,7 @@ internal class MockServerManagerIT {
     }
 
     @Test
-    fun `Mock server should respond with 404 if no stubs are registered`() {
+    fun `Mock Server should respond with 404 if no stubs are registered`() {
         val manager = startManager(mockServers = mapOf())
 
         val request = HttpGet("http://localhost")
@@ -155,7 +155,7 @@ internal class MockServerManagerIT {
         assertEquals(1, manager.requestsReceived.size)
 
         assertEquals(
-            "No response could be served as there are no stubs registered for the mock server.",
+            "No response could be served as there are no stubs registered for the Mock Server.",
             encodeResponseBody(response?.entity),
         )
         assertEquals("text/plain", response?.getFirstHeader("Content-Type")?.value)
@@ -165,7 +165,7 @@ internal class MockServerManagerIT {
     }
 
     @Test
-    fun `Resetting mock servers should reset stubs and requests`() {
+    fun `Resetting Mock Servers should reset stubs and requests`() {
         val manager = startManager()
 
         val response1 = client.execute(HttpGet("http://example.com"))
@@ -191,7 +191,7 @@ internal class MockServerManagerIT {
     }
 
     @Test
-    fun `Trying to start mock server if port is already in use should throw exception`() {
+    fun `Trying to start Mock Server if port is already in use should throw exception`() {
         val manager1 = MockServerManager(mapOf(), mockServerConfig)
         val manager2 = MockServerManager(mapOf(), mockServerConfig)
 

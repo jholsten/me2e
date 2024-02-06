@@ -60,7 +60,7 @@ class MockServerStubRequestMatcher(
 
     /**
      * Returns whether the given WireMock request matches the requirements of this stub request.
-     * @param request Actual request that the mock server received.
+     * @param request Actual request that the Mock Server received.
      * @return Whether the given request matches this request pattern.
      */
     @JvmSynthetic

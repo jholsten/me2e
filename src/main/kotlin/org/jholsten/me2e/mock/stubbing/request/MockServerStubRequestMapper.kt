@@ -21,7 +21,7 @@ internal class MockServerStubRequestMapper private constructor() {
         internal const val METADATA_MATCHER_KEY = "matcher"
 
         /**
-         * Key for which name of the mock server is stored in stub metadata.
+         * Key for which name of the Mock Server is stored in stub metadata.
          */
         @JvmSynthetic
         internal const val METADATA_MOCK_SERVER_NAME_KEY = "name"

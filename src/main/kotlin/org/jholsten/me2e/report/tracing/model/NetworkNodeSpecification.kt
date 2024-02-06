@@ -5,7 +5,7 @@ import java.util.UUID
 
 /**
  * Specification of one node in a network.
- * This may either be a service, network gateway or mock server.
+ * This may either be a service, network gateway or Mock Server.
  */
 class NetworkNodeSpecification internal constructor(
     val nodeType: NodeType,
@@ -23,7 +23,7 @@ class NetworkNodeSpecification internal constructor(
         SERVICE,
 
         /**
-         * A network node representing a mock server.
+         * A network node representing a Mock Server.
          */
         MOCK_SERVER,
 

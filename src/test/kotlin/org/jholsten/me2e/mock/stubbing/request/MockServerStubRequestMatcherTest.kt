@@ -259,7 +259,7 @@ internal class MockServerStubRequestMatcherTest {
     }
 
     @Test
-    fun `Deserializing mock server stub request should set correct properties`() {
+    fun `Deserializing Mock Server stub request should set correct properties`() {
         val value = """
             {
                 "method": "GET",

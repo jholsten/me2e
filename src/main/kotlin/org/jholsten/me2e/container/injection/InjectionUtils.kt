@@ -8,7 +8,7 @@ import org.jholsten.me2e.utils.logger
 import java.lang.reflect.Field
 
 /**
- * Utility class for injecting container and mock server instances into the fields of the
+ * Utility class for injecting container and Mock Server instances into the fields of the
  * [testClassInstance] which are annotated with [InjectService].
  *
  * For each field that is annotated with [InjectService], the corresponding instance is retrieved from the [Me2eTest.containerManager]
@@ -18,7 +18,7 @@ import java.lang.reflect.Field
  */
 internal class InjectionUtils<T : Me2eTest>(
     /**
-     * Instance of a Test class which inherits from [Me2eTest] and for which container and mock server instances
+     * Instance of a Test class which inherits from [Me2eTest] and for which container and Mock Server instances
      * are to be injected into the fields annotated with [InjectService].
      */
     private val testClassInstance: T,
@@ -26,7 +26,7 @@ internal class InjectionUtils<T : Me2eTest>(
     private val logger = logger(this)
 
     /**
-     * Injects container and mock server instances into the fields in [testClassInstance] which are annotated
+     * Injects container and Mock Server instances into the fields in [testClassInstance] which are annotated
      * with [InjectService]. Retrieves instances to inject from the [Me2eTest.containerManager] and
      * [Me2eTest.mockServerManager].
      */
@@ -34,7 +34,7 @@ internal class InjectionUtils<T : Me2eTest>(
     fun injectServices() {
         val annotatedFields = FieldUtils.getFieldsWithAnnotation(testClassInstance.javaClass, InjectService::class.java)
         logger.debug(
-            "Injecting container and mock server instances into {} fields of class {}.",
+            "Injecting container and Mock Server instances into {} fields of class {}.",
             annotatedFields.size,
             testClassInstance::class,
         )
@@ -46,7 +46,7 @@ internal class InjectionUtils<T : Me2eTest>(
     /**
      * Injects the corresponding service into the given field.
      * If the field's type is a subtype of [Container], the corresponding container instance is injected.
-     * If the field's type is a subtype of [MockServer], the corresponding mock server instance is injected.
+     * If the field's type is a subtype of [MockServer], the corresponding Mock Server instance is injected.
      */
     private fun injectService(field: Field) {
         if (Container::class.java.isAssignableFrom(field.type)) {
@@ -54,13 +54,13 @@ internal class InjectionUtils<T : Me2eTest>(
         } else if (MockServer::class.java.isAssignableFrom(field.type)) {
             injectService(field, InjectableServiceType.MOCK_SERVER)
         } else {
-            logger.warn("Unable to inject service for field ${field.name}. Only container and mock server instances can be injected.")
+            logger.warn("Unable to inject service for field ${field.name}. Only container and Mock Server instances can be injected.")
         }
     }
 
     /**
      * Injects service instance into the given field.
-     * Retrieves container/mock server instance with the derived name from container/mock server
+     * Retrieves container/Mock Server instance with the derived name from container/Mock Server
      * manager and sets it as a value of the given field.
      */
     private fun injectService(field: Field, serviceType: InjectableServiceType) {

@@ -46,7 +46,7 @@ open class Me2eTest {
         }
 
         /**
-         * Mock server manager instance responsible for managing the mock servers.
+         * Mock Server manager instance responsible for managing the Mock Servers.
          */
         @get:JvmStatic
         val mockServerManager: MockServerManager by lazy {

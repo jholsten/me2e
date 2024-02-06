@@ -21,9 +21,9 @@ internal class ConfigValidator : Validator<TestConfig> {
         val duplicateHostnames = testConfig.environment.mockServers.values.map { it.hostname }.getDuplicates()
         if (duplicateHostnames.isNotEmpty()) {
             logger.warn(
-                "Detected different mock servers with the same hostnames:\n" +
+                "Detected different Mock Servers with the same hostnames:\n" +
                     "${duplicateHostnames.toStringList().joinToString("\n")}\n" +
-                    "This means that requests to these host names are assigned to multiple mock servers."
+                    "This means that requests to these host names are assigned to multiple Mock Servers."
             )
         }
     }
@@ -39,9 +39,9 @@ internal class ConfigValidator : Validator<TestConfig> {
 
     private fun throwVerificationExceptionForDuplicateStubNames(duplicateStubNames: List<Pair<String, Map<String, Int>>>) {
         val stringBuilder = StringBuilder()
-        stringBuilder.appendLine("Detected request stubs with duplicate names for at least one mock server:")
+        stringBuilder.appendLine("Detected request stubs with duplicate names for at least one Mock Server:")
         for ((mockServerName, duplicateNames) in duplicateStubNames) {
-            stringBuilder.appendLine("Mock server \"$mockServerName\":")
+            stringBuilder.appendLine("Mock Server \"$mockServerName\":")
             val duplicateNameLines = duplicateNames.toStringList(indent = 2)
             for (line in duplicateNameLines) {
                 stringBuilder.appendLine(line)

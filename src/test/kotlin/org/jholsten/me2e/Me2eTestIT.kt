@@ -80,7 +80,7 @@ class Me2eTestIT : Me2eTest() {
         "/https, HTTPS",
     )
     @Suppress("UNUSED_PARAMETER")
-    fun `Invoking mock server in container should succeed`(relativeUrl: String, description: String) {
+    fun `Invoking Mock Server in container should succeed`(relativeUrl: String, description: String) {
         val response = backendApi.post(RelativeUrl(relativeUrl), HttpRequestBody(content = "{\"id\": 123}", MediaType.JSON_UTF8))
 
         logger.info(backendApi.getLogs().toString())

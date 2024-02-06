@@ -56,12 +56,12 @@ internal class MockServerTest {
     }
 
     @Test
-    fun `Registering stubs when mock server is not initialized should throw`() {
+    fun `Registering stubs when Mock Server is not initialized should throw`() {
         assertFailsWith<IllegalStateException> { server.registerStubs() }
     }
 
     @Test
-    fun `Resetting mock server should reset stubs and requests`() {
+    fun `Resetting Mock Server should reset stubs and requests`() {
         every { wireMockServer.removeStubsByMetadata(any()) } just runs
         every { wireMockServer.removeServeEventsForStubsMatchingMetadata(any()) } returns mockk()
         server.initialize(wireMockServer)
@@ -73,7 +73,7 @@ internal class MockServerTest {
     }
 
     @Test
-    fun `Resetting mock server when server is not initialized should throw`() {
+    fun `Resetting Mock Server when server is not initialized should throw`() {
         assertFailsWith<IllegalStateException> { server.reset() }
     }
 
@@ -115,12 +115,12 @@ internal class MockServerTest {
     }
 
     @Test
-    fun `Retrieving requests received when mock server is not initialized should throw`() {
+    fun `Retrieving requests received when Mock Server is not initialized should throw`() {
         assertFailsWith<IllegalStateException> { server.requestsReceived }
     }
 
     @Test
-    fun `Retrieving requests received when mock server is not running should throw`() {
+    fun `Retrieving requests received when Mock Server is not running should throw`() {
         every { wireMockServer.isRunning } returns false
         assertFailsWith<IllegalStateException> { server.requestsReceived }
     }
@@ -224,12 +224,12 @@ internal class MockServerTest {
     }
 
     @Test
-    fun `Verifying request should fail if mock server is not initialized`() {
+    fun `Verifying request should fail if Mock Server is not initialized`() {
         assertFailsWith<IllegalStateException> { server.verify(receivedRequest()) }
     }
 
     @Test
-    fun `Verifying request should fail if mock server is not running`() {
+    fun `Verifying request should fail if Mock Server is not running`() {
         server.initialize(wireMockServer)
         every { wireMockServer.isRunning } returns false
 

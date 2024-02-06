@@ -7,7 +7,7 @@ import java.io.FileNotFoundException
 import kotlin.jvm.Throws
 
 /**
- * Interface for parsing a mock server stub definition.
+ * Interface for parsing a Mock Server stub definition.
  */
 internal interface MockServerStubParser : Parser<MockServerStub> {
 

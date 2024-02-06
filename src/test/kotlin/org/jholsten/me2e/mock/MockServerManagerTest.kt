@@ -41,7 +41,7 @@ internal class MockServerManagerTest {
     }
 
     @Test
-    fun `Constructing mock server manager should instantiate wire mock server`() {
+    fun `Constructing Mock Server manager should instantiate WireMock Server`() {
         val configMock = spyk<WireMockConfiguration>()
         every { constructedWith<WireMockConfiguration>().port(any()) } returns configMock
         every { configMock.httpsPort(any()) } returns configMock
@@ -56,7 +56,7 @@ internal class MockServerManagerTest {
     }
 
     @Test
-    fun `Starting mock server manager should start wire mock`() {
+    fun `Starting Mock Server manager should start WireMock`() {
         every { PortUtils.isPortAvailable(any()) } returns true
         every { anyConstructed<WireMockServer>().start() } just runs
         every { anyConstructed<WireMockServer>().isRunning } returns false andThen true
@@ -71,7 +71,7 @@ internal class MockServerManagerTest {
     }
 
     @Test
-    fun `Starting mock server manager should fail if wire mock is already running`() {
+    fun `Starting Mock Server manager should fail if WireMock is already running`() {
         every { anyConstructed<WireMockServer>().isRunning } returns true
 
         val manager = MockServerManager(mapOf(), mockServerConfig)
@@ -79,7 +79,7 @@ internal class MockServerManagerTest {
     }
 
     @Test
-    fun `Starting mock server manager should fail if HTTP port is in use`() {
+    fun `Starting Mock Server manager should fail if HTTP port is in use`() {
         every { PortUtils.isPortAvailable(80) } returns false
         every { PortUtils.isPortAvailable(443) } returns true
         every { anyConstructed<WireMockServer>().isRunning } returns false
@@ -89,7 +89,7 @@ internal class MockServerManagerTest {
     }
 
     @Test
-    fun `Starting mock server manager should fail if HTTPS port is in use`() {
+    fun `Starting Mock Server manager should fail if HTTPS port is in use`() {
         every { PortUtils.isPortAvailable(80) } returns true
         every { PortUtils.isPortAvailable(443) } returns false
         every { anyConstructed<WireMockServer>().isRunning } returns false
@@ -99,7 +99,7 @@ internal class MockServerManagerTest {
     }
 
     @Test
-    fun `Starting mock server manager should fail when wire mock does not start`() {
+    fun `Starting Mock Server manager should fail when WireMock does not start`() {
         every { PortUtils.isPortAvailable(any()) } returns true
         every { anyConstructed<WireMockServer>().start() } just runs
         every { anyConstructed<WireMockServer>().isRunning } returns false
@@ -114,7 +114,7 @@ internal class MockServerManagerTest {
     }
 
     @Test
-    fun `Starting mock server manager should fail when wire mock fails`() {
+    fun `Starting Mock Server manager should fail when WireMock fails`() {
         every { PortUtils.isPortAvailable(any()) } returns true
         every { anyConstructed<WireMockServer>().start() } throws FatalStartupException(RuntimeException())
         every { anyConstructed<WireMockServer>().isRunning } returns false
@@ -122,12 +122,12 @@ internal class MockServerManagerTest {
         val manager = MockServerManager(mapOf(), mockServerConfig)
         val e = assertFailsWith<ServiceStartupException> { manager.start() }
 
-        assertContains(e.message!!, "Mock server could not be started")
+        assertContains(e.message!!, "Mock Server could not be started")
         verify { anyConstructed<WireMockServer>().start() }
     }
 
     @Test
-    fun `Stopping mock server should stop wire mock`() {
+    fun `Stopping Mock Server should stop WireMock`() {
         every { anyConstructed<WireMockServer>().stop() } just runs
         every { anyConstructed<WireMockServer>().isRunning } returns true
 
@@ -138,7 +138,7 @@ internal class MockServerManagerTest {
     }
 
     @Test
-    fun `Stopping mock server should fail if wire mock is not running`() {
+    fun `Stopping Mock Server should fail if WireMock is not running`() {
         every { anyConstructed<WireMockServer>().isRunning } returns false
 
         val manager = MockServerManager(mapOf(), mockServerConfig)
@@ -175,7 +175,7 @@ internal class MockServerManagerTest {
     }
 
     @Test
-    fun `Registering all stubs should register stubs of all mock servers`() {
+    fun `Registering all stubs should register stubs of all Mock Servers`() {
         val manager = mockServerManager()
         manager.registerAllStubs()
 
@@ -185,7 +185,7 @@ internal class MockServerManagerTest {
     }
 
     @Test
-    fun `Resetting should reset at all mock servers and wire mock`() {
+    fun `Resetting should reset at all Mock Servers and WireMock`() {
         every { anyConstructed<WireMockServer>().resetAll() } just runs
 
         val manager = mockServerManager()

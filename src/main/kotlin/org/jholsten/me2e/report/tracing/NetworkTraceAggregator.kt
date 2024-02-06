@@ -78,9 +78,9 @@ class NetworkTraceAggregator {
     private val networkTraceCollectors: MutableMap<String, NetworkTraceCollector> = mutableMapOf()
 
     /**
-     * Node representation of all mock servers in the test environment.
-     * The mock servers are not actually separate nodes in the network, but are reachable via the Test Runner on port 80/443.
-     * Requests to the mock servers are assigned via the name specified in the host header.
+     * Node representation of all Mock Servers in the test environment.
+     * The Mock Servers are not actually separate nodes in the network, but are reachable via the Test Runner on port 80/443.
+     * Requests to the Mock Servers are assigned via the name specified in the host header.
      */
     private val mockServers: Map<String, NetworkNodeSpecification> by lazy {
         if (Me2eTestConfigStorage.config != null) {
@@ -267,7 +267,7 @@ class NetworkTraceAggregator {
     /**
      * Tries to find the node in the network which is associated with the given IP address.
      * If the IP address is not found in the list of registered containers, it may be the test runner,
-     * a network gateway or one of the mock servers which sent/received the associated packet.
+     * a network gateway or one of the Mock Servers which sent/received the associated packet.
      */
     private fun matchIpAndPort(networkId: String, ipAddress: String, port: Int, packet: HttpRequestPacket): NetworkNodeSpecification? {
         val networkContainers = monitoredNetworks[networkId] ?: return null
@@ -347,8 +347,8 @@ class NetworkTraceAggregator {
     }
 
     /**
-     * Tries to find the mock server addressed in the given packet. Uses the information from
-     * the host header of the request to find the corresponding mock server with the same name.
+     * Tries to find the Mock Server addressed in the given packet. Uses the information from
+     * the host header of the request to find the corresponding Mock Server with the same name.
      */
     private fun findMockServer(packet: HttpRequestPacket): NetworkNodeSpecification? {
         val host = packet.headers.filterKeys { it.lowercase() == "host" }.firstNotNullOfOrNull { it.value }

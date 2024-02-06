@@ -93,8 +93,8 @@ class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironmentConfig
     }
 
     /**
-     * Deserializes mock server instances to Map of `(mockServerName, mockServer)`.
-     * Sets `name` field to `mockServerName` for each mock server.
+     * Deserializes Mock Server instances to Map of `(mockServerName, mockServer)`.
+     * Sets `name` field to `mockServerName` for each Mock Server.
      */
     private fun deserializeMockServers(mockServersNode: JsonNode): Map<String, MockServer> {
         val result = mutableMapOf<String, MockServer>()

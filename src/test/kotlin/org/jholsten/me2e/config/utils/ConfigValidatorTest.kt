@@ -56,7 +56,7 @@ internal class ConfigValidatorTest {
     }
 
     @Test
-    fun `Validating config without containers and mock servers should succeed`() {
+    fun `Validating config without containers and Mock Servers should succeed`() {
         assertDoesNotThrow {
             validator.validate(
                 TestConfig(

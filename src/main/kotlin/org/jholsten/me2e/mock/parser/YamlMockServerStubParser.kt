@@ -6,7 +6,7 @@ import org.jholsten.me2e.parsing.YamlParser
 import org.jholsten.me2e.parsing.utils.DeserializerFactory
 
 /**
- * Class for parsing the mock server stub definition defined in a YAML or JSON file.
+ * Class for parsing the Mock Server stub definition defined in a YAML or JSON file.
  */
 internal class YamlMockServerStubParser(
     /**

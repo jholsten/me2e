@@ -8,7 +8,7 @@ import kotlin.test.*
 internal class MockServerStubResponseBodyTest {
 
     @Test
-    fun `Deserializing mock server stub response body should set correct properties`() {
+    fun `Deserializing Mock Server stub response body should set correct properties`() {
         val value = """
             {
                 "string-content": "abc",

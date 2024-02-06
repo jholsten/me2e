@@ -6,7 +6,7 @@ import org.jholsten.me2e.utils.toJson
 
 /**
  * Pattern to match string values.
- * This matcher is used to verify the properties of the requests that should have been sent to a mock server.
+ * This matcher is used to verify the properties of the requests that should have been sent to a Mock Server.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 open class StringMatcher(

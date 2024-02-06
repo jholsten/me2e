@@ -38,13 +38,13 @@ data class AggregatedNetworkTrace(
 
     /**
      * Client which sent the request. Is only set if IP address could be
-     * associated with a corresponding container, mock server etc.
+     * associated with a corresponding container, Mock Server etc.
      */
     var client: NetworkNodeSpecification?,
 
     /**
      * Server which received the request. Is only set if IP address could be
-     * associated with a corresponding container, mock server etc.
+     * associated with a corresponding container, Mock Server etc.
      */
     var server: NetworkNodeSpecification?,
 

@@ -19,7 +19,7 @@ import kotlin.math.max
 
 /**
  * Utility class that outputs a body containing information about an unmatched request.
- * The [render] method of the class is invoked when the mock server receives a request for which no matching stub is found.
+ * The [render] method of the class is invoked when the Mock Server receives a request for which no matching stub is found.
  * Within the method, first, the closest stub is identified and a comparison of this stub with the actual request is rendered.
  * This body is both printed in the logs and returned as a response body to the request.
  *
@@ -31,7 +31,7 @@ class MockServerStubNotMatchedRenderer : NotMatchedRenderer() {
         val nearMisses = admin.findTopNearMissesFor(loggedRequest).nearMisses
 
         val body = when {
-            nearMisses.isEmpty() -> "No response could be served as there are no stubs registered for the mock server."
+            nearMisses.isEmpty() -> "No response could be served as there are no stubs registered for the Mock Server."
             else -> renderNearestMiss(nearMisses[0])
         }
 

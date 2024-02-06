@@ -6,7 +6,7 @@
   "properties": {
     "name": {
       "type": "string",
-      "description": "Optional identifier of this stub. Needs to be unique for one mock server."
+      "description": "Optional identifier of this stub. Needs to be unique for one Mock Server."
     },
     "request": {
       "$id": "#/properties/request",

@@ -3,10 +3,15 @@ package org.jholsten.me2e.mock.stubbing.response
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 
+/**
+ * Mapper for instantiating a WireMock [ResponseDefinitionBuilder] from a [MockServerStubResponse] instance.
+ */
 internal class MockServerStubResponseMapper private constructor() {
     companion object {
         /**
-         * Maps the given stub response to Wire Mock equivalent.
+         * Maps the given stub response to WireMock equivalent.
+         * @param stubResponse Stubbed response to be mapped.
+         * @return Equivalent of the [stubResponse] for WireMock.
          */
         @JvmSynthetic
         fun toWireMockResponseDefinition(stubResponse: MockServerStubResponse): ResponseDefinitionBuilder {

@@ -97,7 +97,7 @@ class TestEnvironmentConfigDeserializerTest {
     }
 
     @Test
-    fun `Deserializing environment config without mock servers should succeed`() {
+    fun `Deserializing environment config without Mock Servers should succeed`() {
         val contents = "docker-compose: docker-compose-parsing-test.yml"
         mockReadingDockerCompose(dockerComposeContents)
 
