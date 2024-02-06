@@ -255,7 +255,7 @@ class DatabaseContainer(
     private fun initializeConnection(state: ContainerState, exposedPort: ContainerPort) {
         if (system == DatabaseManagementSystem.MONGO_DB) {
             connection = MongoDBConnection.Builder()
-                .withContainer(state)
+                .withContainer(this)
                 .withHost(state.host)
                 .withPort(exposedPort.external!!)
                 .withDatabase(database!!)

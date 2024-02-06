@@ -6,12 +6,11 @@ import com.mongodb.client.MongoClient
 import com.mongodb.client.MongoClients
 import com.mongodb.client.MongoDatabase
 import org.bson.Document
+import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.container.database.DatabaseManagementSystem
 import org.jholsten.me2e.container.database.exception.DatabaseException
 import org.jholsten.me2e.container.database.model.QueryResult
 import org.jholsten.me2e.utils.logger
-import org.testcontainers.containers.ContainerState
-import org.testcontainers.utility.MountableFile
 import java.io.File
 import java.io.FileNotFoundException
 
@@ -55,7 +54,7 @@ class MongoDBConnection private constructor(
      * Reference to the Docker container which serves this database.
      * Is required to run scripts.
      */
-    val container: ContainerState?,
+    val container: Container?,
 ) : DatabaseConnection(host, port, database, username, password, DatabaseManagementSystem.MONGO_DB) {
     private val logger = logger(this)
 
@@ -137,10 +136,10 @@ class MongoDBConnection private constructor(
             throw FileNotFoundException("File $scriptName does not exist.")
         }
         logger.info("Copying script $scriptName to container...")
-        container.copyFileToContainer(MountableFile.forHostPath(file.path), file.name)
+        container.copyFileToContainer(file.path, file.name)
         logger.info("Executing script $scriptName...")
-        val command = arrayOf(mongoShellCommand, "--quiet", "<", file.name)
-        val result = container.execInContainer(*command)
+        val command = arrayOf(mongoShellCommand!!, "--quiet", "<", file.name)
+        val result = container.execute(*command)
         if (result.exitCode != 0) {
             throw DatabaseException("Unable to execute script $scriptName (executed command: ${command.joinToString(" ")}): ${result.stdout}")
         }
@@ -167,7 +166,7 @@ class MongoDBConnection private constructor(
     }
 
     class Builder : DatabaseConnection.Builder<Builder>() {
-        private var container: ContainerState? = null
+        private var container: Container? = null
         private var settings: MongoClientSettings? = null
 
         /**
@@ -176,7 +175,7 @@ class MongoDBConnection private constructor(
          * @param container Reference to the Docker container which serves this database.
          * @return Builder instance, to use for chaining.
          */
-        fun withContainer(container: ContainerState?) = apply {
+        fun withContainer(container: Container?) = apply {
             this.container = container
         }
 
@@ -211,13 +210,13 @@ class MongoDBConnection private constructor(
      * To find the correct command, both are tried out one after the other. If none of the commands
      * is set on the PATH, `null` is returned.
      */
-    private fun getMongoCommand(container: ContainerState): String? {
-        val mongoshResult = container.execInContainer("mongosh", "--version")
+    private fun getMongoCommand(container: Container): String? {
+        val mongoshResult = container.execute("mongosh", "--version")
         if (mongoshResult.exitCode == 0) {
             logger.info("Using command 'mongosh' to execute commands on the Mongo shell.")
             return "mongosh"
         }
-        val mongoResult = container.execInContainer("mongo", "--version")
+        val mongoResult = container.execute("mongo", "--version")
         if (mongoResult.exitCode == 0) {
             logger.info("Using command 'mongo' to execute commands on the Mongo shell.")
             return "mongo"

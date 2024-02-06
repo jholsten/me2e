@@ -136,7 +136,7 @@ class DockerCompose private constructor(
     /**
      * Component to execute custom Docker-Compose commands locally.
      */
-    val local: Local by lazy { Local() }
+    private val local: Local by lazy { Local() }
 
     /**
      * Returns [ContainerState] instance for the service with the given name.

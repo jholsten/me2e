@@ -1,7 +1,10 @@
 package org.jholsten.me2e.container.database.connection
 
+import io.mockk.mockk
 import org.bson.Document
+import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.container.database.model.QueryResult
+import org.jholsten.me2e.container.model.DockerContainerReference
 import org.jholsten.util.RecursiveComparison
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -23,7 +26,7 @@ import kotlin.test.assertFailsWith
 internal class MongoDBConnectionIT {
 
     companion object {
-        private val unsecuredContainer = GenericContainer("mongo:4.4.27")
+        private val unsecuredContainerState = GenericContainer("mongo:4.4.27")
             .withEnv(
                 mapOf(
                     "MONGO_INITDB_DATABASE" to "testdb",
@@ -32,9 +35,14 @@ internal class MongoDBConnectionIT {
             .withExposedPorts(27017)
             .waitingFor(Wait.forSuccessfulCommand("echo 'db.runCommand(\"ping\").ok' | mongo --quiet"))
 
+        private val unsecuredContainer = Container(
+            name = "mongo-db",
+            image = "mongo:4.4.27",
+        )
+
         private lateinit var unsecuredConnection: MongoDBConnection
 
-        private val securedContainer = GenericContainer("mongo:4.4.27")
+        private val securedContainerState = GenericContainer("mongo:4.4.27")
             .withEnv(
                 mapOf(
                     "MONGO_INITDB_DATABASE" to "testdb",
@@ -45,22 +53,29 @@ internal class MongoDBConnectionIT {
             .withExposedPorts(27017)
             .waitingFor(Wait.forSuccessfulCommand("echo 'db.runCommand(\"ping\").ok' | mongo -u user -p 123 --quiet"))
 
+        private val securedContainer = Container(
+            name = "mongo-db-secured",
+            image = "mongo:4.4.27",
+        )
+
         private lateinit var securedConnection: MongoDBConnection
 
         @BeforeAll
         @JvmStatic
         fun beforeAll() {
-            unsecuredContainer.start()
+            unsecuredContainerState.start()
+            unsecuredContainer.dockerContainer = DockerContainerReference(mockk(), unsecuredContainerState, mockk())
             unsecuredConnection = MongoDBConnection.Builder()
-                .withHost(unsecuredContainer.host)
-                .withPort(unsecuredContainer.getMappedPort(27017))
+                .withHost(unsecuredContainerState.host)
+                .withPort(unsecuredContainerState.getMappedPort(27017))
                 .withContainer(unsecuredContainer)
                 .withDatabase("testdb")
                 .build()
-            securedContainer.start()
+            securedContainerState.start()
+            securedContainer.dockerContainer = DockerContainerReference(mockk(), securedContainerState, mockk())
             securedConnection = MongoDBConnection.Builder()
-                .withHost(securedContainer.host)
-                .withPort(securedContainer.getMappedPort(27017))
+                .withHost(securedContainerState.host)
+                .withPort(securedContainerState.getMappedPort(27017))
                 .withContainer(securedContainer)
                 .withDatabase("testdb")
                 .withUsername("user")
@@ -72,9 +87,9 @@ internal class MongoDBConnectionIT {
         @JvmStatic
         fun afterAll() {
             unsecuredConnection.client.close()
-            unsecuredContainer.stop()
+            unsecuredContainerState.stop()
             securedConnection.client.close()
-            securedContainer.stop()
+            securedContainerState.stop()
         }
 
         class DatabaseArgumentProvider : ArgumentsProvider {
@@ -128,10 +143,10 @@ internal class MongoDBConnectionIT {
 
     @Test
     fun `Connection URL should be constructed correctly`() {
-        val unsecuredUrl = "${unsecuredContainer.host}:${unsecuredContainer.getMappedPort(27017)}"
+        val unsecuredUrl = "${unsecuredContainerState.host}:${unsecuredContainerState.getMappedPort(27017)}"
         assertEquals("mongodb://$unsecuredUrl", unsecuredConnection.url)
 
-        val securedUrl = "${securedContainer.host}:${securedContainer.getMappedPort(27017)}"
+        val securedUrl = "${securedContainerState.host}:${securedContainerState.getMappedPort(27017)}"
         assertEquals("mongodb://user:123@$securedUrl", securedConnection.url)
     }
 
