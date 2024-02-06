@@ -1,9 +1,13 @@
 package org.jholsten.me2e.request.assertion
 
 import org.jholsten.me2e.request.assertion.matchers.Assertable
+import org.jholsten.me2e.request.model.HttpResponse
 
 /**
  * Specification of an expected response.
+ * For this specification, all expectations of the properties of an [org.jholsten.me2e.request.model.HttpResponse]
+ * can be defined, which are then evaluated collectively. This enables to evaluate several assertions and obtain
+ * all failed ones and not just the first. Furthermore, the specification can be reused across multiple tests.
  */
 class ResponseSpecification {
     private var statusCode: MutableList<Assertable<Int?>> = mutableListOf()
@@ -16,6 +20,11 @@ class ResponseSpecification {
     private var base64Body: MutableList<Assertable<String?>> = mutableListOf()
     private var jsonBody: MutableList<Pair<String, Assertable<String?>>> = mutableListOf()
 
+    /**
+     * Expects that the status code of the response satisfies the given assertion.
+     * @param expected Expectation for the value of the [HttpResponse.code].
+     * @return This instance, to use for chaining.
+     */
     fun expectStatusCode(expected: Assertable<Int?>) = apply {
         this.statusCode.add(expected)
     }

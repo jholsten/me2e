@@ -12,6 +12,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
 
     /**
      * Asserts that the status code of the [response] satisfies the given assertion.
+     * @param expected Expectation for the value of the [HttpResponse.code].
      * @throws AssertionFailure if assertion was not successful.
      */
     fun statusCode(expected: Assertable<Int?>) {
@@ -20,6 +21,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
 
     /**
      * Asserts that the protocol of the [response] satisfies the given assertion.
+     * @param expected Expectation for the value of the [HttpResponse.protocol].
      * @throws AssertionFailure if assertion was not successful.
      */
     fun protocol(expected: Assertable<String?>) {
@@ -28,6 +30,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
 
     /**
      * Asserts that the message of the [response] satisfies the given assertion.
+     * @param expected Expectation for the value of the [HttpResponse.message].
      * @throws AssertionFailure if assertion was not successful.
      */
     fun message(expected: Assertable<String?>) {
@@ -36,6 +39,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
 
     /**
      * Asserts that the headers of the [response] satisfy the given assertion.
+     * @param expected Expectation for the value of the [HttpResponse.headers].
      * @throws AssertionFailure if assertion was not successful.
      */
     fun headers(expected: Assertable<Map<String, List<*>>?>) {
@@ -44,6 +48,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
 
     /**
      * Asserts that the content type of the [response] satisfies the given assertion.
+     * @param expected Expectation for the value of the [org.jholsten.me2e.request.model.HttpResponseBody.contentType].
      * @throws AssertionFailure if content type is not set or if assertion was not successful.
      */
     fun contentType(expected: Assertable<String?>) {
@@ -52,6 +57,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
 
     /**
      * Asserts that the body of the [response], encoded as string, satisfies the given assertion.
+     * @param expected Expectation for the string value of the [HttpResponse.body].
      * @throws AssertionFailure if assertion was not successful.
      */
     fun body(expected: Assertable<String?>) {
@@ -60,6 +66,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
 
     /**
      * Asserts that the body of the [response], encoded as byte array, satisfies the given assertion.
+     * @param expected Expectation for the binary value of the [HttpResponse.body].
      * @throws AssertionFailure if assertion was not successful.
      */
     fun binaryBody(expected: Assertable<ByteArray?>) {
@@ -68,6 +75,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
 
     /**
      * Asserts that the body of the [response], encoded as base 64, satisfies the given assertion.
+     * @param expected Expectation for the base 64 encoded value of the [HttpResponse.body].
      * @throws AssertionFailure if assertion was not successful.
      */
     fun base64Body(expected: Assertable<String?>) {
@@ -113,10 +121,12 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      * assertThat(response).jsonBody("keywords[1]", isEqualTo("Test Automation"))
      * assertThat(response).jsonBody("journal.title", isEqualTo("IEEE Software"))
      * ```
+     * @param key Key of the JSON body to evaluate.
+     * @param expected Expectation for the value of the JSON node with the given key.
      * @throws AssertionFailure if assertion was not successful.
      */
     fun jsonBody(key: String, expected: Assertable<String?>) {
-        val json = this.response.body?.asJson() ?: throw AssertionFailure("Response does not contain a response body")
+        val json = this.response.body?.asJson() ?: throw AssertionFailure("Response does not contain a response body.")
         val path = key.split(".")
         var node: JsonNode = json
         for (subKey in path) {
@@ -130,13 +140,23 @@ class AssertableResponse internal constructor(private val response: HttpResponse
     }
 
     /**
-     * Asserts that the [response] conforms to the given specification.
+     * Asserts that the [response] conforms to the given specification. Evaluates assertions for all properties.
+     * @param specification Expectation for the [response].
      * @throws AssertionFailure if at least one assertion was not successful.
      */
     fun conformsTo(specification: ResponseSpecification) {
         specification.evaluate(this)
     }
 
+    /**
+     * Tries to find the JSON node with the given key in the given root.
+     * For keys specifying an element in an array, the key with format `property[{index}]` is destructured into
+     * the name of the property and the index of the element. For regular properties, the JSON node with the
+     * specified key is returned. If the [root] does not contain a JSON node with the specified property, `null`
+     * is returned.
+     * @param root JSON node to search for the property with the given key.
+     * @param key Key of the JSON node to find. May be a property or an indexed property.
+     */
     private fun findNode(root: JsonNode, key: String): JsonNode? {
         val arrayKeyMatcher = Regex("(.*)\\[(\\d)\\]").find(key)
         return if (arrayKeyMatcher != null) {
@@ -148,6 +168,13 @@ class AssertableResponse internal constructor(private val response: HttpResponse
         }
     }
 
+    /**
+     * Tries to find element in array node with the given key in the given root at the given index.
+     * Returns `null` if the [root] does not contain a JSON node with the given key.
+     * @param root JSON node to search for the element with the given key.
+     * @param key Key of the JSON node to find.
+     * @throws AssertionFailure if JSON node with the given key is not an array node.
+     */
     private fun findArrayNode(root: JsonNode, key: String, arrayIndex: Int): JsonNode? {
         val node = root.findByKey(key) ?: return null
         if (!node.isArray) {
@@ -157,6 +184,10 @@ class AssertableResponse internal constructor(private val response: HttpResponse
         return arrayNode.get(arrayIndex)
     }
 
+    /**
+     * Returns the JSON node with the given key or `null`, if such key does not exist.
+     * @param key Key of the JSON node to find.
+     */
     private fun JsonNode.findByKey(key: String): JsonNode? {
         for ((elementKey, element) in this.fields()) {
             if (elementKey == key) {

@@ -1,7 +1,7 @@
 package org.jholsten.me2e.request.assertion.matchers
 
 /**
- * Assertion for checking that a value of type [T] is not null.
+ * Assertion for checking if a value of type [T] is not null.
  */
 class NotNullAssertion<T> : Assertable<T?>(
     assertion = { actual -> actual != null },

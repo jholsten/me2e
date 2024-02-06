@@ -4,12 +4,13 @@ import org.jholsten.me2e.request.model.HttpResponse
 import org.jholsten.me2e.request.assertion.matchers.*
 
 /**
- * Collection of assertions.
+ * Factory methods for the assertions for the properties of an [HttpResponse].
  */
 class Assertions {
     companion object {
         /**
          * Returns [AssertableResponse] to assert that the properties of the given [response] are as expected.
+         * @param response Response to whose properties the assertions refer.
          */
         @JvmStatic
         fun assertThat(response: HttpResponse): AssertableResponse {
@@ -18,6 +19,7 @@ class Assertions {
 
         /**
          * Returns assertion for checking whether the expected value is equal to an actual value.
+         * @param expected Expected value which should be equal to the actual value.
          */
         @JvmStatic
         fun <T> isEqualTo(expected: T): Assertable<T?> {
@@ -26,6 +28,7 @@ class Assertions {
 
         /**
          * Returns assertion for checking whether an actual string value contains the given expected value.
+         * @param expected Expected value which should be contained in the actual value.
          */
         @JvmStatic
         fun contains(expected: String): Assertable<String?> {
@@ -34,6 +37,7 @@ class Assertions {
 
         /**
          * Returns assertion for checking whether a map contains the given key.
+         * @param expectedKey Expected key which should be contained in the actual map.
          */
         @JvmStatic
         fun <K> containsKey(expectedKey: K): MultiMapKeyContainsAssertion<K> {
@@ -42,6 +46,7 @@ class Assertions {
 
         /**
          * Returns assertion for checking whether an actual string value matches the given regex pattern.
+         * @param expectedPattern Expected pattern to which the actual value should match.
          */
         @JvmStatic
         fun matchesPattern(expectedPattern: String): Assertable<String?> {
