@@ -9,7 +9,7 @@ import org.jholsten.me2e.utils.toJson
  * This matcher is used to verify the properties of the requests that should have been sent to a mock server.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-open class StringMatcher private constructor(
+open class StringMatcher(
     /**
      * Matches only if the string is exactly equal to the defined one.
      * A value of `null` indicates that the actual value does not value to be equal.
@@ -82,7 +82,7 @@ open class StringMatcher private constructor(
          */
         @JvmStatic
         fun notEqualTo(expected: String): StringMatcher {
-            return StringMatcher(equals = expected)
+            return StringMatcher(notEquals = expected)
         }
 
         /**
