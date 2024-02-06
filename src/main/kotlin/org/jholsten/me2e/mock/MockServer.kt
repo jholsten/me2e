@@ -52,6 +52,56 @@ class MockServer(
     private var wireMockServer: WireMockServer? = null
 
     /**
+     * Returns all requests that this Mock Server received sorted by their timestamp.
+     * @throws IllegalStateException if the Mock Server is not initialized or not running.
+     */
+    val requestsReceived: List<HttpRequest>
+        get() {
+            val events = wireMockRequestsReceived.toMutableList()
+            events.sortBy { it.request.loggedDate }
+            return events.map { HttpRequestMapper.INSTANCE.toInternalDto(it.request) }
+        }
+
+    /**
+     * Returns all requests as [ServeEvent] instances that this Mock Server received.
+     * @throws IllegalStateException if the Mock Server is not initialized or not running.
+     */
+    private val wireMockRequestsReceived: List<ServeEvent>
+        get() {
+            assertThatMockServerIsInitializedAndRunning()
+            return wireMockServer!!.allServeEvents.filter { it.request.host == hostname }
+        }
+
+    /**
+     * Resets all captured requests for this Mock Server. As a result, the list of [requestsReceived] will be empty.
+     * @throws IllegalStateException if the Mock Server is not initialized.
+     */
+    fun reset() {
+        assertThatMockServerIsInitialized()
+        val metadataMatcher = WireMock.matchingJsonPath("$.$METADATA_MOCK_SERVER_NAME_KEY", WireMock.equalTo(name))
+        wireMockServer!!.removeServeEventsForStubsMatchingMetadata(metadataMatcher)
+    }
+
+    /**
+     * Verifies that this Mock Server instance received requests which match the given pattern.
+     * @throws IllegalStateException if the Mock Server is not initialized.
+     * @throws VerificationException if Mock Server did not receive the expected number of requests.
+     */
+    fun verify(verification: MockServerVerification) {
+        assertThatMockServerIsInitialized()
+        val matcher = verification.toRequestMatcher()
+        val matchResults = wireMockRequestsReceived.filter { matcher.matches(it.request) }
+
+        if (verification.times != null && verification.times != matchResults.size) {
+            throw VerificationException.forTimesNotMatching(name, verification.times, matcher, matchResults, wireMockRequestsReceived)
+        } else if (verification.times == null && matchResults.isEmpty()) {
+            throw VerificationException.forNotReceivedAtLeastOnce(name, matcher, wireMockRequestsReceived)
+        } else if (verification.noOther && wireMockRequestsReceived.size != matchResults.size) {
+            throw VerificationException.forOtherRequests(name, matcher, matchResults, wireMockRequestsReceived)
+        }
+    }
+
+    /**
      * Callback function to execute when the WireMock server has been started.
      * Sets the reference to the server for this instance.
      * @param wireMockServer Reference to the WireMock server which has been started.
@@ -75,55 +125,9 @@ class MockServer(
     }
 
     /**
-     * Resets all captured requests for this Mock Server. As a result, the list of [requestsReceived] will be empty.
-     * @throws IllegalStateException if the Mock Server is not initialized.
+     * Maps the given [MockServerVerification] instance to a [MockServerStubRequestMatcher] which is used to
+     * match the requests that this Mock Server instance received.
      */
-    fun reset() {
-        assertThatMockServerIsInitialized()
-        val metadataMatcher = WireMock.matchingJsonPath("$.$METADATA_MOCK_SERVER_NAME_KEY", WireMock.equalTo(name))
-        wireMockServer!!.removeServeEventsForStubsMatchingMetadata(metadataMatcher)
-    }
-
-    /**
-     * Returns all requests that this Mock Server received sorted by their timestamp.
-     * @throws IllegalStateException if the Mock Server is not initialized or not running.
-     */
-    val requestsReceived: List<HttpRequest>
-        get() {
-            val events = wireMockRequestsReceived.toMutableList()
-            events.sortBy { it.request.loggedDate }
-            return events.map { HttpRequestMapper.INSTANCE.toInternalDto(it.request) }
-        }
-
-    /**
-     * Returns all requests as [ServeEvent] instances that this Mock Server received.
-     * @throws IllegalStateException if the Mock Server is not initialized or not running.
-     */
-    private val wireMockRequestsReceived: List<ServeEvent>
-        get() {
-            assertThatMockServerIsInitializedAndRunning()
-            return wireMockServer!!.allServeEvents.filter { it.request.host == hostname }
-        }
-
-    /**
-     * Verifies that this Mock Server instance received requests which match the given pattern.
-     * @throws IllegalStateException if the Mock Server is not initialized.
-     * @throws VerificationException if Mock Server did not receive the expected number of requests.
-     */
-    fun verify(verification: MockServerVerification) {
-        assertThatMockServerIsInitialized()
-        val matcher = verification.toRequestMatcher()
-        val matchResults = wireMockRequestsReceived.filter { matcher.matches(it.request) }
-
-        if (verification.times != null && verification.times != matchResults.size) {
-            throw VerificationException.forTimesNotMatching(name, verification.times, matcher, matchResults, wireMockRequestsReceived)
-        } else if (verification.times == null && matchResults.isEmpty()) {
-            throw VerificationException.forNotReceivedAtLeastOnce(name, matcher, wireMockRequestsReceived)
-        } else if (verification.noOther && wireMockRequestsReceived.size != matchResults.size) {
-            throw VerificationException.forOtherRequests(name, matcher, matchResults, wireMockRequestsReceived)
-        }
-    }
-
     private fun MockServerVerification.toRequestMatcher(): MockServerStubRequestMatcher {
         return if (this.stubName != null) {
             val stub = stubs.firstOrNull { it.name == this.stubName }

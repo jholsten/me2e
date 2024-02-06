@@ -29,17 +29,27 @@ class MockServerManager(
     /**
      * Configuration for all [org.jholsten.me2e.mock.MockServer] instances.
      */
-    private val mockServerConfig: MockServerConfig,
+    mockServerConfig: MockServerConfig,
 ) {
     companion object {
+        /**
+         * Port where the Mock Server's HTTP API is reachable.
+         * Uses the default HTTP port to be able to use the Mock Servers hostname without the need to specify a port.
+         */
         private const val HTTP_PORT = 80
+
+        /**
+         * Port where the Mock Server's HTTPS API is reachable.
+         * Uses the default HTTPS port to be able to use the Mock Servers hostname without the need to specify a port.
+         */
         private const val HTTPS_PORT = 443
     }
 
     private val logger = logger(this)
 
     /**
-     * Mock Server instance that handles incoming requests
+     * Mock Server instance that handles incoming requests.
+     * Is shared between all [MockServer] instances.
      */
     private val wireMockServer: WireMockServer
 
@@ -63,11 +73,41 @@ class MockServerManager(
     }
 
     /**
+     * Returns all requests that any Mock Server received sorted by their timestamp.
+     * @throws IllegalStateException if the Mock Server is not running.
+     */
+    val requestsReceived: List<HttpRequest>
+        get() {
+            check(wireMockServer.isRunning) { "Received requests can only be retrieved when Mock Server is running." }
+            val events = wireMockServer.allServeEvents.toMutableList()
+            events.sortBy { it.request.loggedDate }
+            return events.map { HttpRequestMapper.INSTANCE.toInternalDto(it.request) }
+        }
+
+    /**
+     * Returns whether the HTTP Mock Server is currently up and running.
+     */
+    val isRunning: Boolean
+        get() = this.wireMockServer.isRunning
+
+    /**
+     * Returns the HTTP port of the Mock Server.
+     */
+    val httpPort: Int
+        get() = HTTP_PORT
+
+    /**
+     * Returns the HTTPS port of the Mock Server.
+     */
+    val httpsPort: Int
+        get() = HTTPS_PORT
+
+    /**
      * Initializes all Mock Server instances and starts mocked HTTP server.
      * Waits at most 5 seconds until the HTTP server is running.
      * @throws ServiceStartupException if server could not be started.
      * @throws HealthTimeoutException if server is not running within 5 seconds.
-     * @throws IllegalStateException if Mock Server is already running
+     * @throws IllegalStateException if Mock Server is already running.
      */
     fun start() {
         check(!isRunning) { "Mock Server is already running" }
@@ -83,56 +123,15 @@ class MockServerManager(
     fun stop() {
         check(isRunning) { "Mock Server can only be stopped if it is currently running" }
         this.wireMockServer.stop()
-        logger.info("Stopped HTTP Mock Server")
+        logger.info("Stopped HTTP Mock Server.")
     }
 
     /**
-     * Registers all stubs defined for all Mock Servers.
-     * This leads to the Mock Servers responding with the specified response whenever the request matches the corresponding stub.
-     * @throws IllegalStateException if the Mock Server is not initialized.
-     */
-    private fun registerAllStubs() {
-        for (mockServer in mockServers.values) {
-            mockServer.registerStubs()
-        }
-    }
-
-    /**
-     * Resets all captured requests for all Mock Servers.
+     * Resets all captured requests for all Mock Server instances.
      */
     fun resetAll() {
         wireMockServer.resetRequests()
     }
-
-    /**
-     * Returns all requests that any Mock Server received sorted by their timestamp.
-     * @throws IllegalStateException if the HTTP Mock Server is not running.
-     */
-    val requestsReceived: List<HttpRequest>
-        get() {
-            check(wireMockServer.isRunning) { "Received requests can only be retrieved when Mock Server is running" }
-            val events = wireMockServer.allServeEvents.toMutableList()
-            events.sortBy { it.request.loggedDate }
-            return events.map { HttpRequestMapper.INSTANCE.toInternalDto(it.request) }
-        }
-
-    /**
-     * Returns whether the HTTP Mock Server is currently up and running.
-     */
-    val isRunning: Boolean
-        get() = this.wireMockServer.isRunning
-
-    /**
-     * Returns the HTTP port of the HTTP Mock Server.
-     */
-    val httpPort: Int
-        get() = HTTP_PORT
-
-    /**
-     * Returns the HTTPS port of the HTTP Mock Server.
-     */
-    val httpsPort: Int
-        get() = HTTPS_PORT
 
     /**
      * Starts mocked HTTP server and waits at most 5 seconds until it's running.
@@ -153,13 +152,24 @@ class MockServerManager(
     }
 
     /**
-     * Initializes all Mock Servers by setting the reference to this [WireMockServer] instance.
+     * Initializes all Mock Servers by setting the reference to this [wireMockServer] instance.
      */
     private fun initializeMockServers() {
         logger.info("Initializing ${mockServers.size} Mock Servers...")
         for ((mockServerName, mockServer) in mockServers) {
             mockServer.initialize(wireMockServer)
             logger.info("Initialized Mock Server $mockServerName")
+        }
+    }
+
+    /**
+     * Registers all stubs defined for all Mock Servers.
+     * This leads to the Mock Servers responding with the specified response whenever the request matches the corresponding stub.
+     * @throws IllegalStateException if the Mock Server is not initialized.
+     */
+    private fun registerAllStubs() {
+        for (mockServer in mockServers.values) {
+            mockServer.registerStubs()
         }
     }
 

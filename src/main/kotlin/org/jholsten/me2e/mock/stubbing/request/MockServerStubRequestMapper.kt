@@ -28,6 +28,10 @@ internal class MockServerStubRequestMapper private constructor() {
 
         /**
          * Maps stub request to equivalent stub for WireMock. Uses weighted matching to show nearly missed stubs.
+         * Adds the [stubRequest] and the name of the mock server to the metadata of the [MappingBuilder] to be
+         * able to access this information for the verification.
+         * @param mockServerName Name of the mock server for which this request matcher is defined.
+         * @param stubRequest Stub request instance which should be mapped to the equivalent for WireMock.
          * @see com.github.tomakehurst.wiremock.matching.RequestPattern
          */
         @JvmSynthetic

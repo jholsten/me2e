@@ -22,7 +22,6 @@ import kotlin.math.max
  * The [render] method of the class is invoked when the Mock Server receives a request for which no matching stub is found.
  * Within the method, first, the closest stub is identified and a comparison of this stub with the actual request is rendered.
  * This body is both printed in the logs and returned as a response body to the request.
- *
  * @see [com.github.tomakehurst.wiremock.verification.notmatched.PlainTextStubNotMatchedRenderer]
  */
 class MockServerStubNotMatchedRenderer : NotMatchedRenderer() {
@@ -32,7 +31,7 @@ class MockServerStubNotMatchedRenderer : NotMatchedRenderer() {
 
         val body = when {
             nearMisses.isEmpty() -> "No response could be served as there are no stubs registered for the Mock Server."
-            else -> renderNearestMiss(nearMisses[0])
+            else -> renderDifference(nearMisses[0])
         }
 
         LocalNotifier.notifier().error(body)
@@ -44,7 +43,12 @@ class MockServerStubNotMatchedRenderer : NotMatchedRenderer() {
             .build()
     }
 
-    private fun renderNearestMiss(nearestMiss: NearMiss): String {
+    /**
+     * Builds string representation of the given nearest miss, which is the stub that is closest to the request received.
+     * The string representation describes the differences between the nearest stub and the actual request.
+     * @param nearestMiss Nearest miss as the stub that is closest to the request received.
+     */
+    private fun renderDifference(nearestMiss: NearMiss): String {
         val requestMatcher = nearestMiss.stubMapping.metadata[METADATA_MATCHER_KEY] as MockServerStubRequestMatcher
         val stringBuilder = StringBuilder()
         stringBuilder.appendLine("Request was not matched.")
@@ -84,6 +88,12 @@ class MockServerStubNotMatchedRenderer : NotMatchedRenderer() {
         return stringBuilder.toString()
     }
 
+    /**
+     * Appends string representation of the request body of the actual request to the given string builder.
+     * @param stringBuilder String builder to append the string representation to.
+     * @param requestMatcher Request matcher of the nearest stub.
+     * @param request Actual request that the Mock Server received.
+     */
     private fun renderBody(stringBuilder: StringBuilder, requestMatcher: MockServerStubRequestMatcher, request: LoggedRequest) {
         stringBuilder.appendLine()
         stringBuilder.appendLine("--> Body Patterns of the closest stub:")
@@ -95,6 +105,12 @@ class MockServerStubNotMatchedRenderer : NotMatchedRenderer() {
         stringBuilder.appendLine(request.bodyAsString)
     }
 
+    /**
+     * Appends a row for which some cells may span over multiple lines to the given table.
+     * @param header Header of the row, i.e. the name to display in the first column.
+     * @param stubEntries Lines containing the content of the stubbed request.
+     * @param requestEntries Lines containing the content of the actual request.
+     */
     private fun Table.multilineRow(header: String, stubEntries: List<String>?, requestEntries: List<String>?) {
         val stubLines = if (stubEntries.isNullOrEmpty()) listOf("ANY") else stubEntries
         val requestLines = if (requestEntries.isNullOrEmpty()) listOf("{}") else requestEntries
@@ -115,6 +131,10 @@ class MockServerStubNotMatchedRenderer : NotMatchedRenderer() {
         }
     }
 
+    /**
+     * Generates string representation of the given string matcher with each property in a separate line.
+     * @return Lines representing the properties of this string matcher.
+     */
     private fun StringMatcher.toStringLines(): List<String> {
         val lines = listOf(
             "  equals" to equals,
@@ -130,6 +150,11 @@ class MockServerStubNotMatchedRenderer : NotMatchedRenderer() {
         }
     }
 
+    /**
+     * Generates string representation of the given map of key and string matcher with each key and
+     * each property in a separate line. Adds indentation to string matchers for a key.
+     * @return Lines representing this map.
+     */
     private fun Map<String, StringMatcher>.toStringLines(): List<String> {
         return entries.map { it.key to it.value.toStringLines() }.flatMap { (key, lines) ->
             listOf("\"$key\": {", *lines.takeLast(lines.size - 1).toTypedArray())
