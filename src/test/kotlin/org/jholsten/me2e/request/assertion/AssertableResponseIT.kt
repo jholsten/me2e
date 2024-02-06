@@ -1,13 +1,12 @@
 package org.jholsten.me2e.request.assertion
 
-import org.jholsten.me2e.assertions.AssertionFailure
-import org.jholsten.me2e.assertions.Assertions.Companion.assertThat
-import org.jholsten.me2e.assertions.Assertions.Companion.contains
-import org.jholsten.me2e.assertions.Assertions.Companion.containsKey
-import org.jholsten.me2e.assertions.Assertions.Companion.isEqualTo
-import org.jholsten.me2e.assertions.Assertions.Companion.isNotNull
-import org.jholsten.me2e.assertions.Assertions.Companion.isNull
-import org.jholsten.me2e.assertions.Assertions.Companion.matchesPattern
+import org.jholsten.me2e.request.assertion.Assertions.Companion.assertThat
+import org.jholsten.me2e.request.assertion.Assertions.Companion.contains
+import org.jholsten.me2e.request.assertion.Assertions.Companion.containsKey
+import org.jholsten.me2e.request.assertion.Assertions.Companion.isEqualTo
+import org.jholsten.me2e.request.assertion.Assertions.Companion.isNotNull
+import org.jholsten.me2e.request.assertion.Assertions.Companion.isNull
+import org.jholsten.me2e.request.assertion.Assertions.Companion.matchesPattern
 import org.jholsten.me2e.request.model.*
 import org.jholsten.util.assertDoesNotThrow
 import kotlin.test.*

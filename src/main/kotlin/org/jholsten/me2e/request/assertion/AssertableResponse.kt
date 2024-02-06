@@ -2,8 +2,7 @@ package org.jholsten.me2e.request.assertion
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
-import org.jholsten.me2e.assertions.AssertionFailure
-import org.jholsten.me2e.assertions.matchers.Assertable
+import org.jholsten.me2e.request.assertion.matchers.Assertable
 import org.jholsten.me2e.request.model.HttpResponse
 
 /**

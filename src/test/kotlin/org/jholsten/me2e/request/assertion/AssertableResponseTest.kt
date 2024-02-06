@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.databind.node.ObjectNode
 import io.mockk.every
 import io.mockk.mockk
-import org.jholsten.me2e.assertions.Assertions.Companion.assertThat
-import org.jholsten.me2e.assertions.Assertions.Companion.contains
-import org.jholsten.me2e.assertions.Assertions.Companion.isEqualTo
+import org.jholsten.me2e.request.assertion.Assertions.Companion.assertThat
+import org.jholsten.me2e.request.assertion.Assertions.Companion.contains
+import org.jholsten.me2e.request.assertion.Assertions.Companion.isEqualTo
 import org.jholsten.me2e.request.model.*
 import kotlin.test.*
 

@@ -108,12 +108,12 @@ internal class NetworkTraceAggregatorIT {
             parentId = null,
             streamId = null,
             client = NetworkNodeSpecification(
-                nodeType = NetworkNodeSpecification.NodeType.SERVICE,
+                nodeType = NetworkNodeSpecification.NodeType.CONTAINER,
                 ipAddress = "ANY",
                 specification = ServiceSpecification(name = "Test Runner"),
             ),
             server = NetworkNodeSpecification(
-                nodeType = NetworkNodeSpecification.NodeType.SERVICE,
+                nodeType = NetworkNodeSpecification.NodeType.CONTAINER,
                 ipAddress = "ANY",
                 specification = ServiceSpecification(name = "backend-api"),
             ),
@@ -127,7 +127,7 @@ internal class NetworkTraceAggregatorIT {
             parentId = first.id,
             streamId = first.streamId,
             client = NetworkNodeSpecification(
-                nodeType = NetworkNodeSpecification.NodeType.SERVICE,
+                nodeType = NetworkNodeSpecification.NodeType.CONTAINER,
                 ipAddress = "ANY",
                 specification = ServiceSpecification(name = "backend-api"),
             ),

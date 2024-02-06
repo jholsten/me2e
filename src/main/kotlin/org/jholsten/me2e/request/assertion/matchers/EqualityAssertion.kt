@@ -1,4 +1,4 @@
-package org.jholsten.me2e.assertions.matchers
+package org.jholsten.me2e.request.assertion.matchers
 
 /**
  * Assertion for checking the equality of values of type [T].

@@ -1,7 +1,6 @@
 package org.jholsten.me2e.request.assertion
 
-import org.jholsten.me2e.assertions.AssertionFailure
-import org.jholsten.me2e.assertions.matchers.Assertable
+import org.jholsten.me2e.request.assertion.matchers.Assertable
 
 /**
  * Specification of an expected response.

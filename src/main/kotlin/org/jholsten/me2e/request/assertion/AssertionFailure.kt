@@ -1,4 +1,4 @@
-package org.jholsten.me2e.assertions
+package org.jholsten.me2e.request.assertion
 
 /**
  * Exception that occurs when an assertion was not successful.

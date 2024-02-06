@@ -1,7 +1,7 @@
 package org.jholsten.me2e
 
-import org.jholsten.me2e.assertions.Assertions.Companion.assertThat
-import org.jholsten.me2e.assertions.Assertions.Companion.isEqualTo
+import org.jholsten.me2e.request.assertion.Assertions.Companion.assertThat
+import org.jholsten.me2e.request.assertion.Assertions.Companion.isEqualTo
 import org.jholsten.me2e.config.model.ConfigFormat
 import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.container.injection.InjectService
