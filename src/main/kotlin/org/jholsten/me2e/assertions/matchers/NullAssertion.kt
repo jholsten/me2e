@@ -6,5 +6,5 @@ package org.jholsten.me2e.assertions.matchers
  */
 class NullAssertion<T> : Assertable<T?>(
     assertion = { actual -> actual == null },
-    message = { property, actual -> "Expected $property\n\t$actual\nto be null" }
+    message = "to be null",
 )

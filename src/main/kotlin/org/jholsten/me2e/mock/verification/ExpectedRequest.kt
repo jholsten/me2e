@@ -9,6 +9,22 @@ import org.jholsten.me2e.request.model.HttpMethod
  * The starting point for these verifications are the methods [receivedRequest], which are used to specify how often
  * the subsequently defined request is expected. The methods of this class can then be used to specify the expected
  * request, for example by specifying the expected request method (see [withMethod]).
+ * TODO: Add samples
+ * TODO: Maybe replace string matcher with something else so that naming is similar to Response-Assertions?
+ *
+ * TODO: Desired interface:
+ * assertThat(mockServer).receivedRequest().withPath(equalTo("/search")) NOT WORKING BECAUSE I NEED TO EVALUATE THIS ALL TOGETHER
+ * assertThat(mockServer).receivedRequest(1, ExpectedRequest() // OR: ExpectedRequest() + ExpectedResponse()
+ *      .withPath(equalTo("/search"))
+ *      .withMessage(equalTo("Hello"))
+ * )
+ *
+ * AssertableMockServerVerification(mockServer)
+ *
+ * assertThat(response).statusCode(equalTo(200))
+ * assertThat(response).statusCode(notEqualTo(200))
+ * assertThat(response).statusCode(lessThan(200))
+ * assertThat(response).statusCode(between(200, 300))
  */
 class MockServerVerification private constructor(
     /**

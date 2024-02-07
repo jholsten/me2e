@@ -6,5 +6,5 @@ package org.jholsten.me2e.assertions.matchers
  */
 class InEqualityAssertion<T>(expected: T) : Assertable<T>(
     assertion = { actual -> expected != actual },
-    message = { property, actual -> "Expected $property\n\t$actual\nto not be equal to\n\t$expected" },
+    message = "to not be equal to\n\t$expected",
 )

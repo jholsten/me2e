@@ -1,9 +1,9 @@
 package org.jholsten.me2e.request.assertions
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ArrayNode
 import org.jholsten.me2e.assertions.AssertionFailure
 import org.jholsten.me2e.assertions.matchers.Assertable
+import org.jholsten.me2e.assertions.matchers.JsonBodyAssertion
 import org.jholsten.me2e.request.model.HttpResponse
 
 /**
@@ -165,62 +165,26 @@ class AssertableResponse internal constructor(private val response: HttpResponse
     }
 
     /**
-     * Asserts that the body of the [response], parsed as JSON, satisfies the given assertion for the element with the given key.
-     * Use `.` as path separators to specify a path in the JSON tree. Use `[{index}]` to specify the element at index `index` in
-     * an array node.
+     * Asserts that the body of the [response], parsed as JSON, satisfies the given assertion.
+     * See [JsonBodyAssertion] for detailed information on the format of the [JsonBodyAssertion.expectedPath].
      *
-     * Example:
-     * Given is the following JSON body representing an article.
-     * ```json
-     * {
-     *      "title": "Developing, Verifying, and Maintaining High-Quality Automated Test Scripts",
-     *      "authors": [
-     *          {
-     *              "firstname": "Vahid",
-     *              "lastname": "Garousi"
-     *          },
-     *          {
-     *              "firstname": "Michael",
-     *              "lastname": "Felderer"
-     *          }
-     *      ],
-     *      "year": 2016,
-     *      "keywords": ["Software Testing", "Test Automation"],
-     *      "journal": {
-     *          "title": "IEEE Software",
-     *          "volume": 33,
-     *          "issue": 3
-     *      }
-     * }
+     * Example Usage:
+     * ```kotlin
+     * assertThat(response).jsonBody(containsNode("journal.title").withValue(equalTo("IEEE Software")))
      * ```
-     *
-     * For this response body, the following assertions do not throw an exception.
-     * ```
-     * assertThat(response).jsonBody("title", contains("Automated Test Scripts"))
-     * assertThat(response).jsonBody("authors[0].lastname", equalTo("Garousi"))
-     * assertThat(response).jsonBody("authors[0]", equalTo("{\"firstname\":\"Vahid\",\"lastname\":\"Garousi\"}"))
-     * assertThat(response).jsonBody("year", equalTo("2016"))
-     * assertThat(response).jsonBody("keywords[1]", equalTo("Test Automation"))
-     * assertThat(response).jsonBody("journal.title", equalTo("IEEE Software"))
-     * ```
-     * @param key Key of the JSON body to evaluate.
-     * @param expected Expectation for the value of the JSON node with the given key.
+     * @param expected Expectation for the value of the [HttpResponse.body].
      * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
      * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ResponseSpecification].
      * @throws AssertionFailure if assertion was not successful.
      */
-    fun jsonBody(key: String, expected: Assertable<String?>) = apply {
-        val json = this.response.body?.asJson() ?: throw AssertionFailure("Response does not contain a response body.")
-        val path = key.split(".")
-        var node: JsonNode = json
-        for (subKey in path) {
-            node = findNode(node, subKey) ?: throw AssertionFailure("Unable to find JSON node with key $subKey in path $key.")
-        }
-        val stringRepresentation = when {
-            node.isValueNode -> node.asText()
-            else -> node.toString()
-        }
-        expected.evaluate("json body at path $key", stringRepresentation)
+    fun jsonBody(expected: Assertable<JsonNode>) = apply {
+        val json = try {
+            this.response.body?.asJson()
+        } catch (e: Exception) {
+            throw AssertionFailure("Unable to parse body as JSON: ${e.message}")
+        } ?: throw AssertionFailure("Response does not contain a response body.")
+
+        expected.evaluate("json body", json)
     }
 
     /**
@@ -230,54 +194,5 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      */
     fun conformsTo(specification: ResponseSpecification) {
         specification.evaluate(this)
-    }
-
-    /**
-     * Tries to find the JSON node with the given key in the given root.
-     * For keys specifying an element in an array, the key with format `property[{index}]` is destructured into
-     * the name of the property and the index of the element. For regular properties, the JSON node with the
-     * specified key is returned. If the [root] does not contain a JSON node with the specified property, `null`
-     * is returned.
-     * @param root JSON node to search for the property with the given key.
-     * @param key Key of the JSON node to find. May be a property or an indexed property.
-     */
-    private fun findNode(root: JsonNode, key: String): JsonNode? {
-        val arrayKeyMatcher = Regex("(.*)\\[(\\d)\\]").find(key)
-        return if (arrayKeyMatcher != null) {
-            val strippedKey = arrayKeyMatcher.groupValues[1]
-            val arrayIndex = arrayKeyMatcher.groupValues[2].toInt()
-            findArrayNode(root, strippedKey, arrayIndex)
-        } else {
-            root.findByKey(key)
-        }
-    }
-
-    /**
-     * Tries to find element in array node with the given key in the given root at the given index.
-     * Returns `null` if the [root] does not contain a JSON node with the given key.
-     * @param root JSON node to search for the element with the given key.
-     * @param key Key of the JSON node to find.
-     * @throws AssertionFailure if JSON node with the given key is not an array node.
-     */
-    private fun findArrayNode(root: JsonNode, key: String, arrayIndex: Int): JsonNode? {
-        val node = root.findByKey(key) ?: return null
-        if (!node.isArray) {
-            throw AssertionFailure("Expected node $key to be an array, but is ${node.nodeType}.")
-        }
-        val arrayNode = node as ArrayNode
-        return arrayNode.get(arrayIndex)
-    }
-
-    /**
-     * Returns the JSON node with the given key or `null`, if such key does not exist.
-     * @param key Key of the JSON node to find.
-     */
-    private fun JsonNode.findByKey(key: String): JsonNode? {
-        for ((elementKey, element) in this.fields()) {
-            if (elementKey == key) {
-                return element
-            }
-        }
-        return null
     }
 }

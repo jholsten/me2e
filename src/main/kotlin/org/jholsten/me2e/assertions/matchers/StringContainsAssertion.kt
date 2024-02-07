@@ -5,5 +5,5 @@ package org.jholsten.me2e.assertions.matchers
  */
 class StringContainsAssertion(expected: String) : Assertable<String?>(
     assertion = { actual -> actual?.contains(expected) ?: false },
-    message = { property, actual -> "Expected $property\n\t$actual\nto contain\n\t$expected" },
+    message = "to contain\n\t$expected",
 )

@@ -12,13 +12,13 @@ open class Assertable<T> internal constructor(
      * Assertion which should evaluate to `true`.
      * Takes actual value as parameter and must return a boolean value.
      */
-    private val assertion: (T) -> Boolean,
+    val assertion: (T) -> Boolean,
 
     /**
-     * Message to output in case assertion was not successful.
-     * Takes property name and actual value as parameters and must return the message.
+     * Message representing the expectation to output in case assertion was not successful.
+     * Is prefixed with `"Expected $property\n\t$actual\n"`.
      */
-    private val message: (String, T) -> String,
+    val message: String,
 ) {
     /**
      * Evaluates the assertion for the given actual value.
@@ -29,7 +29,8 @@ open class Assertable<T> internal constructor(
     @JvmSynthetic
     internal fun evaluate(property: String, actual: T) {
         if (!assertion(actual)) {
-            throw AssertionFailure(message(property, actual))
+            val message = "Expected $property\n\t$actual\n$message"
+            throw AssertionFailure(message)
         }
     }
 }

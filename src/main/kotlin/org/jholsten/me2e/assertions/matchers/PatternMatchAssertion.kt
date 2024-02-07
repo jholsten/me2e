@@ -5,5 +5,5 @@ package org.jholsten.me2e.assertions.matchers
  */
 class PatternMatchAssertion(expected: String) : Assertable<String?>(
     assertion = { actual -> actual?.let { expected.toRegex().matches(it) } ?: false },
-    message = { property, actual -> "Expected $property\n\t$actual\nto match pattern\n\t$expected" }
+    message = "to match pattern\n\t$expected",
 )

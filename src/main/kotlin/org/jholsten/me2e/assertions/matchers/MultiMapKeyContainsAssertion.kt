@@ -7,18 +7,18 @@ package org.jholsten.me2e.assertions.matchers
  */
 class MultiMapKeyContainsAssertion<K>(private val expectedKey: K) : Assertable<Map<K, List<*>>?>(
     assertion = { actual -> actual?.containsKey(expectedKey) ?: false },
-    message = { property, actual -> "Expected $property\n\t$actual\nto contain key\n\t$expectedKey" },
+    message = "to contain key\n\t$expectedKey",
 ) {
     /**
      * Returns assertion for checking if the map contains the expected key with an expected value.
-     * @param expectedValue Expected value that the entry for the [expectedKey] should have.
+     * @param expectedValue Expected value that the entry for the [expectedKey] should have. TODO: Assertable
      * @param V Datatype of the values of the maps to compare.
      * @param E Datatype of the values of the list of values to compare.
      */
     fun <V : Collection<E>, E> withValue(expectedValue: E): Assertable<Map<K, V>?> {
         return Assertable(
             assertion = { actual -> actual?.get(expectedKey)?.contains(expectedValue) ?: false },
-            message = { property, actual -> "Expected $property\n\t$actual\nto contain\n\tkey $expectedKey with value $expectedValue" }
+            message = "to contain key $expectedKey with value\n\t$expectedValue",
         )
     }
 
@@ -31,7 +31,7 @@ class MultiMapKeyContainsAssertion<K>(private val expectedKey: K) : Assertable<M
     fun <V : Collection<E>, E> withValues(expectedValues: V): Assertable<Map<K, V>?> {
         return Assertable(
             assertion = { actual -> actual?.get(expectedKey) == expectedValues },
-            message = { property, actual -> "Expected $property\n\t$actual\nto contain\n\tkey $expectedKey with values $expectedValues" }
+            message = "to contain key $expectedKey with values\n\t$expectedValues",
         )
     }
 }

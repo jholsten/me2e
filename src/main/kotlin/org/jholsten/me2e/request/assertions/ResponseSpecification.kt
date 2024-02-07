@@ -1,7 +1,9 @@
 package org.jholsten.me2e.request.assertions
 
+import com.fasterxml.jackson.databind.JsonNode
 import org.jholsten.me2e.assertions.AssertionFailure
 import org.jholsten.me2e.assertions.matchers.Assertable
+import org.jholsten.me2e.assertions.matchers.JsonBodyAssertion
 import org.jholsten.me2e.request.model.HttpResponse
 
 /**
@@ -12,15 +14,15 @@ import org.jholsten.me2e.request.model.HttpResponse
  * @see AssertableResponse.conformsTo
  */
 class ResponseSpecification {
-    private var statusCode: MutableList<Assertable<Int?>> = mutableListOf()
-    private var protocol: MutableList<Assertable<String?>> = mutableListOf()
-    private var message: MutableList<Assertable<String?>> = mutableListOf()
-    private var headers: MutableList<Assertable<Map<String, List<*>>?>> = mutableListOf()
-    private var contentType: MutableList<Assertable<String?>> = mutableListOf()
-    private var body: MutableList<Assertable<String?>> = mutableListOf()
-    private var binaryBody: MutableList<Assertable<ByteArray?>> = mutableListOf()
-    private var base64Body: MutableList<Assertable<String?>> = mutableListOf()
-    private var jsonBody: MutableList<Pair<String, Assertable<String?>>> = mutableListOf()
+    private val statusCode: MutableList<Assertable<Int?>> = mutableListOf()
+    private val protocol: MutableList<Assertable<String?>> = mutableListOf()
+    private val message: MutableList<Assertable<String?>> = mutableListOf()
+    private val headers: MutableList<Assertable<Map<String, List<*>>?>> = mutableListOf()
+    private val contentType: MutableList<Assertable<String?>> = mutableListOf()
+    private val body: MutableList<Assertable<String?>> = mutableListOf()
+    private val binaryBody: MutableList<Assertable<ByteArray?>> = mutableListOf()
+    private val base64Body: MutableList<Assertable<String?>> = mutableListOf()
+    private val jsonBody: MutableList<Assertable<JsonNode>> = mutableListOf()
 
     /**
      * Expects that the status code of the response satisfies the given assertion.
@@ -151,20 +153,20 @@ class ResponseSpecification {
     }
 
     /**
-     * Expects that the body of the response, encoded as JSON, satisfies the given assertion for the element
-     * with the given key. See [AssertableResponse.jsonBody] for detailed information on the format of the [key].
+     * Expects that the body of the response, parsed as JSON, satisfies the given assertion.
+     * See [JsonBodyAssertion] for detailed information on the format of the [JsonBodyAssertion.expectedPath].
      * You may call this function multiple times to place multiple requirements on the body.
      *
      * Example:
      * ```kotlin
-     * ResponseSpecification().expectJsonBody("journal.title", equalTo("IEEE Software"))
+     * ResponseSpecification().jsonBody(containsNode("journal.title").withValue(equalTo("IEEE Software")))
      * ```
      * @param expected Expectation for the value of the [HttpResponse.body].
      * @return This instance, to use for chaining.
      * @see AssertableResponse.jsonBody
      */
-    fun expectJsonBody(key: String, expected: Assertable<String?>) = apply {
-        this.jsonBody.add(key to expected)
+    fun expectJsonBody(expected: Assertable<JsonNode>) = apply {
+        this.jsonBody.add(expected)
     }
 
     /**
@@ -185,7 +187,7 @@ class ResponseSpecification {
             body.map { evaluate { response.body(it) } },
             binaryBody.map { evaluate { response.binaryBody(it) } },
             base64Body.map { evaluate { response.base64Body(it) } },
-            jsonBody.map { evaluate { response.jsonBody(it.first, it.second) } },
+            jsonBody.map { evaluate { response.jsonBody(it) } },
         ).flatten().filterNotNull()
 
         if (messages.isNotEmpty()) {

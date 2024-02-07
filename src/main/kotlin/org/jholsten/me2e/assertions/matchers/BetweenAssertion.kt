@@ -9,5 +9,5 @@ package org.jholsten.me2e.assertions.matchers
  */
 class BetweenAssertion<T>(lowerBound: T, upperBound: T) : Assertable<T?>(
     assertion = { actual -> actual?.let { actual in lowerBound..upperBound } == true },
-    message = { property, actual -> "Expected $property\n\t$actual\nto be in range\n\t$lowerBound <= x <= $upperBound" },
+    message = "to be in range\n\t$lowerBound <= x <= $upperBound",
 ) where T : Number?, T : Comparable<T>

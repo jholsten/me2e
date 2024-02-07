@@ -52,11 +52,11 @@ internal class AssertableResponseIT {
                 .contentType(equalTo("application/json; charset=utf-8"))
                 .body(equalTo("{\"name\": \"John\", \"nested\": {\"key1\": \"value1\", \"key2\": \"value2\"}, \"details\": [{\"detail\": 1}, {\"detail\": 2}]}"))
                 .base64Body(equalTo("eyJuYW1lIjogIkpvaG4iLCAibmVzdGVkIjogeyJrZXkxIjogInZhbHVlMSIsICJrZXkyIjogInZhbHVlMiJ9LCAiZGV0YWlscyI6IFt7ImRldGFpbCI6IDF9LCB7ImRldGFpbCI6IDJ9XX0="))
-                .jsonBody("name", equalTo("John"))
-                .jsonBody("nested.key1", equalTo("value1"))
-                .jsonBody("nested.key2", equalTo("value2"))
-                .jsonBody("details[0].detail", equalTo("1"))
-                .jsonBody("details[1].detail", equalTo("2"))
+                .jsonBody(containsNode("name").withValue(equalTo("John")))
+                .jsonBody(containsNode("nested.key1").withValue(equalTo("value1")))
+                .jsonBody(containsNode("nested.key2").withValue(equalTo("value2")))
+                .jsonBody(containsNode("details[0].detail").withValue(equalTo("1")))
+                .jsonBody(containsNode("details[1].detail").withValue(equalTo("2")))
         }
     }
 
@@ -314,43 +314,43 @@ internal class AssertableResponseIT {
 
     @Test
     fun `Asserting json body should not throw if assertion is satisfied`() {
-        assertDoesNotThrow { assertThat(response).jsonBody("name", equalTo("John")) }
-        assertDoesNotThrow { assertThat(response).jsonBody("nested.key1", equalTo("value1")) }
-        assertDoesNotThrow { assertThat(response).jsonBody("nested.key2", equalTo("value2")) }
-        assertDoesNotThrow { assertThat(response).jsonBody("details[0].detail", equalTo("1")) }
-        assertDoesNotThrow { assertThat(response).jsonBody("details[1].detail", equalTo("2")) }
+        assertDoesNotThrow { assertThat(response).jsonBody(containsNode("name").withValue(equalTo("John"))) }
+        assertDoesNotThrow { assertThat(response).jsonBody(containsNode("nested.key1").withValue(equalTo("value1"))) }
+        assertDoesNotThrow { assertThat(response).jsonBody(containsNode("nested.key2").withValue(equalTo("value2"))) }
+        assertDoesNotThrow { assertThat(response).jsonBody(containsNode("details[0].detail").withValue(equalTo("1"))) }
+        assertDoesNotThrow { assertThat(response).jsonBody(containsNode("details[1].detail").withValue(equalTo("2"))) }
         assertDoesNotThrow {
             assertThat(response)
-                .jsonBody("name", equalTo("John"))
-                .jsonBody("nested.key1", equalTo("value1"))
-                .jsonBody("nested.key2", equalTo("value2"))
-                .jsonBody("details[0].detail", equalTo("1"))
-                .jsonBody("details[1].detail", equalTo("2"))
+                .jsonBody(containsNode("name").withValue(equalTo("John")))
+                .jsonBody(containsNode("nested.key1").withValue(equalTo("value1")))
+                .jsonBody(containsNode("nested.key2").withValue(equalTo("value2")))
+                .jsonBody(containsNode("details[0].detail").withValue(equalTo("1")))
+                .jsonBody(containsNode("details[1].detail").withValue(equalTo("2")))
         }
     }
 
     @Test
     fun `Asserting json body should throw if assertion is not satisfied`() {
-        assertFails { assertThat(response).jsonBody("name", equalTo("Peter")) }
-        assertFails { assertThat(response).jsonBody("nested.key1", equalTo("other")) }
-        assertFails { assertThat(response).jsonBody("nested.key2", equalTo("other")) }
-        assertFails { assertThat(response).jsonBody("details[0].detail", equalTo("other")) }
-        assertFails { assertThat(response).jsonBody("details[1].detail", equalTo("other")) }
-        assertFails { assertThat(response).jsonBody("non-existing", equalTo("Something")) }
-        assertFails { assertThat(response).jsonBody("details[99].detail", equalTo("Something")) }
-        assertFails { assertThat(response).jsonBody("name[0]", equalTo("Peter")) }
-        assertFails { assertThat(response).jsonBody("details[0]", equalTo("Something")) }
+        assertFails { assertThat(response).jsonBody(containsNode("name").withValue(equalTo("Peter"))) }
+        assertFails { assertThat(response).jsonBody(containsNode("nested.key1").withValue(equalTo("other"))) }
+        assertFails { assertThat(response).jsonBody(containsNode("nested.key2").withValue(equalTo("other"))) }
+        assertFails { assertThat(response).jsonBody(containsNode("details[0].detail").withValue(equalTo("other"))) }
+        assertFails { assertThat(response).jsonBody(containsNode("details[1].detail").withValue(equalTo("other"))) }
+        assertFails { assertThat(response).jsonBody(containsNode("non-existing").withValue(equalTo("Something"))) }
+        assertFails { assertThat(response).jsonBody(containsNode("details[99].detail").withValue(equalTo("Something"))) }
+        assertFails { assertThat(response).jsonBody(containsNode("name[0]").withValue(equalTo("Peter"))) }
+        assertFails { assertThat(response).jsonBody(containsNode("details[0]").withValue(equalTo("Something"))) }
         assertFails {
             assertThat(response)
-                .jsonBody("name", equalTo("Peter"))
-                .jsonBody("nested.key1", equalTo("other"))
-                .jsonBody("nested.key2", equalTo("other"))
-                .jsonBody("details[0].detail", equalTo("other"))
-                .jsonBody("details[1].detail", equalTo("other"))
-                .jsonBody("non-existing", equalTo("Something"))
-                .jsonBody("details[99].detail", equalTo("Something"))
-                .jsonBody("name[0]", equalTo("Peter"))
-                .jsonBody("details[0]", equalTo("Something"))
+                .jsonBody(containsNode("name").withValue(equalTo("Peter")))
+                .jsonBody(containsNode("nested.key1").withValue(equalTo("other")))
+                .jsonBody(containsNode("nested.key2").withValue(equalTo("other")))
+                .jsonBody(containsNode("details[0].detail").withValue(equalTo("other")))
+                .jsonBody(containsNode("details[1].detail").withValue(equalTo("other")))
+                .jsonBody(containsNode("non-existing").withValue(equalTo("Something")))
+                .jsonBody(containsNode("details[99].detail").withValue(equalTo("Something")))
+                .jsonBody(containsNode("name[0]").withValue(equalTo("Peter")))
+                .jsonBody(containsNode("details[0]").withValue(equalTo("Something")))
         }
     }
 
@@ -371,8 +371,8 @@ internal class AssertableResponseIT {
             .expectBody(contains("name"))
             .expectBase64Body(contains("eyJuYW1lIjogIkpva"))
             .expectBinaryBody(equalTo(response.body?.asBinary()))
-            .expectJsonBody("name", equalTo("John"))
-            .expectJsonBody("details[0].detail", equalTo("1"))
+            .expectJsonBody(containsNode("name").withValue(equalTo("John")))
+            .expectJsonBody(containsNode("details[0].detail").withValue(equalTo("1")))
 
         assertDoesNotThrow { assertThat(response).conformsTo(specification) }
     }
@@ -392,8 +392,8 @@ internal class AssertableResponseIT {
             .expectContentType(equalTo("Other"))
             .expectBody(contains("Other"))
             .expectBase64Body(contains("Other"))
-            .expectJsonBody("name", equalTo("Peter"))
-            .expectJsonBody("details[0]", equalTo("1"))
+            .expectJsonBody(containsNode("name").withValue(equalTo("Peter")))
+            .expectJsonBody(containsNode("details[0]").withValue(equalTo("1")))
 
         val e = assertFails { assertThat(response).conformsTo(specification) }
         assertEquals(14, e.failures.size)
