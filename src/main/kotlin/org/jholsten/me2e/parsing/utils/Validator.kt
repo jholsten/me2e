@@ -12,6 +12,5 @@ internal interface Validator<T> {
      * @param value Value to validate.
      * @throws ValidationException if validation failed.
      */
-    @JvmSynthetic
     fun validate(value: T)
 }

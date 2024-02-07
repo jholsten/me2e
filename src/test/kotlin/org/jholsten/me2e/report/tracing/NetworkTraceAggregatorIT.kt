@@ -108,7 +108,7 @@ internal class NetworkTraceAggregatorIT {
             parentId = null,
             streamId = null,
             client = NetworkNodeSpecification(
-                nodeType = NetworkNodeSpecification.NodeType.CONTAINER,
+                nodeType = NetworkNodeSpecification.NodeType.TEST_RUNNER,
                 ipAddress = "ANY",
                 specification = ServiceSpecification(name = "Test Runner"),
             ),
