@@ -128,7 +128,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      * }
      * ```
      *
-     * For this response body, following assertions do not throw an exception.
+     * For this response body, the following assertions do not throw an exception.
      * ```
      * assertThat(response).jsonBody("title", contains("Automated Test Scripts"))
      * assertThat(response).jsonBody("authors[0].lastname", isEqualTo("Garousi"))

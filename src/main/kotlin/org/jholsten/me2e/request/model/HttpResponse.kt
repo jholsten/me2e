@@ -12,7 +12,7 @@ class HttpResponse internal constructor(
     val request: HttpRequest,
 
     /**
-     * HTTP protocol that was used, such as `http/1.1`.
+     * HTTP protocol version that was used, such as `HTTP/1.1`.
      */
     val protocol: String,
 

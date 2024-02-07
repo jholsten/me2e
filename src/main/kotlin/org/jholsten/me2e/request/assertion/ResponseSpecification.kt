@@ -22,6 +22,12 @@ class ResponseSpecification {
 
     /**
      * Expects that the status code of the response satisfies the given assertion.
+     * You may call this function multiple times to place multiple requirements on the status code.
+     *
+     * Example:
+     * ```kotlin
+     * ResponseSpecification().expectStatusCode(isEqualTo(200))
+     * ```
      * @param expected Expectation for the value of the [HttpResponse.code].
      * @return This instance, to use for chaining.
      */
@@ -29,14 +35,32 @@ class ResponseSpecification {
         this.statusCode.add(expected)
     }
 
+    /**
+     * Expects that the protocol of the response satisfies the given assertion.
+     * You may call this function multiple times to place multiple requirements on the protocol.
+     * @param expected Expectation for the value of the [HttpResponse.protocol].
+     * @return This instance, to use for chaining.
+     */
     fun expectProtocol(expected: Assertable<String?>) = apply {
         this.protocol.add(expected)
     }
 
+    /**
+     * Expects that the status message of the response satisfies the given assertion.
+     * You may call this function multiple times to place multiple requirements on the status message.
+     * @param expected Expectation for the value of the [HttpResponse.message].
+     * @return This instance, to use for chaining.
+     */
     fun expectMessage(expected: Assertable<String?>) = apply {
         this.message.add(expected)
     }
 
+    /**
+     * Expects that the headers of the response satisfy the given assertion.
+     * You may call this function multiple times to place multiple requirements on the headers.
+     * @param expected Expectation for the value of the [HttpResponse.headers].
+     * @return This instance, to use for chaining.
+     */
     fun expectHeaders(expected: Assertable<Map<String, List<*>>?>) = apply {
         this.headers.add(expected)
     }
@@ -63,7 +87,9 @@ class ResponseSpecification {
 
     /**
      * Evaluates whether all expected values match the actual response.
+     * @param response Actual response to be evaluated.
      */
+    @JvmSynthetic
     internal fun evaluate(response: AssertableResponse) {
         val messages = listOf(
             statusCode.map { evaluate { response.statusCode(it) } },
