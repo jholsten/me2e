@@ -13,72 +13,88 @@ class AssertableResponse internal constructor(private val response: HttpResponse
     /**
      * Asserts that the status code of the [response] satisfies the given assertion.
      * @param expected Expectation for the value of the [HttpResponse.code].
+     * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
+     * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ResponseSpecification].
      * @throws AssertionFailure if assertion was not successful.
      */
-    fun statusCode(expected: Assertable<Int?>) {
+    fun statusCode(expected: Assertable<Int?>) = apply {
         expected.evaluate("status code", this.response.code)
     }
 
     /**
      * Asserts that the protocol of the [response] satisfies the given assertion.
      * @param expected Expectation for the value of the [HttpResponse.protocol].
+     * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
+     * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ResponseSpecification].
      * @throws AssertionFailure if assertion was not successful.
      */
-    fun protocol(expected: Assertable<String?>) {
+    fun protocol(expected: Assertable<String?>) = apply {
         expected.evaluate("protocol", this.response.protocol)
     }
 
     /**
      * Asserts that the message of the [response] satisfies the given assertion.
      * @param expected Expectation for the value of the [HttpResponse.message].
+     * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
+     * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ResponseSpecification].
      * @throws AssertionFailure if assertion was not successful.
      */
-    fun message(expected: Assertable<String?>) {
+    fun message(expected: Assertable<String?>) = apply {
         expected.evaluate("message", this.response.message)
     }
 
     /**
      * Asserts that the headers of the [response] satisfy the given assertion.
      * @param expected Expectation for the value of the [HttpResponse.headers].
+     * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
+     * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ResponseSpecification].
      * @throws AssertionFailure if assertion was not successful.
      */
-    fun headers(expected: Assertable<Map<String, List<*>>?>) {
+    fun headers(expected: Assertable<Map<String, List<*>>?>) = apply {
         expected.evaluate("headers", this.response.headers.entries)
     }
 
     /**
      * Asserts that the content type of the [response] satisfies the given assertion.
      * @param expected Expectation for the value of the [org.jholsten.me2e.request.model.HttpResponseBody.contentType].
+     * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
+     * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ResponseSpecification].
      * @throws AssertionFailure if content type is not set or if assertion was not successful.
      */
-    fun contentType(expected: Assertable<String?>) {
+    fun contentType(expected: Assertable<String?>) = apply {
         expected.evaluate("content type", this.response.body?.contentType?.value)
     }
 
     /**
      * Asserts that the body of the [response], encoded as string, satisfies the given assertion.
      * @param expected Expectation for the string value of the [HttpResponse.body].
+     * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
+     * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ResponseSpecification].
      * @throws AssertionFailure if assertion was not successful.
      */
-    fun body(expected: Assertable<String?>) {
+    fun body(expected: Assertable<String?>) = apply {
         expected.evaluate("body", this.response.body?.asString())
     }
 
     /**
      * Asserts that the body of the [response], encoded as byte array, satisfies the given assertion.
      * @param expected Expectation for the binary value of the [HttpResponse.body].
+     * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
+     * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ResponseSpecification].
      * @throws AssertionFailure if assertion was not successful.
      */
-    fun binaryBody(expected: Assertable<ByteArray?>) {
+    fun binaryBody(expected: Assertable<ByteArray?>) = apply {
         expected.evaluate("binary body", this.response.body?.asBinary())
     }
 
     /**
      * Asserts that the body of the [response], encoded as base 64, satisfies the given assertion.
      * @param expected Expectation for the base 64 encoded value of the [HttpResponse.body].
+     * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
+     * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ResponseSpecification].
      * @throws AssertionFailure if assertion was not successful.
      */
-    fun base64Body(expected: Assertable<String?>) {
+    fun base64Body(expected: Assertable<String?>) = apply {
         expected.evaluate("base 64 body", this.response.body?.asBase64())
     }
 
@@ -123,9 +139,11 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      * ```
      * @param key Key of the JSON body to evaluate.
      * @param expected Expectation for the value of the JSON node with the given key.
+     * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
+     * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ResponseSpecification].
      * @throws AssertionFailure if assertion was not successful.
      */
-    fun jsonBody(key: String, expected: Assertable<String?>) {
+    fun jsonBody(key: String, expected: Assertable<String?>) = apply {
         val json = this.response.body?.asJson() ?: throw AssertionFailure("Response does not contain a response body.")
         val path = key.split(".")
         var node: JsonNode = json

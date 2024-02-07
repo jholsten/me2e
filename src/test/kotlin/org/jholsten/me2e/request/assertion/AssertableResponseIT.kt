@@ -41,16 +41,53 @@ internal class AssertableResponseIT {
     )
 
     @Test
+    fun `Asserting all properties should not throw if assertions are satisfied`() {
+        assertDoesNotThrow {
+            assertThat(response)
+                .statusCode(isEqualTo(200))
+                .protocol(isEqualTo("http/1.1"))
+                .message(isEqualTo("Some Message"))
+                .headers(
+                    isEqualTo(
+                        mapOf(
+                            "Key1" to listOf("Value1.1", "Value1.2"),
+                            "Key2" to listOf("Value2"),
+                        )
+                    )
+                )
+                .contentType(isEqualTo("application/json; charset=utf-8"))
+                .body(isEqualTo("{\"name\": \"John\", \"nested\": {\"key1\": \"value1\", \"key2\": \"value2\"}, \"details\": [{\"detail\": 1}, {\"detail\": 2}]}"))
+                .base64Body(isEqualTo("eyJuYW1lIjogIkpvaG4iLCAibmVzdGVkIjogeyJrZXkxIjogInZhbHVlMSIsICJrZXkyIjogInZhbHVlMiJ9LCAiZGV0YWlscyI6IFt7ImRldGFpbCI6IDF9LCB7ImRldGFpbCI6IDJ9XX0="))
+                .jsonBody("name", isEqualTo("John"))
+                .jsonBody("nested.key1", isEqualTo("value1"))
+                .jsonBody("nested.key2", isEqualTo("value2"))
+                .jsonBody("details[0].detail", isEqualTo("1"))
+                .jsonBody("details[1].detail", isEqualTo("2"))
+        }
+    }
+
+    @Test
     fun `Asserting status code should not throw if assertion is satisfied`() {
         assertDoesNotThrow { assertThat(response).statusCode(isEqualTo(response.code)) }
         assertDoesNotThrow { assertThat(response).statusCode(isEqualTo(200)) }
         assertDoesNotThrow { assertThat(response).statusCode(isNotNull()) }
+        assertDoesNotThrow {
+            assertThat(response)
+                .statusCode(isEqualTo(response.code))
+                .statusCode(isEqualTo(200))
+                .statusCode(isNotNull())
+        }
     }
 
     @Test
     fun `Asserting status code should throw if assertion is not satisfied`() {
         assertFails { assertThat(response).statusCode(isEqualTo(400)) }
         assertFails { assertThat(response).statusCode(isNull()) }
+        assertFails {
+            assertThat(response)
+                .statusCode(isEqualTo(400))
+                .statusCode(isNull())
+        }
     }
 
     @Test
@@ -60,6 +97,14 @@ internal class AssertableResponseIT {
         assertDoesNotThrow { assertThat(response).protocol(contains("http")) }
         assertDoesNotThrow { assertThat(response).protocol(matchesPattern("http.{4}")) }
         assertDoesNotThrow { assertThat(response).protocol(isNotNull()) }
+        assertDoesNotThrow {
+            assertThat(response)
+                .protocol(isEqualTo(response.protocol))
+                .protocol(isEqualTo("http/1.1"))
+                .protocol(contains("http"))
+                .protocol(matchesPattern("http.{4}"))
+                .protocol(isNotNull())
+        }
     }
 
     @Test
@@ -68,6 +113,13 @@ internal class AssertableResponseIT {
         assertFails { assertThat(response).protocol(contains("ABC")) }
         assertFails { assertThat(response).protocol(matchesPattern("^[A-Z]{4}\$")) }
         assertFails { assertThat(response).protocol(isNull()) }
+        assertFails {
+            assertThat(response)
+                .protocol(isEqualTo("http/2.0"))
+                .protocol(contains("ABC"))
+                .protocol(matchesPattern("^[A-Z]{4}\$"))
+                .protocol(isNull())
+        }
     }
 
     @Test
@@ -77,6 +129,14 @@ internal class AssertableResponseIT {
         assertDoesNotThrow { assertThat(response).message(contains("Message")) }
         assertDoesNotThrow { assertThat(response).message(matchesPattern("[\\w|\\s]*")) }
         assertDoesNotThrow { assertThat(response).message(isNotNull()) }
+        assertDoesNotThrow {
+            assertThat(response)
+                .message(isEqualTo(response.message))
+                .message(isEqualTo("Some Message"))
+                .message(contains("Message"))
+                .message(matchesPattern("[\\w|\\s]*"))
+                .message(isNotNull())
+        }
     }
 
     @Test
@@ -85,6 +145,13 @@ internal class AssertableResponseIT {
         assertFails { assertThat(response).message(contains("Something else")) }
         assertFails { assertThat(response).message(matchesPattern("^[A-Z]{4}\$")) }
         assertFails { assertThat(response).message(isNull()) }
+        assertFails {
+            assertThat(response)
+                .message(isEqualTo("Another Message"))
+                .message(contains("Something else"))
+                .message(matchesPattern("^[A-Z]{4}\$"))
+                .message(isNull())
+        }
     }
 
     @Test
@@ -107,6 +174,17 @@ internal class AssertableResponseIT {
             )
         }
         assertDoesNotThrow { assertThat(response).headers(isNotNull()) }
+        assertDoesNotThrow {
+            assertThat(response)
+                .headers(isEqualTo(response.headers.entries))
+                .headers(containsKey("Key1").withValue("Value1.1"))
+                .headers(containsKey("Key1").withValue("Value1.2"))
+                .headers(containsKey("Key1").withValues(listOf("Value1.1", "Value1.2")))
+                .headers(containsKey("Key1"))
+                .headers(containsKey("Key2").withValue("Value2"))
+                .headers(containsKey("Key2"))
+                .headers(isNotNull())
+        }
     }
 
     @Test
@@ -117,6 +195,15 @@ internal class AssertableResponseIT {
         assertFails { assertThat(response).headers(containsKey("Key3")) }
         assertFails { assertThat(response).headers(isEqualTo(mapOf())) }
         assertFails { assertThat(response).headers(isNull()) }
+        assertFails {
+            assertThat(response)
+                .headers(containsKey("Key1").withValue("Other"))
+                .headers(containsKey("Key1").withValues(listOf("Other")))
+                .headers(containsKey("Key1").withValues(listOf("Value1.1")))
+                .headers(containsKey("Key3"))
+                .headers(isEqualTo(mapOf()))
+                .headers(isNull())
+        }
     }
 
     @Test
@@ -125,6 +212,13 @@ internal class AssertableResponseIT {
         assertDoesNotThrow { assertThat(response).contentType(isEqualTo("application/json; charset=utf-8")) }
         assertDoesNotThrow { assertThat(response).contentType(contains("application/json")) }
         assertDoesNotThrow { assertThat(response).contentType(isNotNull()) }
+        assertDoesNotThrow {
+            assertThat(response)
+                .contentType(isEqualTo(response.body?.contentType?.value))
+                .contentType(isEqualTo("application/json; charset=utf-8"))
+                .contentType(contains("application/json"))
+                .contentType(isNotNull())
+        }
     }
 
     @Test
@@ -132,6 +226,12 @@ internal class AssertableResponseIT {
         assertFails { assertThat(response).contentType(isEqualTo("text/plain; charset=utf-8")) }
         assertFails { assertThat(response).contentType(contains("text/plain")) }
         assertFails { assertThat(response).contentType(isNull()) }
+        assertFails {
+            assertThat(response)
+                .contentType(isEqualTo("text/plain; charset=utf-8"))
+                .contentType(contains("text/plain"))
+                .contentType(isNull())
+        }
     }
 
     @Test
@@ -140,6 +240,12 @@ internal class AssertableResponseIT {
         assertDoesNotThrow { assertThat(response).body(isEqualTo("{\"name\": \"John\", \"nested\": {\"key1\": \"value1\", \"key2\": \"value2\"}, \"details\": [{\"detail\": 1}, {\"detail\": 2}]}")) }
         assertDoesNotThrow { assertThat(response).body(contains("name")) }
         assertDoesNotThrow { assertThat(response).body(isNotNull()) }
+        assertDoesNotThrow {
+            assertThat(response)
+                .body(isEqualTo(response.body?.asString()))
+                .body(contains("name"))
+                .body(isNotNull())
+        }
     }
 
     @Test
@@ -147,18 +253,34 @@ internal class AssertableResponseIT {
         assertFails { assertThat(response).body(isEqualTo("Something else")) }
         assertFails { assertThat(response).body(contains("Other")) }
         assertFails { assertThat(response).body(isNull()) }
+        assertFails {
+            assertThat(response)
+                .body(isEqualTo("Something else"))
+                .body(contains("Other"))
+                .body(isNull())
+        }
     }
 
     @Test
     fun `Asserting binary body should not throw if assertion is satisfied`() {
         assertDoesNotThrow { assertThat(response).binaryBody(isEqualTo(response.body?.asBinary())) }
         assertDoesNotThrow { assertThat(response).binaryBody(isNotNull()) }
+        assertDoesNotThrow {
+            assertThat(response)
+                .binaryBody(isEqualTo(response.body?.asBinary()))
+                .binaryBody(isNotNull())
+        }
     }
 
     @Test
     fun `Asserting binary body should throw if assertion is not satisfied`() {
         assertFails { assertThat(response).binaryBody(isEqualTo(byteArrayOf(10, 11, 12))) }
         assertFails { assertThat(response).binaryBody(isNull()) }
+        assertFails {
+            assertThat(response)
+                .binaryBody(isEqualTo(byteArrayOf(10, 11, 12)))
+                .binaryBody(isNull())
+        }
     }
 
     @Test
@@ -166,12 +288,22 @@ internal class AssertableResponseIT {
         assertDoesNotThrow { assertThat(response).base64Body(isEqualTo(response.body?.asBase64())) }
         assertDoesNotThrow { assertThat(response).base64Body(isEqualTo("eyJuYW1lIjogIkpvaG4iLCAibmVzdGVkIjogeyJrZXkxIjogInZhbHVlMSIsICJrZXkyIjogInZhbHVlMiJ9LCAiZGV0YWlscyI6IFt7ImRldGFpbCI6IDF9LCB7ImRldGFpbCI6IDJ9XX0=")) }
         assertDoesNotThrow { assertThat(response).base64Body(isNotNull()) }
+        assertDoesNotThrow {
+            assertThat(response)
+                .base64Body(isEqualTo(response.body?.asBase64()))
+                .base64Body(isNotNull())
+        }
     }
 
     @Test
     fun `Asserting base 64 body should throw if assertion is not satisfied`() {
         assertFails { assertThat(response).base64Body(isEqualTo("ABC")) }
         assertFails { assertThat(response).base64Body(isNull()) }
+        assertFails {
+            assertThat(response)
+                .base64Body(isEqualTo("ABC"))
+                .base64Body(isNull())
+        }
     }
 
     @Test
@@ -181,6 +313,14 @@ internal class AssertableResponseIT {
         assertDoesNotThrow { assertThat(response).jsonBody("nested.key2", isEqualTo("value2")) }
         assertDoesNotThrow { assertThat(response).jsonBody("details[0].detail", isEqualTo("1")) }
         assertDoesNotThrow { assertThat(response).jsonBody("details[1].detail", isEqualTo("2")) }
+        assertDoesNotThrow {
+            assertThat(response)
+                .jsonBody("name", isEqualTo("John"))
+                .jsonBody("nested.key1", isEqualTo("value1"))
+                .jsonBody("nested.key2", isEqualTo("value2"))
+                .jsonBody("details[0].detail", isEqualTo("1"))
+                .jsonBody("details[1].detail", isEqualTo("2"))
+        }
     }
 
     @Test
@@ -194,6 +334,18 @@ internal class AssertableResponseIT {
         assertFails { assertThat(response).jsonBody("details[99].detail", isEqualTo("Something")) }
         assertFails { assertThat(response).jsonBody("name[0]", isEqualTo("Peter")) }
         assertFails { assertThat(response).jsonBody("details[0]", isEqualTo("Something")) }
+        assertFails {
+            assertThat(response)
+                .jsonBody("name", isEqualTo("Peter"))
+                .jsonBody("nested.key1", isEqualTo("other"))
+                .jsonBody("nested.key2", isEqualTo("other"))
+                .jsonBody("details[0].detail", isEqualTo("other"))
+                .jsonBody("details[1].detail", isEqualTo("other"))
+                .jsonBody("non-existing", isEqualTo("Something"))
+                .jsonBody("details[99].detail", isEqualTo("Something"))
+                .jsonBody("name[0]", isEqualTo("Peter"))
+                .jsonBody("details[0]", isEqualTo("Something"))
+        }
     }
 
     @Test
