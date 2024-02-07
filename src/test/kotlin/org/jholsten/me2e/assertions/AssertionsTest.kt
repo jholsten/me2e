@@ -41,14 +41,14 @@ internal class AssertionsTest {
 
     @Test
     fun `String contains assertion should not throw if actual contains expected`() {
-        assertDoesNotThrow { contains("A").evaluate("Property", "ABCDEFGHIJKLMNOP") }
-        assertDoesNotThrow { contains("ABC").evaluate("Property", "ABCDEFGHIJKLMNOP") }
+        assertDoesNotThrow { containsString("A").evaluate("Property", "ABCDEFGHIJKLMNOP") }
+        assertDoesNotThrow { containsString("ABC").evaluate("Property", "ABCDEFGHIJKLMNOP") }
     }
 
     @Test
     fun `String contains assertion should throw if actual does not contain expected`() {
-        assertFailsWith<AssertionFailure> { contains("Z").evaluate("Property", "ABCDEFGHIJKLMNOP") }
-        assertFailsWith<AssertionFailure> { contains("a").evaluate("Property", "ABCDEFGHIJKLMNOP") }
+        assertFailsWith<AssertionFailure> { containsString("Z").evaluate("Property", "ABCDEFGHIJKLMNOP") }
+        assertFailsWith<AssertionFailure> { containsString("a").evaluate("Property", "ABCDEFGHIJKLMNOP") }
     }
 
     @Test

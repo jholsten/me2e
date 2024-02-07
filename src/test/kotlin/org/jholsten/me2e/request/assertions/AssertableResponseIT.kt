@@ -100,14 +100,14 @@ internal class AssertableResponseIT {
     fun `Asserting protocol should not throw if assertion is satisfied`() {
         assertDoesNotThrow { assertThat(response).protocol(equalTo(response.protocol)) }
         assertDoesNotThrow { assertThat(response).protocol(equalTo("http/1.1")) }
-        assertDoesNotThrow { assertThat(response).protocol(contains("http")) }
+        assertDoesNotThrow { assertThat(response).protocol(containsString("http")) }
         assertDoesNotThrow { assertThat(response).protocol(matchesPattern("http.{4}")) }
         assertDoesNotThrow { assertThat(response).protocol(isNotNull()) }
         assertDoesNotThrow {
             assertThat(response)
                 .protocol(equalTo(response.protocol))
                 .protocol(equalTo("http/1.1"))
-                .protocol(contains("http"))
+                .protocol(containsString("http"))
                 .protocol(matchesPattern("http.{4}"))
                 .protocol(isNotNull())
         }
@@ -116,13 +116,13 @@ internal class AssertableResponseIT {
     @Test
     fun `Asserting protocol should throw if assertion is not satisfied`() {
         assertFails { assertThat(response).protocol(equalTo("http/2.0")) }
-        assertFails { assertThat(response).protocol(contains("ABC")) }
+        assertFails { assertThat(response).protocol(containsString("ABC")) }
         assertFails { assertThat(response).protocol(matchesPattern("^[A-Z]{4}\$")) }
         assertFails { assertThat(response).protocol(isNull()) }
         assertFails {
             assertThat(response)
                 .protocol(equalTo("http/2.0"))
-                .protocol(contains("ABC"))
+                .protocol(containsString("ABC"))
                 .protocol(matchesPattern("^[A-Z]{4}\$"))
                 .protocol(isNull())
         }
@@ -132,14 +132,14 @@ internal class AssertableResponseIT {
     fun `Asserting message should not throw if assertion is satisfied`() {
         assertDoesNotThrow { assertThat(response).message(equalTo(response.message)) }
         assertDoesNotThrow { assertThat(response).message(equalTo("Some Message")) }
-        assertDoesNotThrow { assertThat(response).message(contains("Message")) }
+        assertDoesNotThrow { assertThat(response).message(containsString("Message")) }
         assertDoesNotThrow { assertThat(response).message(matchesPattern("[\\w|\\s]*")) }
         assertDoesNotThrow { assertThat(response).message(isNotNull()) }
         assertDoesNotThrow {
             assertThat(response)
                 .message(equalTo(response.message))
                 .message(equalTo("Some Message"))
-                .message(contains("Message"))
+                .message(containsString("Message"))
                 .message(matchesPattern("[\\w|\\s]*"))
                 .message(isNotNull())
         }
@@ -148,13 +148,13 @@ internal class AssertableResponseIT {
     @Test
     fun `Asserting message should throw if assertion is not satisfied`() {
         assertFails { assertThat(response).message(equalTo("Another Message")) }
-        assertFails { assertThat(response).message(contains("Something else")) }
+        assertFails { assertThat(response).message(containsString("Something else")) }
         assertFails { assertThat(response).message(matchesPattern("^[A-Z]{4}\$")) }
         assertFails { assertThat(response).message(isNull()) }
         assertFails {
             assertThat(response)
                 .message(equalTo("Another Message"))
-                .message(contains("Something else"))
+                .message(containsString("Something else"))
                 .message(matchesPattern("^[A-Z]{4}\$"))
                 .message(isNull())
         }
@@ -216,13 +216,13 @@ internal class AssertableResponseIT {
     fun `Asserting content type should not throw if assertion is satisfied`() {
         assertDoesNotThrow { assertThat(response).contentType(equalTo(response.body?.contentType?.value)) }
         assertDoesNotThrow { assertThat(response).contentType(equalTo("application/json; charset=utf-8")) }
-        assertDoesNotThrow { assertThat(response).contentType(contains("application/json")) }
+        assertDoesNotThrow { assertThat(response).contentType(containsString("application/json")) }
         assertDoesNotThrow { assertThat(response).contentType(isNotNull()) }
         assertDoesNotThrow {
             assertThat(response)
                 .contentType(equalTo(response.body?.contentType?.value))
                 .contentType(equalTo("application/json; charset=utf-8"))
-                .contentType(contains("application/json"))
+                .contentType(containsString("application/json"))
                 .contentType(isNotNull())
         }
     }
@@ -230,12 +230,12 @@ internal class AssertableResponseIT {
     @Test
     fun `Asserting content type should throw if assertion is not satisfied`() {
         assertFails { assertThat(response).contentType(equalTo("text/plain; charset=utf-8")) }
-        assertFails { assertThat(response).contentType(contains("text/plain")) }
+        assertFails { assertThat(response).contentType(containsString("text/plain")) }
         assertFails { assertThat(response).contentType(isNull()) }
         assertFails {
             assertThat(response)
                 .contentType(equalTo("text/plain; charset=utf-8"))
-                .contentType(contains("text/plain"))
+                .contentType(containsString("text/plain"))
                 .contentType(isNull())
         }
     }
@@ -244,12 +244,12 @@ internal class AssertableResponseIT {
     fun `Asserting body should not throw if assertion is satisfied`() {
         assertDoesNotThrow { assertThat(response).body(equalTo(response.body?.asString())) }
         assertDoesNotThrow { assertThat(response).body(equalTo("{\"name\": \"John\", \"nested\": {\"key1\": \"value1\", \"key2\": \"value2\"}, \"details\": [{\"detail\": 1}, {\"detail\": 2}]}")) }
-        assertDoesNotThrow { assertThat(response).body(contains("name")) }
+        assertDoesNotThrow { assertThat(response).body(containsString("name")) }
         assertDoesNotThrow { assertThat(response).body(isNotNull()) }
         assertDoesNotThrow {
             assertThat(response)
                 .body(equalTo(response.body?.asString()))
-                .body(contains("name"))
+                .body(containsString("name"))
                 .body(isNotNull())
         }
     }
@@ -257,12 +257,12 @@ internal class AssertableResponseIT {
     @Test
     fun `Asserting body should throw if assertion is not satisfied`() {
         assertFails { assertThat(response).body(equalTo("Something else")) }
-        assertFails { assertThat(response).body(contains("Other")) }
+        assertFails { assertThat(response).body(containsString("Other")) }
         assertFails { assertThat(response).body(isNull()) }
         assertFails {
             assertThat(response)
                 .body(equalTo("Something else"))
-                .body(contains("Other"))
+                .body(containsString("Other"))
                 .body(isNull())
         }
     }
@@ -361,15 +361,15 @@ internal class AssertableResponseIT {
             .expectStatusCode(isNotNull())
             .expectProtocol(equalTo("http/1.1"))
             .expectProtocol(isNotNull())
-            .expectProtocol(contains("http"))
+            .expectProtocol(containsString("http"))
             .expectMessage(equalTo("Some Message"))
-            .expectMessage(contains("Message"))
+            .expectMessage(containsString("Message"))
             .expectHeaders(containsKey("Key1").withValue(equalTo("Value1.1")))
             .expectHeaders(containsKey("Key1").withValue(equalTo("Value1.2")))
             .expectHeaders(containsKey("Key2").withValue(equalTo("Value2")))
             .expectContentType(equalTo("application/json; charset=utf-8"))
-            .expectBody(contains("name"))
-            .expectBase64Body(contains("eyJuYW1lIjogIkpva"))
+            .expectBody(containsString("name"))
+            .expectBase64Body(containsString("eyJuYW1lIjogIkpva"))
             .expectBinaryBody(equalTo(response.body?.asBinary()))
             .expectJsonBody(containsNode("name").withValue(equalTo("John")))
             .expectJsonBody(containsNode("details[0].detail").withValue(equalTo("1")))
@@ -384,14 +384,14 @@ internal class AssertableResponseIT {
             .expectStatusCode(isNull())
             .expectProtocol(equalTo("http/2.0"))
             .expectProtocol(isNull())
-            .expectProtocol(contains("https"))
+            .expectProtocol(containsString("https"))
             .expectMessage(equalTo("Other"))
-            .expectMessage(contains("Something Else"))
+            .expectMessage(containsString("Something Else"))
             .expectHeaders(containsKey("Key1").withValue(equalTo("Other")))
             .expectHeaders(containsKey("Key3"))
             .expectContentType(equalTo("Other"))
-            .expectBody(contains("Other"))
-            .expectBase64Body(contains("Other"))
+            .expectBody(containsString("Other"))
+            .expectBase64Body(containsString("Other"))
             .expectJsonBody(containsNode("name").withValue(equalTo("Peter")))
             .expectJsonBody(containsNode("details[0]").withValue(equalTo("1")))
 

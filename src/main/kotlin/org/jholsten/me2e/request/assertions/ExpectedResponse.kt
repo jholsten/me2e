@@ -89,7 +89,7 @@ class ExpectedResponse {
     }
 
     /**
-     * Expects that the content type of the response satisfies the given assertion.
+     * Expects that the content type of the response body satisfies the given assertion.
      * You may call this function multiple times to place multiple requirements on the content type.
      *
      * Example:

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import io.mockk.every
 import io.mockk.mockk
 import org.jholsten.me2e.assertions.assertThat
-import org.jholsten.me2e.assertions.contains
+import org.jholsten.me2e.assertions.containsString
 import org.jholsten.me2e.assertions.containsNode
 import org.jholsten.me2e.assertions.equalTo
 import org.jholsten.me2e.request.model.*
@@ -53,7 +53,7 @@ internal class AssertableResponseTest {
 
     @Test
     fun `Asserting json body should not throw if assertion is satisfied`() {
-        assertThat(response).jsonBody(containsNode("title").withValue(contains("Automated Test Scripts")))
+        assertThat(response).jsonBody(containsNode("title").withValue(containsString("Automated Test Scripts")))
         assertThat(response).jsonBody(containsNode("authors[0].lastname").withValue(equalTo("Garousi")))
         assertThat(response).jsonBody(containsNode("authors[0]").withValue(equalTo("{\"firstname\":\"Vahid\",\"lastname\":\"Garousi\"}")))
         assertThat(response).jsonBody(containsNode("year").withValue(equalTo("2016")))

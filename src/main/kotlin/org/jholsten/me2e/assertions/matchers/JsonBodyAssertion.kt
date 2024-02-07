@@ -36,7 +36,7 @@ import org.jholsten.me2e.assertions.AssertionFailure
  *
  * For this response body, the following assertions do not throw an exception.
  * ```
- * assertThat(response).jsonBody(containsNode("title").withValue(contains("Automated Test Scripts")))
+ * assertThat(response).jsonBody(containsNode("title").withValue(containsString("Automated Test Scripts")))
  * assertThat(response).jsonBody(containsNode("authors[0].lastname").withValue(equalTo("Garousi")))
  * assertThat(response).jsonBody(containsNode("authors[0]").withValue(equalTo("{\"firstname\":\"Vahid\",\"lastname\":\"Garousi\"}")))
  * assertThat(response).jsonBody(containsNode("year").withValue(equalTo("2016")))

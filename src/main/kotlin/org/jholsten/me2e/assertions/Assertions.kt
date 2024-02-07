@@ -56,11 +56,11 @@ fun <T> notEqualTo(expected: T): Assertable<T?> {
  *
  * Example Usage:
  * ```kotlin
- * assertThat(response).protocol(contains("HTTP"))
+ * assertThat(response).protocol(containsString("HTTP"))
  * ```
  * @param expected Expected value which should be contained in the actual value.
  */
-fun contains(expected: String): Assertable<String?> {
+fun containsString(expected: String): Assertable<String?> {
     return StringContainsAssertion(expected)
 }
 
