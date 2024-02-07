@@ -7,16 +7,18 @@ import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.HttpEntity
 import org.apache.hc.core5.http.io.entity.StringEntity
+import org.jholsten.me2e.assertions.assertThat
+import org.jholsten.me2e.assertions.containsKey
+import org.jholsten.me2e.assertions.containsNode
+import org.jholsten.me2e.assertions.equalTo
 import org.jholsten.me2e.config.model.MockServerConfig
 import org.jholsten.me2e.mock.exception.VerificationException
 import org.jholsten.me2e.mock.stubbing.MockServerStub
 import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequestMatcher
 import org.jholsten.me2e.mock.stubbing.request.StringMatcher
-import org.jholsten.me2e.mock.stubbing.request.StringMatcher.Companion.containing
-import org.jholsten.me2e.mock.stubbing.request.StringMatcher.Companion.equalTo
 import org.jholsten.me2e.mock.stubbing.response.MockServerStubResponse
 import org.jholsten.me2e.mock.stubbing.response.MockServerStubResponseBody
-import org.jholsten.me2e.mock.verification.MockServerVerification.Companion.receivedRequest
+import org.jholsten.me2e.mock.verification.ExpectedRequest
 import org.jholsten.me2e.request.model.*
 import org.jholsten.util.assertDoesNotThrow
 import kotlin.test.*
@@ -98,12 +100,11 @@ class MockServerIT {
         assertEquals(expectedReceivedRequest.url, exampleServer.requestsReceived.first().url)
         assertEquals(expectedReceivedRequest.method, exampleServer.requestsReceived.first().method)
         assertDoesNotThrow {
-            exampleServer.verify(
-                receivedRequest(1)
+            assertThat(exampleServer).receivedRequest(
+                1, ExpectedRequest()
                     .withPath(equalTo("/search"))
-                    .withMethod(HttpMethod.POST)
-                    .withQueryParameter("id", equalTo("123"))
-                    .withQueryParameter("ID", equalTo("123"))
+                    .withMethod(equalTo(HttpMethod.POST))
+                    .withQueryParameters(containsKey("id").withValue(equalTo("123")))
                     .andNoOther()
             )
         }
@@ -131,15 +132,14 @@ class MockServerIT {
         assertEquals(expectedReceivedRequest.method, exampleServer.requestsReceived.first().method)
         assertEquals(expectedReceivedRequest.body?.asString(), exampleServer.requestsReceived.first().body?.asString())
         assertDoesNotThrow {
-            exampleServer.verify(
-                receivedRequest(1)
+            assertThat(exampleServer).receivedRequest(
+                1, ExpectedRequest()
                     .withPath(equalTo("/search"))
-                    .withMethod(HttpMethod.POST)
-                    .withQueryParameter("id", equalTo("123"))
-                    .withQueryParameter("ID", equalTo("123"))
-                    .withRequestBody(containing("some-key").and(containing("some-value")))
-                    .withHeader("header1", equalTo("headerValue"))
-                    .withHeader("HEADER1", equalTo("headerValue"))
+                    .withMethod(equalTo(HttpMethod.POST))
+                    .withQueryParameters(containsKey("id").withValue(equalTo("123")))
+                    .withBody(equalTo("{\"some-key\": \"some-value\"}"))
+                    .withJsonBoy(containsNode("some-key").withValue(equalTo("some-value")))
+                    .withHeaders(containsKey("header1").withValue(equalTo("headerValue")))
                     .andNoOther()
             )
         }
@@ -152,10 +152,7 @@ class MockServerIT {
         assertEquals(200, response.code)
         assertEquals(1, exampleServer.requestsReceived.size)
         assertDoesNotThrow {
-            exampleServer.verify(
-                receivedRequest(1)
-                    .matchingStub("request-stub")
-            )
+            assertThat(exampleServer).receivedRequest(1, ExpectedRequest().matchingStub("request-stub"))
         }
     }
 
@@ -166,10 +163,7 @@ class MockServerIT {
         assertEquals(200, response.code)
         assertEquals(1, exampleServer.requestsReceived.size)
         assertFailsWith<IllegalArgumentException> {
-            exampleServer.verify(
-                receivedRequest(1)
-                    .matchingStub("non-existing")
-            )
+            assertThat(exampleServer).receivedRequest(1, ExpectedRequest().matchingStub("non-existing"))
         }
     }
 
@@ -180,18 +174,18 @@ class MockServerIT {
         assertEquals(200, response.code)
         assertEquals(1, exampleServer.requestsReceived.size)
         assertDoesNotThrow {
-            exampleServer.verify(
-                receivedRequest(1)
+            assertThat(exampleServer).receivedRequest(
+                1, ExpectedRequest()
                     .withPath(equalTo("/"))
-                    .withMethod(HttpMethod.GET)
+                    .withMethod(equalTo(HttpMethod.GET))
                     .andNoOther()
             )
         }
         assertFailsWith<VerificationException> {
-            exampleServer.verify(
-                receivedRequest(1)
+            assertThat(exampleServer).receivedRequest(
+                1, ExpectedRequest()
                     .withPath(equalTo("/something-else"))
-                    .withMethod(HttpMethod.GET)
+                    .withMethod(equalTo(HttpMethod.GET))
             )
         }
     }
@@ -200,10 +194,10 @@ class MockServerIT {
     fun `Mock Server verification should fail if expected request was not received at least once`() {
         assertEquals(0, exampleServer.requestsReceived.size)
         assertFailsWith<VerificationException> {
-            exampleServer.verify(
-                receivedRequest()
+            assertThat(exampleServer).receivedRequest(
+                ExpectedRequest()
                     .withPath(equalTo("/"))
-                    .withMethod(HttpMethod.GET)
+                    .withMethod(equalTo(HttpMethod.GET))
             )
         }
     }
@@ -216,21 +210,20 @@ class MockServerIT {
         assertEquals(200, response1?.code)
         assertEquals(200, response2?.code)
         assertEquals(2, exampleServer.requestsReceived.size)
-        val request1Verification = receivedRequest()
+        val request1Verification = ExpectedRequest()
             .withPath(equalTo("/"))
-            .withMethod(HttpMethod.GET)
-        val request2Verification = receivedRequest()
+            .withMethod(equalTo(HttpMethod.GET))
+        val request2Verification = ExpectedRequest()
             .withPath(equalTo("/search"))
-            .withMethod(HttpMethod.POST)
-            .withQueryParameter("id", equalTo("123"))
-
-        assertDoesNotThrow { exampleServer.verify(request1Verification) }
-        assertDoesNotThrow { exampleServer.verify(request2Verification) }
+            .withMethod(equalTo(HttpMethod.POST))
+            .withQueryParameters(containsKey("id").withValue(equalTo("123")))
+        assertDoesNotThrow { assertThat(exampleServer).receivedRequest(request1Verification) }
+        assertDoesNotThrow { assertThat(exampleServer).receivedRequest(request2Verification) }
         assertFailsWith<VerificationException> {
-            exampleServer.verify(request1Verification.andNoOther())
+            assertThat(exampleServer).receivedRequest(request1Verification.andNoOther())
         }
         assertFailsWith<VerificationException> {
-            exampleServer.verify(request2Verification.andNoOther())
+            assertThat(exampleServer).receivedRequest(request2Verification.andNoOther())
         }
     }
 
@@ -241,10 +234,10 @@ class MockServerIT {
         assertEquals(404, response.code)
         assertEquals(1, exampleServer.requestsReceived.size)
         assertDoesNotThrow {
-            exampleServer.verify(
-                receivedRequest(1)
+            assertThat(exampleServer).receivedRequest(
+                1, ExpectedRequest()
                     .withPath(equalTo("/not-stubbed"))
-                    .withMethod(HttpMethod.GET)
+                    .withMethod(equalTo(HttpMethod.GET))
                     .andNoOther()
             )
         }
@@ -257,10 +250,10 @@ class MockServerIT {
         assertEquals(200, response.code)
         assertEquals(1, exampleServer.requestsReceived.size)
         assertDoesNotThrow {
-            exampleServer.verify(
-                receivedRequest(1)
+            assertThat(exampleServer).receivedRequest(
+                1, ExpectedRequest()
                     .withPath(equalTo("/"))
-                    .withMethod(HttpMethod.GET)
+                    .withMethod(equalTo(HttpMethod.GET))
             )
         }
 
@@ -268,10 +261,10 @@ class MockServerIT {
 
         assertEquals(0, exampleServer.requestsReceived.size)
         assertFailsWith<VerificationException> {
-            exampleServer.verify(
-                receivedRequest(1)
+            assertThat(exampleServer).receivedRequest(
+                1, ExpectedRequest()
                     .withPath(equalTo("/"))
-                    .withMethod(HttpMethod.GET)
+                    .withMethod(equalTo(HttpMethod.GET))
             )
         }
     }

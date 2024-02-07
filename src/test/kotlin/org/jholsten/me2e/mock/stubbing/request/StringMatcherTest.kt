@@ -2,11 +2,6 @@ package org.jholsten.me2e.mock.stubbing.request
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import org.jholsten.util.RecursiveComparison
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.Arguments
-import org.junit.jupiter.params.provider.MethodSource
-import java.util.stream.Stream
 import kotlin.test.*
 
 internal class StringMatcherTest {
@@ -159,24 +154,6 @@ internal class StringMatcherTest {
     }
 
     @Test
-    fun `String matchers chained with AND should match`() {
-        val matcher = StringMatcher(contains = "A").and(StringMatcher(contains = "B"))
-
-        assertTrue(matcher.matches("AB"))
-        assertFalse(matcher.matches("A"))
-        assertFalse(matcher.matches("B"))
-    }
-
-    @Test
-    fun `String matchers chained with OR should match`() {
-        val matcher = StringMatcher(contains = "A").or(StringMatcher(contains = "B"))
-
-        assertTrue(matcher.matches("AB"))
-        assertTrue(matcher.matches("A"))
-        assertTrue(matcher.matches("B"))
-    }
-
-    @Test
     fun `Deserializing string matcher should set correct properties`() {
         val value = """
             {
@@ -198,41 +175,5 @@ internal class StringMatcherTest {
         assertEquals("ABC", result.contains)
         assertEquals("999", result.notContains)
         assertTrue(result.ignoreCase)
-    }
-
-    @ParameterizedTest(name = "[{index}] factory method {0}")
-    @MethodSource("factoryComparisonProvider")
-    fun `Factory method invocation should equal constructor invocation`(
-        @Suppress("UNUSED_PARAMETER") method: String,
-        constructorMatcher: StringMatcher,
-        factoryMatcher: StringMatcher,
-    ) {
-        RecursiveComparison.assertEquals(constructorMatcher, factoryMatcher)
-    }
-
-    companion object {
-        @JvmStatic
-        private fun factoryComparisonProvider(): Stream<Arguments> {
-            val value = "ABC"
-            return Stream.of(
-                Arguments.of("equalTo", StringMatcher(equals = value), StringMatcher.equalTo(value)),
-                Arguments.of("equalToIgnoreCase", StringMatcher(equals = value, ignoreCase = true), StringMatcher.equalToIgnoreCase(value)),
-                Arguments.of("notEqualTo", StringMatcher(notEquals = value), StringMatcher.notEqualTo(value)),
-                Arguments.of(
-                    "notEqualToIgnoreCase",
-                    StringMatcher(notEquals = value, ignoreCase = true),
-                    StringMatcher.notEqualToIgnoreCase(value),
-                ),
-                Arguments.of("matching", StringMatcher(matches = value), StringMatcher.matching(value)),
-                Arguments.of("notMatching", StringMatcher(notMatches = value), StringMatcher.notMatching(value)),
-                Arguments.of("containing", StringMatcher(contains = value), StringMatcher.containing(value)),
-                Arguments.of(
-                    "containingIgnoreCase",
-                    StringMatcher(contains = value, ignoreCase = true),
-                    StringMatcher.containingIgnoreCase(value)
-                ),
-                Arguments.of("notContaining", StringMatcher(notContains = value), StringMatcher.notContaining(value)),
-            )
-        }
     }
 }

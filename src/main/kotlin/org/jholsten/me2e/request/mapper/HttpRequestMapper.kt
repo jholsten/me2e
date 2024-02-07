@@ -1,10 +1,12 @@
 package org.jholsten.me2e.request.mapper
 
-import com.github.tomakehurst.wiremock.http.RequestMethod
-import okhttp3.Headers
+import com.github.tomakehurst.wiremock.http.HttpHeaders as WireMockHttpHeaders
+import com.github.tomakehurst.wiremock.http.RequestMethod as WireMockHttpMethod
+import com.github.tomakehurst.wiremock.http.Request as WireMockRequest
+import okhttp3.Headers as OkHttpHeaders
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.Request
-import okhttp3.RequestBody
+import okhttp3.Request as OkHttpRequest
+import okhttp3.RequestBody as OkHttpRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okio.Buffer
 import org.jholsten.me2e.request.model.HttpHeaders
@@ -27,38 +29,38 @@ internal abstract class HttpRequestMapper {
     @Mapping(target = "method", source = "okHttpRequest", qualifiedByName = ["mapHttpMethod"])
     @Mapping(target = "headers", source = "okHttpRequest", qualifiedByName = ["mapHeaders"])
     @Mapping(target = "body", source = "okHttpRequest", qualifiedByName = ["mapBody"])
-    internal abstract fun toInternalDto(okHttpRequest: Request): HttpRequest
+    internal abstract fun toInternalDto(okHttpRequest: OkHttpRequest): HttpRequest
 
     @Mapping(target = "url", expression = "java(new Url(request.getAbsoluteUrl()))")
     @Mapping(target = "method", source = "request.method", qualifiedByName = ["mapHttpMethod"])
     @Mapping(target = "headers", source = "request.headers", qualifiedByName = ["mapHeaders"])
     @Mapping(target = "body", source = "request", qualifiedByName = ["mapBody"])
-    internal abstract fun toInternalDto(request: com.github.tomakehurst.wiremock.http.Request): HttpRequest
+    internal abstract fun toInternalDto(request: WireMockRequest): HttpRequest
 
     @Mapping(target = "url", expression = "java(HttpUrl.parse(request.getUrl().toString()))")
     @Mapping(target = "headers", source = "request.headers", qualifiedByName = ["mapHeadersToOkHttp"])
     @Mapping(target = "body", source = "body", qualifiedByName = ["mapBodyToOkHttp"])
     @Mapping(target = "tags\$okhttp", ignore = true)
     @Mapping(target = "tags", expression = "java(new java.util.HashMap<>())")
-    internal abstract fun toOkHttpRequest(request: HttpRequest): Request
+    internal abstract fun toOkHttpRequest(request: HttpRequest): OkHttpRequest
 
     @Named("mapHttpMethod")
-    protected fun mapHttpMethod(okHttpRequest: Request): HttpMethod {
+    protected fun mapHttpMethod(okHttpRequest: OkHttpRequest): HttpMethod {
         return HttpMethodMapper.INSTANCE.toInternalDto(okHttpRequest.method)
     }
 
     @Named("mapHttpMethod")
-    protected fun mapHttpMethod(requestMethod: RequestMethod): HttpMethod {
+    protected fun mapHttpMethod(requestMethod: WireMockHttpMethod): HttpMethod {
         return HttpMethodMapper.INSTANCE.toInternalDto(requestMethod.value())
     }
 
     @Named("mapHeaders")
-    protected fun mapHeaders(okHttpRequest: Request): HttpHeaders {
+    protected fun mapHeaders(okHttpRequest: OkHttpRequest): HttpHeaders {
         return mapHeaders(okHttpRequest.headers)
     }
 
     @Named("mapHeaders")
-    internal fun mapHeaders(headers: Headers): HttpHeaders {
+    internal fun mapHeaders(headers: OkHttpHeaders): HttpHeaders {
         val builder = HttpHeaders.Builder()
         for (i in 0 until headers.size) {
             builder.add(headers.name(i), headers.value(i))
@@ -67,12 +69,12 @@ internal abstract class HttpRequestMapper {
     }
 
     @Named("mapHeaders")
-    protected fun mapHeaders(headers: com.github.tomakehurst.wiremock.http.HttpHeaders): HttpHeaders {
+    protected fun mapHeaders(headers: WireMockHttpHeaders): HttpHeaders {
         return HttpHeaders(headers.all().associate { it.key() to it.values() })
     }
 
     @Named("mapBody")
-    protected fun mapBody(okHttpRequest: Request): HttpRequestBody? {
+    protected fun mapBody(okHttpRequest: OkHttpRequest): HttpRequestBody? {
         val body = okHttpRequest.body ?: return null
         val buffer = Buffer()
         body.writeTo(buffer)
@@ -83,7 +85,7 @@ internal abstract class HttpRequestMapper {
     }
 
     @Named("mapBody")
-    protected fun mapBody(request: com.github.tomakehurst.wiremock.http.Request): HttpRequestBody? {
+    protected fun mapBody(request: WireMockRequest): HttpRequestBody? {
         if (request.body == null || request.body.isEmpty()) {
             return null
         }
@@ -94,8 +96,8 @@ internal abstract class HttpRequestMapper {
     }
 
     @Named("mapHeadersToOkHttp")
-    protected fun mapHeadersToOkHttp(headers: HttpHeaders): Headers {
-        val builder = Headers.Builder()
+    protected fun mapHeadersToOkHttp(headers: HttpHeaders): OkHttpHeaders {
+        val builder = OkHttpHeaders.Builder()
         for (header in headers.entries) {
             header.value.forEach { builder.add(header.key, it) }
         }
@@ -104,7 +106,7 @@ internal abstract class HttpRequestMapper {
     }
 
     @Named("mapBodyToOkHttp")
-    protected fun mapBodyToOkHttp(body: HttpRequestBody?): RequestBody? {
+    protected fun mapBodyToOkHttp(body: HttpRequestBody?): OkHttpRequestBody? {
         if (body == null) {
             return null
         }

@@ -7,11 +7,10 @@ import com.github.tomakehurst.wiremock.stubbing.ServeEvent
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import com.github.tomakehurst.wiremock.verification.LoggedRequest
 import io.mockk.*
+import org.jholsten.me2e.assertions.equalTo
 import org.jholsten.me2e.mock.exception.VerificationException
 import org.jholsten.me2e.mock.stubbing.MockServerStub
-import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequestMatcher
-import org.jholsten.me2e.mock.stubbing.request.StringMatcher.Companion.equalTo
-import org.jholsten.me2e.mock.verification.MockServerVerification.Companion.receivedRequest
+import org.jholsten.me2e.mock.verification.ExpectedRequest
 import org.jholsten.me2e.request.mapper.HttpRequestMapper
 import org.jholsten.me2e.request.model.HttpRequest
 import org.jholsten.util.assertDoesNotThrow
@@ -87,7 +86,7 @@ internal class MockServerTest {
             every { host } returns server.hostname
             every { loggedDate } returns Date(50)
         }
-        val request3 = mockk<LoggedRequest>() {
+        val request3 = mockk<LoggedRequest> {
             every { host } returns "another-host.de"
             every { loggedDate } returns Date(25)
         }
@@ -140,15 +139,12 @@ internal class MockServerTest {
             ServeEvent(request2, mockk<StubMapping>(), mockk<ResponseDefinition>()),
         )
         every { wireMockServer.allServeEvents } returns events
-        mockkConstructor(MockServerStubRequestMatcher::class)
-        every { anyConstructed<MockServerStubRequestMatcher>().matches(request1) } returns true
-        every { anyConstructed<MockServerStubRequestMatcher>().matches(request2) } returns false
+        mockkConstructor(ExpectedRequest::class)
+        every { anyConstructed<ExpectedRequest>().matches(any(), request1) } returns true
+        every { anyConstructed<ExpectedRequest>().matches(any(), request2) } returns false
 
         assertDoesNotThrow {
-            server.verify(
-                receivedRequest(1)
-                    .withPath(equalTo("/some-path"))
-            )
+            server.verify(1, ExpectedRequest().withPath(equalTo("/some-path")))
         }
     }
 
@@ -160,12 +156,12 @@ internal class MockServerTest {
 
         assertFailsWith<VerificationException> {
             server.verify(
-                receivedRequest(1)
+                1, ExpectedRequest()
                     .withPath(equalTo("/some-path"))
             )
         }
         assertFailsWith<VerificationException> {
-            server.verify(receivedRequest(1))
+            server.verify(1, ExpectedRequest())
         }
     }
 
@@ -176,13 +172,10 @@ internal class MockServerTest {
         every { wireMockServer.allServeEvents } returns listOf()
 
         assertFailsWith<VerificationException> {
-            server.verify(
-                receivedRequest()
-                    .withPath(equalTo("/some-path"))
-            )
+            server.verify(null, ExpectedRequest().withPath(equalTo("/some-path")))
         }
         assertFailsWith<VerificationException> {
-            server.verify(receivedRequest())
+            server.verify(null, ExpectedRequest())
         }
     }
 
@@ -208,22 +201,22 @@ internal class MockServerTest {
             ServeEvent(request3, mockk<StubMapping>(), mockk<ResponseDefinition>()),
         )
         every { wireMockServer.allServeEvents } returns events
-        mockkConstructor(MockServerStubRequestMatcher::class)
-        every { anyConstructed<MockServerStubRequestMatcher>().matches(request1) } returns true
-        every { anyConstructed<MockServerStubRequestMatcher>().matches(request2) } returns true
-        every { anyConstructed<MockServerStubRequestMatcher>().matches(request3) } returns false
+        mockkConstructor(ExpectedRequest::class)
+        every { anyConstructed<ExpectedRequest>().matches(any(), request1) } returns true
+        every { anyConstructed<ExpectedRequest>().matches(any(), request2) } returns true
+        every { anyConstructed<ExpectedRequest>().matches(any(), request3) } returns false
 
-        val request1Verification = receivedRequest().withPath(equalTo("/some-path"))
-        val request2Verification = receivedRequest().withPath(equalTo("/other-path"))
-        assertDoesNotThrow { server.verify(request1Verification) }
-        assertDoesNotThrow { server.verify(request2Verification) }
-        assertFailsWith<VerificationException> { server.verify(request1Verification.andNoOther()) }
-        assertFailsWith<VerificationException> { server.verify(request2Verification.andNoOther()) }
+        val request1Verification = ExpectedRequest().withPath(equalTo("/some-path"))
+        val request2Verification = ExpectedRequest().withPath(equalTo("/other-path"))
+        assertDoesNotThrow { server.verify(null, request1Verification) }
+        assertDoesNotThrow { server.verify(null, request2Verification) }
+        assertFailsWith<VerificationException> { server.verify(null, request1Verification.andNoOther()) }
+        assertFailsWith<VerificationException> { server.verify(null, request2Verification.andNoOther()) }
     }
 
     @Test
     fun `Verifying request should fail if Mock Server is not initialized`() {
-        assertFailsWith<IllegalStateException> { server.verify(receivedRequest()) }
+        assertFailsWith<IllegalStateException> { server.verify(null, ExpectedRequest()) }
     }
 
     @Test
@@ -231,6 +224,6 @@ internal class MockServerTest {
         server.initialize(wireMockServer)
         every { wireMockServer.isRunning } returns false
 
-        assertFailsWith<IllegalStateException> { server.verify(receivedRequest()) }
+        assertFailsWith<IllegalStateException> { server.verify(null, ExpectedRequest()) }
     }
 }

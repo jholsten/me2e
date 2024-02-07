@@ -8,8 +8,7 @@ import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.container.injection.InjectService
 import org.jholsten.me2e.container.microservice.MicroserviceContainer
 import org.jholsten.me2e.mock.MockServer
-import org.jholsten.me2e.mock.stubbing.request.StringMatcher.Companion.equalTo
-import org.jholsten.me2e.mock.verification.MockServerVerification.Companion.receivedRequest
+import org.jholsten.me2e.mock.verification.ExpectedRequest
 import org.jholsten.me2e.request.model.HttpMethod
 import org.jholsten.me2e.request.model.HttpRequestBody
 import org.jholsten.me2e.request.model.MediaType
@@ -92,11 +91,11 @@ class Me2eTestIT : Me2eTest() {
         assertThat(response).jsonBody(containsNode("items[1].name").withValue(equalTo("B")))
         assertThat(response).jsonBody(containsNode("items[1].value").withValue(equalTo("1")))
 
-        paymentService.verify(
-            receivedRequest()
+        assertThat(paymentService).receivedRequest(
+            ExpectedRequest()
                 .withPath(equalTo("/search"))
-                .withMethod(HttpMethod.POST)
-                .withRequestBody(equalTo("{\"id\": 123}"))
+                .withMethod(equalTo(HttpMethod.POST))
+                .withBody(equalTo("{\"id\": 123}"))
                 .andNoOther()
         )
     }

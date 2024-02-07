@@ -8,8 +8,7 @@ import org.jholsten.me2e.mock.stubbing.MockServerStub
 import org.jholsten.me2e.config.utils.MockServerDeserializer
 import org.jholsten.me2e.mock.exception.VerificationException
 import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequestMapper.Companion.METADATA_MOCK_SERVER_NAME_KEY
-import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequestMatcher
-import org.jholsten.me2e.mock.verification.MockServerVerification
+import org.jholsten.me2e.mock.verification.ExpectedRequest
 import org.jholsten.me2e.request.mapper.HttpRequestMapper
 import org.jholsten.me2e.request.model.HttpRequest
 
@@ -87,17 +86,17 @@ class MockServer(
      * @throws IllegalStateException if the Mock Server is not initialized.
      * @throws VerificationException if Mock Server did not receive the expected number of requests.
      */
-    fun verify(verification: MockServerVerification) {
+    @JvmSynthetic
+    internal fun verify(times: Int?, expectedRequest: ExpectedRequest) {
         assertThatMockServerIsInitialized()
-        val matcher = verification.toRequestMatcher()
-        val matchResults = wireMockRequestsReceived.filter { matcher.matches(it.request) }
+        val matchResults = wireMockRequestsReceived.filter { expectedRequest.matches(this, it.request) }
 
-        if (verification.times != null && verification.times != matchResults.size) {
-            throw VerificationException.forTimesNotMatching(name, verification.times, matcher, matchResults, wireMockRequestsReceived)
-        } else if (verification.times == null && matchResults.isEmpty()) {
-            throw VerificationException.forNotReceivedAtLeastOnce(name, matcher, wireMockRequestsReceived)
-        } else if (verification.noOther && wireMockRequestsReceived.size != matchResults.size) {
-            throw VerificationException.forOtherRequests(name, matcher, matchResults, wireMockRequestsReceived)
+        if (times != null && times != matchResults.size) {
+            throw VerificationException.forTimesNotMatching(name, times, expectedRequest, matchResults, wireMockRequestsReceived)
+        } else if (times == null && matchResults.isEmpty()) {
+            throw VerificationException.forNotReceivedAtLeastOnce(name, expectedRequest, wireMockRequestsReceived)
+        } else if (expectedRequest.noOther && wireMockRequestsReceived.size != matchResults.size) {
+            throw VerificationException.forOtherRequests(name, expectedRequest, matchResults, wireMockRequestsReceived)
         }
     }
 
@@ -121,27 +120,6 @@ class MockServer(
         assertThatMockServerIsInitialized()
         for (stub in this.stubs) {
             stub.registerAt(name, wireMockServer!!)
-        }
-    }
-
-    /**
-     * Maps the given [MockServerVerification] instance to a [MockServerStubRequestMatcher] which is used to
-     * match the requests that this Mock Server instance received.
-     */
-    private fun MockServerVerification.toRequestMatcher(): MockServerStubRequestMatcher {
-        return if (this.stubName != null) {
-            val stub = stubs.firstOrNull { it.name == this.stubName }
-            requireNotNull(stub) { "No stub with name ${this.stubName} exists for Mock Server $name." }
-            stub.request
-        } else {
-            MockServerStubRequestMatcher(
-                hostname = hostname,
-                method = this.method,
-                path = this.path,
-                headers = this.headers,
-                queryParameters = this.queryParameters,
-                bodyPatterns = this.requestBodyPattern?.let { listOf(it) },
-            )
         }
     }
 

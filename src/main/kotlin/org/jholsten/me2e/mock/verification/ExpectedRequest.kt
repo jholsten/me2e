@@ -1,7 +1,13 @@
 package org.jholsten.me2e.mock.verification
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.github.tomakehurst.wiremock.http.Request
+import org.jholsten.me2e.assertions.AssertionFailure
+import org.jholsten.me2e.assertions.matchers.Assertable
+import org.jholsten.me2e.mock.MockServer
 import org.jholsten.me2e.mock.stubbing.MockServerStub
 import org.jholsten.me2e.mock.stubbing.request.StringMatcher
+import org.jholsten.me2e.request.mapper.HttpRequestMapper
 import org.jholsten.me2e.request.model.HttpMethod
 
 /**
@@ -25,53 +31,24 @@ import org.jholsten.me2e.request.model.HttpMethod
  * assertThat(response).statusCode(notEqualTo(200))
  * assertThat(response).statusCode(lessThan(200))
  * assertThat(response).statusCode(between(200, 300))
+ * TODO: toString
  */
-class MockServerVerification private constructor(
-    /**
-     * Number of times that the Mock Server should have received this request.
-     * If set to `null`, it is verified that the Mock Server received the specified request at least once.
-     */
-    internal val times: Int?,
-) {
-    companion object {
-        /**
-         * Entrypoint for specifying a request that a Mock Server should have received at least once.
-         */
-        @JvmStatic
-        fun receivedRequest(): MockServerVerification {
-            return MockServerVerification(null)
-        }
-
-        /**
-         * Entrypoint for specifying a request that a Mock Server should have received exactly [times] number of times.
-         * @param times Number of times that the Mock Server should have received this request.
-         */
-        @JvmStatic
-        fun receivedRequest(times: Int): MockServerVerification {
-            return MockServerVerification(times)
-        }
-    }
-
-    @JvmSynthetic
-    internal var stubName: String? = null
-
-    @JvmSynthetic
-    internal var method: HttpMethod? = null
-
-    @JvmSynthetic
-    internal var path: StringMatcher? = null
-
-    @JvmSynthetic
-    internal var headers: MutableMap<String, StringMatcher>? = null
-
-    @JvmSynthetic
-    internal var queryParameters: MutableMap<String, StringMatcher>? = null
-
-    @JvmSynthetic
-    internal var requestBodyPattern: StringMatcher? = null
+class ExpectedRequest {
+    private var stubName: String? = null
+    private val method: MutableList<Assertable<HttpMethod?>> = mutableListOf()
+    private val path: MutableList<Assertable<String?>> = mutableListOf()
+    private val headers: MutableList<Assertable<Map<String, List<*>>?>> = mutableListOf()
+    private val queryParameters: MutableList<Assertable<Map<String, List<*>>?>> = mutableListOf()
+    private val contentType: MutableList<Assertable<String?>> = mutableListOf()
+    private val body: MutableList<Assertable<String?>> = mutableListOf()
+    private val binaryBody: MutableList<Assertable<ByteArray?>> = mutableListOf()
+    private val base64Body: MutableList<Assertable<String?>> = mutableListOf()
+    private val jsonBody: MutableList<Assertable<JsonNode?>> = mutableListOf()
 
     @JvmSynthetic
     internal var noOther: Boolean = false
+
+    private var stub: MockServerStub? = null
 
     /**
      * Matches if the request pattern defined for the stub with the given [MockServerStub.name] matches the incoming request.
@@ -89,18 +66,18 @@ class MockServerVerification private constructor(
      * @param method HTTP request method that the actual request should have.
      * @return This instance, to use for chaining.
      */
-    fun withMethod(method: HttpMethod): MockServerVerification = apply {
-        this.method = method
+    fun withMethod(expected: Assertable<HttpMethod?>) = apply {
+        this.method.add(expected)
     }
 
     /**
      * Path that the expected incoming request should have.
      * Not setting this value means that the path of the expected request is arbitrary.
-     * @param path Pattern that the path of the actual request should conform to.
+     * @param expected Pattern that the path of the actual request should conform to.
      * @return This instance, to use for chaining.
      */
-    fun withPath(path: StringMatcher): MockServerVerification = apply {
-        this.path = path
+    fun withPath(expected: Assertable<String?>) = apply {
+        this.path.add(expected)
     }
 
     /**
@@ -110,11 +87,12 @@ class MockServerVerification private constructor(
      * @param headerValue String matcher for the value of the expected request header.
      * @return This instance, to use for chaining.
      */
-    fun withHeader(key: String, headerValue: StringMatcher) = apply {
-        if (this.headers == null) {
-            this.headers = mutableMapOf()
-        }
-        this.headers!![key.lowercase()] = headerValue
+    fun withHeaders(expected: Assertable<Map<String, List<*>>?>) = apply {
+        this.headers.add(expected)
+    }
+
+    fun withContentType(expected: Assertable<String?>) = apply {
+        this.contentType.add(expected)
     }
 
     /**
@@ -124,11 +102,8 @@ class MockServerVerification private constructor(
      * @param queryParameterValue String matcher for the value of the expected query parameter.
      * @return This instance, to use for chaining.
      */
-    fun withQueryParameter(key: String, queryParameterValue: StringMatcher) = apply {
-        if (this.queryParameters == null) {
-            this.queryParameters = mutableMapOf()
-        }
-        this.queryParameters!![key.lowercase()] = queryParameterValue
+    fun withQueryParameters(expected: Assertable<Map<String, List<*>>?>) = apply {
+        this.queryParameters.add(expected)
     }
 
     /**
@@ -138,9 +113,23 @@ class MockServerVerification private constructor(
      * @param bodyMatcher Pattern that the body of the actual request should conform to.
      * @return This instance, to use for chaining.
      */
-    fun withRequestBody(bodyMatcher: StringMatcher) = apply {
-        this.requestBodyPattern = bodyMatcher
+    fun withBody(expected: Assertable<String?>) = apply {
+        this.body.add(expected)
     }
+
+    fun withBinaryBody(expected: Assertable<ByteArray?>) = apply {
+        this.binaryBody.add(expected)
+    }
+
+    fun withBase64Body(expected: Assertable<String?>) = apply {
+        this.base64Body.add(expected)
+    }
+
+    fun withJsonBoy(expected: Assertable<JsonNode?>) = apply {
+        this.jsonBody.add(expected)
+    }
+
+    // TODO: JSON Body
 
     /**
      * Expect that the Mock Server only received this specified request and no other.
@@ -148,5 +137,56 @@ class MockServerVerification private constructor(
      */
     fun andNoOther() = apply {
         this.noOther = true
+    }
+
+    @JvmSynthetic
+    internal fun matches(mockServer: MockServer, request: Request): Boolean {
+        if (this.stubName != null) {
+            this.stub = mockServer.stubs.firstOrNull { it.name == this.stubName }
+            requireNotNull(this.stub) { "No stub with name ${this.stubName} exists for Mock Server ${mockServer.name}." }
+            return this.stub!!.request.matches(request)
+        }
+        val mappedRequest = HttpRequestMapper.INSTANCE.toInternalDto(request)
+        var json: JsonNode? = null
+        if (this.jsonBody.isNotEmpty()) {
+            json = try {
+                mappedRequest.body?.asJson()
+            } catch (e: Exception) {
+                throw AssertionFailure("Unable to parse body as JSON: ${e.message}")
+            }
+        }
+        val results = listOf(
+            listOf(mockServer.hostname == request.host),
+            method.map { evaluate { it.evaluate("method", mappedRequest.method) } },
+            path.map { evaluate { it.evaluate("path", mappedRequest.url.path) } },
+            headers.map { evaluate { it.evaluate("headers", mappedRequest.headers.entries) } },
+            queryParameters.map { evaluate { it.evaluate("path", mappedRequest.url.queryParameters) } },
+            body.map { evaluate { it.evaluate("body", mappedRequest.body?.asString()) } },
+            binaryBody.map { evaluate { it.evaluate("binary body", mappedRequest.body?.asBinary()) } },
+            base64Body.map { evaluate { it.evaluate("base 64 body", mappedRequest.body?.asBase64()) } },
+            jsonBody.map { evaluate { it.evaluate("json body", json) } },
+        ).flatten()
+        return results.all { it }
+    }
+
+    /**
+     * Evaluates the given assertion. Returns `null` if the assertion was successful.
+     * Returns the message of the failure in case the assertion was not successful.
+     * @return `null` if assertion was successful, else the message of the failure.
+     */
+    private fun evaluate(assertion: () -> Unit): Boolean {
+        return try {
+            assertion()
+            true
+        } catch (e: AssertionFailure) {
+            false
+        }
+    }
+
+    override fun toString(): String {
+        if (this.stubName != null) {
+            return this.stub?.toString() ?: this.stubName!!
+        }
+        return "TODO (Probably easier when only using one object and not a list)"
     }
 }

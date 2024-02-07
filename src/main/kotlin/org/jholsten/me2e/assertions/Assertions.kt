@@ -3,6 +3,8 @@
 package org.jholsten.me2e.assertions
 
 import org.jholsten.me2e.assertions.matchers.*
+import org.jholsten.me2e.mock.MockServer
+import org.jholsten.me2e.mock.verification.MockServerVerification
 import org.jholsten.me2e.request.assertions.AssertableResponse
 import org.jholsten.me2e.request.model.HttpResponse
 
@@ -12,6 +14,10 @@ import org.jholsten.me2e.request.model.HttpResponse
  */
 fun assertThat(response: HttpResponse): AssertableResponse {
     return AssertableResponse(response)
+}
+
+fun assertThat(mockServer: MockServer): MockServerVerification {
+    return MockServerVerification(mockServer)
 }
 
 /**
@@ -61,6 +67,8 @@ fun contains(expected: String): Assertable<String?> {
 /**
  * Returns assertion for checking whether a map contains the given key,
  * i.e. an assertion which does not throw if `actual.containsKey(expectedKey)`.
+ * For assertions concerning the value of the entry with the [expectedKey], use
+ * [MultiMapKeyContainsAssertion.withValue] and [MultiMapKeyContainsAssertion.withValues].
  *
  * Example Usage:
  * ```kotlin
@@ -71,6 +79,22 @@ fun contains(expected: String): Assertable<String?> {
  */
 fun <K> containsKey(expectedKey: K): MultiMapKeyContainsAssertion<K> {
     return MultiMapKeyContainsAssertion(expectedKey)
+}
+
+/**
+ * Returns assertion for checking whether a JSON body contains a node with the given path.
+ * Use `.` as path separators to specify a path in the JSON tree. Use `[{index}]` to specify the element at index `index`
+ * in an array node. See [JsonBodyAssertion] for detailed information on the format of the [JsonBodyAssertion.expectedPath].
+ * For assertions concerning the value of the node with the [expectedPath], use [JsonBodyAssertion.withValue].
+ *
+ * Example Usage:
+ * ```kotlin
+ * assertThat(response).jsonBody(containsNode("journal.title").withValue(equalTo("IEEE Software")))
+ * ```
+ * @param expectedPath Expected path to the JSON node which should be contained in the actual JSON body.
+ */
+fun containsNode(expectedPath: String): JsonBodyAssertion {
+    return JsonBodyAssertion(expectedPath)
 }
 
 /**

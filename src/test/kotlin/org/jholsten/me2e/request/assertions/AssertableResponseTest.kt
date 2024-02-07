@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.mockk
 import org.jholsten.me2e.assertions.assertThat
 import org.jholsten.me2e.assertions.contains
+import org.jholsten.me2e.assertions.containsNode
 import org.jholsten.me2e.assertions.equalTo
 import org.jholsten.me2e.request.model.*
 import kotlin.test.*
@@ -52,11 +53,11 @@ internal class AssertableResponseTest {
 
     @Test
     fun `Asserting json body should not throw if assertion is satisfied`() {
-        assertThat(response).jsonBody("title", contains("Automated Test Scripts"))
-        assertThat(response).jsonBody("authors[0].lastname", equalTo("Garousi"))
-        assertThat(response).jsonBody("authors[0]", equalTo("{\"firstname\":\"Vahid\",\"lastname\":\"Garousi\"}"))
-        assertThat(response).jsonBody("year", equalTo("2016"))
-        assertThat(response).jsonBody("keywords[1]", equalTo("Test Automation"))
-        assertThat(response).jsonBody("journal.title", equalTo("IEEE Software"))
+        assertThat(response).jsonBody(containsNode("title").withValue(contains("Automated Test Scripts")))
+        assertThat(response).jsonBody(containsNode("authors[0].lastname").withValue(equalTo("Garousi")))
+        assertThat(response).jsonBody(containsNode("authors[0]").withValue(equalTo("{\"firstname\":\"Vahid\",\"lastname\":\"Garousi\"}")))
+        assertThat(response).jsonBody(containsNode("year").withValue(equalTo("2016")))
+        assertThat(response).jsonBody(containsNode("keywords[1]").withValue(equalTo("Test Automation")))
+        assertThat(response).jsonBody(containsNode("journal.title").withValue(equalTo("IEEE Software")))
     }
 }
