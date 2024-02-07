@@ -39,8 +39,8 @@ import com.github.dockerjava.api.model.Container as DockerContainer
 /**
  * Representation of one Docker container.
  * This may be a microservice, a database or any other kind of supporting service.
- * @sample MicroserviceContainer
- * @sample DatabaseContainer
+ * @see MicroserviceContainer
+ * @see DatabaseContainer
  */
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,
