@@ -3,7 +3,10 @@ package org.jholsten.me2e.request.assertion
 import org.jholsten.me2e.request.assertion.Assertions.Companion.assertThat
 import org.jholsten.me2e.request.assertion.Assertions.Companion.contains
 import org.jholsten.me2e.request.assertion.Assertions.Companion.containsKey
+import org.jholsten.me2e.request.assertion.Assertions.Companion.isBetween
 import org.jholsten.me2e.request.assertion.Assertions.Companion.isEqualTo
+import org.jholsten.me2e.request.assertion.Assertions.Companion.isGreaterThan
+import org.jholsten.me2e.request.assertion.Assertions.Companion.isLessThan
 import org.jholsten.me2e.request.assertion.Assertions.Companion.isNotNull
 import org.jholsten.me2e.request.assertion.Assertions.Companion.isNull
 import org.jholsten.me2e.request.assertion.Assertions.Companion.matchesPattern
@@ -70,11 +73,17 @@ internal class AssertableResponseIT {
     fun `Asserting status code should not throw if assertion is satisfied`() {
         assertDoesNotThrow { assertThat(response).statusCode(isEqualTo(response.code)) }
         assertDoesNotThrow { assertThat(response).statusCode(isEqualTo(200)) }
+        assertDoesNotThrow { assertThat(response).statusCode(isLessThan(300)) }
+        assertDoesNotThrow { assertThat(response).statusCode(isGreaterThan(100)) }
+        assertDoesNotThrow { assertThat(response).statusCode(isBetween(100, 300)) }
         assertDoesNotThrow { assertThat(response).statusCode(isNotNull()) }
         assertDoesNotThrow {
             assertThat(response)
                 .statusCode(isEqualTo(response.code))
                 .statusCode(isEqualTo(200))
+                .statusCode(isLessThan(300))
+                .statusCode(isGreaterThan(100))
+                .statusCode(isBetween(100, 300))
                 .statusCode(isNotNull())
         }
     }
@@ -82,10 +91,16 @@ internal class AssertableResponseIT {
     @Test
     fun `Asserting status code should throw if assertion is not satisfied`() {
         assertFails { assertThat(response).statusCode(isEqualTo(400)) }
+        assertFails { assertThat(response).statusCode(isLessThan(100)) }
+        assertFails { assertThat(response).statusCode(isGreaterThan(300)) }
+        assertFails { assertThat(response).statusCode(isBetween(400, 500)) }
         assertFails { assertThat(response).statusCode(isNull()) }
         assertFails {
             assertThat(response)
                 .statusCode(isEqualTo(400))
+                .statusCode(isLessThan(100))
+                .statusCode(isGreaterThan(300))
+                .statusCode(isBetween(400, 500))
                 .statusCode(isNull())
         }
     }
