@@ -15,7 +15,7 @@ internal interface OkHttpRequestInterceptor : Interceptor {
          * Maps request interceptor to okhttp3 request interceptor.
          * @param interceptor Request interceptor to map
          */
-        @JvmStatic
+        @JvmSynthetic
         fun fromRequestInterceptor(interceptor: RequestInterceptor): OkHttpRequestInterceptor {
             return object : OkHttpRequestInterceptor {
                 override fun intercept(chain: Interceptor.Chain): Response {
