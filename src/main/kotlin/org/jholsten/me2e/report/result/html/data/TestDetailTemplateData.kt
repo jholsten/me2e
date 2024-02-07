@@ -92,10 +92,6 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
             return TestDetailTemplateData(super.context)
         }
 
-        override fun self(): Builder {
-            return this
-        }
-
         /**
          * Returns all tests and test containers included in the result, i.e. the [result], all of its children
          * and their children, recursively.

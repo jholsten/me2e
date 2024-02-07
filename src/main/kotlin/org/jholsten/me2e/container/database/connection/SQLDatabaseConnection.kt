@@ -165,8 +165,6 @@ class SQLDatabaseConnection private constructor(
             this.schema = schema
         }
 
-        override fun self(): Builder = this
-
         override fun build(): SQLDatabaseConnection {
             if (this.system == DatabaseManagementSystem.POSTGRESQL) {
                 this.schema = this.schema ?: "public"

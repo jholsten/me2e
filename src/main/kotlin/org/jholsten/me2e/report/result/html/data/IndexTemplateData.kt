@@ -40,10 +40,6 @@ class IndexTemplateData(context: Context) : TemplateData(context) {
             return IndexTemplateData(super.context)
         }
 
-        override fun self(): Builder {
-            return this
-        }
-
         /**
          * Returns all tests and test containers included in the result, i.e. all of the [TestExecutionResult.roots],
          * their children and their children, recursively.

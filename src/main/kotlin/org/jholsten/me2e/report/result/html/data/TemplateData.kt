@@ -24,8 +24,9 @@ open class TemplateData(
 
         /**
          * Sets the locale to use for the Thymeleaf template.
-         * In the template, the keys in `messages_$locale.properties` can then
-         * be referenced with `#{key}`.
+         * In the template, the keys in `messages_$locale.properties` can then be referenced with `#{key}`.
+         * @param locale Locale to use for the Thymeleaf template.
+         * @return Builder instance, to use for chaining.
          * TODO: Verify
          */
         fun withLocale(locale: Locale): SELF {
@@ -43,6 +44,9 @@ open class TemplateData(
          *     <td th:text="${value.name}"/>
          * </tr>
          * ```
+         * @param key Key of the variable to set.
+         * @param value Value of the variable to set.
+         * @return Builder instance, to use for chaining.
          */
         fun withVariable(key: String, value: Any?): SELF {
             context.setVariable(key, value)
@@ -52,17 +56,27 @@ open class TemplateData(
         /**
          * Sets the timestamp of when the report was generated.
          * The formatted timestamp can be used in the template by referencing `${generationTimestamp}`.
+         * @param timestamp Timestamp of when the report was generated.
+         * @return Builder instance, to use for chaining.
          */
         fun withGenerationTimestamp(timestamp: Instant): SELF {
             val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm:ss").withZone(ZoneId.systemDefault())
             return withVariable("generationTimestamp", formatter.format(timestamp))
         }
 
+        /**
+         * Builds an instance of the [TemplateData] using the properties set in this builder.
+         */
         open fun build(): TemplateData {
             return TemplateData(context)
         }
 
-        protected open fun self(): SELF {
+        /**
+         * Returns the instantiated Builder instance.
+         * For subtypes of this class, this method should use the type of the subclass as the return type.
+         * Only then will it be possible to chain method invocations of this class and the subclass.
+         */
+        private fun self(): SELF {
             @Suppress("UNCHECKED_CAST")
             return this as SELF
         }

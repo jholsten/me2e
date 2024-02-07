@@ -189,15 +189,18 @@ abstract class DatabaseConnection protected constructor(
         }
 
         /**
+         * Builds an instance of the [DatabaseConnection] using the properties set in this builder.
+         */
+        abstract fun build(): DatabaseConnection
+
+        /**
          * Returns the instantiated Builder instance.
          * For subtypes of this class, this method should use the type of the subclass as the return type.
          * Only then will it be possible to chain method invocations of this class and the subclass.
          */
-        protected abstract fun self(): SELF
-
-        /**
-         * Builds an instance of the [DatabaseConnection] using the properties set in this builder.
-         */
-        abstract fun build(): DatabaseConnection
+        private fun self(): SELF {
+            @Suppress("UNCHECKED_CAST")
+            return this as SELF
+        }
     }
 }

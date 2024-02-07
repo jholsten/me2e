@@ -189,8 +189,6 @@ class MongoDBConnection private constructor(
             this.settings = settings
         }
 
-        override fun self(): Builder = this
-
         override fun build(): MongoDBConnection {
             return MongoDBConnection(
                 host = requireNotNull(host) { "Host cannot be null" },
