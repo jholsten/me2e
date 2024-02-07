@@ -78,8 +78,9 @@ class ContainerManager(
     fun start() {
         pullImages()
         environment.start()
-        initializeContainers()
+        initializeContainersOnStarted()
         environment.waitUntilHealthy(containers.keys.toList(), dockerConfig.healthTimeout)
+        initializeContainersOnHealthy()
     }
 
     /**
@@ -120,17 +121,42 @@ class ContainerManager(
      * Initializes containers after the Docker-Compose is started.
      * Sets corresponding [DockerContainer] and [org.testcontainers.containers.ContainerState] instances.
      */
-    private fun initializeContainers() {
+    private fun initializeContainersOnStarted() {
         for (container in containers.values) {
             val state = environment.getContainerByServiceName(container.name)!!
-            try {
-                container.initialize(environment.getDockerContainer(container.name), state, environment)
-            } catch (e: Exception) {
-                logger.error(
-                    "Unable to initialize container ${container.name}. " +
-                        "It is possible that some of the functions do not work properly.", e
+            initializeContainer(container.name) {
+                container.initializeOnContainerStarted(
+                    environment.getDockerContainer(container.name),
+                    state,
+                    environment
                 )
             }
+        }
+    }
+
+    /**
+     * Initializes containers after all Docker containers of the environment are healthy.
+     */
+    private fun initializeContainersOnHealthy() {
+        for (container in containers.values) {
+            initializeContainer(container.name) { container.initializeOnContainerHealthy() }
+        }
+    }
+
+    /**
+     * Initializes container with the given name by executing the given initialization function.
+     * Catches all exceptions that may occur upon initialization and logs and appropriate warning.
+     * @param containerName Name of the container to initialize.
+     * @param initialize Function to invoke for initializing the container.
+     */
+    private fun initializeContainer(containerName: String, initialize: () -> Unit) {
+        try {
+            initialize()
+        } catch (e: Exception) {
+            logger.error(
+                "Unable to initialize container $containerName. " +
+                    "It is possible that some of the functions do not work properly.", e
+            )
         }
     }
 

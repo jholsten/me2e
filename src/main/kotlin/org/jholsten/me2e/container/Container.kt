@@ -359,12 +359,19 @@ open class Container(
      * @param environment Docker-Compose environment which the container is part of.
      */
     @JvmSynthetic
-    internal open fun initialize(dockerContainer: DockerContainer, state: ContainerState, environment: DockerCompose) {
+    internal open fun initializeOnContainerStarted(dockerContainer: DockerContainer, state: ContainerState, environment: DockerCompose) {
         this.dockerContainer = DockerContainerReference(dockerContainer, state, environment)
         mapContainerPorts(dockerContainer)
 
         ReportDataAggregator.onContainerStarted(this)
         addEventConsumer(ContainerRestartListener(this), eventFilters = listOf(ContainerEvent.Type.RESTART))
+    }
+
+    /**
+     * Callback function to execute when all containers of the environment are healthy.
+     */
+    @JvmSynthetic
+    internal open fun initializeOnContainerHealthy() {
     }
 
     /**

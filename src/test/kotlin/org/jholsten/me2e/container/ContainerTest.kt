@@ -80,7 +80,7 @@ internal class ContainerTest {
             DockerContainerPort().withPrivatePort(null).withPublicPort(8002),
         )
 
-        container.initialize(dockerContainer, dockerContainerState, environment)
+        container.initializeOnContainerStarted(dockerContainer, dockerContainerState, environment)
 
         val expected = listOf(
             ContainerPort(12345, 8000),

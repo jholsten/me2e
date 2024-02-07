@@ -174,8 +174,8 @@ class MicroserviceContainer(
     }
 
     @JvmSynthetic
-    override fun initialize(dockerContainer: DockerContainer, state: ContainerState, environment: DockerCompose) {
-        super.initialize(dockerContainer, state, environment)
+    override fun initializeOnContainerStarted(dockerContainer: DockerContainer, state: ContainerState, environment: DockerCompose) {
+        super.initializeOnContainerStarted(dockerContainer, state, environment)
         val baseUrl = setBaseUrl()
         httpClient = OkHttpClient.Builder()
             .withBaseUrl(baseUrl)

@@ -1,6 +1,5 @@
 package org.jholsten.me2e.container.database
 
-import com.github.dockerjava.api.DockerClient
 import com.github.dockerjava.api.command.EventsCmd
 import com.github.dockerjava.api.command.LogContainerCmd
 import com.github.dockerjava.api.model.ContainerPort as DockerContainerPort
@@ -167,7 +166,7 @@ internal class DatabaseContainerTest {
     @ArgumentsSource(SQLContainerArgumentProvider::class)
     @Suppress("UNUSED_PARAMETER")
     fun `Initializing database container should initialize connection`(system: DatabaseManagementSystem, container: DatabaseContainer) {
-        container.initialize(mockedDockerContainer, mockedDockerContainerState, mockedEnvironment)
+        container.initializeOnContainerStarted(mockedDockerContainer, mockedDockerContainerState, mockedEnvironment)
 
         assertNotNull(container.connection)
         verify { mockedSQLConnection.executeScript("init_1", "database/init_1.sql") }

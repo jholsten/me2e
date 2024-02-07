@@ -7,7 +7,6 @@ import org.jholsten.me2e.container.database.connection.MongoDBConnection
 import org.jholsten.me2e.container.database.connection.SQLDatabaseConnection
 import org.jholsten.me2e.container.database.exception.DatabaseException
 import org.jholsten.me2e.container.database.model.QueryResult
-import org.jholsten.me2e.container.docker.DockerCompose
 import org.jholsten.me2e.container.model.ContainerPort
 import org.jholsten.me2e.container.model.ContainerPortList
 import org.jholsten.me2e.container.model.ContainerType
@@ -16,7 +15,6 @@ import org.testcontainers.containers.ContainerState
 import java.io.File
 import java.io.FileNotFoundException
 import java.time.Instant
-import com.github.dockerjava.api.model.Container as DockerContainer
 
 /**
  * Representation of a Docker container which contains a database.
@@ -223,16 +221,22 @@ class DatabaseContainer(
         connection!!.reset()
     }
 
+    /**
+     * Callback function to execute when all containers of the environment are healthy.
+     * As a connection to the database can only be established after the database is up and running, the connection
+     * attempt is only made as soon as all containers of the environment are healthy. Otherwise, the initialization
+     * scripts cannot be executed.
+     */
     @JvmSynthetic
-    override fun initialize(dockerContainer: DockerContainer, state: ContainerState, environment: DockerCompose) {
-        super.initialize(dockerContainer, state, environment)
+    override fun initializeOnContainerHealthy() {
+        super.initializeOnContainerHealthy()
         val exposedPort = ports.findFirstExposed()
         if (exposedPort?.external == null) {
             logger.warn("Could not find any exposed ports for database container '$name'.")
         } else if (database == null) {
             logger.warn("Could not detect the name of the database for container '$name'.")
         } else if (system != DatabaseManagementSystem.OTHER) {
-            initializeConnection(state, exposedPort)
+            initializeConnection(dockerContainer!!.state, exposedPort)
             executeInitializationScripts()
         }
     }
