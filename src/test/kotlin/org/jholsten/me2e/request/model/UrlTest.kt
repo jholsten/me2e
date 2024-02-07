@@ -237,4 +237,13 @@ internal class UrlTest {
     fun `Appending relative URL should succeed`(relativeUrl: String, expectedUrl: String) {
         assertEquals(expectedUrl, Url("https://example.com").withRelativeUrl(RelativeUrl(relativeUrl)).value)
     }
+
+    @Test
+    fun `URL properties should be correct`() {
+        val url = Url("https://example.com/search?q=abc&q=xyz#p=42")
+        assertEquals("example.com", url.host)
+        assertEquals("/search", url.path)
+        assertEquals(mapOf("q" to listOf("abc", "xyz")), url.queryParameters)
+        assertEquals("p=42", url.fragment)
+    }
 }

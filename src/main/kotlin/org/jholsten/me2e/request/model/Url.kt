@@ -1,5 +1,6 @@
 package org.jholsten.me2e.request.model
 
+import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.apache.commons.lang3.StringUtils
 
@@ -12,8 +13,35 @@ class Url(
      */
     val value: String,
 ) {
+    /**
+     * Host address part of this URL, e.g. `example.com` for a URL with [value] `https://example.com/search?q=xyz#p=42`.
+     */
+    val host: String
+
+    /**
+     * Path part of this URL, e.g. `/search` for a URL with [value] `https://example.com/search?q=xyz#p=42`.
+     */
+    val path: String
+
+    /**
+     * Query parameters of this URL as map of key and list of parameter values,
+     * e.g. `{"q": ["xyz"]}` for a URL with [value] `https://example.com/search?q=xyz#p=42`.
+     */
+    val queryParameters: Map<String, List<String?>>
+
+    /**
+     * Fragment of this URL, e.g. `p=42` for a URL with [value] `https://example.com/search?q=xyz#p=42`.
+     */
+    val fragment: String?
+
     init {
-        assertUrlIsValid()
+        val url = assertUrlIsValid()
+        host = url.host
+        path = url.encodedPath
+        queryParameters = url.queryParameterNames.associateWith {
+            url.queryParameterValues(it)
+        }
+        fragment = url.fragment
     }
 
     /**
@@ -30,9 +58,7 @@ class Url(
      * @throws IllegalArgumentException if format of generated absolute URL is invalid
      */
     fun withRelativeUrl(relativeUrl: RelativeUrl): Url {
-        val url = Url(StringUtils.stripEnd(this.toString(), "/") + relativeUrl.toString())
-        url.assertUrlIsValid()
-        return url
+        return Url(StringUtils.stripEnd(this.toString(), "/") + relativeUrl.toString())
     }
 
     class Builder() {
@@ -128,8 +154,10 @@ class Url(
         }
     }
 
-    private fun assertUrlIsValid() {
-        requireNotNull(value.toHttpUrlOrNull()) { "Invalid URL format: $value" }
+    private fun assertUrlIsValid(): HttpUrl {
+        val url = value.toHttpUrlOrNull()
+        requireNotNull(url) { "Invalid URL format: $value" }
+        return url
     }
 
     override fun equals(other: Any?): Boolean {
