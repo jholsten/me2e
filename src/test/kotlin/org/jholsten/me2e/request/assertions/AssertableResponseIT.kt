@@ -356,7 +356,7 @@ internal class AssertableResponseIT {
 
     @Test
     fun `Asserting conformity to specification should not throw if all assertions are satisfied`() {
-        val specification = ResponseSpecification()
+        val specification = ExpectedResponse()
             .expectStatusCode(equalTo(200))
             .expectStatusCode(isNotNull())
             .expectProtocol(equalTo("http/1.1"))
@@ -379,7 +379,7 @@ internal class AssertableResponseIT {
 
     @Test
     fun `Asserting conformity to specification should throw if at least one assertion is not satisfied`() {
-        val specification = ResponseSpecification()
+        val specification = ExpectedResponse()
             .expectStatusCode(equalTo(400))
             .expectStatusCode(isNull())
             .expectProtocol(equalTo("http/2.0"))

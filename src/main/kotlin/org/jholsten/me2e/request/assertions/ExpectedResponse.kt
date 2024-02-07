@@ -13,7 +13,7 @@ import org.jholsten.me2e.request.model.HttpResponse
  * failed assertions and not just the first one. Furthermore, the specification can be reused across multiple tests.
  * @see AssertableResponse.conformsTo
  */
-class ResponseSpecification {
+class ExpectedResponse {
     private val statusCode: MutableList<Assertable<Int?>> = mutableListOf()
     private val protocol: MutableList<Assertable<String?>> = mutableListOf()
     private val message: MutableList<Assertable<String?>> = mutableListOf()

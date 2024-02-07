@@ -45,7 +45,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      * ```
      * @param expected Expectation for the value of the [HttpResponse.code].
      * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
-     * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ResponseSpecification].
+     * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ExpectedResponse].
      * @throws AssertionFailure if assertion was not successful.
      */
     fun statusCode(expected: Assertable<Int?>) = apply {
@@ -61,7 +61,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      * ```
      * @param expected Expectation for the value of the [HttpResponse.protocol].
      * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
-     * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ResponseSpecification].
+     * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ExpectedResponse].
      * @throws AssertionFailure if assertion was not successful.
      */
     fun protocol(expected: Assertable<String?>) = apply {
@@ -77,7 +77,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      * ```
      * @param expected Expectation for the value of the [HttpResponse.message].
      * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
-     * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ResponseSpecification].
+     * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ExpectedResponse].
      * @throws AssertionFailure if assertion was not successful.
      */
     fun message(expected: Assertable<String?>) = apply {
@@ -93,7 +93,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      * ```
      * @param expected Expectation for the value of the [HttpResponse.headers].
      * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
-     * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ResponseSpecification].
+     * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ExpectedResponse].
      * @throws AssertionFailure if assertion was not successful.
      */
     fun headers(expected: Assertable<Map<String, List<*>>?>) = apply {
@@ -109,7 +109,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      * ```
      * @param expected Expectation for the value of the [org.jholsten.me2e.request.model.HttpResponseBody.contentType].
      * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
-     * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ResponseSpecification].
+     * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ExpectedResponse].
      * @throws AssertionFailure if content type is not set or if assertion was not successful.
      */
     fun contentType(expected: Assertable<String?>) = apply {
@@ -125,7 +125,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      * ```
      * @param expected Expectation for the string value of the [HttpResponse.body].
      * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
-     * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ResponseSpecification].
+     * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ExpectedResponse].
      * @throws AssertionFailure if assertion was not successful.
      */
     fun body(expected: Assertable<String?>) = apply {
@@ -141,7 +141,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      * ```
      * @param expected Expectation for the binary value of the [HttpResponse.body].
      * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
-     * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ResponseSpecification].
+     * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ExpectedResponse].
      * @throws AssertionFailure if assertion was not successful.
      */
     fun binaryBody(expected: Assertable<ByteArray?>) = apply {
@@ -157,7 +157,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      * ```
      * @param expected Expectation for the base 64 encoded value of the [HttpResponse.body].
      * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
-     * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ResponseSpecification].
+     * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ExpectedResponse].
      * @throws AssertionFailure if assertion was not successful.
      */
     fun base64Body(expected: Assertable<String?>) = apply {
@@ -174,7 +174,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      * ```
      * @param expected Expectation for the value of the [HttpResponse.body].
      * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
-     * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ResponseSpecification].
+     * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ExpectedResponse].
      * @throws AssertionFailure if assertion was not successful.
      */
     fun jsonBody(expected: Assertable<JsonNode?>) = apply {
@@ -192,7 +192,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      * @param specification Expectation for the [response].
      * @throws AssertionFailure if at least one assertion was not successful.
      */
-    fun conformsTo(specification: ResponseSpecification) {
+    fun conformsTo(specification: ExpectedResponse) {
         specification.evaluate(this)
     }
 }
