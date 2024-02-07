@@ -138,6 +138,7 @@ internal class NetworkTraceAggregator {
      */
     @JvmSynthetic
     internal fun collectPackets(roots: List<FinishedTestResult>) {
+        if (networkTraceCollectors.isEmpty()) return
         logger.info("Collecting packets...")
         // Since network capturing may be delayed by a couple of milliseconds, we wait a little bit
         Thread.sleep(1000)
