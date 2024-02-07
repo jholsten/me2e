@@ -7,11 +7,41 @@ import org.jholsten.me2e.request.model.HttpResponse
 
 /**
  * Model for asserting that the properties of the given [response] are as expected.
+ *
+ * Example Usage:
+ * ```kotlin
+ * import org.jholsten.me2e.Me2eTest
+ * import org.jholsten.me2e.container.injection.InjectService
+ * import org.jholsten.me2e.container.microservice.MicroserviceContainer
+ * import org.jholsten.me2e.request.assertions.*
+ *
+ * class E2ETest : Me2eTest() {
+ *     @InjectService
+ *     private lateinit var api: MicroserviceContainer
+ *
+ *     @Test
+ *     fun `Invoking endpoint should return expected request`() {
+ *         val url = RelativeUrl.Builder().withPath("/books").withQueryParameter("id", "1234").build()
+ *         val response = api.get(url)
+ *
+ *         assertThat(response)
+ *             .statusCode(isEqualTo(200))
+ *             .message(isEqualTo("OK"))
+ *             .jsonBody("journal.title", isEqualTo("IEEE Software"))
+ *     }
+ * }
+ * ```
+ * @see assertThat
  */
 class AssertableResponse internal constructor(private val response: HttpResponse) {
 
     /**
      * Asserts that the status code of the [response] satisfies the given assertion.
+     *
+     * Example Usage:
+     * ```kotlin
+     * assertThat(response).statusCode(isEqualTo(200))
+     * ```
      * @param expected Expectation for the value of the [HttpResponse.code].
      * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
      * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ResponseSpecification].
@@ -23,6 +53,11 @@ class AssertableResponse internal constructor(private val response: HttpResponse
 
     /**
      * Asserts that the protocol of the [response] satisfies the given assertion.
+     *
+     * Example Usage:
+     * ```kotlin
+     * assertThat(response).protocol(isEqualTo("HTTP/1.1"))
+     * ```
      * @param expected Expectation for the value of the [HttpResponse.protocol].
      * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
      * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ResponseSpecification].
@@ -34,6 +69,11 @@ class AssertableResponse internal constructor(private val response: HttpResponse
 
     /**
      * Asserts that the message of the [response] satisfies the given assertion.
+     *
+     * Example Usage:
+     * ```kotlin
+     * assertThat(response).message(isEqualTo("OK"))
+     * ```
      * @param expected Expectation for the value of the [HttpResponse.message].
      * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
      * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ResponseSpecification].
@@ -45,6 +85,11 @@ class AssertableResponse internal constructor(private val response: HttpResponse
 
     /**
      * Asserts that the headers of the [response] satisfy the given assertion.
+     *
+     * Example Usage:
+     * ```kotlin
+     * assertThat(response).headers(containsKey("Content-Type").withValue("application/json"))
+     * ```
      * @param expected Expectation for the value of the [HttpResponse.headers].
      * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
      * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ResponseSpecification].
@@ -56,6 +101,11 @@ class AssertableResponse internal constructor(private val response: HttpResponse
 
     /**
      * Asserts that the content type of the [response] satisfies the given assertion.
+     *
+     * Example Usage:
+     * ```kotlin
+     * assertThat(response).contentType(isEqualTo("application/json"))
+     * ```
      * @param expected Expectation for the value of the [org.jholsten.me2e.request.model.HttpResponseBody.contentType].
      * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
      * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ResponseSpecification].
@@ -67,6 +117,11 @@ class AssertableResponse internal constructor(private val response: HttpResponse
 
     /**
      * Asserts that the body of the [response], encoded as string, satisfies the given assertion.
+     *
+     * Example Usage:
+     * ```kotlin
+     * assertThat(response).body(isEqualTo("Text Content"))
+     * ```
      * @param expected Expectation for the string value of the [HttpResponse.body].
      * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
      * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ResponseSpecification].
@@ -78,6 +133,11 @@ class AssertableResponse internal constructor(private val response: HttpResponse
 
     /**
      * Asserts that the body of the [response], encoded as byte array, satisfies the given assertion.
+     *
+     * Example Usage:
+     * ```kotlin
+     * assertThat(response).binaryBody(isEqualTo(byteArrayOf(123, 34, 110)))
+     * ```
      * @param expected Expectation for the binary value of the [HttpResponse.body].
      * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
      * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ResponseSpecification].
@@ -89,6 +149,11 @@ class AssertableResponse internal constructor(private val response: HttpResponse
 
     /**
      * Asserts that the body of the [response], encoded as base 64, satisfies the given assertion.
+     *
+     * Example Usage:
+     * ```kotlin
+     * assertThat(response).base64Body(isEqualTo("YWRtaW46c2VjcmV0"))
+     * ```
      * @param expected Expectation for the base 64 encoded value of the [HttpResponse.body].
      * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
      * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ResponseSpecification].
