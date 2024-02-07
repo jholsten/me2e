@@ -8,7 +8,7 @@ import org.jholsten.me2e.request.model.HttpResponse
 
 /**
  * Specification of an expected response.
- * For this specification, all expectations of the properties of an [org.jholsten.me2e.request.model.HttpResponse]
+ * For this specification, all expectations for the properties of an [org.jholsten.me2e.request.model.HttpResponse]
  * can be defined, which are then evaluated collectively. This enables to evaluate several assertions and obtain all
  * failed assertions and not just the first one. Furthermore, the specification can be reused across multiple tests.
  * @see AssertableResponse.conformsTo
@@ -30,7 +30,7 @@ class ExpectedResponse {
      *
      * Example:
      * ```kotlin
-     * ResponseSpecification().expectStatusCode(equalTo(200))
+     * ExpectedResponse().expectStatusCode(equalTo(200))
      * ```
      * @param expected Expectation for the value of the [HttpResponse.code].
      * @return This instance, to use for chaining.
@@ -46,7 +46,7 @@ class ExpectedResponse {
      *
      * Example:
      * ```kotlin
-     * ResponseSpecification().expectProtocol(equalTo("HTTP/1.1"))
+     * ExpectedResponse().expectProtocol(equalTo("HTTP/1.1"))
      * ```
      * @param expected Expectation for the value of the [HttpResponse.protocol].
      * @return This instance, to use for chaining.
@@ -62,7 +62,7 @@ class ExpectedResponse {
      *
      * Example:
      * ```kotlin
-     * ResponseSpecification().expectMessage(equalTo("OK"))
+     * ExpectedResponse().expectMessage(equalTo("OK"))
      * ```
      * @param expected Expectation for the value of the [HttpResponse.message].
      * @return This instance, to use for chaining.
@@ -78,7 +78,7 @@ class ExpectedResponse {
      *
      * Example:
      * ```kotlin
-     * ResponseSpecification().expectHeaders(containsKey("Content-Type").withValue(equalTo("application/json")))
+     * ExpectedResponse().expectHeaders(containsKey("Content-Type").withValue(equalTo("application/json")))
      * ```
      * @param expected Expectation for the value of the [HttpResponse.headers].
      * @return This instance, to use for chaining.
@@ -94,7 +94,7 @@ class ExpectedResponse {
      *
      * Example:
      * ```kotlin
-     * ResponseSpecification().expectContentType(equalTo("application/json"))
+     * ExpectedResponse().expectContentType(equalTo("application/json"))
      * ```
      * @param expected Expectation for the value of the [org.jholsten.me2e.request.model.HttpResponseBody.contentType].
      * @return This instance, to use for chaining.
@@ -110,7 +110,7 @@ class ExpectedResponse {
      *
      * Example:
      * ```kotlin
-     * ResponseSpecification().expectBody(equalTo("Text Content"))
+     * ExpectedResponse().expectBody(equalTo("Text Content"))
      * ```
      * @param expected Expectation for the value of the [HttpResponse.body].
      * @return This instance, to use for chaining.
@@ -126,7 +126,7 @@ class ExpectedResponse {
      *
      * Example:
      * ```kotlin
-     * ResponseSpecification().expectBinaryBody(equalTo(byteArrayOf(123, 34, 110)))
+     * ExpectedResponse().expectBinaryBody(equalTo(byteArrayOf(123, 34, 110)))
      * ```
      * @param expected Expectation for the value of the [HttpResponse.body].
      * @return This instance, to use for chaining.
@@ -142,7 +142,7 @@ class ExpectedResponse {
      *
      * Example:
      * ```kotlin
-     * ResponseSpecification().expectBase64Body(equalTo("YWRtaW46c2VjcmV0"))
+     * ExpectedResponse().expectBase64Body(equalTo("YWRtaW46c2VjcmV0"))
      * ```
      * @param expected Expectation for the value of the [HttpResponse.body].
      * @return This instance, to use for chaining.
@@ -159,7 +159,7 @@ class ExpectedResponse {
      *
      * Example:
      * ```kotlin
-     * ResponseSpecification().jsonBody(containsNode("journal.title").withValue(equalTo("IEEE Software")))
+     * ExpectedResponse().jsonBody(containsNode("journal.title").withValue(equalTo("IEEE Software")))
      * ```
      * @param expected Expectation for the value of the [HttpResponse.body].
      * @return This instance, to use for chaining.
