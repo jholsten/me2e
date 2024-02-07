@@ -17,6 +17,7 @@ import java.lang.Exception
  * and the packets are not available immediately after the test execution, they are only collected after all
  * tests have been executed. The assignment of the packets to the tests then takes place using the timestamps
  * of the captured packets.
+ * @see <a href="https://gitlab.informatik.uni-bremen.de/jholsten/docker-traffic-capturer">docker-traffic-capturer</a>
  */
 internal class NetworkTraceCollector(
     /**
@@ -27,8 +28,8 @@ internal class NetworkTraceCollector(
     private val logger = logger(this)
 
     /**
-     * [docker-traffic-capturer](https://gitlab.informatik.uni-bremen.de/jholsten/docker-traffic-capturer) which collects
-     * all HTTP packets sent in the network.
+     * Container for the docker-traffic-capturer which collects all HTTP packets sent in the network.
+     * @see <a href="https://gitlab.informatik.uni-bremen.de/jholsten/docker-traffic-capturer">docker-traffic-capturer</a>
      */
     private val capturer = GenericContainer(DockerImageName.parse(DOCKER_TRAFFIC_CAPTURER_IMAGE))
         .withNetworkMode("host")

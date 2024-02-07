@@ -168,6 +168,7 @@ open class Container(
      * @param command Command to execute in array format. Example: `["echo", "a", "&&", "echo", "b"]`
      * @return Result of the execution.
      * @throws IllegalStateException if container is not initialized, i.e. not started.
+     * @see <a href="https://docs.docker.com/engine/reference/commandline/exec/">Docker Documentation</a>
      */
     fun execute(vararg command: String): ExecutionResult {
         assertThatContainerIsInitialized()
@@ -186,6 +187,7 @@ open class Container(
      * @param command Command to execute in array format. Example: `["echo", "a", "&&", "echo", "b"]`
      * @return Result of the execution.
      * @throws IllegalStateException if container is not initialized, i.e. not started.
+     * @see <a href="https://docs.docker.com/engine/reference/commandline/exec/">Docker Documentation</a>
      */
     fun executeAsUser(user: String, vararg command: String): ExecutionResult {
         assertThatContainerIsInitialized()
@@ -377,8 +379,8 @@ open class Container(
     /**
      * Callback function to execute when the corresponding Docker container was restarted.
      * After a restart, all existing consumers are closed and the port mappings of the container can change (see
-     * [GitHub Issue #31926](https://github.com/moby/moby/issues/31926)). Therefore, all registered consumers are reattached and
-     * the port mappings are updated in the internal state.
+     * [GitHub Issue #31926](https://github.com/moby/moby/issues/31926)). Therefore, all registered consumers are
+     * reattached and the port mappings are updated in the internal state.
      * @param timestamp Timestamp of when the Docker container was restarted.
      */
     @JvmSynthetic

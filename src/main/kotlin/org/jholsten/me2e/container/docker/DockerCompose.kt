@@ -119,7 +119,7 @@ class DockerCompose private constructor(
 
     /**
      * Kotlin wrapper for [DockerComposeV1] to avoid typing issue.
-     * See [GitHub Issue #1010](https://github.com/testcontainers/testcontainers-java/issues/1010)
+     * @see <a href="https://github.com/testcontainers/testcontainers-java/issues/1010">GitHub Issue #1010</a>
      */
     internal class KDockerComposeV1(identifier: String, file: File) : DockerComposeV1<KDockerComposeV1>(identifier, file)
 

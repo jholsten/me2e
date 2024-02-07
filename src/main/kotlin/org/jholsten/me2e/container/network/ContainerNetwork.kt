@@ -4,6 +4,7 @@ package org.jholsten.me2e.container.network
  * Specification of the network that a container is part of.
  * Corresponds to one entry in the `Networks` returned by
  * [`docker inspect $containerId`](https://docs.docker.com/engine/reference/commandline/inspect).
+ * @see <a href="https://docs.docker.com/engine/reference/commandline/inspect">Docker Documentation</a>
  */
 data class ContainerNetwork(
     /**
@@ -68,7 +69,7 @@ data class ContainerNetwork(
 ) {
     /**
      * Custom IPAM (IP Address Management) configuration defined for the network.
-     * See [Docker Documentation](https://docs.docker.com/compose/compose-file/06-networks/#ipam).
+     * @see <a href="https://docs.docker.com/compose/compose-file/06-networks/#ipam">Docker Documentation</a>
      */
     data class IpamConfig(
         val ipV4Address: String?,

@@ -20,8 +20,10 @@ import java.time.Instant
  * class, each in a separate HTML file. To generate the HTML files, [Thymeleaf](https://www.thymeleaf.org/)
  * is used, which generates files from a template using a [org.thymeleaf.context.Context] instance, which
  * is filled with variables containing the test results.
+ *
  * To extend or modify this report generator, implement a subclass and set its reference in your project's
  * [org.jholsten.me2e.Me2eTestConfig.reportGenerators].
+ * @see <a href="https://www.thymeleaf.org/">Thymeleaf</a>
  */
 open class HtmlReportGenerator(
     /**

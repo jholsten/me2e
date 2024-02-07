@@ -10,6 +10,7 @@ import java.time.Instant
  * Corresponds to the DTO which is transferred by the [docker-traffic-capturer](https://gitlab.informatik.uni-bremen.de/jholsten/docker-traffic-capturer).
  * @see HttpRequestPacket
  * @see HttpResponsePacket
+ * @see <a href="https://gitlab.informatik.uni-bremen.de/jholsten/docker-traffic-capturer">docker-traffic-capturer</a>
  */
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,

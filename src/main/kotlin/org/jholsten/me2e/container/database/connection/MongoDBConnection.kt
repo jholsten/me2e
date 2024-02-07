@@ -98,7 +98,7 @@ class MongoDBConnection private constructor(
     /**
      * Command for executing shell commands inside the MongoDB container.
      * For versions < 5.0, the command is `mongo`, whereas for newer versions, the command is `mongosh`.
-     * See [MongoDB Documentation](https://www.mongodb.com/docs/v4.4/mongo/#std-label-compare-mongosh-mongo).
+     * @see <a href="https://www.mongodb.com/docs/v4.4/mongo/#std-label-compare-mongosh-mongo">MongoDB Documentation</a>
      */
     val mongoShellCommand: String? by lazy {
         if (container == null) {

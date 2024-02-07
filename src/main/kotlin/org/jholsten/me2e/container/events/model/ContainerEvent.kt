@@ -19,7 +19,7 @@ data class ContainerEvent(
 ) {
     /**
      * Representation of the possible container event types.
-     * See [Docker Documentation](https://docs.docker.com/engine/reference/commandline/system_events/#containers).
+     * @see <a href="https://docs.docker.com/engine/reference/commandline/system_events/#containers">Docker Documentation</a>
      */
     enum class Type(
         /**

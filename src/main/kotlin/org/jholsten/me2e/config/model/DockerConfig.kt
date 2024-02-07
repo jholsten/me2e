@@ -23,7 +23,8 @@ class DockerConfig(
     /**
      * Whether to always build images before starting containers.
      *
-     * Applies `--build` in `docker compose up` (see [Docker Documentation](https://docs.docker.com/engine/reference/commandline/compose_up/#options).
+     * Applies `--build` in `docker compose up`.
+     * @see <a href="https://docs.docker.com/engine/reference/commandline/compose_up/#options">Docker Documentation</a>
      */
     @JsonProperty("build-images")
     val buildImages: Boolean = false,
@@ -31,8 +32,8 @@ class DockerConfig(
     /**
      * Whether to remove images used by services after containers shut down.
      *
-     * If not set to [DockerComposeRemoveImagesStrategy.NONE], applies `--rmi=local` or `--rmi=all` in `docker compose down`
-     * (see [Docker Documentation](https://docs.docker.com/engine/reference/commandline/compose_down/#options).
+     * If not set to [DockerComposeRemoveImagesStrategy.NONE], applies `--rmi=local` or `--rmi=all` in `docker compose down`.
+     * @see <a href="https://docs.docker.com/engine/reference/commandline/compose_down/#options">Docker Documentation</a>
      */
     @JsonProperty("remove-images")
     val removeImages: DockerComposeRemoveImagesStrategy = DockerComposeRemoveImagesStrategy.NONE,
@@ -40,7 +41,8 @@ class DockerConfig(
     /**
      * Whether to remove volumes after containers shut down.
      *
-     * Applies `--volumes` in `docker compose down` (see [Docker Documentation](https://docs.docker.com/engine/reference/commandline/compose_down/#options).
+     * Applies `--volumes` in `docker compose down`.
+     * @see <a href="https://docs.docker.com/engine/reference/commandline/compose_down/#options">Docker Documentation</a>
      */
     @JsonProperty("remove-volumes")
     val removeVolumes: Boolean = true,

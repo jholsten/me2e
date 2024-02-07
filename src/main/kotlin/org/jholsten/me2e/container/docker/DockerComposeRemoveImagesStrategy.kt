@@ -5,7 +5,7 @@ package org.jholsten.me2e.container.docker
  * services should be removed after the containers shut down.
  *
  * If not [NONE], applies `--rmi=${strategy.lowercase()}` in `docker compose down` command.
- * (See [Docker Documentation](https://docs.docker.com/engine/reference/commandline/compose_down/#options)
+ * @see <a href="https://docs.docker.com/engine/reference/commandline/compose_down/#options">Docker Documentation</a>
  */
 enum class DockerComposeRemoveImagesStrategy {
     /**
