@@ -27,7 +27,7 @@ class ResponseSpecification {
      *
      * Example:
      * ```kotlin
-     * ResponseSpecification().expectStatusCode(isEqualTo(200))
+     * ResponseSpecification().expectStatusCode(equalTo(200))
      * ```
      * @param expected Expectation for the value of the [HttpResponse.code].
      * @return This instance, to use for chaining.
@@ -43,7 +43,7 @@ class ResponseSpecification {
      *
      * Example:
      * ```kotlin
-     * ResponseSpecification().expectProtocol(isEqualTo("HTTP/1.1"))
+     * ResponseSpecification().expectProtocol(equalTo("HTTP/1.1"))
      * ```
      * @param expected Expectation for the value of the [HttpResponse.protocol].
      * @return This instance, to use for chaining.
@@ -59,7 +59,7 @@ class ResponseSpecification {
      *
      * Example:
      * ```kotlin
-     * ResponseSpecification().expectMessage(isEqualTo("OK"))
+     * ResponseSpecification().expectMessage(equalTo("OK"))
      * ```
      * @param expected Expectation for the value of the [HttpResponse.message].
      * @return This instance, to use for chaining.
@@ -91,7 +91,7 @@ class ResponseSpecification {
      *
      * Example:
      * ```kotlin
-     * ResponseSpecification().expectContentType(isEqualTo("application/json"))
+     * ResponseSpecification().expectContentType(equalTo("application/json"))
      * ```
      * @param expected Expectation for the value of the [org.jholsten.me2e.request.model.HttpResponseBody.contentType].
      * @return This instance, to use for chaining.
@@ -107,7 +107,7 @@ class ResponseSpecification {
      *
      * Example:
      * ```kotlin
-     * ResponseSpecification().expectBody(isEqualTo("Text Content"))
+     * ResponseSpecification().expectBody(equalTo("Text Content"))
      * ```
      * @param expected Expectation for the value of the [HttpResponse.body].
      * @return This instance, to use for chaining.
@@ -123,7 +123,7 @@ class ResponseSpecification {
      *
      * Example:
      * ```kotlin
-     * ResponseSpecification().expectBinaryBody(isEqualTo(byteArrayOf(123, 34, 110)))
+     * ResponseSpecification().expectBinaryBody(equalTo(byteArrayOf(123, 34, 110)))
      * ```
      * @param expected Expectation for the value of the [HttpResponse.body].
      * @return This instance, to use for chaining.
@@ -139,7 +139,7 @@ class ResponseSpecification {
      *
      * Example:
      * ```kotlin
-     * ResponseSpecification().expectBase64Body(isEqualTo("YWRtaW46c2VjcmV0"))
+     * ResponseSpecification().expectBase64Body(equalTo("YWRtaW46c2VjcmV0"))
      * ```
      * @param expected Expectation for the value of the [HttpResponse.body].
      * @return This instance, to use for chaining.
@@ -156,7 +156,7 @@ class ResponseSpecification {
      *
      * Example:
      * ```kotlin
-     * ResponseSpecification().expectJsonBody("journal.title", isEqualTo("IEEE Software"))
+     * ResponseSpecification().expectJsonBody("journal.title", equalTo("IEEE Software"))
      * ```
      * @param expected Expectation for the value of the [HttpResponse.body].
      * @return This instance, to use for chaining.

@@ -25,9 +25,9 @@ import org.jholsten.me2e.request.model.HttpResponse
  *         val response = api.get(url)
  *
  *         assertThat(response)
- *             .statusCode(isEqualTo(200))
- *             .message(isEqualTo("OK"))
- *             .jsonBody("journal.title", isEqualTo("IEEE Software"))
+ *             .statusCode(equalTo(200))
+ *             .message(equalTo("OK"))
+ *             .jsonBody("journal.title", equalTo("IEEE Software"))
  *     }
  * }
  * ```
@@ -40,7 +40,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      *
      * Example Usage:
      * ```kotlin
-     * assertThat(response).statusCode(isEqualTo(200))
+     * assertThat(response).statusCode(equalTo(200))
      * ```
      * @param expected Expectation for the value of the [HttpResponse.code].
      * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
@@ -56,7 +56,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      *
      * Example Usage:
      * ```kotlin
-     * assertThat(response).protocol(isEqualTo("HTTP/1.1"))
+     * assertThat(response).protocol(equalTo("HTTP/1.1"))
      * ```
      * @param expected Expectation for the value of the [HttpResponse.protocol].
      * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
@@ -72,7 +72,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      *
      * Example Usage:
      * ```kotlin
-     * assertThat(response).message(isEqualTo("OK"))
+     * assertThat(response).message(equalTo("OK"))
      * ```
      * @param expected Expectation for the value of the [HttpResponse.message].
      * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
@@ -104,7 +104,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      *
      * Example Usage:
      * ```kotlin
-     * assertThat(response).contentType(isEqualTo("application/json"))
+     * assertThat(response).contentType(equalTo("application/json"))
      * ```
      * @param expected Expectation for the value of the [org.jholsten.me2e.request.model.HttpResponseBody.contentType].
      * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
@@ -120,7 +120,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      *
      * Example Usage:
      * ```kotlin
-     * assertThat(response).body(isEqualTo("Text Content"))
+     * assertThat(response).body(equalTo("Text Content"))
      * ```
      * @param expected Expectation for the string value of the [HttpResponse.body].
      * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
@@ -136,7 +136,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      *
      * Example Usage:
      * ```kotlin
-     * assertThat(response).binaryBody(isEqualTo(byteArrayOf(123, 34, 110)))
+     * assertThat(response).binaryBody(equalTo(byteArrayOf(123, 34, 110)))
      * ```
      * @param expected Expectation for the binary value of the [HttpResponse.body].
      * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
@@ -152,7 +152,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      *
      * Example Usage:
      * ```kotlin
-     * assertThat(response).base64Body(isEqualTo("YWRtaW46c2VjcmV0"))
+     * assertThat(response).base64Body(equalTo("YWRtaW46c2VjcmV0"))
      * ```
      * @param expected Expectation for the base 64 encoded value of the [HttpResponse.body].
      * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
@@ -196,11 +196,11 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      * For this response body, the following assertions do not throw an exception.
      * ```
      * assertThat(response).jsonBody("title", contains("Automated Test Scripts"))
-     * assertThat(response).jsonBody("authors[0].lastname", isEqualTo("Garousi"))
-     * assertThat(response).jsonBody("authors[0]", isEqualTo("{\"firstname\":\"Vahid\",\"lastname\":\"Garousi\"}"))
-     * assertThat(response).jsonBody("year", isEqualTo("2016"))
-     * assertThat(response).jsonBody("keywords[1]", isEqualTo("Test Automation"))
-     * assertThat(response).jsonBody("journal.title", isEqualTo("IEEE Software"))
+     * assertThat(response).jsonBody("authors[0].lastname", equalTo("Garousi"))
+     * assertThat(response).jsonBody("authors[0]", equalTo("{\"firstname\":\"Vahid\",\"lastname\":\"Garousi\"}"))
+     * assertThat(response).jsonBody("year", equalTo("2016"))
+     * assertThat(response).jsonBody("keywords[1]", equalTo("Test Automation"))
+     * assertThat(response).jsonBody("journal.title", equalTo("IEEE Software"))
      * ```
      * @param key Key of the JSON body to evaluate.
      * @param expected Expectation for the value of the JSON node with the given key.

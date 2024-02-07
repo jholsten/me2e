@@ -83,12 +83,12 @@ class Me2eTestIT : Me2eTest() {
         val response = backendApi.post(RelativeUrl(relativeUrl), HttpRequestBody(content = "{\"id\": 123}", MediaType.JSON_UTF8))
 
         logger.info(backendApi.getLogs().toString())
-        assertThat(response).statusCode(isEqualTo(200))
-        assertThat(response).jsonBody("id", isEqualTo("123"))
-        assertThat(response).jsonBody("items[0].name", isEqualTo("A"))
-        assertThat(response).jsonBody("items[0].value", isEqualTo("42"))
-        assertThat(response).jsonBody("items[1].name", isEqualTo("B"))
-        assertThat(response).jsonBody("items[1].value", isEqualTo("1"))
+        assertThat(response).statusCode(equalTo(200))
+        assertThat(response).jsonBody("id", org.jholsten.me2e.request.assertions.equalTo("123"))
+        assertThat(response).jsonBody("items[0].name", org.jholsten.me2e.request.assertions.equalTo("A"))
+        assertThat(response).jsonBody("items[0].value", org.jholsten.me2e.request.assertions.equalTo("42"))
+        assertThat(response).jsonBody("items[1].name", org.jholsten.me2e.request.assertions.equalTo("B"))
+        assertThat(response).jsonBody("items[1].value", org.jholsten.me2e.request.assertions.equalTo("1"))
 
         paymentService.verify(
             receivedRequest()

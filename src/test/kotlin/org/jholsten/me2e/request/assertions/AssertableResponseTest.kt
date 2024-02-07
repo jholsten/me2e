@@ -50,10 +50,10 @@ internal class AssertableResponseTest {
     @Test
     fun `Asserting json body should not throw if assertion is satisfied`() {
         assertThat(response).jsonBody("title", contains("Automated Test Scripts"))
-        assertThat(response).jsonBody("authors[0].lastname", isEqualTo("Garousi"))
-        assertThat(response).jsonBody("authors[0]", isEqualTo("{\"firstname\":\"Vahid\",\"lastname\":\"Garousi\"}"))
-        assertThat(response).jsonBody("year", isEqualTo("2016"))
-        assertThat(response).jsonBody("keywords[1]", isEqualTo("Test Automation"))
-        assertThat(response).jsonBody("journal.title", isEqualTo("IEEE Software"))
+        assertThat(response).jsonBody("authors[0].lastname", equalTo("Garousi"))
+        assertThat(response).jsonBody("authors[0]", equalTo("{\"firstname\":\"Vahid\",\"lastname\":\"Garousi\"}"))
+        assertThat(response).jsonBody("year", equalTo("2016"))
+        assertThat(response).jsonBody("keywords[1]", equalTo("Test Automation"))
+        assertThat(response).jsonBody("journal.title", equalTo("IEEE Software"))
     }
 }

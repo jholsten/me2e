@@ -1,7 +1,7 @@
 package org.jholsten.me2e.container.microservice
 
 import org.jholsten.me2e.request.assertions.assertThat
-import org.jholsten.me2e.request.assertions.isEqualTo
+import org.jholsten.me2e.request.assertions.equalTo
 import org.jholsten.me2e.config.model.DockerConfig
 import org.jholsten.me2e.config.model.RequestConfig
 import org.jholsten.me2e.container.ContainerManager
@@ -51,8 +51,8 @@ internal class MicroserviceContainerIT {
     fun `Executing GET request should succeed`() {
         val response = backendApi.get(RelativeUrl("/health"))
 
-        assertThat(response).statusCode(isEqualTo(200))
-        assertThat(response).body(isEqualTo("OK"))
+        assertThat(response).statusCode(equalTo(200))
+        assertThat(response).body(equalTo("OK"))
     }
 
     @Test
@@ -61,8 +61,8 @@ internal class MicroserviceContainerIT {
 
         val response = backendApi.get(RelativeUrl("/secured"))
 
-        assertThat(response).statusCode(isEqualTo(200))
-        assertThat(response).body(isEqualTo("admin"))
+        assertThat(response).statusCode(equalTo(200))
+        assertThat(response).body(equalTo("admin"))
         backendApi.resetRequestInterceptors()
     }
 }

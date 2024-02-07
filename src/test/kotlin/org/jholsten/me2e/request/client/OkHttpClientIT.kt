@@ -6,7 +6,7 @@ import org.awaitility.Awaitility
 import org.awaitility.Durations
 import org.jholsten.me2e.request.assertions.assertThat
 import org.jholsten.me2e.request.assertions.containsKey
-import org.jholsten.me2e.request.assertions.isEqualTo
+import org.jholsten.me2e.request.assertions.equalTo
 import org.jholsten.me2e.request.interceptor.RequestInterceptor
 import org.jholsten.me2e.request.model.*
 import org.junit.jupiter.api.AfterAll
@@ -152,9 +152,9 @@ class OkHttpClientIT {
         assertEquals("Some Response", response.body!!.asString())
         assertTrue("Content-Type" in response.headers)
         assertEquals(listOf("text/plain"), response.headers["Content-Type"])
-        assertThat(response).statusCode(isEqualTo(200))
-        assertThat(response).body(isEqualTo("Some Response"))
-        assertThat(response).contentType(isEqualTo("text/plain"))
+        assertThat(response).statusCode(equalTo(200))
+        assertThat(response).body(equalTo("Some Response"))
+        assertThat(response).contentType(equalTo("text/plain"))
         assertThat(response).headers(containsKey("Content-Type").withValue("text/plain"))
     }
 

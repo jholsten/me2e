@@ -19,12 +19,12 @@ fun assertThat(response: HttpResponse): AssertableResponse {
  *
  * Example Usage:
  * ```kotlin
- * assertThat(response).statusCode(isEqualTo(200))
+ * assertThat(response).statusCode(equalTo(200))
  * ```
  * @param expected Expected value which should be equal to the actual value.
  * @param T Datatype of the values to compare.
  */
-fun <T> isEqualTo(expected: T): Assertable<T?> {
+fun <T> equalTo(expected: T): Assertable<T?> {
     return EqualityAssertion(expected)
 }
 
@@ -34,12 +34,12 @@ fun <T> isEqualTo(expected: T): Assertable<T?> {
  *
  * Example Usage:
  * ```kotlin
- * assertThat(response).statusCode(isNotEqualTo(500))
+ * assertThat(response).statusCode(notEqualTo(500))
  * ```
  * @param expected Expected value which should not be equal to the actual value.
  * @param T Datatype of the values to compare.
  */
-fun <T> isNotEqualTo(expected: T): Assertable<T?> {
+fun <T> notEqualTo(expected: T): Assertable<T?> {
     return InEqualityAssertion(expected)
 }
 
@@ -92,12 +92,12 @@ fun matchesPattern(expectedPattern: String): Assertable<String?> {
  *
  * Example Usage:
  * ```kotlin
- * assertThat(response).statusCode(isGreaterThan(100))
+ * assertThat(response).statusCode(greaterThan(100))
  * ```
  * @param expected Numeric value which should be less than the actual value.
  * @param T Numeric datatype of the values to compare.
  */
-fun <T> isGreaterThan(expected: T): Assertable<T?> where T : Number?, T : Comparable<T> {
+fun <T> greaterThan(expected: T): Assertable<T?> where T : Number?, T : Comparable<T> {
     return GreaterThanAssertion(expected)
 }
 
@@ -107,12 +107,12 @@ fun <T> isGreaterThan(expected: T): Assertable<T?> where T : Number?, T : Compar
  *
  * Example Usage:
  * ```kotlin
- * assertThat(response).statusCode(isLessThan(500))
+ * assertThat(response).statusCode(lessThan(500))
  * ```
  * @param expected Numeric value which should be greater than the actual value.
  * @param T Numeric datatype of the values to compare.
  */
-fun <T> isLessThan(expected: T): Assertable<T?> where T : Number?, T : Comparable<T> {
+fun <T> lessThan(expected: T): Assertable<T?> where T : Number?, T : Comparable<T> {
     return LessThanAssertion(expected)
 }
 
@@ -122,13 +122,13 @@ fun <T> isLessThan(expected: T): Assertable<T?> where T : Number?, T : Comparabl
  *
  * Example Usage:
  * ```kotlin
- * assertThat(response).statusCode(isBetween(200, 299))
+ * assertThat(response).statusCode(between(200, 299))
  * ```
  * @param lowerBound Numeric value which should be less than or equal to the actual value.
  * @param upperBound Numeric value which should be greater than or equal to the actual value.
  * @param T Numeric datatype of the values to compare.
  */
-fun <T> isBetween(lowerBound: T, upperBound: T): Assertable<T?> where T : Number?, T : Comparable<T> {
+fun <T> between(lowerBound: T, upperBound: T): Assertable<T?> where T : Number?, T : Comparable<T> {
     return BetweenAssertion(lowerBound, upperBound)
 }
 

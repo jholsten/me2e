@@ -7,36 +7,36 @@ internal class AssertionsTest {
 
     @Test
     fun `Equality assertion should not throw for equal values`() {
-        assertDoesNotThrow { isEqualTo("A").evaluate("Property", "A") }
-        assertDoesNotThrow { isEqualTo(1).evaluate("Property", 1) }
-        assertDoesNotThrow { isEqualTo(1.0).evaluate("Property", 1.0) }
-        assertDoesNotThrow { isEqualTo(listOf("A")).evaluate("Property", listOf("A")) }
+        assertDoesNotThrow { equalTo("A").evaluate("Property", "A") }
+        assertDoesNotThrow { equalTo(1).evaluate("Property", 1) }
+        assertDoesNotThrow { equalTo(1.0).evaluate("Property", 1.0) }
+        assertDoesNotThrow { equalTo(listOf("A")).evaluate("Property", listOf("A")) }
     }
 
     @Test
     fun `Equality assertion should throw for unequal values`() {
-        assertFailsWith<AssertionFailure> { isEqualTo("A").evaluate("Property", "B") }
-        assertFailsWith<AssertionFailure> { isEqualTo(1).evaluate("Property", 2) }
-        assertFailsWith<AssertionFailure> { isEqualTo(1.0).evaluate("Property", 2.0) }
-        assertFailsWith<AssertionFailure> { isEqualTo(listOf("A")).evaluate("Property", listOf("B")) }
-        assertFailsWith<AssertionFailure> { isEqualTo("A").evaluate("Property", null) }
+        assertFailsWith<AssertionFailure> { equalTo("A").evaluate("Property", "B") }
+        assertFailsWith<AssertionFailure> { equalTo(1).evaluate("Property", 2) }
+        assertFailsWith<AssertionFailure> { equalTo(1.0).evaluate("Property", 2.0) }
+        assertFailsWith<AssertionFailure> { equalTo(listOf("A")).evaluate("Property", listOf("B")) }
+        assertFailsWith<AssertionFailure> { equalTo("A").evaluate("Property", null) }
     }
 
     @Test
     fun `Inequality assertion should not throw for equal values`() {
-        assertDoesNotThrow { isNotEqualTo("A").evaluate("Property", "B") }
-        assertDoesNotThrow { isNotEqualTo(1).evaluate("Property", 2) }
-        assertDoesNotThrow { isNotEqualTo(1.0).evaluate("Property", 2.0) }
-        assertDoesNotThrow { isNotEqualTo(listOf("A")).evaluate("Property", listOf("B")) }
-        assertDoesNotThrow { isNotEqualTo("A").evaluate("Property", null) }
+        assertDoesNotThrow { notEqualTo("A").evaluate("Property", "B") }
+        assertDoesNotThrow { notEqualTo(1).evaluate("Property", 2) }
+        assertDoesNotThrow { notEqualTo(1.0).evaluate("Property", 2.0) }
+        assertDoesNotThrow { notEqualTo(listOf("A")).evaluate("Property", listOf("B")) }
+        assertDoesNotThrow { notEqualTo("A").evaluate("Property", null) }
     }
 
     @Test
     fun `Inequality assertion should throw for unequal values`() {
-        assertFailsWith<AssertionFailure> { isNotEqualTo("A").evaluate("Property", "A") }
-        assertFailsWith<AssertionFailure> { isNotEqualTo(1).evaluate("Property", 1) }
-        assertFailsWith<AssertionFailure> { isNotEqualTo(1.0).evaluate("Property", 1.0) }
-        assertFailsWith<AssertionFailure> { isNotEqualTo(listOf("A")).evaluate("Property", listOf("A")) }
+        assertFailsWith<AssertionFailure> { notEqualTo("A").evaluate("Property", "A") }
+        assertFailsWith<AssertionFailure> { notEqualTo(1).evaluate("Property", 1) }
+        assertFailsWith<AssertionFailure> { notEqualTo(1.0).evaluate("Property", 1.0) }
+        assertFailsWith<AssertionFailure> { notEqualTo(listOf("A")).evaluate("Property", listOf("A")) }
     }
 
     @Test
@@ -92,41 +92,41 @@ internal class AssertionsTest {
 
     @Test
     fun `Greater than assertion should not throw if actual is greater than expected`() {
-        assertDoesNotThrow { isGreaterThan(10).evaluate("Property", 15) }
-        assertDoesNotThrow { isGreaterThan(0.2).evaluate("Property", 1.0) }
+        assertDoesNotThrow { greaterThan(10).evaluate("Property", 15) }
+        assertDoesNotThrow { greaterThan(0.2).evaluate("Property", 1.0) }
     }
 
     @Test
     fun `Greater than assertion should throw if actual is not greater than expected`() {
-        assertFailsWith<AssertionFailure> { isGreaterThan(10).evaluate("Property", 5) }
-        assertFailsWith<AssertionFailure> { isGreaterThan(0.2).evaluate("Property", 0.1) }
-        assertFailsWith<AssertionFailure> { isGreaterThan(10).evaluate("Property", null) }
+        assertFailsWith<AssertionFailure> { greaterThan(10).evaluate("Property", 5) }
+        assertFailsWith<AssertionFailure> { greaterThan(0.2).evaluate("Property", 0.1) }
+        assertFailsWith<AssertionFailure> { greaterThan(10).evaluate("Property", null) }
     }
 
     @Test
     fun `Less than assertion should not throw if actual is less than expected`() {
-        assertDoesNotThrow { isLessThan(10).evaluate("Property", 5) }
-        assertDoesNotThrow { isLessThan(0.2).evaluate("Property", 0.1) }
+        assertDoesNotThrow { lessThan(10).evaluate("Property", 5) }
+        assertDoesNotThrow { lessThan(0.2).evaluate("Property", 0.1) }
     }
 
     @Test
     fun `Less than assertion should throw if actual is not less than expected`() {
-        assertFailsWith<AssertionFailure> { isLessThan(10).evaluate("Property", 15) }
-        assertFailsWith<AssertionFailure> { isLessThan(0.2).evaluate("Property", 1.0) }
-        assertFailsWith<AssertionFailure> { isLessThan(10).evaluate("Property", null) }
+        assertFailsWith<AssertionFailure> { lessThan(10).evaluate("Property", 15) }
+        assertFailsWith<AssertionFailure> { lessThan(0.2).evaluate("Property", 1.0) }
+        assertFailsWith<AssertionFailure> { lessThan(10).evaluate("Property", null) }
     }
 
     @Test
     fun `Between assertion should not throw if actual is within range`() {
-        assertDoesNotThrow { isBetween(10, 20).evaluate("Property", 15) }
-        assertDoesNotThrow { isBetween(0.2, 2.0).evaluate("Property", 1.0) }
+        assertDoesNotThrow { between(10, 20).evaluate("Property", 15) }
+        assertDoesNotThrow { between(0.2, 2.0).evaluate("Property", 1.0) }
     }
 
     @Test
     fun `Between assertion should throw if actual is not within range`() {
-        assertFailsWith<AssertionFailure> { isBetween(10, 20).evaluate("Property", 5) }
-        assertFailsWith<AssertionFailure> { isBetween(0.2, 2.0).evaluate("Property", 3.0) }
-        assertFailsWith<AssertionFailure> { isBetween(10, 20).evaluate("Property", null) }
+        assertFailsWith<AssertionFailure> { between(10, 20).evaluate("Property", 5) }
+        assertFailsWith<AssertionFailure> { between(0.2, 2.0).evaluate("Property", 3.0) }
+        assertFailsWith<AssertionFailure> { between(10, 20).evaluate("Property", null) }
     }
 
     @Test
