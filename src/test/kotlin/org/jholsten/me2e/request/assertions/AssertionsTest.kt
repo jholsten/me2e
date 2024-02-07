@@ -1,15 +1,5 @@
-package org.jholsten.me2e.request.assertion
+package org.jholsten.me2e.request.assertions
 
-import org.jholsten.me2e.request.assertion.Assertions.Companion.contains
-import org.jholsten.me2e.request.assertion.Assertions.Companion.containsKey
-import org.jholsten.me2e.request.assertion.Assertions.Companion.isBetween
-import org.jholsten.me2e.request.assertion.Assertions.Companion.isEqualTo
-import org.jholsten.me2e.request.assertion.Assertions.Companion.isGreaterThan
-import org.jholsten.me2e.request.assertion.Assertions.Companion.isLessThan
-import org.jholsten.me2e.request.assertion.Assertions.Companion.isNotEqualTo
-import org.jholsten.me2e.request.assertion.Assertions.Companion.isNotNull
-import org.jholsten.me2e.request.assertion.Assertions.Companion.isNull
-import org.jholsten.me2e.request.assertion.Assertions.Companion.matchesPattern
 import org.jholsten.util.assertDoesNotThrow
 import kotlin.test.*
 

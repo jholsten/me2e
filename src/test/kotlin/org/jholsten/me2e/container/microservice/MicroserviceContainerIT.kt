@@ -1,7 +1,7 @@
 package org.jholsten.me2e.container.microservice
 
-import org.jholsten.me2e.request.assertion.Assertions.Companion.assertThat
-import org.jholsten.me2e.request.assertion.Assertions.Companion.isEqualTo
+import org.jholsten.me2e.request.assertions.assertThat
+import org.jholsten.me2e.request.assertions.isEqualTo
 import org.jholsten.me2e.config.model.DockerConfig
 import org.jholsten.me2e.config.model.RequestConfig
 import org.jholsten.me2e.container.ContainerManager

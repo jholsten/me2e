@@ -1,6 +1,6 @@
-package org.jholsten.me2e.request.assertion
+package org.jholsten.me2e.request.assertions
 
-import org.jholsten.me2e.request.assertion.matchers.Assertable
+import org.jholsten.me2e.request.assertions.matchers.Assertable
 import org.jholsten.me2e.request.model.HttpResponse
 
 /**

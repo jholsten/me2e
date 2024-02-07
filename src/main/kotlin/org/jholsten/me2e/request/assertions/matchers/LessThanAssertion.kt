@@ -1,4 +1,4 @@
-package org.jholsten.me2e.request.assertion.matchers
+package org.jholsten.me2e.request.assertions.matchers
 
 
 /**

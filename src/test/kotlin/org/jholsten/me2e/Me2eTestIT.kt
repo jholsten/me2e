@@ -1,7 +1,5 @@
 package org.jholsten.me2e
 
-import org.jholsten.me2e.request.assertion.Assertions.Companion.assertThat
-import org.jholsten.me2e.request.assertion.Assertions.Companion.isEqualTo
 import org.jholsten.me2e.config.model.ConfigFormat
 import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.container.injection.InjectService
@@ -9,6 +7,7 @@ import org.jholsten.me2e.container.microservice.MicroserviceContainer
 import org.jholsten.me2e.mock.MockServer
 import org.jholsten.me2e.mock.stubbing.request.StringMatcher.Companion.equalTo
 import org.jholsten.me2e.mock.verification.MockServerVerification.Companion.receivedRequest
+import org.jholsten.me2e.request.assertions.*
 import org.jholsten.me2e.request.model.HttpMethod
 import org.jholsten.me2e.request.model.HttpRequestBody
 import org.jholsten.me2e.request.model.MediaType
