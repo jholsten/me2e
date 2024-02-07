@@ -7,7 +7,7 @@ import org.jholsten.me2e.assertions.AssertionFailure
  * if the assertion was not successful.
  * @param T Datatype of the values to compare.
  */
-open class Assertable<T> internal constructor(
+abstract class Assertable<T> internal constructor(
     /**
      * Assertion which should evaluate to `true`.
      * Takes actual value as parameter and must return a boolean value.
