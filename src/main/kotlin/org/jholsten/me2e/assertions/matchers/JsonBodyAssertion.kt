@@ -44,17 +44,17 @@ import org.jholsten.me2e.assertions.AssertionFailure
  * assertThat(response).jsonBody(containsNode("journal.title").withValue(equalTo("IEEE Software")))
  * ```
  */
-class JsonBodyAssertion(private val expectedPath: String) : Assertable<JsonNode>(
-    assertion = { actual -> findNodeByPath(actual, expectedPath) != null },
+class JsonBodyAssertion(private val expectedPath: String) : Assertable<JsonNode?>(
+    assertion = { actual -> actual?.let { findNodeByPath(it, expectedPath) } != null },
     message = "to contain node with path\n\t$expectedPath",
 ) {
     /**
      * Returns assertion for checking if the JSON body contains a node with the expected path with an expected value.
      * @param expectedValue Expectation for the value of the JSON node with the given key.
      */
-    fun withValue(expectedValue: Assertable<String?>): Assertable<JsonNode> {
+    fun withValue(expectedValue: Assertable<String?>): Assertable<JsonNode?> {
         return Assertable(
-            assertion = { actual -> findNodeByPath(actual, expectedPath)?.let { evaluateValue(it, expectedValue) } == true },
+            assertion = { actual -> actual?.let { findNodeByPath(it, expectedPath)?.let { evaluateValue(it, expectedValue) } } == true },
             message = "to contain node with key $expectedPath with value ${expectedValue.message}"
         )
     }

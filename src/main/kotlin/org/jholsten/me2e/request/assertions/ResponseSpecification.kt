@@ -22,7 +22,7 @@ class ResponseSpecification {
     private val body: MutableList<Assertable<String?>> = mutableListOf()
     private val binaryBody: MutableList<Assertable<ByteArray?>> = mutableListOf()
     private val base64Body: MutableList<Assertable<String?>> = mutableListOf()
-    private val jsonBody: MutableList<Assertable<JsonNode>> = mutableListOf()
+    private val jsonBody: MutableList<Assertable<JsonNode?>> = mutableListOf()
 
     /**
      * Expects that the status code of the response satisfies the given assertion.
@@ -165,7 +165,7 @@ class ResponseSpecification {
      * @return This instance, to use for chaining.
      * @see AssertableResponse.jsonBody
      */
-    fun expectJsonBody(expected: Assertable<JsonNode>) = apply {
+    fun expectJsonBody(expected: Assertable<JsonNode?>) = apply {
         this.jsonBody.add(expected)
     }
 

@@ -28,7 +28,7 @@ import org.jholsten.me2e.request.model.HttpResponse
  *         assertThat(response)
  *             .statusCode(equalTo(200))
  *             .message(equalTo("OK"))
- *             .jsonBody("journal.title", equalTo("IEEE Software"))
+ *             .jsonBody(containsNode("journal.title").withValue(equalTo("IEEE Software")))
  *     }
  * }
  * ```
@@ -177,12 +177,12 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ResponseSpecification].
      * @throws AssertionFailure if assertion was not successful.
      */
-    fun jsonBody(expected: Assertable<JsonNode>) = apply {
+    fun jsonBody(expected: Assertable<JsonNode?>) = apply {
         val json = try {
             this.response.body?.asJson()
         } catch (e: Exception) {
             throw AssertionFailure("Unable to parse body as JSON: ${e.message}")
-        } ?: throw AssertionFailure("Response does not contain a response body.")
+        }
 
         expected.evaluate("json body", json)
     }
