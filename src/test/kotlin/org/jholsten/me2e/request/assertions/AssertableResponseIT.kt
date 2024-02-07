@@ -163,11 +163,11 @@ internal class AssertableResponseIT {
     @Test
     fun `Asserting headers should not throw if assertion is satisfied`() {
         assertDoesNotThrow { assertThat(response).headers(equalTo(response.headers.entries)) }
-        assertDoesNotThrow { assertThat(response).headers(containsKey("Key1").withValue("Value1.1")) }
-        assertDoesNotThrow { assertThat(response).headers(containsKey("Key1").withValue("Value1.2")) }
+        assertDoesNotThrow { assertThat(response).headers(containsKey("Key1").withValue(equalTo("Value1.1"))) }
+        assertDoesNotThrow { assertThat(response).headers(containsKey("Key1").withValue(equalTo("Value1.2"))) }
         assertDoesNotThrow { assertThat(response).headers(containsKey("Key1").withValues(listOf("Value1.1", "Value1.2"))) }
         assertDoesNotThrow { assertThat(response).headers(containsKey("Key1")) }
-        assertDoesNotThrow { assertThat(response).headers(containsKey("Key2").withValue("Value2")) }
+        assertDoesNotThrow { assertThat(response).headers(containsKey("Key2").withValue(equalTo("Value2"))) }
         assertDoesNotThrow { assertThat(response).headers(containsKey("Key2")) }
         assertDoesNotThrow {
             assertThat(response).headers(
@@ -183,11 +183,11 @@ internal class AssertableResponseIT {
         assertDoesNotThrow {
             assertThat(response)
                 .headers(equalTo(response.headers.entries))
-                .headers(containsKey("Key1").withValue("Value1.1"))
-                .headers(containsKey("Key1").withValue("Value1.2"))
+                .headers(containsKey("Key1").withValue(equalTo("Value1.1")))
+                .headers(containsKey("Key1").withValue(equalTo("Value1.2")))
                 .headers(containsKey("Key1").withValues(listOf("Value1.1", "Value1.2")))
                 .headers(containsKey("Key1"))
-                .headers(containsKey("Key2").withValue("Value2"))
+                .headers(containsKey("Key2").withValue(equalTo("Value2")))
                 .headers(containsKey("Key2"))
                 .headers(isNotNull())
         }
@@ -195,7 +195,7 @@ internal class AssertableResponseIT {
 
     @Test
     fun `Asserting headers should throw if assertion is not satisfied`() {
-        assertFails { assertThat(response).headers(containsKey("Key1").withValue("Other")) }
+        assertFails { assertThat(response).headers(containsKey("Key1").withValue(equalTo("Other"))) }
         assertFails { assertThat(response).headers(containsKey("Key1").withValues(listOf("Other"))) }
         assertFails { assertThat(response).headers(containsKey("Key1").withValues(listOf("Value1.1"))) }
         assertFails { assertThat(response).headers(containsKey("Key3")) }
@@ -203,7 +203,7 @@ internal class AssertableResponseIT {
         assertFails { assertThat(response).headers(isNull()) }
         assertFails {
             assertThat(response)
-                .headers(containsKey("Key1").withValue("Other"))
+                .headers(containsKey("Key1").withValue(equalTo("Other")))
                 .headers(containsKey("Key1").withValues(listOf("Other")))
                 .headers(containsKey("Key1").withValues(listOf("Value1.1")))
                 .headers(containsKey("Key3"))
@@ -364,9 +364,9 @@ internal class AssertableResponseIT {
             .expectProtocol(contains("http"))
             .expectMessage(equalTo("Some Message"))
             .expectMessage(contains("Message"))
-            .expectHeaders(containsKey("Key1").withValue("Value1.1"))
-            .expectHeaders(containsKey("Key1").withValue("Value1.2"))
-            .expectHeaders(containsKey("Key2").withValue("Value2"))
+            .expectHeaders(containsKey("Key1").withValue(equalTo("Value1.1")))
+            .expectHeaders(containsKey("Key1").withValue(equalTo("Value1.2")))
+            .expectHeaders(containsKey("Key2").withValue(equalTo("Value2")))
             .expectContentType(equalTo("application/json; charset=utf-8"))
             .expectBody(contains("name"))
             .expectBase64Body(contains("eyJuYW1lIjogIkpva"))
@@ -387,7 +387,7 @@ internal class AssertableResponseIT {
             .expectProtocol(contains("https"))
             .expectMessage(equalTo("Other"))
             .expectMessage(contains("Something Else"))
-            .expectHeaders(containsKey("Key1").withValue("Other"))
+            .expectHeaders(containsKey("Key1").withValue(equalTo("Other")))
             .expectHeaders(containsKey("Key3"))
             .expectContentType(equalTo("Other"))
             .expectBody(contains("Other"))

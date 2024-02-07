@@ -89,7 +89,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      *
      * Example Usage:
      * ```kotlin
-     * assertThat(response).headers(containsKey("Content-Type").withValue("application/json"))
+     * assertThat(response).headers(containsKey("Content-Type").withValue(equalTo("application/json")))
      * ```
      * @param expected Expectation for the value of the [HttpResponse.headers].
      * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this

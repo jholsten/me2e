@@ -78,7 +78,7 @@ class ResponseSpecification {
      *
      * Example:
      * ```kotlin
-     * ResponseSpecification().expectHeaders(containsKey("Content-Type").withValue("application/json"))
+     * ResponseSpecification().expectHeaders(containsKey("Content-Type").withValue(equalTo("application/json")))
      * ```
      * @param expected Expectation for the value of the [HttpResponse.headers].
      * @return This instance, to use for chaining.

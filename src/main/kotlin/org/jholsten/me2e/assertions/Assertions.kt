@@ -64,7 +64,7 @@ fun contains(expected: String): Assertable<String?> {
  *
  * Example Usage:
  * ```kotlin
- * assertThat(response).headers(containsKey("Content-Type").withValue("application/json"))
+ * assertThat(response).headers(containsKey("Content-Type").withValue(equalTo("application/json")))
  * ```
  * @param expectedKey Expected key which should be contained in the actual map.
  * @param K Datatype of the keys of the maps to compare.

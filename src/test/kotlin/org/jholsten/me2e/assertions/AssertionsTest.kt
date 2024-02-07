@@ -65,17 +65,25 @@ internal class AssertionsTest {
 
     @Test
     fun `Multi map value contains assertion should not throw if actual contains key with value`() {
-        assertDoesNotThrow { containsKey("A").withValue(1).evaluate("Property", mapOf("A" to listOf(1), "B" to listOf(2))) }
-        assertDoesNotThrow { containsKey("A").withValue(2).evaluate("Property", mapOf("A" to listOf(1, 2), "B" to listOf(2))) }
-        assertDoesNotThrow { containsKey(1).withValue("A").evaluate("Property", mapOf(1 to listOf("A"), 2 to listOf("B"))) }
+        assertDoesNotThrow { containsKey("A").withValue(equalTo(1)).evaluate("Property", mapOf("A" to listOf(1), "B" to listOf(2))) }
+        assertDoesNotThrow { containsKey("A").withValue(equalTo(2)).evaluate("Property", mapOf("A" to listOf(1, 2), "B" to listOf(2))) }
+        assertDoesNotThrow { containsKey(1).withValue(equalTo("A")).evaluate("Property", mapOf(1 to listOf("A"), 2 to listOf("B"))) }
     }
 
     @Test
     fun `Multi map value contains assertion should throw if actual does not contain key with value`() {
-        assertFailsWith<AssertionFailure> { containsKey("A").withValue(2).evaluate("Property", mapOf("A" to listOf(1), "B" to listOf(2))) }
-        assertFailsWith<AssertionFailure> { containsKey(1).withValue("B").evaluate("Property", mapOf(1 to listOf("A"), 2 to listOf("B"))) }
-        assertFailsWith<AssertionFailure> { containsKey("C").withValue(3).evaluate("Property", mapOf("A" to listOf(1), "B" to listOf(2))) }
-        assertFailsWith<AssertionFailure> { containsKey(3).withValue("C").evaluate("Property", mapOf(1 to listOf("A"), 2 to listOf("B"))) }
+        assertFailsWith<AssertionFailure> {
+            containsKey("A").withValue(equalTo(2)).evaluate("Property", mapOf("A" to listOf(1), "B" to listOf(2)))
+        }
+        assertFailsWith<AssertionFailure> {
+            containsKey(1).withValue(equalTo("B")).evaluate("Property", mapOf(1 to listOf("A"), 2 to listOf("B")))
+        }
+        assertFailsWith<AssertionFailure> {
+            containsKey("C").withValue(equalTo(3)).evaluate("Property", mapOf("A" to listOf(1), "B" to listOf(2)))
+        }
+        assertFailsWith<AssertionFailure> {
+            containsKey(3).withValue(equalTo("C")).evaluate("Property", mapOf(1 to listOf("A"), 2 to listOf("B")))
+        }
     }
 
     @Test

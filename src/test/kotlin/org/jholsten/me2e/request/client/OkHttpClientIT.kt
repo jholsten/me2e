@@ -155,7 +155,7 @@ class OkHttpClientIT {
         assertThat(response).statusCode(equalTo(200))
         assertThat(response).body(equalTo("Some Response"))
         assertThat(response).contentType(equalTo("text/plain"))
-        assertThat(response).headers(containsKey("Content-Type").withValue("text/plain"))
+        assertThat(response).headers(containsKey("Content-Type").withValue(equalTo("text/plain")))
     }
 
     private fun assertRequestWasSent(url: String, method: HttpMethod, headers: HttpHeaders, body: HttpRequestBody?) {

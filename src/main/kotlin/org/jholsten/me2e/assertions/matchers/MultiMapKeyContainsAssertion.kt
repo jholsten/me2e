@@ -10,14 +10,15 @@ class MultiMapKeyContainsAssertion<K>(private val expectedKey: K) : Assertable<M
     message = "to contain key\n\t$expectedKey",
 ) {
     /**
-     * Returns assertion for checking if the map contains the expected key with an expected value.
-     * @param expectedValue Expected value that the entry for the [expectedKey] should have. TODO: Assertable
+     * Returns assertion for checking if the map contains the expected key with an entry which contains a
+     * value which satisfies the given expectation.
+     * @param expectedValue Expectation for the value of the entry for the [expectedKey].
      * @param V Datatype of the values of the maps to compare.
      * @param E Datatype of the values of the list of values to compare.
      */
-    fun <V : Collection<E>, E> withValue(expectedValue: E): Assertable<Map<K, V>?> {
+    fun <V : Collection<E>, E> withValue(expectedValue: Assertable<E>): Assertable<Map<K, V>?> {
         return Assertable(
-            assertion = { actual -> actual?.get(expectedKey)?.contains(expectedValue) ?: false },
+            assertion = { actual -> evaluateValue(actual?.get(expectedKey), expectedValue) },
             message = "to contain key $expectedKey with value\n\t$expectedValue",
         )
     }
@@ -33,5 +34,14 @@ class MultiMapKeyContainsAssertion<K>(private val expectedKey: K) : Assertable<M
             assertion = { actual -> actual?.get(expectedKey) == expectedValues },
             message = "to contain key $expectedKey with values\n\t$expectedValues",
         )
+    }
+
+    /**
+     * Returns whether any value in the list of values of the given entry satisfies the given assertion.
+     * @param entry Entry of the map for which the values are to be evaluated.
+     * @param expected Expectation for the value of the entry for the [expectedKey].
+     */
+    private fun <V : Collection<E>, E> evaluateValue(entry: V?, expected: Assertable<E>): Boolean {
+        return entry?.any { expected.assertion(it) } == true
     }
 }
