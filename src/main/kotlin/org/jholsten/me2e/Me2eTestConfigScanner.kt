@@ -14,16 +14,17 @@ internal class Me2eTestConfigScanner {
          */
         @JvmSynthetic
         fun findFirstTestConfigAnnotation(): Me2eTestConfig? {
-            val scanResult = ClassGraph().enableAnnotationInfo().disableJarScanning().scan()
-            val annotatedClasses = scanResult.getClassesWithAnnotation(Me2eTestConfig::class.java)
-            if (annotatedClasses.isEmpty()) {
-                return null
-            } else if (annotatedClasses.size != 1) {
-                logger.warn("Found ${annotatedClasses.size} Me2eTestConfig annotations. Will be using the first one...")
+            ClassGraph().enableAnnotationInfo().disableJarScanning().scan().use { scanResult ->
+                val annotatedClasses = scanResult.getClassesWithAnnotation(Me2eTestConfig::class.java)
+                if (annotatedClasses.isEmpty()) {
+                    return null
+                } else if (annotatedClasses.size != 1) {
+                    logger.warn("Found ${annotatedClasses.size} Me2eTestConfig annotations. Will be using the first one...")
+                }
+                val annotatedClass = annotatedClasses.first()
+                logger.info("Reading test configuration from ${annotatedClass.name}.")
+                return extractAnnotationFromAnnotatedClass(annotatedClass)
             }
-            val annotatedClass = annotatedClasses.first()
-            logger.info("Reading test configuration from ${annotatedClass.name}.")
-            return extractAnnotationFromAnnotatedClass(annotatedClass)
         }
 
         private fun extractAnnotationFromAnnotatedClass(annotatedClass: ClassInfo): Me2eTestConfig {
