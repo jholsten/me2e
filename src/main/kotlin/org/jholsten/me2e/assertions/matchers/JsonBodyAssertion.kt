@@ -45,7 +45,7 @@ import org.jholsten.me2e.assertions.AssertionFailure
  * ```
  */
 class JsonBodyAssertion(private val expectedPath: String) : Assertable<JsonNode?>(
-    assertion = { actual -> actual?.let { findNodeByPath(it, expectedPath) } != null },
+    assertion = { actual -> actual != null && findNodeByPath(actual, expectedPath) != null },
     message = "to contain node with path\n\t$expectedPath",
 ) {
     /**
@@ -53,10 +53,14 @@ class JsonBodyAssertion(private val expectedPath: String) : Assertable<JsonNode?
      * @param expectedValue Expectation for the value of the JSON node with the given key.
      */
     fun withValue(expectedValue: Assertable<String?>): Assertable<JsonNode?> {
-        return Assertable(
-            assertion = { actual -> actual?.let { findNodeByPath(it, expectedPath)?.let { evaluateValue(it, expectedValue) } } == true },
+        return object : Assertable<JsonNode?>(
+            assertion = { actual ->
+                actual != null && findNodeByPath(actual, expectedPath)?.let { evaluateValue(it, expectedValue) } == true
+            },
             message = "to contain node with key $expectedPath with value ${expectedValue.message}"
-        )
+        ) {
+            override fun toString(): String = "contains node with path $expectedPath and value $expectedValue"
+        }
     }
 
     /**
@@ -137,4 +141,6 @@ class JsonBodyAssertion(private val expectedPath: String) : Assertable<JsonNode?
             return null
         }
     }
+
+    override fun toString(): String = "contains node with path $expectedPath"
 }

@@ -7,4 +7,6 @@ package org.jholsten.me2e.assertions.matchers
 class NotNullAssertion<T> : Assertable<T?>(
     assertion = { actual -> actual != null },
     message = "to not be null",
-)
+) {
+    override fun toString(): String = "not null"
+}

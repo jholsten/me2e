@@ -17,10 +17,12 @@ class MultiMapKeyContainsAssertion<K>(private val expectedKey: K) : Assertable<M
      * @param E Datatype of the values of the list of values to compare.
      */
     fun <V : Collection<E>, E> withValue(expectedValue: Assertable<E>): Assertable<Map<K, V>?> {
-        return Assertable(
+        return object : Assertable<Map<K, V>?>(
             assertion = { actual -> evaluateValue(actual?.get(expectedKey), expectedValue) },
             message = "to contain key $expectedKey with value\n\t$expectedValue",
-        )
+        ) {
+            override fun toString(): String = "contains key $expectedKey with value $expectedValue"
+        }
     }
 
     /**
@@ -30,10 +32,12 @@ class MultiMapKeyContainsAssertion<K>(private val expectedKey: K) : Assertable<M
      * @param E Datatype of the values of the list of values to compare.
      */
     fun <V : Collection<E>, E> withValues(expectedValues: V): Assertable<Map<K, V>?> {
-        return Assertable(
+        return object : Assertable<Map<K, V>?>(
             assertion = { actual -> actual?.get(expectedKey) == expectedValues },
             message = "to contain key $expectedKey with values\n\t$expectedValues",
-        )
+        ) {
+            override fun toString(): String = "contains key $expectedKey with values $expectedValues"
+        }
     }
 
     /**
@@ -44,4 +48,6 @@ class MultiMapKeyContainsAssertion<K>(private val expectedKey: K) : Assertable<M
     private fun <V : Collection<E>, E> evaluateValue(entry: V?, expected: Assertable<E>): Boolean {
         return entry?.any { expected.assertion(it) } == true
     }
+
+    override fun toString(): String = "contains key $expectedKey"
 }
