@@ -24,21 +24,6 @@ class OkHttpClient private constructor(
      */
     private val configuration: Configuration,
 ) : HttpClient {
-
-    /*
-    TODO: Desired interface:
-
-    val relativeUrl = HttpRelativeUrl.Builder().withPath("/search").withQueryParam(...).build()
-    // HttpRelativeUrl.empty() for using base url
-
-    fun get(relativeUrl: HttpRelativeUrl) {
-        // Why not store properties directly in HttpUrl? Because of flexibility/extensibility (e.g. username/password)
-        val url = baseUrl.withRelativeUrl(relativeUrl).build()
-
-        // How to avoid code duplicates? Use RelativeUrl.Builder in HttpUrl!
-    }
-     */
-
     override fun setBaseUrl(baseUrl: Url) {
         this.baseUrl = baseUrl
     }
@@ -118,7 +103,7 @@ class OkHttpClient private constructor(
         }
     }
 
-    class Builder : HttpClient.Builder {
+    class Builder : HttpClient.Builder<Builder> {
         private var baseUrl: Url? = null
         private val configuration: Configuration = Configuration()
 
@@ -233,6 +218,7 @@ class OkHttpClient private constructor(
         /**
          * Asserts that the given timeout value is valid (with respect to the requirements of okhttp).
          * Returns timeout value in milliseconds.
+         * @throws IllegalArgumentException if timeout value is out of range.
          */
         private fun checkTimeout(timeout: Long, unit: TimeUnit): Long {
             require(timeout >= 0) { "Timeout needs to be a positive value" }

@@ -6,6 +6,7 @@ import org.jholsten.me2e.request.model.HttpResponse
 /**
  * Request interceptor for observing and modifying outgoing HTTP requests.
  * This may be used for logging purposes or adding authentication headers.
+ * @sample org.jholsten.me2e.container.microservice.authentication.UsernamePasswordAuthentication.getRequestInterceptor
  */
 interface RequestInterceptor {
     /**
@@ -22,6 +23,7 @@ interface RequestInterceptor {
 
         /**
          * Proceeds the HTTP request.
+         * @param request Request with which the chain should proceed.
          */
         fun proceed(request: HttpRequest): HttpResponse
     }

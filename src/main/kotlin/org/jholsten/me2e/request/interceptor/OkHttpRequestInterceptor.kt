@@ -13,7 +13,7 @@ internal interface OkHttpRequestInterceptor : Interceptor {
     companion object {
         /**
          * Maps request interceptor to okhttp3 request interceptor.
-         * @param interceptor Request interceptor to map
+         * @param interceptor Request interceptor to map.
          */
         @JvmSynthetic
         fun fromRequestInterceptor(interceptor: RequestInterceptor): OkHttpRequestInterceptor {
@@ -29,7 +29,7 @@ internal interface OkHttpRequestInterceptor : Interceptor {
     /**
      * Chain that forwards all calls to the okhttp3 chain.
      */
-    class OkHttpForwardChain(private val chain: Interceptor.Chain) : RequestInterceptor.Chain {
+    private class OkHttpForwardChain(private val chain: Interceptor.Chain) : RequestInterceptor.Chain {
         override fun getRequest(): HttpRequest {
             val request = chain.request()
             return HttpRequestMapper.INSTANCE.toInternalDto(request)

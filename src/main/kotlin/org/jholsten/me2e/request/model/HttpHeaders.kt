@@ -4,7 +4,7 @@ import okhttp3.internal.toImmutableList
 import okhttp3.internal.toImmutableMap
 
 /**
- * Representation of HTTP headers of an HTTP request.
+ * Representation of HTTP headers of an HTTP request or an HTTP response.
  */
 class HttpHeaders internal constructor(
     private val values: Map<String, List<String>>
@@ -53,7 +53,7 @@ class HttpHeaders internal constructor(
 
     /**
      * Returns new [Builder] instance initialized with the HTTP headers of this instance.
-     * This allows to create new instances with party modified properties.
+     * This allows to create new instances with partly modified properties.
      */
     fun newBuilder(): Builder {
         return Builder(this.values)
@@ -70,6 +70,9 @@ class HttpHeaders internal constructor(
 
         /**
          * Adds an HTTP header with the given [key] and the given [value].
+         * @param key Key of the header to add.
+         * @param value Value of the header to add.
+         * @return Builder instance, to use for chaining.
          */
         fun add(key: String, value: String) = apply {
             add(key, listOf(value))
@@ -77,6 +80,10 @@ class HttpHeaders internal constructor(
 
         /**
          * Adds HTTP headers for the given [values] with the given [key].
+         * @param key Key of the headers to add.
+         * @param values Values of the headers to add to the existing values.
+         * @return Builder instance, to use for chaining.
+         * @throws IllegalArgumentException if [key] is blank or [values] are empty.
          */
         fun add(key: String, values: List<String>) = apply {
             require(key.isNotBlank()) { "Key cannot be blank" }
@@ -91,6 +98,9 @@ class HttpHeaders internal constructor(
         /**
          * Removes the HTTP header for the given [key] and the given [value].
          * Does not modify the builder instance if combination of key and value does not exist.
+         * @param key Key of the HTTP header to remove.
+         * @param value Value of the HTTP header to remove.
+         * @return Builder instance, to use for chaining.
          */
         fun remove(key: String, value: String) = apply {
             if (this.values.containsKey(key)) {
@@ -104,6 +114,8 @@ class HttpHeaders internal constructor(
         /**
          * Removes all HTTP headers for the given [key].
          * Does not modify the builder instance if key does not exist.
+         * @param key Key of the HTTP headers to remove.
+         * @return Builder instance, to use for chaining.
          */
         fun remove(key: String) = apply {
             this.values.remove(key)
@@ -112,11 +124,17 @@ class HttpHeaders internal constructor(
         /**
          * Sets the value of the HTTP header with the given key.
          * If the key is not found, it is added. If the key is found, the existing values are replaced.
+         * @param key Key of the HTTP header to set.
+         * @param value Value of the HTTP header to set.
+         * @return Builder instance, to use for chaining.
          */
         operator fun set(key: String, value: String) = apply {
             this.values[key] = mutableListOf(value)
         }
 
+        /**
+         * Builds an instance of the [HttpHeaders] using the properties set in this builder.
+         */
         fun build(): HttpHeaders {
             val immutableValues = values.map { (key, values) -> key to values.toImmutableList() }.toMap()
             return HttpHeaders(immutableValues.toImmutableMap())

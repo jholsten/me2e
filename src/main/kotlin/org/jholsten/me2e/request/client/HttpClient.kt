@@ -10,13 +10,24 @@ import java.util.concurrent.TimeUnit
  */
 interface HttpClient {
 
+    /**
+     * Updates the base URL to the given value.
+     * @param baseUrl Base URL to set for this HTTP client.
+     */
     fun setBaseUrl(baseUrl: Url)
 
     /**
      * Sets the given interceptors for all outgoing requests.
+     * Note that this overwrites all existing interceptors. If you want to add an interceptor instead,
+     * use [addRequestInterceptor].
+     * @param interceptors Request interceptors to set.
      */
     fun setRequestInterceptors(interceptors: List<RequestInterceptor>)
 
+    /**
+     * Adds the given interceptor for all outgoing requests to the existing list of interceptors.
+     * @param interceptor Request interceptor to add.
+     */
     fun addRequestInterceptor(interceptor: RequestInterceptor)
 
     /**
@@ -146,73 +157,87 @@ interface HttpClient {
     /**
      * Builder for the HTTP client.
      */
-    interface Builder {
+    interface Builder<SELF : Builder<SELF>> {
         /**
          * Sets the base URL of the client.
+         * @param baseUrl Base URL to set.
          */
-        fun withBaseUrl(baseUrl: Url): Builder
+        fun withBaseUrl(baseUrl: Url): SELF
 
         /**
          * Sets the given interceptors for all outgoing requests.
-         * @param interceptors Request interceptor to set
+         * @param interceptors Request interceptor to set.
          */
-        fun withRequestInterceptors(interceptors: List<RequestInterceptor>): Builder
+        fun withRequestInterceptors(interceptors: List<RequestInterceptor>): SELF
 
         /**
          * Adds the given interceptor for all outgoing requests.
-         * @param interceptor Request interceptor to add
+         * @param interceptor Request interceptor to add.
          */
-        fun addRequestInterceptor(interceptor: RequestInterceptor): Builder
+        fun addRequestInterceptor(interceptor: RequestInterceptor): SELF
 
         /**
          * Sets the given connect timeout for new connections. The default value is 10 seconds.
+         * @param timeout Connect timeout in [unit] to set.
+         * @param unit Time unit of the [timeout] value to set.
          */
-        fun withConnectTimeout(timeout: Long, unit: TimeUnit): Builder
+        fun withConnectTimeout(timeout: Long, unit: TimeUnit): SELF
 
         /**
          * Sets the given read timeout for new connections. The default value is 10 seconds.
+         * @param timeout Read timeout in [unit] to set.
+         * @param unit Time unit of the [timeout] value to set.
          */
-        fun withReadTimeout(timeout: Long, unit: TimeUnit): Builder
+        fun withReadTimeout(timeout: Long, unit: TimeUnit): SELF
 
         /**
          * Sets the given write timeout for new connections. The default value is 10 seconds.
+         * @param timeout Write timeout in [unit] to set.
+         * @param unit Time unit of the [timeout] value to set.
          */
-        fun withWriteTimeout(timeout: Long, unit: TimeUnit): Builder
+        fun withWriteTimeout(timeout: Long, unit: TimeUnit): SELF
 
         /**
-         * Builds and returns the configured HttpClient.
+         * Builds an instance of the [HttpClient] using the properties set in this builder.
          */
         fun build(): HttpClient
     }
 
     /**
      * Configuration of the HTTP client.
+     * Enables to modify an existing HTTP client instance.
      */
     interface Configuration {
         /**
          * Sets the given interceptors for all outgoing requests.
-         * @param interceptors Request interceptor to set
+         * @param interceptors Request interceptor to set.
          */
         fun setRequestInterceptors(interceptors: List<RequestInterceptor>): Configuration
 
         /**
          * Adds the given interceptor for all outgoing requests.
-         * @param interceptor Request interceptor to add
+         * @param interceptor Request interceptor to add.
          */
         fun addRequestInterceptor(interceptor: RequestInterceptor): Configuration
 
         /**
          * Sets the given connect timeout for new connections. The default value is 10 seconds.
+         * @param timeout Connect timeout in [unit] to set.
+         * @param unit Time unit of the [timeout] value to set.
          */
         fun setConnectTimeout(timeout: Long, unit: TimeUnit): Configuration
 
         /**
          * Sets the given read timeout for new connections. The default value is 10 seconds.
+         * @param timeout Read timeout in [unit] to set.
+         * @param unit Time unit of the [timeout] value to set.
          */
         fun setReadTimeout(timeout: Long, unit: TimeUnit): Configuration
 
         /**
          * Sets the given write timeout for new connections. The default value is 10 seconds.
+         * @param timeout Write timeout in [unit] to set.
+         * @param unit Time unit of the [timeout] value to set.
          */
         fun setWriteTimeout(timeout: Long, unit: TimeUnit): Configuration
     }
