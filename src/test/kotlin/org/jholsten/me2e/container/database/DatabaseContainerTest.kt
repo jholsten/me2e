@@ -1,8 +1,5 @@
 package org.jholsten.me2e.container.database
 
-import com.github.dockerjava.api.command.EventsCmd
-import com.github.dockerjava.api.command.LogContainerCmd
-import com.github.dockerjava.api.model.ContainerPort as DockerContainerPort
 import io.mockk.*
 import com.github.dockerjava.api.model.Container as DockerContainer
 import org.jholsten.me2e.container.database.connection.MongoDBConnection
@@ -11,7 +8,8 @@ import org.jholsten.me2e.container.database.model.QueryResult
 import org.jholsten.me2e.container.docker.DockerCompose
 import org.jholsten.me2e.container.model.ContainerPort
 import org.jholsten.me2e.container.model.ContainerPortList
-import org.jholsten.me2e.report.result.ReportDataAggregator
+import org.jholsten.me2e.container.model.DockerContainerReference
+import org.jholsten.util.assertDoesNotThrow
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -35,7 +33,7 @@ internal class DatabaseContainerTest {
             name = "postgres-db",
             image = "postgres:12",
             environment = mapOf(),
-            ports = ContainerPortList(listOf(ContainerPort(internal = 5432))),
+            ports = ContainerPortList(listOf(ContainerPort(internal = 5432, external = 5432))),
             hasHealthcheck = true,
             system = DatabaseManagementSystem.POSTGRESQL,
             database = "testdb",
@@ -49,7 +47,7 @@ internal class DatabaseContainerTest {
             name = "my-sql-db",
             image = "mysql:8.0",
             environment = mapOf(),
-            ports = ContainerPortList(listOf(ContainerPort(internal = 3306))),
+            ports = ContainerPortList(listOf(ContainerPort(internal = 3306, external = 3306))),
             hasHealthcheck = true,
             system = DatabaseManagementSystem.MY_SQL,
             database = "testdb",
@@ -62,7 +60,7 @@ internal class DatabaseContainerTest {
             name = "maria-db",
             image = "mariadb:11.2.2",
             environment = mapOf(),
-            ports = ContainerPortList(listOf(ContainerPort(internal = 3306))),
+            ports = ContainerPortList(listOf(ContainerPort(internal = 3306, external = 3306))),
             hasHealthcheck = true,
             system = DatabaseManagementSystem.MARIA_DB,
             database = "testdb",
@@ -75,7 +73,7 @@ internal class DatabaseContainerTest {
             name = "mongo-db",
             image = "mongo:4.4.27",
             environment = mapOf(),
-            ports = ContainerPortList(listOf(ContainerPort(internal = 27017))),
+            ports = ContainerPortList(listOf(ContainerPort(internal = 27017, external = 27017))),
             hasHealthcheck = true,
             system = DatabaseManagementSystem.MONGO_DB,
             database = "testdb",
@@ -88,7 +86,7 @@ internal class DatabaseContainerTest {
             name = "other-db",
             image = "unknown-db:latest",
             environment = mapOf(),
-            ports = ContainerPortList(listOf(ContainerPort(internal = 12345))),
+            ports = ContainerPortList(listOf(ContainerPort(internal = 12345, external = 12345))),
             hasHealthcheck = true,
             system = DatabaseManagementSystem.OTHER,
             database = "testdb",
@@ -113,30 +111,14 @@ internal class DatabaseContainerTest {
     fun beforeTest() {
         mockkConstructor(SQLDatabaseConnection.Builder::class)
         mockkConstructor(MongoDBConnection.Builder::class)
+        postgreSQLContainer.dockerContainer = DockerContainerReference(mockedDockerContainer, mockedDockerContainerState, mockedEnvironment)
+        mySQLContainer.dockerContainer = DockerContainerReference(mockedDockerContainer, mockedDockerContainerState, mockedEnvironment)
+        mariaDBContainer.dockerContainer = DockerContainerReference(mockedDockerContainer, mockedDockerContainerState, mockedEnvironment)
+        mongoDBContainer.dockerContainer = DockerContainerReference(mockedDockerContainer, mockedDockerContainerState, mockedEnvironment)
+        otherDBContainer.dockerContainer = DockerContainerReference(mockedDockerContainer, mockedDockerContainerState, mockedEnvironment)
+        every { mockedDockerContainerState.host } returns "localhost"
         every { anyConstructed<SQLDatabaseConnection.Builder>().build() } returns mockedSQLConnection
         every { anyConstructed<MongoDBConnection.Builder>().build() } returns mockedMongoDBConnection
-        every { mockedDockerContainer.getPorts() } returns arrayOf(
-            DockerContainerPort().withIp("127.0.0.1").withType("tcp").withPrivatePort(5432).withPublicPort(5432),
-            DockerContainerPort().withIp("127.0.0.1").withType("tcp").withPrivatePort(3306).withPublicPort(3306),
-            DockerContainerPort().withIp("127.0.0.1").withType("tcp").withPrivatePort(27017).withPublicPort(27017),
-            DockerContainerPort().withIp("127.0.0.1").withType("tcp").withPrivatePort(12345).withPublicPort(12345),
-        )
-        every { mockedDockerContainerState.host } returns "localhost"
-        every { mockedDockerContainerState.containerId } returns "containerId"
-        every { mockedDockerContainerState.dockerClient } returns mockk {
-            every { logContainerCmd(any()) } returns mockk<LogContainerCmd> {
-                every { withFollowStream(any()) } returns this
-                every { withSince(any()) } returns this
-                every { withStdOut(any()) } returns this
-                every { withStdErr(any()) } returns this
-                every { exec(any()) } returns mockk()
-            }
-            every { eventsCmd() } returns mockk<EventsCmd> {
-                every { withContainerFilter(any()) } returns this
-                every { withEventFilter(any()) } returns this
-                every { exec(any()) } returns mockk()
-            }
-        }
         every { mockedSQLConnection.tables } returns listOf("company")
         every { mockedSQLConnection.getAllFromTable(any()) } returns QueryResult(listOf(mapOf("id" to "1")))
         every { mockedSQLConnection.executeScript(any(), any<File>()) } just runs
@@ -153,8 +135,6 @@ internal class DatabaseContainerTest {
         every { mockedMongoDBConnection.clearAll() } just runs
         every { mockedMongoDBConnection.clearAllExcept(any()) } just runs
         every { mockedMongoDBConnection.reset() } just runs
-        mockkObject(ReportDataAggregator)
-        every { ReportDataAggregator.onContainerStarted(any()) } just runs
     }
 
     @AfterTest
@@ -165,11 +145,26 @@ internal class DatabaseContainerTest {
     @ParameterizedTest(name = "[{index}] with {0}")
     @ArgumentsSource(SQLContainerArgumentProvider::class)
     @Suppress("UNUSED_PARAMETER")
-    fun `Initializing database container should initialize connection`(system: DatabaseManagementSystem, container: DatabaseContainer) {
-        container.initializeOnContainerStarted(mockedDockerContainer, mockedDockerContainerState, mockedEnvironment)
+    fun `Initializing SQL database container should initialize connection`(system: DatabaseManagementSystem, container: DatabaseContainer) {
+        container.initializeOnContainerHealthy()
 
         assertNotNull(container.connection)
         verify { mockedSQLConnection.executeScript("init_1", "database/init_1.sql") }
         verify { mockedSQLConnection.executeScript("init_2", "database/init_2.sql") }
+    }
+
+    @Test
+    fun `Initializing No-SQL database container should initialize connection`() {
+        mongoDBContainer.initializeOnContainerHealthy()
+
+        assertNotNull(mongoDBContainer.connection)
+        verify { mockedMongoDBConnection.executeScript("init_1", "database/init_1.sql") }
+        verify { mockedMongoDBConnection.executeScript("init_2", "database/init_2.sql") }
+    }
+
+    @Test
+    fun `Initializing other database container should not fail`() {
+        assertDoesNotThrow { otherDBContainer.initializeOnContainerHealthy() }
+        assertNull(otherDBContainer.connection)
     }
 }
