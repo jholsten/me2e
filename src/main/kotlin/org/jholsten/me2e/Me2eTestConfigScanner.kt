@@ -14,7 +14,7 @@ internal class Me2eTestConfigScanner {
          */
         @JvmSynthetic
         fun findFirstTestConfigAnnotation(): Me2eTestConfig? {
-            val scanResult = ClassGraph().enableAnnotationInfo().scan()
+            val scanResult = ClassGraph().enableAnnotationInfo().disableJarScanning().scan()
             val annotatedClasses = scanResult.getClassesWithAnnotation(Me2eTestConfig::class.java)
             if (annotatedClasses.isEmpty()) {
                 return null
