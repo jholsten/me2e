@@ -6,10 +6,10 @@ import org.jholsten.me2e.utils.toJson
 
 /**
  * Pattern to match string values.
- * This matcher is used to verify the properties of the requests that should have been sent to a Mock Server.
+ * This matcher is used to match the properties of the request stubs to the requests that the Mock Server receives.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-open class StringMatcher(
+class StringMatcher(
     /**
      * Matches only if the string is exactly equal to the defined one.
      * A value of `null` indicates that the actual value does not value to be equal.
@@ -60,7 +60,7 @@ open class StringMatcher(
      * @return Whether the actual value conforms to all requirements of this matcher.
      */
     @JvmSynthetic
-    internal open fun matches(value: String): Boolean {
+    internal fun matches(value: String): Boolean {
         if (!matchesEqual(value)) {
             return false
         } else if (!matchesPattern(value)) {

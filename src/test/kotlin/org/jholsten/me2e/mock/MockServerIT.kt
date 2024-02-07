@@ -20,6 +20,7 @@ import org.jholsten.me2e.mock.stubbing.response.MockServerStubResponse
 import org.jholsten.me2e.mock.stubbing.response.MockServerStubResponseBody
 import org.jholsten.me2e.mock.verification.ExpectedRequest
 import org.jholsten.me2e.request.model.*
+import org.jholsten.util.RecursiveComparison
 import org.jholsten.util.assertDoesNotThrow
 import kotlin.test.*
 
@@ -32,6 +33,7 @@ class MockServerIT {
     private val exampleServer = MockServer(
         "example-service", "example.com", listOf(
             MockServerStub(
+                name = "other-stub",
                 request = MockServerStubRequestMatcher(
                     hostname = "example.com",
                     method = HttpMethod.POST,
@@ -89,9 +91,22 @@ class MockServerIT {
         val expectedReceivedRequest = HttpRequest(
             url = Url("http://example.com/search?id=123"),
             method = HttpMethod.POST,
+            body = HttpRequestBody(
+                byteArrayOf(
+                    123, 34, 110, 97, 109, 101, 34, 58, 32, 34, 74, 111, 104, 110, 34, 44, 32, 34, 110, 101, 115, 116, 101, 100, 34, 58,
+                    32, 123, 34, 107, 101, 121, 49, 34, 58, 32, 34, 118, 97, 108, 117, 101, 49, 34, 44, 32, 34, 107, 101, 121, 50, 34, 58,
+                    32, 34, 118, 97, 108, 117, 101, 50, 34, 125, 44, 32, 34, 100, 101, 116, 97, 105, 108, 115, 34, 58, 32, 91, 123, 34, 100,
+                    101, 116, 97, 105, 108, 34, 58, 32, 49, 125, 44, 32, 123, 34, 100, 101, 116, 97, 105, 108, 34, 58, 32, 50, 125, 93, 125,
+                ),
+                MediaType.JSON_UTF8,
+            ),
         )
 
-        val response = client.execute(HttpPost("http://example.com/search?id=123"))
+        val request = HttpPost("http://example.com/search?id=123")
+        request.entity = StringEntity(
+            "{\"name\": \"John\", \"nested\": {\"key1\": \"value1\", \"key2\": \"value2\"}, \"details\": [{\"detail\": 1}, {\"detail\": 2}]}"
+        )
+        val response = client.execute(request)
 
         assertEquals(200, response?.code)
         assertEquals("A Response", encodeResponseBody(response?.entity))
@@ -99,12 +114,20 @@ class MockServerIT {
         assertEquals(1, exampleServer.requestsReceived.size)
         assertEquals(expectedReceivedRequest.url, exampleServer.requestsReceived.first().url)
         assertEquals(expectedReceivedRequest.method, exampleServer.requestsReceived.first().method)
+        RecursiveComparison.assertEquals(expectedReceivedRequest.body?.asBinary(), exampleServer.requestsReceived.first().body?.asBinary())
         assertDoesNotThrow {
             assertThat(exampleServer).receivedRequest(
                 1, ExpectedRequest()
                     .withPath(equalTo("/search"))
                     .withMethod(equalTo(HttpMethod.POST))
                     .withQueryParameters(containsKey("id").withValue(equalTo("123")))
+                    .withBody(equalTo("{\"name\": \"John\", \"nested\": {\"key1\": \"value1\", \"key2\": \"value2\"}, \"details\": [{\"detail\": 1}, {\"detail\": 2}]}"))
+                    .withBase64Body(equalTo("eyJuYW1lIjogIkpvaG4iLCAibmVzdGVkIjogeyJrZXkxIjogInZhbHVlMSIsICJrZXkyIjogInZhbHVlMiJ9LCAiZGV0YWlscyI6IFt7ImRldGFpbCI6IDF9LCB7ImRldGFpbCI6IDJ9XX0="))
+                    .withJsonBody(containsNode("name").withValue(equalTo("John")))
+                    .withJsonBody(containsNode("nested.key1").withValue(equalTo("value1")))
+                    .withJsonBody(containsNode("nested.key2").withValue(equalTo("value2")))
+                    .withJsonBody(containsNode("details[0].detail").withValue(equalTo("1")))
+                    .withJsonBody(containsNode("details[1].detail").withValue(equalTo("2")))
                     .andNoOther()
             )
         }
@@ -138,8 +161,9 @@ class MockServerIT {
                     .withMethod(equalTo(HttpMethod.POST))
                     .withQueryParameters(containsKey("id").withValue(equalTo("123")))
                     .withBody(equalTo("{\"some-key\": \"some-value\"}"))
-                    .withJsonBoy(containsNode("some-key").withValue(equalTo("some-value")))
+                    .withJsonBody(containsNode("some-key").withValue(equalTo("some-value")))
                     .withHeaders(containsKey("header1").withValue(equalTo("headerValue")))
+                    .withContentType(equalTo(MediaType.JSON_UTF8.value))
                     .andNoOther()
             )
         }
@@ -153,6 +177,17 @@ class MockServerIT {
         assertEquals(1, exampleServer.requestsReceived.size)
         assertDoesNotThrow {
             assertThat(exampleServer).receivedRequest(1, ExpectedRequest().matchingStub("request-stub"))
+        }
+    }
+
+    @Test
+    fun `Mock Server verification should fail for named stub if request does not match`() {
+        val response = client.execute(HttpGet("http://example.com"))
+
+        assertEquals(200, response.code)
+        assertEquals(1, exampleServer.requestsReceived.size)
+        assertFailsWith<VerificationException> {
+            assertThat(exampleServer).receivedRequest(1, ExpectedRequest().matchingStub("other-stub"))
         }
     }
 
@@ -186,6 +221,7 @@ class MockServerIT {
                 1, ExpectedRequest()
                     .withPath(equalTo("/something-else"))
                     .withMethod(equalTo(HttpMethod.GET))
+                    .withContentType(equalTo(MediaType.TEXT_PLAIN_UTF8.value))
             )
         }
     }

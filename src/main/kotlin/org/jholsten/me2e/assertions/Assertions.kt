@@ -11,11 +11,17 @@ import org.jholsten.me2e.request.model.HttpResponse
 /**
  * Returns [AssertableResponse] to assert that the properties of the given [response] are as expected.
  * @param response Response to whose properties the assertions refer.
+ * @see AssertableResponse
  */
 fun assertThat(response: HttpResponse): AssertableResponse {
     return AssertableResponse(response)
 }
 
+/**
+ * Returns [MockServerVerification] to assert that the [mockServer] received an expected request.
+ * @param mockServer Mock Server which should have received the expected request.
+ * @see MockServerVerification
+ */
 fun assertThat(mockServer: MockServer): MockServerVerification {
     return MockServerVerification(mockServer)
 }

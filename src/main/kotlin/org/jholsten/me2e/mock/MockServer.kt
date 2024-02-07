@@ -82,25 +82,6 @@ class MockServer(
     }
 
     /**
-     * Verifies that this Mock Server instance received requests which match the given pattern.
-     * @throws IllegalStateException if the Mock Server is not initialized.
-     * @throws VerificationException if Mock Server did not receive the expected number of requests.
-     */
-    @JvmSynthetic
-    internal fun verify(times: Int?, expectedRequest: ExpectedRequest) {
-        assertThatMockServerIsInitialized()
-        val matchResults = wireMockRequestsReceived.filter { expectedRequest.matches(this, it.request) }
-
-        if (times != null && times != matchResults.size) {
-            throw VerificationException.forTimesNotMatching(name, times, expectedRequest, matchResults, wireMockRequestsReceived)
-        } else if (times == null && matchResults.isEmpty()) {
-            throw VerificationException.forNotReceivedAtLeastOnce(name, expectedRequest, wireMockRequestsReceived)
-        } else if (expectedRequest.noOther && wireMockRequestsReceived.size != matchResults.size) {
-            throw VerificationException.forOtherRequests(name, expectedRequest, matchResults, wireMockRequestsReceived)
-        }
-    }
-
-    /**
      * Callback function to execute when the WireMock server has been started.
      * Sets the reference to the server for this instance.
      * @param wireMockServer Reference to the WireMock server which has been started.
@@ -120,6 +101,28 @@ class MockServer(
         assertThatMockServerIsInitialized()
         for (stub in this.stubs) {
             stub.registerAt(name, wireMockServer!!)
+        }
+    }
+
+    /**
+     * Verifies that this Mock Server instance received requests which match the given pattern.
+     * @param times Number of times that the Mock Server should have received the expected request.
+     * If set to `null`, it is verified that the Mock Server received the specified request at least once.
+     * @param expectedRequest Expectation for the request that the Mock Server should have received.
+     * @throws IllegalStateException if the Mock Server is not initialized.
+     * @throws VerificationException if Mock Server did not receive the expected number of requests.
+     */
+    @JvmSynthetic
+    internal fun verify(times: Int?, expectedRequest: ExpectedRequest) {
+        assertThatMockServerIsInitialized()
+        val matchResults = wireMockRequestsReceived.filter { expectedRequest.matches(this, it.request) }
+
+        if (times != null && times != matchResults.size) {
+            throw VerificationException.forTimesNotMatching(name, times, expectedRequest, matchResults, wireMockRequestsReceived)
+        } else if (times == null && matchResults.isEmpty()) {
+            throw VerificationException.forNotReceivedAtLeastOnce(name, expectedRequest, wireMockRequestsReceived)
+        } else if (expectedRequest.noOther && wireMockRequestsReceived.size != matchResults.size) {
+            throw VerificationException.forOtherRequests(name, expectedRequest, matchResults, wireMockRequestsReceived)
         }
     }
 
