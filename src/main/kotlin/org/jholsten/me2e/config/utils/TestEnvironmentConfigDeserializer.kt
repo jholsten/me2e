@@ -20,7 +20,7 @@ import org.jholsten.me2e.utils.logger
 /**
  * Custom deserializer for deserializing test environment configuration.
  * Deserializes services in `docker-compose` file to [Container] instances.
- * Also, it sets the name of the specified mock servers to the corresponding key.
+ * Also, it sets the name of the specified Mock Servers to the corresponding key.
  */
 class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironmentConfig>() {
     companion object {
@@ -218,6 +218,7 @@ class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironmentConfig
      *   - SESSION_SECRET
      * ```
      * Since we need the entry in the format of Option 1, we need to convert entries given in Option-2-Format.
+     * @see <a href="https://docs.docker.com/compose/compose-file/compose-file-v3/#environment">Docker Documentation</a>
      */
     private fun convertListToMap(serviceNode: ObjectNode, key: String) {
         if (serviceNode[key] == null || !serviceNode[key].isArray) {
