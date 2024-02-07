@@ -1,9 +1,10 @@
 @file:JvmName("Assertions")
 
-package org.jholsten.me2e.request.assertions
+package org.jholsten.me2e.assertions
 
+import org.jholsten.me2e.assertions.matchers.*
+import org.jholsten.me2e.request.assertions.AssertableResponse
 import org.jholsten.me2e.request.model.HttpResponse
-import org.jholsten.me2e.request.assertions.matchers.*
 
 /**
  * Returns [AssertableResponse] to assert that the properties of the given [response] are as expected.

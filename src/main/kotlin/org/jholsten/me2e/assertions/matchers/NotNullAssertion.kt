@@ -1,4 +1,4 @@
-package org.jholsten.me2e.request.assertions.matchers
+package org.jholsten.me2e.assertions.matchers
 
 /**
  * Assertion for checking if a value of type [T] is not null.

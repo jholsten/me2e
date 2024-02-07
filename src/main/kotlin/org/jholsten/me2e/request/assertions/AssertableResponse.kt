@@ -2,7 +2,8 @@ package org.jholsten.me2e.request.assertions
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
-import org.jholsten.me2e.request.assertions.matchers.Assertable
+import org.jholsten.me2e.assertions.AssertionFailure
+import org.jholsten.me2e.assertions.matchers.Assertable
 import org.jholsten.me2e.request.model.HttpResponse
 
 /**
@@ -10,10 +11,10 @@ import org.jholsten.me2e.request.model.HttpResponse
  *
  * Example Usage:
  * ```kotlin
+ * import org.jholsten.me2e.assertions.*
  * import org.jholsten.me2e.Me2eTest
  * import org.jholsten.me2e.container.injection.InjectService
  * import org.jholsten.me2e.container.microservice.MicroserviceContainer
- * import org.jholsten.me2e.request.assertions.*
  *
  * class E2ETest : Me2eTest() {
  *     @InjectService
@@ -31,7 +32,7 @@ import org.jholsten.me2e.request.model.HttpResponse
  *     }
  * }
  * ```
- * @see assertThat
+ * @see org.jholsten.me2e.assertions.assertThat
  */
 class AssertableResponse internal constructor(private val response: HttpResponse) {
 

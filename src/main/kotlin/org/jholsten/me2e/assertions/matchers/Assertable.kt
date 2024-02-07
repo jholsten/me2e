@@ -1,6 +1,6 @@
-package org.jholsten.me2e.request.assertions.matchers
+package org.jholsten.me2e.assertions.matchers
 
-import org.jholsten.me2e.request.assertions.AssertionFailure
+import org.jholsten.me2e.assertions.AssertionFailure
 
 /**
  * Base class for assertions. Enables to evaluate an assertion and throw a corresponding [AssertionFailure]

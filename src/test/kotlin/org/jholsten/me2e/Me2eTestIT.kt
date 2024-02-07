@@ -1,5 +1,6 @@
 package org.jholsten.me2e
 
+import org.jholsten.me2e.assertions.assertThat
 import org.jholsten.me2e.config.model.ConfigFormat
 import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.container.injection.InjectService
@@ -7,7 +8,6 @@ import org.jholsten.me2e.container.microservice.MicroserviceContainer
 import org.jholsten.me2e.mock.MockServer
 import org.jholsten.me2e.mock.stubbing.request.StringMatcher.Companion.equalTo
 import org.jholsten.me2e.mock.verification.MockServerVerification.Companion.receivedRequest
-import org.jholsten.me2e.request.assertions.*
 import org.jholsten.me2e.request.model.HttpMethod
 import org.jholsten.me2e.request.model.HttpRequestBody
 import org.jholsten.me2e.request.model.MediaType
@@ -83,12 +83,12 @@ class Me2eTestIT : Me2eTest() {
         val response = backendApi.post(RelativeUrl(relativeUrl), HttpRequestBody(content = "{\"id\": 123}", MediaType.JSON_UTF8))
 
         logger.info(backendApi.getLogs().toString())
-        assertThat(response).statusCode(equalTo(200))
-        assertThat(response).jsonBody("id", org.jholsten.me2e.request.assertions.equalTo("123"))
-        assertThat(response).jsonBody("items[0].name", org.jholsten.me2e.request.assertions.equalTo("A"))
-        assertThat(response).jsonBody("items[0].value", org.jholsten.me2e.request.assertions.equalTo("42"))
-        assertThat(response).jsonBody("items[1].name", org.jholsten.me2e.request.assertions.equalTo("B"))
-        assertThat(response).jsonBody("items[1].value", org.jholsten.me2e.request.assertions.equalTo("1"))
+        assertThat(response).statusCode(org.jholsten.me2e.assertions.equalTo(200))
+        assertThat(response).jsonBody("id", org.jholsten.me2e.assertions.equalTo("123"))
+        assertThat(response).jsonBody("items[0].name", org.jholsten.me2e.assertions.equalTo("A"))
+        assertThat(response).jsonBody("items[0].value", org.jholsten.me2e.assertions.equalTo("42"))
+        assertThat(response).jsonBody("items[1].name", org.jholsten.me2e.assertions.equalTo("B"))
+        assertThat(response).jsonBody("items[1].value", org.jholsten.me2e.assertions.equalTo("1"))
 
         paymentService.verify(
             receivedRequest()

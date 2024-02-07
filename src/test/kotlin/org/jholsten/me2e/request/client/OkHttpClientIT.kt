@@ -4,9 +4,9 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import org.awaitility.Awaitility
 import org.awaitility.Durations
-import org.jholsten.me2e.request.assertions.assertThat
-import org.jholsten.me2e.request.assertions.containsKey
-import org.jholsten.me2e.request.assertions.equalTo
+import org.jholsten.me2e.assertions.assertThat
+import org.jholsten.me2e.assertions.containsKey
+import org.jholsten.me2e.assertions.equalTo
 import org.jholsten.me2e.request.interceptor.RequestInterceptor
 import org.jholsten.me2e.request.model.*
 import org.junit.jupiter.api.AfterAll

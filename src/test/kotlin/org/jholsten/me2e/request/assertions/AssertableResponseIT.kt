@@ -1,5 +1,6 @@
 package org.jholsten.me2e.request.assertions
 
+import org.jholsten.me2e.assertions.*
 import org.jholsten.me2e.request.model.*
 import org.jholsten.util.assertDoesNotThrow
 import kotlin.test.*
