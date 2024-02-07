@@ -2,6 +2,8 @@
 
 package org.jholsten.me2e.utils
 
+import com.fasterxml.jackson.core.util.DefaultIndenter
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
 import org.jholsten.me2e.parsing.utils.DeserializerFactory
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -20,8 +22,18 @@ internal inline fun <reified T> logger(from: T): Logger {
  * @param obj Object to serialize.
  */
 internal inline fun <reified T> toJson(obj: T): String {
-    val writer = DeserializerFactory.getObjectMapper().writerWithDefaultPrettyPrinter()
+    val writer = DeserializerFactory.getObjectMapper().writer(customPrettyPrinter)
     return writer.writeValueAsString(obj)
+}
+
+/**
+ * Custom printer for serializing objects to string.
+ * Adds indentation to entries in arrays.
+ */
+private val customPrettyPrinter: DefaultPrettyPrinter by lazy {
+    val printer = DefaultPrettyPrinter()
+    printer.indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE)
+    printer
 }
 
 /**
