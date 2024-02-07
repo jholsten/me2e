@@ -29,7 +29,19 @@ class Assertions {
         }
 
         /**
-         * Returns assertion for checking whether an actual string value contains the given expected value.
+         * Returns assertion for checking whether the expected value is not equal to an actual value,
+         * i.e. an assertion which does not throw if `actual != expected`.
+         * @param expected Expected value which should not be equal to the actual value.
+         * @param T Datatype of the values to compare.
+         */
+        @JvmStatic
+        fun <T> isNotEqualTo(expected: T): Assertable<T?> {
+            return InEqualityAssertion(expected)
+        }
+
+        /**
+         * Returns assertion for checking whether an actual string value contains the given expected value,
+         * i.e. an assertion which does not throw if `actual.contains(expected)`.
          * @param expected Expected value which should be contained in the actual value.
          */
         @JvmStatic
