@@ -173,7 +173,7 @@ class MongoDBConnection private constructor(
          * Sets reference to the Docker container which serves this database.
          * Is required to run scripts.
          * @param container Reference to the Docker container which serves this database.
-         * @return Builder instance, to use for chaining.
+         * @return This builder instance, to use for chaining.
          */
         fun withContainer(container: Container?) = apply {
             this.container = container
@@ -183,7 +183,7 @@ class MongoDBConnection private constructor(
          * Sets settings to use for the connection to MongoDB.
          * The connection string is set to [url] upon initialization.
          * @param settings Settings to use for the connection to MongoDB.
-         * @return Builder instance, to use for chaining.
+         * @return This builder instance, to use for chaining.
          */
         fun withSettings(settings: MongoClientSettings) = apply {
             this.settings = settings

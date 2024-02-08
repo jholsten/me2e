@@ -148,7 +148,7 @@ class SQLDatabaseConnection private constructor(
         /**
          * Sets the database management system which contains the database.
          * @param system Database management system which contains the database.
-         * @return Builder instance, to use for chaining.
+         * @return This builder instance, to use for chaining.
          */
         fun withSystem(system: DatabaseManagementSystem) = apply {
             this.system = system
@@ -159,7 +159,7 @@ class SQLDatabaseConnection private constructor(
          * In case of [DatabaseManagementSystem.MY_SQL] and [DatabaseManagementSystem.MARIA_DB], this should be the name of the database.
          * For [DatabaseManagementSystem.POSTGRESQL], the schema is different to the database and is set to `public` by default.
          * @param schema Name of the schema to which this database belongs.
-         * @return Builder instance, to use for chaining.
+         * @return This builder instance, to use for chaining.
          */
         fun withSchema(schema: String?) = apply {
             this.schema = schema

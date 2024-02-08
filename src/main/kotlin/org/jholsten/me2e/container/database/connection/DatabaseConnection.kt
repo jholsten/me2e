@@ -139,7 +139,7 @@ abstract class DatabaseConnection protected constructor(
          * As this is a Docker container, the name of the host on which
          * the Docker engine is running should be entered here.
          * @param host Name of the host on which the container is running.
-         * @return Builder instance, to use for chaining.
+         * @return This builder instance, to use for chaining.
          */
         fun withHost(host: String): SELF {
             this.host = host
@@ -149,7 +149,7 @@ abstract class DatabaseConnection protected constructor(
         /**
          * Sets the port on which the database container is accessible.
          * @param port Port number on which the container is accessible.
-         * @return Builder instance, to use for chaining.
+         * @return This builder instance, to use for chaining.
          */
         fun withPort(port: Int): SELF {
             this.port = port
@@ -159,7 +159,7 @@ abstract class DatabaseConnection protected constructor(
         /**
          * Sets the name of the database to which the connection should be established.
          * @param database Name of the database.
-         * @return Builder instance, to use for chaining.
+         * @return This builder instance, to use for chaining.
          */
         fun withDatabase(database: String): SELF {
             this.database = database
@@ -170,7 +170,7 @@ abstract class DatabaseConnection protected constructor(
          * Sets the username to use for logging in.
          * @param username Username to use for logging in to the database.
          * @see withPassword
-         * @return Builder instance, to use for chaining.
+         * @return This builder instance, to use for chaining.
          */
         fun withUsername(username: String?): SELF {
             this.username = username
@@ -181,7 +181,7 @@ abstract class DatabaseConnection protected constructor(
          * Sets the password to use for logging in.
          * @param password Password to use for logging in to the database.
          * @see withUsername
-         * @return Builder instance, to use for chaining.
+         * @return This builder instance, to use for chaining.
          */
         fun withPassword(password: String?): SELF {
             this.password = password

@@ -7,6 +7,9 @@ import okhttp3.internal.toImmutableMap
  * Representation of HTTP headers of an HTTP request or an HTTP response.
  */
 class HttpHeaders internal constructor(
+    /**
+     * Content of this instance as map of header name and the corresponding values.
+     */
     private val values: Map<String, List<String>>
 ) : Iterable<Pair<String, List<String>>> {
 
@@ -72,7 +75,7 @@ class HttpHeaders internal constructor(
          * Adds an HTTP header with the given [key] and the given [value].
          * @param key Key of the header to add.
          * @param value Value of the header to add.
-         * @return Builder instance, to use for chaining.
+         * @return This builder instance, to use for chaining.
          */
         fun add(key: String, value: String) = apply {
             add(key, listOf(value))
@@ -82,7 +85,7 @@ class HttpHeaders internal constructor(
          * Adds HTTP headers for the given [values] with the given [key].
          * @param key Key of the headers to add.
          * @param values Values of the headers to add to the existing values.
-         * @return Builder instance, to use for chaining.
+         * @return This builder instance, to use for chaining.
          * @throws IllegalArgumentException if [key] is blank or [values] are empty.
          */
         fun add(key: String, values: List<String>) = apply {
@@ -100,7 +103,7 @@ class HttpHeaders internal constructor(
          * Does not modify the builder instance if combination of key and value does not exist.
          * @param key Key of the HTTP header to remove.
          * @param value Value of the HTTP header to remove.
-         * @return Builder instance, to use for chaining.
+         * @return This builder instance, to use for chaining.
          */
         fun remove(key: String, value: String) = apply {
             if (this.values.containsKey(key)) {
@@ -115,7 +118,7 @@ class HttpHeaders internal constructor(
          * Removes all HTTP headers for the given [key].
          * Does not modify the builder instance if key does not exist.
          * @param key Key of the HTTP headers to remove.
-         * @return Builder instance, to use for chaining.
+         * @return This builder instance, to use for chaining.
          */
         fun remove(key: String) = apply {
             this.values.remove(key)
@@ -126,7 +129,7 @@ class HttpHeaders internal constructor(
          * If the key is not found, it is added. If the key is found, the existing values are replaced.
          * @param key Key of the HTTP header to set.
          * @param value Value of the HTTP header to set.
-         * @return Builder instance, to use for chaining.
+         * @return This builder instance, to use for chaining.
          */
         operator fun set(key: String, value: String) = apply {
             this.values[key] = mutableListOf(value)

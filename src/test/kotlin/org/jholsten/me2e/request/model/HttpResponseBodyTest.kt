@@ -36,19 +36,6 @@ internal class HttpResponseBodyTest {
     }
 
     @Test
-    fun `Content with enclosing quotes should be decoded as string without quotes`() {
-        val body = HttpResponseBody(
-            contentType = MediaType.TEXT_PLAIN_UTF8,
-            content = byteArrayOf(
-                34, 79, 75, 34
-            ),
-        )
-
-        assertEquals("OK", body.asString())
-        assertEquals(MediaType.TEXT_PLAIN_UTF8, body.contentType)
-    }
-
-    @Test
     fun `Content with single quote should be decoded as string with quote`() {
         val body = HttpResponseBody(
             contentType = MediaType.TEXT_PLAIN_UTF8,

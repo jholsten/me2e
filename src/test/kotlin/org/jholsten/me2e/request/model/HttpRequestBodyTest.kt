@@ -1,18 +1,22 @@
 package org.jholsten.me2e.request.model
 
 import org.jholsten.util.RecursiveComparison
+import org.junit.jupiter.api.extension.ExtensionContext
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.ArgumentsProvider
+import org.junit.jupiter.params.provider.ArgumentsSource
+import java.io.File
 import kotlin.test.*
 import java.nio.file.Files
+import java.util.stream.Stream
 
 internal class HttpRequestBodyTest {
 
-    @Test
-    fun `String content should be set in request body`() {
-        val body = HttpRequestBody(
-            content = "abc",
-            contentType = MediaType.TEXT_PLAIN_UTF8,
-        )
-
+    @ParameterizedTest(name = "[{index}] with {0}")
+    @ArgumentsSource(StringBodyArgumentProvider::class)
+    @Suppress("UNUSED_PARAMETER")
+    fun `String content should be set in request body`(description: String, body: HttpRequestBody) {
         assertEquals("abc", body.asString())
         RecursiveComparison.assertEquals(byteArrayOf(97, 98, 99), body.asBinary())
         assertEquals("YWJj", body.asBase64())
@@ -38,31 +42,96 @@ internal class HttpRequestBodyTest {
         assertEquals(MediaType.TEXT_PLAIN_UTF8, body.contentType)
     }
 
-    @Test
-    fun `File content should be set in request body`() {
-        val file = Files.createTempFile("test", ".tmp")
-        Files.write(file, "abc".toByteArray())
-        val body = HttpRequestBody(
-            content = file.toFile(),
-            contentType = MediaType.TEXT_PLAIN_UTF8,
-        )
-
+    @ParameterizedTest(name = "[{index}] with {0}")
+    @ArgumentsSource(FileBodyArgumentProvider::class)
+    @Suppress("UNUSED_PARAMETER")
+    fun `File content should be set in request body`(description: String, body: HttpRequestBody) {
         assertEquals("abc", body.asString())
         RecursiveComparison.assertEquals(byteArrayOf(97, 98, 99), body.asBinary())
         assertEquals("YWJj", body.asBase64())
         assertEquals(MediaType.TEXT_PLAIN_UTF8, body.contentType)
     }
 
-    @Test
-    fun `Binary content should be set in request body`() {
-        val body = HttpRequestBody(
-            content = byteArrayOf(97, 98, 99),
-            contentType = MediaType.TEXT_PLAIN_UTF8,
-        )
-
+    @ParameterizedTest(name = "[{index}] with {0}")
+    @ArgumentsSource(BinaryBodyArgumentProvider::class)
+    @Suppress("UNUSED_PARAMETER")
+    fun `Binary content should be set in request body`(description: String, body: HttpRequestBody) {
         assertEquals("abc", body.asString())
         RecursiveComparison.assertEquals(byteArrayOf(97, 98, 99), body.asBinary())
         assertEquals("YWJj", body.asBase64())
         assertEquals(MediaType.TEXT_PLAIN_UTF8, body.contentType)
+    }
+
+    class StringBodyArgumentProvider : ArgumentsProvider {
+        override fun provideArguments(context: ExtensionContext?): Stream<out Arguments> {
+            return Stream.of(
+                Arguments.of(
+                    "Constructor",
+                    HttpRequestBody(
+                        content = "abc",
+                        contentType = MediaType.TEXT_PLAIN_UTF8,
+                        charset = Charsets.UTF_8,
+                    ),
+                ),
+                Arguments.of(
+                    "Builder",
+                    HttpRequestBody.Builder()
+                        .withContent("abc")
+                        .withContentType(MediaType.TEXT_PLAIN_UTF8)
+                        .withCharset(Charsets.UTF_8)
+                        .build()
+                ),
+            )
+        }
+    }
+
+    class FileBodyArgumentProvider : ArgumentsProvider {
+        private val file: File
+
+        init {
+            val path = Files.createTempFile("test", ".tmp")
+            Files.write(path, "abc".toByteArray())
+            file = path.toFile()
+        }
+
+        override fun provideArguments(context: ExtensionContext?): Stream<out Arguments> {
+            return Stream.of(
+                Arguments.of(
+                    "Constructor",
+                    HttpRequestBody(
+                        content = file,
+                        contentType = MediaType.TEXT_PLAIN_UTF8,
+                    ),
+                ),
+                Arguments.of(
+                    "Builder",
+                    HttpRequestBody.Builder()
+                        .withContent(file)
+                        .withContentType(MediaType.TEXT_PLAIN_UTF8)
+                        .build()
+                ),
+            )
+        }
+    }
+
+    class BinaryBodyArgumentProvider : ArgumentsProvider {
+        override fun provideArguments(context: ExtensionContext?): Stream<out Arguments> {
+            return Stream.of(
+                Arguments.of(
+                    "Constructor",
+                    HttpRequestBody(
+                        content = byteArrayOf(97, 98, 99),
+                        contentType = MediaType.TEXT_PLAIN_UTF8,
+                    ),
+                ),
+                Arguments.of(
+                    "Builder",
+                    HttpRequestBody.Builder()
+                        .withContent(byteArrayOf(97, 98, 99))
+                        .withContentType(MediaType.TEXT_PLAIN_UTF8)
+                        .build()
+                ),
+            )
+        }
     }
 }

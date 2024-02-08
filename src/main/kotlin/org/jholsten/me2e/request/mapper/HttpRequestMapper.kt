@@ -79,7 +79,7 @@ internal abstract class HttpRequestMapper {
         val buffer = Buffer()
         body.writeTo(buffer)
         return HttpRequestBody(
-            buffer = buffer,
+            content = buffer.readByteArray(),
             contentType = body.contentType()?.let { return@let MediaTypeMapper.INSTANCE.toInternalDto(it) },
         )
     }

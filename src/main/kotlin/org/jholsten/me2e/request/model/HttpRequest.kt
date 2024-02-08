@@ -48,7 +48,7 @@ class HttpRequest internal constructor(
         /**
          * Sets the given absolute URL for the request.
          * @param url URL of the request to set.
-         * @return Builder instance, to use for chaining.
+         * @return This builder instance, to use for chaining.
          */
         fun withUrl(url: Url) = apply {
             this.url = url
@@ -57,7 +57,7 @@ class HttpRequest internal constructor(
         /**
          * Sets the given HTTP request method for the request.
          * @param method HTTP request method to set.
-         * @return Builder instance, to use for chaining.
+         * @return This builder instance, to use for chaining.
          */
         fun withMethod(method: HttpMethod) = apply {
             this.method = method
@@ -66,7 +66,7 @@ class HttpRequest internal constructor(
         /**
          * Sets the given HTTP headers for the request.
          * @param headers HTTP headers to set.
-         * @return Builder instance, to use for chaining.
+         * @return This builder instance, to use for chaining.
          */
         fun withHeaders(headers: HttpHeaders) = apply {
             this.headerBuilder = headers.newBuilder()
@@ -76,7 +76,7 @@ class HttpRequest internal constructor(
          * Adds an HTTP header with the given [key] and the given [value].
          * @param key Key of the header to add.
          * @param value Value of the header to add.
-         * @return Builder instance, to use for chaining.
+         * @return This builder instance, to use for chaining.
          */
         fun addHeader(key: String, value: String) = apply {
             this.headerBuilder.add(key, value)
@@ -85,7 +85,7 @@ class HttpRequest internal constructor(
         /**
          * Sets the given request body for the request.
          * @param body Request body to set.
-         * @return Builder instance, to use for chaining.
+         * @return This builder instance, to use for chaining.
          */
         fun withBody(body: HttpRequestBody?) = apply {
             this.body = body
