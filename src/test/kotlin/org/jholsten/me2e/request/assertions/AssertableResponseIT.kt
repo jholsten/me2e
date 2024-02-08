@@ -1,5 +1,6 @@
 package org.jholsten.me2e.request.assertions
 
+import com.fasterxml.jackson.core.type.TypeReference
 import org.jholsten.me2e.assertions.*
 import org.jholsten.me2e.request.model.*
 import org.jholsten.util.assertDoesNotThrow
@@ -34,6 +35,18 @@ internal class AssertableResponseIT {
         ),
     )
 
+    private val expectedObj = BodyClass(
+        name = "John",
+        nested = NestedBodyClass(
+            key1 = "value1",
+            key2 = "value2",
+        ),
+        details = listOf(
+            DetailsBodyClass(detail = 1),
+            DetailsBodyClass(detail = 2),
+        )
+    )
+
     @Test
     fun `Asserting all properties should not throw if assertions are satisfied`() {
         assertDoesNotThrow {
@@ -57,6 +70,9 @@ internal class AssertableResponseIT {
                 .jsonBody(containsNode("nested.key2").withValue(equalTo("value2")))
                 .jsonBody(containsNode("details[0].detail").withValue(equalTo("1")))
                 .jsonBody(containsNode("details[1].detail").withValue(equalTo("2")))
+                .objectBody(BodyClass::class.java, equalTo(expectedObj))
+                .objectBody(object : TypeReference<BodyClass>() {}, equalTo(expectedObj))
+                .objectBody<BodyClass>(equalTo(expectedObj))
         }
     }
 
@@ -373,6 +389,9 @@ internal class AssertableResponseIT {
             .expectBinaryBody(equalTo(response.body?.asBinary()))
             .expectJsonBody(containsNode("name").withValue(equalTo("John")))
             .expectJsonBody(containsNode("details[0].detail").withValue(equalTo("1")))
+            .expectObjectBody(BodyClass::class.java, equalTo(expectedObj))
+            .expectObjectBody(object : TypeReference<BodyClass>() {}, equalTo(expectedObj))
+            .expectObjectBody<BodyClass>(equalTo(expectedObj))
 
         assertDoesNotThrow { assertThat(response).conformsTo(specification) }
     }
@@ -398,6 +417,21 @@ internal class AssertableResponseIT {
         val e = assertFails { assertThat(response).conformsTo(specification) }
         assertEquals(14, e.failures.size)
     }
+
+    data class BodyClass(
+        val name: String,
+        val nested: NestedBodyClass,
+        val details: List<DetailsBodyClass>
+    )
+
+    data class NestedBodyClass(
+        val key1: String,
+        val key2: String,
+    )
+
+    data class DetailsBodyClass(
+        val detail: Int,
+    )
 }
 
 private fun assertFails(assertion: () -> Unit): AssertionFailure {

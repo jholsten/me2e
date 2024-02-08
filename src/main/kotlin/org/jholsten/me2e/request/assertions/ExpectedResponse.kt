@@ -1,5 +1,6 @@
 package org.jholsten.me2e.request.assertions
 
+import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonNode
 import org.jholsten.me2e.assertions.AssertionFailure
 import org.jholsten.me2e.assertions.matchers.Assertable
@@ -20,6 +21,7 @@ class ExpectedResponse {
     private val headers: MutableList<Assertable<Map<String, List<*>>?>> = mutableListOf()
     private val contentType: MutableList<Assertable<String?>> = mutableListOf()
     private val body: MutableList<Assertable<String?>> = mutableListOf()
+    private val objectBody: MutableList<ObjectBodyAssertion<*>> = mutableListOf()
     private val binaryBody: MutableList<Assertable<ByteArray?>> = mutableListOf()
     private val base64Body: MutableList<Assertable<String?>> = mutableListOf()
     private val jsonBody: MutableList<Assertable<JsonNode?>> = mutableListOf()
@@ -121,6 +123,61 @@ class ExpectedResponse {
     }
 
     /**
+     * Expects that the body of the response, deserialized to [type], satisfies the given assertion.
+     * For Kotlin, it is recommended to use the inline function [expectObjectBody] instead.
+     * You may call this function multiple times to place multiple requirements on the body.
+     *
+     * Example:
+     * ```java
+     * ExpectedResponse().expectObjectBody(MyClass.class, equalTo(obj));
+     * ```
+     * @param expected Expectation for the value of the [HttpResponse.body].
+     * @param type Type to which the response body content should be deserialized.
+     * @return This instance, to use for chaining.
+     * @see AssertableResponse.objectBody
+     */
+    fun <T> expectObjectBody(type: Class<T>, expected: Assertable<T?>) = apply {
+        this.objectBody.add(ObjectBodyAssertion(type = type, expected = expected))
+    }
+
+    /**
+     * Expects that the body of the response, deserialized to [type], satisfies the given assertion.
+     * In Java, this is useful for deserializing lists of objects, for example.
+     * For Kotlin, it is recommended to use the inline function [expectObjectBody] instead.
+     * You may call this function multiple times to place multiple requirements on the body.
+     *
+     * Example:
+     * ```java
+     * ExpectedResponse().expectObjectBody(new TypeReference<List<MyClass>>(){}, equalTo(list));
+     * ```
+     * @param expected Expectation for the value of the [HttpResponse.body].
+     * @param type Type to which the response body content should be deserialized.
+     * @return This instance, to use for chaining.
+     * @see AssertableResponse.objectBody
+     */
+    fun <T> expectObjectBody(type: TypeReference<T>, expected: Assertable<T?>) = apply {
+        this.objectBody.add(ObjectBodyAssertion(typeReference = type, expected = expected))
+    }
+
+    /**
+     * Expects that the body of the response, deserialized to type [T], satisfies the given assertion.
+     * Only available for Kotlin. You may call this function multiple times to place multiple requirements
+     * on the body.
+     *
+     * Example:
+     * ```java
+     * ExpectedResponse().expectObjectBody<MyClass>(equalTo(list));
+     * ```
+     * @param expected Expectation for the value of the [HttpResponse.body].
+     * @param T Type to which the response body content should be deserialized.
+     * @return This instance, to use for chaining.
+     * @see AssertableResponse.objectBody
+     */
+    inline fun <reified T> expectObjectBody(expected: Assertable<T?>) = apply {
+        expectObjectBody(object : TypeReference<T>() {}, expected)
+    }
+
+    /**
      * Expects that the body of the response, encoded as byte array, satisfies the given assertion.
      * You may call this function multiple times to place multiple requirements on the body.
      *
@@ -185,6 +242,7 @@ class ExpectedResponse {
             headers.map { evaluate { response.headers(it) } },
             contentType.map { evaluate { response.contentType(it) } },
             body.map { evaluate { response.body(it) } },
+            objectBody.map { it.evaluateBody(response) },
             binaryBody.map { evaluate { response.binaryBody(it) } },
             base64Body.map { evaluate { response.base64Body(it) } },
             jsonBody.map { evaluate { response.jsonBody(it) } },
@@ -211,6 +269,27 @@ class ExpectedResponse {
             null
         } catch (e: AssertionFailure) {
             e.message
+        }
+    }
+
+    /**
+     * Wrapper for assertions concerning the object body deserialized to a given type.
+     */
+    private inner class ObjectBodyAssertion<T>(
+        val type: Class<T>? = null,
+        val typeReference: TypeReference<T>? = null,
+        val expected: Assertable<T?>,
+    ) {
+        /**
+         * Evaluates the given assertion. Returns `null` if the assertion was successful.
+         * @see evaluate
+         */
+        fun evaluateBody(response: AssertableResponse): String? {
+            return if (type != null) {
+                evaluate { response.objectBody(type, expected) }
+            } else {
+                evaluate { response.objectBody(typeReference!!, expected) }
+            }
         }
     }
 }

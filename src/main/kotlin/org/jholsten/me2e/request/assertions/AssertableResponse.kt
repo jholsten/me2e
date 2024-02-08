@@ -1,9 +1,11 @@
 package org.jholsten.me2e.request.assertions
 
+import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonNode
 import org.jholsten.me2e.assertions.AssertionFailure
 import org.jholsten.me2e.assertions.matchers.Assertable
 import org.jholsten.me2e.assertions.matchers.JsonBodyAssertion
+import org.jholsten.me2e.parsing.exception.ParseException
 import org.jholsten.me2e.request.model.HttpResponse
 
 /**
@@ -130,6 +132,71 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      */
     fun body(expected: Assertable<String?>) = apply {
         expected.evaluate("body", this.response.body?.asString())
+    }
+
+    /**
+     * Asserts that the body of the [response], deserialized to [type], satisfies the given assertion.
+     * For Kotlin, it is recommended to use the inline function [objectBody] instead.
+     *
+     * Example Usage:
+     * ```java
+     * assertThat(response).objectBody(MyClass.class, equalTo(obj));
+     * ```
+     * @param expected Expectation for the deserialized value of the [HttpResponse.body].
+     * @param type Type to which the response body content should be deserialized.
+     * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
+     * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ExpectedResponse].
+     * @throws AssertionFailure if assertion was not successful.
+     */
+    fun <T> objectBody(type: Class<T>, expected: Assertable<T?>) = apply {
+        val obj = try {
+            this.response.body?.asObject(type)
+        } catch (e: ParseException) {
+            throw AssertionFailure("Unable to deserialize body to instance of type $type: ${e.message}")
+        }
+        expected.evaluate("body", obj)
+    }
+
+    /**
+     * Asserts that the body of the [response], deserialized to [type], satisfies the given assertion.
+     * In Java, this is useful for deserializing lists of objects, for example.
+     * For Kotlin, it is recommended to use the inline function [objectBody] instead.
+     *
+     * Example Usage:
+     * ```java
+     * assertThat(response).objectBody(new TypeReference<List<MyClass>>(){}, equalTo(list));
+     * ```
+     * @param expected Expectation for the deserialized value of the [HttpResponse.body].
+     * @param type Type to which the response body content should be deserialized.
+     * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
+     * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ExpectedResponse].
+     * @throws AssertionFailure if assertion was not successful.
+     */
+    fun <T> objectBody(type: TypeReference<T>, expected: Assertable<T?>) = apply {
+        val obj = try {
+            this.response.body?.asObject(type)
+        } catch (e: ParseException) {
+            throw AssertionFailure("Unable to deserialize body to instance of type $type: ${e.message}")
+        }
+        expected.evaluate("body", obj)
+    }
+
+    /**
+     * Asserts that the body of the [response], deserialized to type [T], satisfies the given assertion.
+     * Only available for Kotlin.
+     *
+     * Example Usage:
+     * ```kotlin
+     * assertThat(response).objectBody<MyClass>(equalTo(list))
+     * ```
+     * @param expected Expectation for the deserialized value of the [HttpResponse.body].
+     * @param T Type to which the response body content should be deserialized.
+     * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
+     * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ExpectedResponse].
+     * @throws AssertionFailure if assertion was not successful.
+     */
+    inline fun <reified T> objectBody(expected: Assertable<T?>) = apply {
+        objectBody(object : TypeReference<T>() {}, expected)
     }
 
     /**
