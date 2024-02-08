@@ -10,7 +10,7 @@ internal class InjectServiceAnnotationProcessorTest {
     private val invalidFieldTypeMessage =
         "@InjectService annotation can only be applied to fields of type org.jholsten.me2e.container.Container and org.jholsten.me2e.mock.MockServer"
     private val invalidEnclosingClassMessage =
-        "@InjectService annotation can only be applied to fields of classes which extend class org.jholsten.me2e.Me2eTest"
+        "@InjectService annotation can only be applied to fields of classes which extend org.jholsten.me2e.Me2eTest"
 
     @Test
     fun `Compiling test class with valid annotations should succeed`() {
@@ -43,6 +43,46 @@ internal class InjectServiceAnnotationProcessorTest {
                         private MockServer mockServer;
                         
                         private Object obj;
+                    }
+                    """.trimIndent()
+                )
+            )
+
+        assertThat(compilation).succeeded()
+    }
+
+    @Test
+    fun `Compiling test class with valid annotations with multiple levels of inheritance should succeed`() {
+        val compilation = javac()
+            .withProcessors(InjectServiceAnnotationProcessor())
+            .compile(
+                JavaFileObjects.forSourceString(
+                    "com.example.BaseE2ETest",
+                    """
+                    package com.example;
+                        
+                    import org.jholsten.me2e.Me2eTest;
+                    import org.jholsten.me2e.container.Container;
+                    import org.jholsten.me2e.container.injection.InjectService;
+                    
+                    class BaseE2ETest extends Me2eTest {
+                        @InjectService
+                        private Container container;
+                    }
+                    """.trimIndent()
+                ),
+                JavaFileObjects.forSourceString(
+                    "com.example.E2ETest",
+                    """
+                    package com.example;
+                        
+                    import org.jholsten.me2e.Me2eTest;
+                    import org.jholsten.me2e.container.Container;
+                    import org.jholsten.me2e.container.injection.InjectService;
+                    
+                    class E2ETest extends BaseE2ETest {
+                        @InjectService
+                        private Container container;
                     }
                     """.trimIndent()
                 )

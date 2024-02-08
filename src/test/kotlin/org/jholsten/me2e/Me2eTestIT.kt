@@ -15,6 +15,7 @@ import org.jholsten.me2e.request.model.MediaType
 import org.jholsten.me2e.request.model.RelativeUrl
 import org.jholsten.me2e.utils.logger
 import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import kotlin.test.*
@@ -98,5 +99,14 @@ class Me2eTestIT : Me2eTest() {
                 .withBody(equalTo("{\"id\": 123}"))
                 .andNoOther()
         )
+    }
+
+    @Nested
+    inner class NestedMe2eTest {
+        @Test
+        fun `Accessing injected services in nested class should succeed`() {
+            assertNotNull(backendApi)
+            assertSame(containerManager.containers["backend-api"], backendApi)
+        }
     }
 }

@@ -4,15 +4,13 @@ import com.google.auto.service.AutoService
 import org.jholsten.me2e.Me2eTest
 import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.mock.MockServer
-import javax.annotation.processing.AbstractProcessor
-import javax.annotation.processing.Processor
-import javax.annotation.processing.RoundEnvironment
-import javax.annotation.processing.SupportedAnnotationTypes
-import javax.annotation.processing.SupportedSourceVersion
+import javax.annotation.processing.*
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.Element
 import javax.lang.model.element.TypeElement
+import javax.lang.model.type.TypeMirror
 import javax.tools.Diagnostic
+import kotlin.reflect.KClass
 
 /**
  * Annotation processor for fields annotated with [InjectService] which ensures that all prerequisites are fulfilled.
@@ -46,15 +44,11 @@ class InjectServiceAnnotationProcessor : AbstractProcessor() {
      * @param element Field annotated with [InjectService].
      */
     private fun assertThatFieldTypeIsValid(element: Element) {
-        val elementType = try {
-            Class.forName(element.asType().toString())
-        } catch (e: ClassNotFoundException) {
-            null
-        }
-        if (elementType == null || !(elementType.isOfType(Container::class.java) || elementType.isOfType(MockServer::class.java))) {
+        val elementType = element.asType()
+        if (elementType == null || !(elementType.isOfType(Container::class) || elementType.isOfType(MockServer::class))) {
             processingEnv.messager.printMessage(
                 Diagnostic.Kind.ERROR,
-                "@InjectService annotation can only be applied to fields of type ${Container::class.java.name} and ${MockServer::class.java.name}",
+                "@InjectService annotation can only be applied to fields of type ${Container::class.qualifiedName} and ${MockServer::class.qualifiedName}",
                 element
             )
         }
@@ -67,21 +61,21 @@ class InjectServiceAnnotationProcessor : AbstractProcessor() {
      */
     private fun assertThatEnclosingClassIsValid(element: Element) {
         val enclosingClass = element.enclosingElement.asType()
-        val superClasses = processingEnv.typeUtils.directSupertypes(enclosingClass).map { it.toString() }
-        if (!superClasses.contains(Me2eTest::class.java.name)) {
+        if (!enclosingClass.isOfType(Me2eTest::class)) {
             processingEnv.messager.printMessage(
                 Diagnostic.Kind.ERROR,
-                "@InjectService annotation can only be applied to fields of classes which extend ${Me2eTest::class.java}",
+                "@InjectService annotation can only be applied to fields of classes which extend ${Me2eTest::class.qualifiedName}",
                 element
             )
         }
     }
 
     /**
-     * Returns whether this class is of type [clazz], i.e. if they are equal or if this class is a
-     * subtype of [clazz].
+     * Returns whether this type mirror is of type [clazz], i.e. if they are equal of it this type
+     * is a direct or indirect subtype of [clazz].
      */
-    private fun Class<*>.isOfType(clazz: Class<*>): Boolean {
-        return clazz.isAssignableFrom(this)
+    private fun TypeMirror.isOfType(clazz: KClass<*>): Boolean {
+        val type = processingEnv.elementUtils.getTypeElement(clazz.java.name).asType()
+        return processingEnv.typeUtils.isAssignable(this, type)
     }
 }
