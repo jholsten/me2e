@@ -32,7 +32,7 @@ class ExpectedResponse {
      * ```kotlin
      * ExpectedResponse().expectStatusCode(equalTo(200))
      * ```
-     * @param expected Expectation for the value of the [HttpResponse.code].
+     * @param expected Expectation for the value of the [HttpResponse.statusCode].
      * @return This instance, to use for chaining.
      * @see AssertableResponse.statusCode
      */

@@ -41,7 +41,7 @@ internal class AssertableResponseTest {
         request = request,
         protocol = "http/1.1",
         message = "Some Message",
-        code = 200,
+        statusCode = 200,
         headers = headers,
         body = responseBody,
     )

@@ -43,13 +43,13 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      * ```kotlin
      * assertThat(response).statusCode(equalTo(200))
      * ```
-     * @param expected Expectation for the value of the [HttpResponse.code].
+     * @param expected Expectation for the value of the [HttpResponse.statusCode].
      * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this
      * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ExpectedResponse].
      * @throws AssertionFailure if assertion was not successful.
      */
     fun statusCode(expected: Assertable<Int?>) = apply {
-        expected.evaluate("status code", this.response.code)
+        expected.evaluate("status code", this.response.statusCode)
     }
 
     /**

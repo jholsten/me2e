@@ -25,12 +25,13 @@ internal abstract class HttpResponseMapper {
     @Mapping(target = "request", source = "okHttpResponse", qualifiedByName = ["mapRequest"])
     @Mapping(target = "protocol", expression = "java(okHttpResponse.protocol().toString())")
     @Mapping(target = "message", expression = "java(okHttpResponse.message().toString())")
-    @Mapping(target = "code", expression = "java(okHttpResponse.code())")
+    @Mapping(target = "statusCode", expression = "java(okHttpResponse.code())")
     @Mapping(target = "headers", source = "okHttpResponse", qualifiedByName = ["mapHeaders"])
     @Mapping(target = "body", source = "okHttpResponse", qualifiedByName = ["mapResponseBody"])
     internal abstract fun toInternalDto(okHttpResponse: Response): HttpResponse
 
     @Mapping(target = "protocol", expression = "java(Protocol.get(response.getProtocol()))")
+    @Mapping(target = "code", source = "statusCode")
     @Mapping(target = "headers", source = "response.headers", qualifiedByName = ["mapHeadersToOkHttp"])
     @Mapping(target = "body", source = "body", qualifiedByName = ["mapResponseBodyToOkHttp"])
     @Mapping(target = "handshake", ignore = true)

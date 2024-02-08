@@ -36,7 +36,7 @@ internal class HttpResponseMapperIT {
             ),
             protocol = "http/1.1",
             message = "Message",
-            code = 200,
+            statusCode = 200,
             headers = HttpHeaders(mapOf("Authorization" to listOf("Bearer 123"))),
             body = null,
         )
@@ -72,7 +72,7 @@ internal class HttpResponseMapperIT {
             ),
             protocol = "http/1.1",
             message = "Message",
-            code = 200,
+            statusCode = 200,
             headers = HttpHeaders(mapOf("Authorization" to listOf("Bearer 123"))),
             body = HttpResponseBody(
                 contentType = MediaType("application/json"),
@@ -108,7 +108,7 @@ internal class HttpResponseMapperIT {
             ),
             protocol = "http/1.1",
             message = "Message",
-            code = 200,
+            statusCode = 200,
             body = HttpResponseBody(
                 contentType = MediaType("text/plain"),
                 content = byteArrayOf(
@@ -134,7 +134,7 @@ internal class HttpResponseMapperIT {
                 ),
                 protocol = "http/1.1",
                 message = "Message",
-                code = 200,
+                statusCode = 200,
                 headers = HttpHeaders(mapOf("Authorization" to listOf("Bearer 123"))),
                 body = null,
             )
@@ -168,7 +168,7 @@ internal class HttpResponseMapperIT {
                 ),
                 protocol = "http/1.1",
                 message = "Message",
-                code = 200,
+                statusCode = 200,
                 headers = HttpHeaders(mapOf("Authorization" to listOf("Bearer 123"))),
                 body = HttpResponseBody(
                     contentType = MediaType("application/json"),
@@ -205,7 +205,7 @@ internal class HttpResponseMapperIT {
                 ),
                 protocol = "http/1.1",
                 message = "Message",
-                code = 200,
+                statusCode = 200,
                 body = HttpResponseBody(
                     contentType = MediaType("text/plain"),
                     content = byteArrayOf(

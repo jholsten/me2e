@@ -154,7 +154,7 @@ internal class OkHttpRequestInterceptorTest {
             ),
             protocol = "http/1.1",
             message = "Message",
-            code = 200,
+            statusCode = 200,
             body = null,
         )
     }

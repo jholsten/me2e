@@ -147,7 +147,7 @@ class OkHttpClientIT {
     }
 
     private fun assertResponseAsExpected(response: HttpResponse) {
-        assertEquals(200, response.code)
+        assertEquals(200, response.statusCode)
         assertNotNull(response.body)
         assertEquals("Some Response", response.body!!.asString())
         assertTrue("Content-Type" in response.headers)

@@ -16,7 +16,7 @@ internal class AssertableResponseIT {
         ),
         protocol = "http/1.1",
         message = "Some Message",
-        code = 200,
+        statusCode = 200,
         headers = HttpHeaders(
             mapOf(
                 "Key1" to listOf("Value1.1", "Value1.2"),
@@ -62,7 +62,7 @@ internal class AssertableResponseIT {
 
     @Test
     fun `Asserting status code should not throw if assertion is satisfied`() {
-        assertDoesNotThrow { assertThat(response).statusCode(equalTo(response.code)) }
+        assertDoesNotThrow { assertThat(response).statusCode(equalTo(response.statusCode)) }
         assertDoesNotThrow { assertThat(response).statusCode(equalTo(200)) }
         assertDoesNotThrow { assertThat(response).statusCode(lessThan(300)) }
         assertDoesNotThrow { assertThat(response).statusCode(greaterThan(100)) }
@@ -70,7 +70,7 @@ internal class AssertableResponseIT {
         assertDoesNotThrow { assertThat(response).statusCode(isNotNull()) }
         assertDoesNotThrow {
             assertThat(response)
-                .statusCode(equalTo(response.code))
+                .statusCode(equalTo(response.statusCode))
                 .statusCode(equalTo(200))
                 .statusCode(lessThan(300))
                 .statusCode(greaterThan(100))

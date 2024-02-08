@@ -6,8 +6,8 @@ package org.jholsten.me2e.request.model
 class HttpResponse internal constructor(
     /**
      * The request that initiated this HTTP response.
-     * This may be different to the original request executed by the application
-     * (e.g. in case the request was redirected).
+     * This may be different to the original request executed by the application (e.g. in case the request was
+     * redirected or modified by a request interceptor).
      */
     val request: HttpRequest,
 
@@ -24,7 +24,7 @@ class HttpResponse internal constructor(
     /**
      * HTTP status code of this response.
      */
-    val code: Int,
+    val statusCode: Int,
 
     /**
      * HTTP headers set in this response.
@@ -34,5 +34,5 @@ class HttpResponse internal constructor(
     /**
      * Response body of this response.
      */
-    val body: HttpResponseBody?,
+    val body: HttpResponseBody? = null,
 )
