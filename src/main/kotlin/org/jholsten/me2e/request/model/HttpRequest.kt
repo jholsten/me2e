@@ -95,8 +95,8 @@ class HttpRequest internal constructor(
          * Builds an instance of the [HttpRequest] using the properties set in this builder.
          */
         fun build(): HttpRequest {
-            val url = this.url ?: throw IllegalArgumentException("Url cannot be null")
-            val method = this.method ?: throw IllegalArgumentException("Http method cannot be null")
+            val url = requireNotNull(this.url) { "Url cannot be null" }
+            val method = requireNotNull(this.method) { "Http method cannot be null" }
             if (method.requiresRequestBody()) {
                 require(body != null) { "HTTP method $method needs to have a request body" }
             }

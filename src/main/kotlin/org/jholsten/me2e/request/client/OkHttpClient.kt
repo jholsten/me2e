@@ -132,7 +132,7 @@ class OkHttpClient private constructor(
         }
 
         override fun build(): OkHttpClient {
-            val baseUrl = this.baseUrl ?: throw IllegalArgumentException("Base URL cannot be null")
+            val baseUrl = requireNotNull(this.baseUrl) { "Base URL cannot be null" }
             configuration.apply()
             return OkHttpClient(
                 baseUrl = baseUrl,
