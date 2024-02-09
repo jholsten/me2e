@@ -52,7 +52,7 @@ internal class MicroserviceContainerIT {
         val response = backendApi.get(RelativeUrl("/health"))
 
         assertThat(response).statusCode(equalTo(200))
-        assertThat(response).body(equalTo("OK"))
+        assertThat(response).body(equalTo("\"OK\""))
     }
 
     @Test
@@ -62,7 +62,7 @@ internal class MicroserviceContainerIT {
         val response = backendApi.get(RelativeUrl("/secured"))
 
         assertThat(response).statusCode(equalTo(200))
-        assertThat(response).body(equalTo("admin"))
+        assertThat(response).body(equalTo("\"admin\""))
         backendApi.resetRequestInterceptors()
     }
 }
