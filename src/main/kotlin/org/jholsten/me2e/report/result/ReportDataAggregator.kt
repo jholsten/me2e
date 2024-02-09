@@ -36,7 +36,7 @@ import kotlin.reflect.full.primaryConstructor
  */
 internal class ReportDataAggregator private constructor() {
     companion object {
-        private val logger = logger(this)
+        private val logger = logger<ReportDataAggregator>()
 
         /**
          * Service which represents the Test Runner.

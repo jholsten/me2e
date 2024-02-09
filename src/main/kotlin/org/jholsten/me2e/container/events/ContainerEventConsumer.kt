@@ -2,10 +2,9 @@ package org.jholsten.me2e.container.events
 
 import com.github.dockerjava.api.model.Event
 import org.jholsten.me2e.container.events.model.ContainerEvent
-import org.slf4j.LoggerFactory
+import org.jholsten.me2e.utils.logger
 import java.time.Instant
 import java.util.function.Consumer
-import kotlin.reflect.KClass
 
 /**
  * Base class for consuming events of a Docker container.
@@ -13,7 +12,7 @@ import kotlin.reflect.KClass
  * @sample ContainerRestartListener
  */
 abstract class ContainerEventConsumer : Consumer<Event> {
-    private val logger = LoggerFactory.getLogger(ContainerEventConsumer::class.java)
+    private val logger = logger<ContainerEventConsumer>()
 
     /**
      * Callback function to execute when a new event is received for a container.

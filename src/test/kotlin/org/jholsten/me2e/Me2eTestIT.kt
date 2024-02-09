@@ -26,7 +26,7 @@ import kotlin.test.*
 )
 class Me2eTestIT : Me2eTest() {
 
-    private val logger = logger(this)
+    private val logger = logger<Me2eTestIT>()
 
     @InjectService
     private lateinit var backendApi: MicroserviceContainer

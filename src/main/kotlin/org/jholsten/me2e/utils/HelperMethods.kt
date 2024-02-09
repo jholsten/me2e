@@ -11,9 +11,11 @@ import java.awt.Color
 
 
 /**
- * Returns logger for the class of the given object.
+ * Returns logger for the given class.
+ * @param T Class for which logger is to be returned.
+ * @return SLF4J logger for class [T].
  */
-internal inline fun <reified T> logger(from: T): Logger {
+internal inline fun <reified T> logger(): Logger {
     return LoggerFactory.getLogger(T::class.java)
 }
 

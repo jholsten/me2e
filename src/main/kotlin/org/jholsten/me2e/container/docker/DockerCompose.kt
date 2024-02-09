@@ -61,7 +61,7 @@ class DockerCompose private constructor(
      */
     v2: Lazy<DockerComposeV2>,
 ) {
-    private val logger = logger(this)
+    private val logger = logger<DockerCompose>()
 
     /**
      * Name of the Docker-Compose project, which is composed of the [identifier] as a prefix

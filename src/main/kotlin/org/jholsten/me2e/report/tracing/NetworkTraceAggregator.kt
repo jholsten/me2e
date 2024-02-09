@@ -19,7 +19,7 @@ import java.time.Instant
  */
 internal class NetworkTraceAggregator {
     companion object {
-        private val logger = logger(this)
+        private val logger = logger<NetworkTraceAggregator>()
 
         /**
          * IP address of the host which is running the tests.
@@ -56,7 +56,7 @@ internal class NetworkTraceAggregator {
         }
     }
 
-    private val logger = logger(this)
+    private val logger = logger<NetworkTraceAggregator>()
 
     /**
      * Docker network IDs for which the HTTP traffic is captured along with the Docker containers in the

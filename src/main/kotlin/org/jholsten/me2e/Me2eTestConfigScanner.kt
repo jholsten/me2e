@@ -6,7 +6,7 @@ import org.jholsten.me2e.utils.logger
 
 internal class Me2eTestConfigScanner {
     companion object {
-        private val logger = logger(this)
+        private val logger = logger<Me2eTestConfigScanner>()
 
         /**
          * Finds [Me2eTestConfig] annotation definition in the project.

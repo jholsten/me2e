@@ -7,8 +7,9 @@ import java.math.MathContext
 /**
  * Deterministic iterator which iterates over all possible colors.
  * Adapted from https://stackoverflow.com/a/21863798/17203788.
- * Note that depending on the initial step size, the number of possible colors is limited due to precision.
- * For an initial step size of `0.15`, there are 668 possible colors.
+ *
+ * Note that depending on the initial step size, the number of possible colors to retrieve is limited
+ * due to precision. For an initial step size of `0.15`, there are 668 possible colors.
  */
 internal class ColorIterator(initialStepSize: BigDecimal = BigDecimal("0.15")) {
     init {

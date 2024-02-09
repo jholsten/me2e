@@ -4,7 +4,7 @@ import com.github.dockerjava.api.model.CpuStatsConfig
 import com.github.dockerjava.api.model.MemoryStatsConfig
 import com.github.dockerjava.api.model.Statistics
 import org.jholsten.me2e.container.stats.model.ContainerStatsEntry
-import org.slf4j.LoggerFactory
+import org.jholsten.me2e.utils.logger
 import java.math.BigDecimal
 import java.math.MathContext
 import java.time.Instant
@@ -17,7 +17,7 @@ import java.util.function.Consumer
  * @sample ContainerStatsCollector
  */
 abstract class ContainerStatsConsumer : Consumer<Statistics> {
-    private val logger = LoggerFactory.getLogger(ContainerStatsConsumer::class.java)
+    private val logger = logger<ContainerStatsConsumer>()
     private val mc: MathContext = MathContext(5)
 
     /**

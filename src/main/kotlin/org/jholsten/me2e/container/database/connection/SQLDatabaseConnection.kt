@@ -54,7 +54,7 @@ class SQLDatabaseConnection private constructor(
      */
     val schema: String,
 ) : DatabaseConnection(host, port, database, username, password, system) {
-    private val logger = logger(this)
+    private val logger = logger<SQLDatabaseConnection>()
 
     /**
      * JDBC URL to use for connecting to the database.
@@ -140,7 +140,7 @@ class SQLDatabaseConnection private constructor(
     }
 
     class Builder : DatabaseConnection.Builder<Builder>() {
-        private val logger = logger(this)
+        private val logger = logger<Builder>()
 
         private var schema: String? = null
         private var system: DatabaseManagementSystem? = null

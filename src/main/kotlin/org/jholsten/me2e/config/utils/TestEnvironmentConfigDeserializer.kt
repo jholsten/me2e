@@ -76,7 +76,7 @@ class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironmentConfig
         private const val PULL_POLICY_KEY = "org.jholsten.me2e.pull-policy"
     }
 
-    private val logger = logger(this)
+    private val logger = logger<TestEnvironmentConfigDeserializer>()
     private var mapper = DeserializerFactory.getObjectMapper()
 
     override fun deserialize(p: JsonParser, ctxt: DeserializationContext): TestEnvironmentConfig {

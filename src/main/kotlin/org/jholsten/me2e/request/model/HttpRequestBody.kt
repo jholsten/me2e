@@ -65,7 +65,7 @@ class HttpRequestBody {
         private var fileContent: File? = null
         private var binaryContent: ByteArray? = null
 
-        private val logger = logger(this)
+        private val logger = logger<Builder>()
 
         /**
          * Sets the given String content for the request body.

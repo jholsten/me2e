@@ -7,7 +7,7 @@ import org.jholsten.me2e.report.result.html.data.TemplateData
 import org.jholsten.me2e.report.result.html.data.TestDetailTemplateData
 import org.jholsten.me2e.report.result.model.TestExecutionResult
 import org.jholsten.me2e.report.result.model.TestResult
-import org.slf4j.LoggerFactory
+import org.jholsten.me2e.utils.logger
 import java.io.File
 import java.nio.file.FileSystems
 import java.nio.file.Files
@@ -54,7 +54,7 @@ open class HtmlReportGenerator(
      */
     protected val outputDirectory: String = "build/reports/me2e"
 ) : ReportGenerator() {
-    private val logger = LoggerFactory.getLogger(HtmlReportGenerator::class.java)
+    private val logger = logger<HtmlReportGenerator>()
 
     /**
      * Result of the test execution for which report is to be generated.

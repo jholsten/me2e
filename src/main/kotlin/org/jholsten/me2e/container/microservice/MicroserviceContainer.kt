@@ -80,7 +80,7 @@ class MicroserviceContainer(
     hasHealthcheck = hasHealthcheck,
     pullPolicy = pullPolicy,
 ) {
-    private val logger = logger(this)
+    private val logger = logger<MicroserviceContainer>()
 
     /**
      * URL where microservice is accessible from localhost.

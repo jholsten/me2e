@@ -9,7 +9,7 @@ import org.jholsten.me2e.utils.logger
  * Additional validator which ensures that a parsed test configuration is valid.
  */
 internal class ConfigValidator : Validator<TestConfig> {
-    private val logger = logger(this)
+    private val logger = logger<ConfigValidator>()
 
     @JvmSynthetic
     override fun validate(value: TestConfig) {

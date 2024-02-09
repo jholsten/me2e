@@ -25,7 +25,7 @@ internal class NetworkTraceCollector(
      */
     private val networkId: String,
 ) {
-    private val logger = logger(this)
+    private val logger = logger<NetworkTraceCollector>()
 
     /**
      * Container for the docker-traffic-capturer which collects all HTTP packets sent in the network.

@@ -108,7 +108,7 @@ class DatabaseContainer(
     hasHealthcheck = hasHealthcheck,
     pullPolicy = pullPolicy,
 ) {
-    private val logger = logger(this)
+    private val logger = logger<DatabaseContainer>()
 
     /**
      * Connection to the database management system.

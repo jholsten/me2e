@@ -23,7 +23,7 @@ internal class InjectionUtils<T : Me2eTest>(
      */
     private val testClassInstance: T,
 ) {
-    private val logger = logger(this)
+    private val logger = logger<InjectionUtils<*>>()
 
     /**
      * Injects container and Mock Server instances into the fields in [testClassInstance] which are annotated

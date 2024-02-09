@@ -45,7 +45,7 @@ class MockServerManager(
         private const val HTTPS_PORT = 443
     }
 
-    private val logger = logger(this)
+    private val logger = logger<MockServerManager>()
 
     /**
      * Mock Server instance that handles incoming requests.

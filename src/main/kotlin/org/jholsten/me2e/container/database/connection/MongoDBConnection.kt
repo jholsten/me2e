@@ -56,7 +56,7 @@ class MongoDBConnection private constructor(
      */
     val container: Container?,
 ) : DatabaseConnection(host, port, database, username, password, DatabaseManagementSystem.MONGO_DB) {
-    private val logger = logger(this)
+    private val logger = logger<MongoDBConnection>()
 
     /**
      * MongoDB URL to use for connecting to the database.

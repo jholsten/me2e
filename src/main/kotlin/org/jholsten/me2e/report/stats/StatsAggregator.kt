@@ -9,7 +9,7 @@ import org.jholsten.me2e.utils.logger
  * Service which collects all statistics entries for all containers.
  */
 internal class StatsAggregator internal constructor() {
-    private val logger = logger(this)
+    private val logger = logger<StatsAggregator>()
 
     /**
      * Map of container specification and statistics entry collector.

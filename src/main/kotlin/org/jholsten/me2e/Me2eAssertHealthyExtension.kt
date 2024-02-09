@@ -22,7 +22,7 @@ class Me2eAssertHealthyExtension : BeforeEachCallback {
         private val restartedContainers: MutableList<String> = mutableListOf()
     }
 
-    private val logger = logger(this)
+    private val logger = logger<Me2eAssertHealthyExtension>()
 
     /**
      * Callback function which is executed before the execution of a test starts.

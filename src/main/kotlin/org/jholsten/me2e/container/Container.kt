@@ -27,7 +27,7 @@ import org.jholsten.me2e.container.events.ContainerRestartListener
 import org.jholsten.me2e.container.events.model.ContainerEvent
 import org.jholsten.me2e.container.exception.DockerException
 import org.jholsten.me2e.report.result.ReportDataAggregator
-import org.slf4j.LoggerFactory
+import org.jholsten.me2e.utils.logger
 import org.testcontainers.containers.ContainerState
 import org.testcontainers.utility.MountableFile
 import java.io.File
@@ -96,7 +96,7 @@ open class Container(
      */
     val pullPolicy: DockerConfig.PullPolicy = DockerConfig.PullPolicy.MISSING,
 ) {
-    private val logger = LoggerFactory.getLogger(Container::class.java)
+    private val logger = logger<Container>()
 
     /**
      * Returns whether the container is currently up and running.

@@ -1,7 +1,7 @@
 package org.jholsten.me2e.container.logging
 
 import org.jholsten.me2e.container.logging.model.ContainerLogEntry
-import org.slf4j.LoggerFactory
+import org.jholsten.me2e.utils.logger
 import org.testcontainers.containers.output.OutputFrame
 import java.time.Instant
 import java.util.function.Consumer
@@ -12,7 +12,7 @@ import java.util.function.Consumer
  * @sample ContainerLogCollector
  */
 abstract class ContainerLogConsumer : Consumer<OutputFrame> {
-    private val logger = LoggerFactory.getLogger(ContainerLogConsumer::class.java)
+    private val logger = logger<ContainerLogConsumer>()
 
     /**
      * Callback function which is executed when a container logs a new entry. Empty messages are

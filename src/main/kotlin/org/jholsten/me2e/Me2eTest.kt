@@ -15,7 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 @ExtendWith(Me2eAssertHealthyExtension::class, Me2eRequestInterceptorResetExtension::class)
 open class Me2eTest {
     companion object {
-        private val logger = logger(this)
+        private val logger = logger<Me2eTest>()
 
         /**
          * Configuration annotation that is used to configure the tests.

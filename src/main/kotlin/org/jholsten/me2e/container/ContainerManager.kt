@@ -35,7 +35,7 @@ class ContainerManager(
      */
     val containers: Map<String, Container>,
 ) {
-    private val logger = logger(this)
+    private val logger = logger<ContainerManager>()
 
     /**
      * [containers] with container type [org.jholsten.me2e.container.model.ContainerType.MICROSERVICE].

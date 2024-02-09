@@ -10,7 +10,7 @@ import org.junit.jupiter.api.extension.ExtensionContext
  * request interceptors set in previous tests do not influence the result of other tests.
  */
 class Me2eRequestInterceptorResetExtension : AfterEachCallback {
-    private val logger = logger(this)
+    private val logger = logger<Me2eRequestInterceptorResetExtension>()
 
     override fun afterEach(context: ExtensionContext?) {
         if (Me2eTest.configAnnotation.resetRequestInterceptors) {
