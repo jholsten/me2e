@@ -25,7 +25,7 @@ internal class AssertableResponseIT {
             )
         ),
         body = HttpResponseBody(
-            contentType = MediaType.JSON_UTF8,
+            contentType = ContentType.JSON_UTF8,
             content = byteArrayOf(
                 123, 34, 110, 97, 109, 101, 34, 58, 32, 34, 74, 111, 104, 110, 34, 44, 32, 34, 110, 101, 115, 116, 101, 100, 34, 58,
                 32, 123, 34, 107, 101, 121, 49, 34, 58, 32, 34, 118, 97, 108, 117, 101, 49, 34, 44, 32, 34, 107, 101, 121, 50, 34, 58, 32,

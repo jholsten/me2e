@@ -44,7 +44,7 @@ internal class HttpRequestMapperIT {
             headers = HttpHeaders(mapOf("Name" to listOf("Value"))),
             body = HttpRequestBody(
                 content = "{\"name\": \"value\"}",
-                contentType = MediaType("application/json"),
+                contentType = ContentType("application/json"),
             ),
         )
 
@@ -79,7 +79,7 @@ internal class HttpRequestMapperIT {
                 headers = HttpHeaders(mapOf("Name" to listOf("Value"))),
                 body = HttpRequestBody(
                     content = "{\"name\": \"value\"}",
-                    contentType = MediaType("application/json"),
+                    contentType = ContentType("application/json"),
                 ),
             )
         )

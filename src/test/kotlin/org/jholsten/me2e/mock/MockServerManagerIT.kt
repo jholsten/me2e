@@ -7,7 +7,7 @@ import com.github.tomakehurst.wiremock.http.JvmProxyConfigurer
 import org.apache.hc.client5.http.classic.methods.HttpGet
 import org.apache.hc.client5.http.classic.methods.HttpPost
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
-import org.apache.hc.core5.http.ContentType
+import org.apache.hc.core5.http.ContentType as ApacheContentType
 import org.apache.hc.core5.http.HttpEntity
 import org.apache.hc.core5.http.io.entity.StringEntity
 import org.jholsten.me2e.config.model.MockServerConfig
@@ -93,12 +93,12 @@ internal class MockServerManagerIT {
         val expectedReceivedRequest = HttpRequest(
             url = Url("http://example.com/search"),
             method = HttpMethod.POST,
-            body = HttpRequestBody("{\"id\": 123}", MediaType.JSON_UTF8),
+            body = HttpRequestBody("{\"id\": 123}", ContentType.JSON_UTF8),
         )
         val manager = startManager()
 
         val request = HttpPost("http://example.com/search")
-        request.entity = StringEntity("{\"id\": 123}", ContentType.APPLICATION_JSON)
+        request.entity = StringEntity("{\"id\": 123}", ApacheContentType.APPLICATION_JSON)
         val response = client.execute(request)
 
         assertTrue(manager.isRunning)

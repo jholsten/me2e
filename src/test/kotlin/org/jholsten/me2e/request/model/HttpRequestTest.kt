@@ -9,7 +9,7 @@ internal class HttpRequestTest {
 
     @Test
     fun `Request builder should set the configured properties`() {
-        val body = HttpRequestBody("content", MediaType.TEXT_PLAIN_UTF8)
+        val body = HttpRequestBody("content", ContentType.TEXT_PLAIN_UTF8)
         val request = HttpRequest.Builder()
             .withUrl(Url("https://google.com/search"))
             .withMethod(HttpMethod.POST)
@@ -74,7 +74,7 @@ internal class HttpRequestTest {
             url = Url("https://google.com/"),
             method = HttpMethod.POST,
             headers = HttpHeaders(mapOf("Name" to listOf("Value"))),
-            body = HttpRequestBody("content", MediaType.TEXT_PLAIN_UTF8),
+            body = HttpRequestBody("content", ContentType.TEXT_PLAIN_UTF8),
         )
 
         val newInstance = request.newBuilder().build()
@@ -124,7 +124,7 @@ internal class HttpRequestTest {
             .withUrl(Url("https://google.com/search"))
             .withMethod(method)
             .withHeaders(HttpHeaders(mapOf("Name" to listOf("Value"))))
-            .withBody(HttpRequestBody("content", MediaType.TEXT_PLAIN_UTF8))
+            .withBody(HttpRequestBody("content", ContentType.TEXT_PLAIN_UTF8))
 
         assertFailsWith<IllegalArgumentException> {
             builder.build()

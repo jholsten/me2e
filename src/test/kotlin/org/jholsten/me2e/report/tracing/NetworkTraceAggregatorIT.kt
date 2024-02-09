@@ -11,7 +11,7 @@ import org.jholsten.me2e.report.result.model.TestResult
 import org.jholsten.me2e.report.tracing.model.AggregatedNetworkTrace
 import org.jholsten.me2e.report.tracing.model.NetworkNodeSpecification
 import org.jholsten.me2e.request.model.HttpRequestBody
-import org.jholsten.me2e.request.model.MediaType
+import org.jholsten.me2e.request.model.ContentType
 import org.jholsten.me2e.request.model.RelativeUrl
 import org.jholsten.util.RecursiveComparison
 import org.junit.jupiter.api.AfterAll
@@ -85,7 +85,7 @@ internal class NetworkTraceAggregatorIT {
                 throwable = null,
             )
 
-        backendApi.post(RelativeUrl("/search"), HttpRequestBody(content = "{\"id\": 123}", MediaType.JSON_UTF8))
+        backendApi.post(RelativeUrl("/search"), HttpRequestBody(content = "{\"id\": 123}", ContentType.JSON_UTF8))
 
         networkTraceAggregator.collectPackets(listOf(test))
 

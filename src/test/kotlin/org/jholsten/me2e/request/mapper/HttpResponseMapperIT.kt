@@ -75,7 +75,7 @@ internal class HttpResponseMapperIT {
             statusCode = 200,
             headers = HttpHeaders(mapOf("Authorization" to listOf("Bearer 123"))),
             body = HttpResponseBody(
-                contentType = MediaType("application/json"),
+                contentType = ContentType("application/json"),
                 content = byteArrayOf(123, 34, 110, 97, 109, 101, 34, 58, 32, 34, 118, 97, 108, 117, 101, 34, 125),
             ),
         )
@@ -110,7 +110,7 @@ internal class HttpResponseMapperIT {
             message = "Message",
             statusCode = 200,
             body = HttpResponseBody(
-                contentType = MediaType("text/plain"),
+                contentType = ContentType("text/plain"),
                 content = byteArrayOf(
                     97, 98, 99, 195.toByte(), 164.toByte(), 195.toByte(), 132.toByte(), 195.toByte(), 182.toByte(),
                     195.toByte(), 150.toByte(), 195.toByte(), 188.toByte(), 195.toByte(), 156.toByte(), 195.toByte(),
@@ -171,7 +171,7 @@ internal class HttpResponseMapperIT {
                 statusCode = 200,
                 headers = HttpHeaders(mapOf("Authorization" to listOf("Bearer 123"))),
                 body = HttpResponseBody(
-                    contentType = MediaType("application/json"),
+                    contentType = ContentType("application/json"),
                     content = byteArrayOf(123, 34, 110, 97, 109, 101, 34, 58, 32, 34, 118, 97, 108, 117, 101, 34, 125),
                 ),
             )
@@ -207,7 +207,7 @@ internal class HttpResponseMapperIT {
                 message = "Message",
                 statusCode = 200,
                 body = HttpResponseBody(
-                    contentType = MediaType("text/plain"),
+                    contentType = ContentType("text/plain"),
                     content = byteArrayOf(
                         97, 98, 99, 195.toByte(), 164.toByte(), 195.toByte(), 132.toByte(), 195.toByte(), 182.toByte(),
                         195.toByte(), 150.toByte(), 195.toByte(), 188.toByte(), 195.toByte(), 156.toByte(), 195.toByte(),

@@ -14,7 +14,7 @@ class HttpResponseBody internal constructor(
     /**
      * Content type of the response body.
      */
-    val contentType: MediaType?,
+    val contentType: ContentType?,
 
     /**
      * Content of the response body.
@@ -107,6 +107,7 @@ class HttpResponseBody internal constructor(
      * val arr = body.asObject<Array<BodyClass>>()
      * val list = body.asObject<List<MyClass>>()
      * ```
+     * @param T Class to which response body content should be parsed.
      * @throws ParseException if content could not be parsed to instance of type [T].
      */
     inline fun <reified T> asObject(): T? {

@@ -17,7 +17,7 @@ class HttpRequestBody {
     /**
      * Content type of the request body.
      */
-    val contentType: MediaType?
+    val contentType: ContentType?
 
     /**
      * Content of the request body.
@@ -32,7 +32,7 @@ class HttpRequestBody {
      * @param charset Charset to use for encoding the string content to a byte array.
      */
     @JvmOverloads
-    constructor(content: String, contentType: MediaType?, charset: Charset = Charsets.UTF_8) {
+    constructor(content: String, contentType: ContentType?, charset: Charset = Charsets.UTF_8) {
         this.content = content.toByteArray(charset)
         this.contentType = contentType
     }
@@ -43,7 +43,7 @@ class HttpRequestBody {
      * @param content File content of the request body.
      * @param contentType Content type of the request body.
      */
-    constructor(content: File, contentType: MediaType?) {
+    constructor(content: File, contentType: ContentType?) {
         this.content = content.readBytes()
         this.contentType = contentType
     }
@@ -53,13 +53,13 @@ class HttpRequestBody {
      * @param content Binary content of the request body.
      * @param contentType Content type of the request body.
      */
-    constructor(content: ByteArray, contentType: MediaType?) {
+    constructor(content: ByteArray, contentType: ContentType?) {
         this.content = content
         this.contentType = contentType
     }
 
     class Builder {
-        private var contentType: MediaType? = null
+        private var contentType: ContentType? = null
         private var stringContent: String? = null
         private var charset: Charset = Charsets.UTF_8
         private var fileContent: File? = null
@@ -105,7 +105,7 @@ class HttpRequestBody {
          */
         fun <T> withJsonContent(content: T) = apply {
             this.stringContent = DeserializerFactory.getObjectMapper().writeValueAsString(content)
-            this.contentType = MediaType.JSON_UTF8
+            this.contentType = ContentType.JSON_UTF8
         }
 
         /**
@@ -113,7 +113,7 @@ class HttpRequestBody {
          * @param contentType Content type of the request body to set.
          * @return This builder instance, to use for chaining.
          */
-        fun withContentType(contentType: MediaType?) = apply {
+        fun withContentType(contentType: ContentType?) = apply {
             this.contentType = contentType
         }
 

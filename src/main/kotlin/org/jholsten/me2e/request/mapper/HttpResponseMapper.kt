@@ -61,7 +61,7 @@ internal abstract class HttpResponseMapper {
         okHttpResponseBody.use { body ->
             val binaryContent = body.bytes()
             return HttpResponseBody(
-                contentType = body.contentType()?.let { return@let MediaTypeMapper.INSTANCE.toInternalDto(it) },
+                contentType = body.contentType()?.let { return@let ContentTypeMapper.INSTANCE.toInternalDto(it) },
                 content = binaryContent,
             )
         }

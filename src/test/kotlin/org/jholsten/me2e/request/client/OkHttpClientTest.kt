@@ -293,7 +293,7 @@ internal class OkHttpClientTest {
             url = Url("https://google.com/upload?name=dog&id=1"),
             method = HttpMethod.POST,
             headers = HttpHeaders(mapOf("Name" to listOf("Value"))),
-            body = HttpRequestBody("Hello World", MediaType.TEXT_PLAIN_UTF8),
+            body = HttpRequestBody("Hello World", ContentType.TEXT_PLAIN_UTF8),
         )
 
         executeRequestTest(httpRequest) { httpClient ->
@@ -304,7 +304,7 @@ internal class OkHttpClientTest {
                     .withQueryParameter("id", "1")
                     .build(),
                 headers = HttpHeaders(mapOf("Name" to listOf("Value"))),
-                body = HttpRequestBody("Hello World", MediaType.TEXT_PLAIN_UTF8),
+                body = HttpRequestBody("Hello World", ContentType.TEXT_PLAIN_UTF8),
             )
         }
     }
@@ -315,13 +315,13 @@ internal class OkHttpClientTest {
             url = Url("https://google.com/upload"),
             method = HttpMethod.POST,
             headers = HttpHeaders.empty(),
-            body = HttpRequestBody("Hello World", MediaType.TEXT_PLAIN_UTF8),
+            body = HttpRequestBody("Hello World", ContentType.TEXT_PLAIN_UTF8),
         )
 
         executeRequestTest(httpRequest) { httpClient ->
             httpClient.post(
                 RelativeUrl.Builder().withPath("/upload").build(),
-                body = HttpRequestBody("Hello World", MediaType.TEXT_PLAIN_UTF8),
+                body = HttpRequestBody("Hello World", ContentType.TEXT_PLAIN_UTF8),
             )
         }
     }
@@ -332,7 +332,7 @@ internal class OkHttpClientTest {
             url = Url("https://google.com/upload?name=dog&id=1"),
             method = HttpMethod.PUT,
             headers = HttpHeaders(mapOf("Name" to listOf("Value"))),
-            body = HttpRequestBody("Hello World", MediaType.TEXT_PLAIN_UTF8),
+            body = HttpRequestBody("Hello World", ContentType.TEXT_PLAIN_UTF8),
         )
 
         executeRequestTest(httpRequest) { httpClient ->
@@ -343,7 +343,7 @@ internal class OkHttpClientTest {
                     .withQueryParameter("id", "1")
                     .build(),
                 headers = HttpHeaders(mapOf("Name" to listOf("Value"))),
-                body = HttpRequestBody("Hello World", MediaType.TEXT_PLAIN_UTF8),
+                body = HttpRequestBody("Hello World", ContentType.TEXT_PLAIN_UTF8),
             )
         }
     }
@@ -354,13 +354,13 @@ internal class OkHttpClientTest {
             url = Url("https://google.com/upload"),
             method = HttpMethod.PUT,
             headers = HttpHeaders.empty(),
-            body = HttpRequestBody("Hello World", MediaType.TEXT_PLAIN_UTF8),
+            body = HttpRequestBody("Hello World", ContentType.TEXT_PLAIN_UTF8),
         )
 
         executeRequestTest(httpRequest) { httpClient ->
             httpClient.put(
                 RelativeUrl.Builder().withPath("/upload").build(),
-                body = HttpRequestBody("Hello World", MediaType.TEXT_PLAIN_UTF8),
+                body = HttpRequestBody("Hello World", ContentType.TEXT_PLAIN_UTF8),
             )
         }
     }
@@ -371,7 +371,7 @@ internal class OkHttpClientTest {
             url = Url("https://google.com/upload?name=dog&id=1"),
             method = HttpMethod.PATCH,
             headers = HttpHeaders(mapOf("Name" to listOf("Value"))),
-            body = HttpRequestBody("Hello World", MediaType.TEXT_PLAIN_UTF8),
+            body = HttpRequestBody("Hello World", ContentType.TEXT_PLAIN_UTF8),
         )
 
         executeRequestTest(httpRequest) { httpClient ->
@@ -382,7 +382,7 @@ internal class OkHttpClientTest {
                     .withQueryParameter("id", "1")
                     .build(),
                 headers = HttpHeaders(mapOf("Name" to listOf("Value"))),
-                body = HttpRequestBody("Hello World", MediaType.TEXT_PLAIN_UTF8),
+                body = HttpRequestBody("Hello World", ContentType.TEXT_PLAIN_UTF8),
             )
         }
     }
@@ -393,13 +393,13 @@ internal class OkHttpClientTest {
             url = Url("https://google.com/upload"),
             method = HttpMethod.PATCH,
             headers = HttpHeaders.empty(),
-            body = HttpRequestBody("Hello World", MediaType.TEXT_PLAIN_UTF8),
+            body = HttpRequestBody("Hello World", ContentType.TEXT_PLAIN_UTF8),
         )
 
         executeRequestTest(httpRequest) { httpClient ->
             httpClient.patch(
                 RelativeUrl.Builder().withPath("/upload").build(),
-                body = HttpRequestBody("Hello World", MediaType.TEXT_PLAIN_UTF8),
+                body = HttpRequestBody("Hello World", ContentType.TEXT_PLAIN_UTF8),
             )
         }
     }
@@ -410,7 +410,7 @@ internal class OkHttpClientTest {
             url = Url("https://google.com/image?name=dog&id=1"),
             method = HttpMethod.DELETE,
             headers = HttpHeaders(mapOf("Name" to listOf("Value"))),
-            body = HttpRequestBody("Hello World", MediaType.TEXT_PLAIN_UTF8),
+            body = HttpRequestBody("Hello World", ContentType.TEXT_PLAIN_UTF8),
         )
 
         executeRequestTest(httpRequest) { httpClient ->
@@ -421,7 +421,7 @@ internal class OkHttpClientTest {
                     .withQueryParameter("id", "1")
                     .build(),
                 headers = HttpHeaders(mapOf("Name" to listOf("Value"))),
-                body = HttpRequestBody("Hello World", MediaType.TEXT_PLAIN_UTF8),
+                body = HttpRequestBody("Hello World", ContentType.TEXT_PLAIN_UTF8),
             )
         }
     }

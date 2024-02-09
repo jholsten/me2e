@@ -5,7 +5,7 @@ import com.github.tomakehurst.wiremock.http.JvmProxyConfigurer
 import org.apache.hc.client5.http.classic.methods.HttpGet
 import org.apache.hc.client5.http.classic.methods.HttpPost
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
-import org.apache.hc.core5.http.ContentType
+import org.apache.hc.core5.http.ContentType as ApacheContentType
 import org.apache.hc.core5.http.HttpEntity
 import org.apache.hc.core5.http.io.entity.StringEntity
 import org.jholsten.me2e.assertions.assertThat
@@ -112,7 +112,7 @@ class MockServerIT {
                     32, 34, 118, 97, 108, 117, 101, 50, 34, 125, 44, 32, 34, 100, 101, 116, 97, 105, 108, 115, 34, 58, 32, 91, 123, 34, 100,
                     101, 116, 97, 105, 108, 34, 58, 32, 49, 125, 44, 32, 123, 34, 100, 101, 116, 97, 105, 108, 34, 58, 32, 50, 125, 93, 125,
                 ),
-                MediaType.JSON_UTF8,
+                ContentType.JSON_UTF8,
             ),
         )
 
@@ -155,12 +155,12 @@ class MockServerIT {
         val expectedReceivedRequest = HttpRequest(
             url = Url("http://example.com/search?id=123"),
             method = HttpMethod.POST,
-            body = HttpRequestBody("{\"some-key\": \"some-value\"}", MediaType.JSON_UTF8),
+            body = HttpRequestBody("{\"some-key\": \"some-value\"}", ContentType.JSON_UTF8),
             headers = HttpHeaders(mapOf("header1" to listOf("headerValue"))),
         )
 
         val request = HttpPost("http://example.com/search?id=123")
-        request.entity = StringEntity("{\"some-key\": \"some-value\"}", ContentType.APPLICATION_JSON)
+        request.entity = StringEntity("{\"some-key\": \"some-value\"}", ApacheContentType.APPLICATION_JSON)
         request.setHeader("header1", "headerValue")
         val response = client.execute(request)
 
@@ -180,7 +180,7 @@ class MockServerIT {
                     .withBody(equalTo("{\"some-key\": \"some-value\"}"))
                     .withJsonBody(containsNode("some-key").withValue(equalTo("some-value")))
                     .withHeaders(containsKey("header1").withValue(equalTo("headerValue")))
-                    .withContentType(equalTo(MediaType.JSON_UTF8.value))
+                    .withContentType(equalTo(ContentType.JSON_UTF8.value))
                     .andNoOther()
             )
         }
@@ -238,7 +238,7 @@ class MockServerIT {
                 1, ExpectedRequest()
                     .withPath(equalTo("/something-else"))
                     .withMethod(equalTo(HttpMethod.GET))
-                    .withContentType(equalTo(MediaType.TEXT_PLAIN_UTF8.value))
+                    .withContentType(equalTo(ContentType.TEXT_PLAIN_UTF8.value))
             )
         }
     }

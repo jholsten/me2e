@@ -11,7 +11,7 @@ import org.jholsten.me2e.mock.MockServer
 import org.jholsten.me2e.mock.verification.ExpectedRequest
 import org.jholsten.me2e.request.model.HttpMethod
 import org.jholsten.me2e.request.model.HttpRequestBody
-import org.jholsten.me2e.request.model.MediaType
+import org.jholsten.me2e.request.model.ContentType
 import org.jholsten.me2e.request.model.RelativeUrl
 import org.jholsten.me2e.utils.logger
 import org.junit.jupiter.api.AfterAll
@@ -82,7 +82,7 @@ class Me2eTestIT : Me2eTest() {
     )
     @Suppress("UNUSED_PARAMETER")
     fun `Invoking Mock Server in container should succeed`(relativeUrl: String, description: String) {
-        val response = backendApi.post(RelativeUrl(relativeUrl), HttpRequestBody(content = "{\"id\": 123}", MediaType.JSON_UTF8))
+        val response = backendApi.post(RelativeUrl(relativeUrl), HttpRequestBody(content = "{\"id\": 123}", ContentType.JSON_UTF8))
 
         logger.info(backendApi.getLogs().toString())
         assertThat(response).statusCode(equalTo(200))

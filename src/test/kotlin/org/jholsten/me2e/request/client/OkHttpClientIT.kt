@@ -89,7 +89,7 @@ class OkHttpClientIT {
         val url = Url(wireMockServer.baseUrl()).withRelativeUrl(
             RelativeUrl.Builder().withPath("/search").withQueryParameter("id", "123").build()
         )
-        val body = HttpRequestBody("Some Request", MediaType.TEXT_PLAIN_UTF8)
+        val body = HttpRequestBody("Some Request", ContentType.TEXT_PLAIN_UTF8)
         val request = HttpRequest.Builder()
             .withUrl(url)
             .withMethod(httpMethod)

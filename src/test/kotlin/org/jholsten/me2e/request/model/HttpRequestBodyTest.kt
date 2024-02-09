@@ -21,14 +21,14 @@ internal class HttpRequestBodyTest {
         assertEquals("abc", body.asString())
         RecursiveComparison.assertEquals(byteArrayOf(97, 98, 99), body.asBinary())
         assertEquals("YWJj", body.asBase64())
-        assertEquals(MediaType.TEXT_PLAIN_UTF8, body.contentType)
+        assertEquals(ContentType.TEXT_PLAIN_UTF8, body.contentType)
     }
 
     @Test
     fun `String content with special characters should be set in request body`() {
         val body = HttpRequestBody(
             content = "abcäÄöÖüÜèé%&~'",
-            contentType = MediaType.TEXT_PLAIN_UTF8,
+            contentType = ContentType.TEXT_PLAIN_UTF8,
         )
 
         assertEquals("abcäÄöÖüÜèé%&~'", body.asString())
@@ -40,7 +40,7 @@ internal class HttpRequestBodyTest {
             ), body.asBinary()
         )
         assertEquals("YWJjw6TDhMO2w5bDvMOcw6jDqSUmfic=", body.asBase64())
-        assertEquals(MediaType.TEXT_PLAIN_UTF8, body.contentType)
+        assertEquals(ContentType.TEXT_PLAIN_UTF8, body.contentType)
     }
 
     @Test
@@ -64,7 +64,7 @@ internal class HttpRequestBodyTest {
         assertEquals("abc", body.asString())
         RecursiveComparison.assertEquals(byteArrayOf(97, 98, 99), body.asBinary())
         assertEquals("YWJj", body.asBase64())
-        assertEquals(MediaType.TEXT_PLAIN_UTF8, body.contentType)
+        assertEquals(ContentType.TEXT_PLAIN_UTF8, body.contentType)
     }
 
     @ParameterizedTest(name = "[{index}] with {0}")
@@ -74,7 +74,7 @@ internal class HttpRequestBodyTest {
         assertEquals("abc", body.asString())
         RecursiveComparison.assertEquals(byteArrayOf(97, 98, 99), body.asBinary())
         assertEquals("YWJj", body.asBase64())
-        assertEquals(MediaType.TEXT_PLAIN_UTF8, body.contentType)
+        assertEquals(ContentType.TEXT_PLAIN_UTF8, body.contentType)
     }
 
     class StringBodyArgumentProvider : ArgumentsProvider {
@@ -84,7 +84,7 @@ internal class HttpRequestBodyTest {
                     "Constructor",
                     HttpRequestBody(
                         content = "abc",
-                        contentType = MediaType.TEXT_PLAIN_UTF8,
+                        contentType = ContentType.TEXT_PLAIN_UTF8,
                         charset = Charsets.UTF_8,
                     ),
                 ),
@@ -92,7 +92,7 @@ internal class HttpRequestBodyTest {
                     "Builder",
                     HttpRequestBody.Builder()
                         .withContent("abc")
-                        .withContentType(MediaType.TEXT_PLAIN_UTF8)
+                        .withContentType(ContentType.TEXT_PLAIN_UTF8)
                         .withCharset(Charsets.UTF_8)
                         .build()
                 ),
@@ -115,14 +115,14 @@ internal class HttpRequestBodyTest {
                     "Constructor",
                     HttpRequestBody(
                         content = file,
-                        contentType = MediaType.TEXT_PLAIN_UTF8,
+                        contentType = ContentType.TEXT_PLAIN_UTF8,
                     ),
                 ),
                 Arguments.of(
                     "Builder",
                     HttpRequestBody.Builder()
                         .withContent(file)
-                        .withContentType(MediaType.TEXT_PLAIN_UTF8)
+                        .withContentType(ContentType.TEXT_PLAIN_UTF8)
                         .build()
                 ),
             )
@@ -136,14 +136,14 @@ internal class HttpRequestBodyTest {
                     "Constructor",
                     HttpRequestBody(
                         content = byteArrayOf(97, 98, 99),
-                        contentType = MediaType.TEXT_PLAIN_UTF8,
+                        contentType = ContentType.TEXT_PLAIN_UTF8,
                     ),
                 ),
                 Arguments.of(
                     "Builder",
                     HttpRequestBody.Builder()
                         .withContent(byteArrayOf(97, 98, 99))
-                        .withContentType(MediaType.TEXT_PLAIN_UTF8)
+                        .withContentType(ContentType.TEXT_PLAIN_UTF8)
                         .build()
                 ),
             )

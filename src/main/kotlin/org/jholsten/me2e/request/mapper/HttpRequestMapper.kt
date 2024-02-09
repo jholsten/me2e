@@ -80,7 +80,7 @@ internal abstract class HttpRequestMapper {
         body.writeTo(buffer)
         return HttpRequestBody(
             content = buffer.readByteArray(),
-            contentType = body.contentType()?.let { return@let MediaTypeMapper.INSTANCE.toInternalDto(it) },
+            contentType = body.contentType()?.let { return@let ContentTypeMapper.INSTANCE.toInternalDto(it) },
         )
     }
 
@@ -91,7 +91,7 @@ internal abstract class HttpRequestMapper {
         }
         return HttpRequestBody(
             content = request.bodyAsString,
-            contentType = request.contentTypeHeader()?.let { return@let MediaTypeMapper.INSTANCE.toInternalDto(it) },
+            contentType = request.contentTypeHeader()?.let { return@let ContentTypeMapper.INSTANCE.toInternalDto(it) },
         )
     }
 
