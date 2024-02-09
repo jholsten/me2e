@@ -1,5 +1,6 @@
 package org.jholsten.me2e.request.model
 
+import com.fasterxml.jackson.core.type.TypeReference
 import org.jholsten.util.RecursiveComparison
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.params.ParameterizedTest
@@ -44,12 +45,16 @@ internal class HttpRequestBodyTest {
 
     @Test
     fun `Object should be serialized and content type should be set to JSON`() {
+        val content = Pair("value1", "value2")
         val body = HttpRequestBody.Builder()
-            .withJsonContent(Pair("value1", "value2"))
+            .withJsonContent(content)
             .build()
 
         assertEquals("{\"first\":\"value1\",\"second\":\"value2\"}", body.asString())
         assertEquals("application/json; charset=utf-8", body.contentType?.value)
+        assertEquals(content, body.asObject<Pair<String, String>>())
+        assertEquals(content, body.asObject(Pair::class.java))
+        assertEquals(content, body.asObject(object : TypeReference<Pair<String, String>>() {}))
     }
 
     @ParameterizedTest(name = "[{index}] with {0}")

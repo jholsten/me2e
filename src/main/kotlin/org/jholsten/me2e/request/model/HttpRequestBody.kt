@@ -1,5 +1,6 @@
 package org.jholsten.me2e.request.model
 
+import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonNode
 import org.jholsten.me2e.parsing.exception.ParseException
 import org.jholsten.me2e.parsing.utils.DeserializerFactory
@@ -189,5 +190,62 @@ class HttpRequestBody {
         } catch (e: Exception) {
             throw ParseException(e.message)
         }
+    }
+
+    /**
+     * Returns binary content deserialized as object of the given type or `null`, if no content is present.
+     * For Kotlin, it is recommended to use the inline function [asObject] instead.
+     *
+     * Example Usage:
+     * ```java
+     * MyClass obj = body.asObject(MyClass.class);
+     * MyClass[] arr = body.asObject(MyClass[].class);
+     * ```
+     * @param type Class to which request body content should be parsed.
+     * @throws ParseException if content could not be parsed to instance of type [T].
+     */
+    fun <T> asObject(type: Class<T>): T? {
+        try {
+            return content?.let { DeserializerFactory.getObjectMapper().readValue(it, type) }
+        } catch (e: Exception) {
+            throw ParseException(e.message)
+        }
+    }
+
+    /**
+     * Returns binary content deserialized as object of the given type or `null`, if no content is present.
+     * In Java, this is useful for deserializing lists of objects, for example.
+     * For Kotlin, it is recommended to use the inline function [asObject] instead.
+     *
+     * Example Usage:
+     * ```java
+     * List<MyClass> list = body.asObject(new TypeReference<List<MyClass>>(){});
+     * ```
+     * @param type Type reference to which request body content should be parsed.
+     * @throws ParseException if content could not be parsed to instance of type [T].
+     */
+    fun <T> asObject(type: TypeReference<T>): T? {
+        try {
+            return content?.let { DeserializerFactory.getObjectMapper().readValue(it, type) }
+        } catch (e: Exception) {
+            throw ParseException(e.message)
+        }
+    }
+
+    /**
+     * Returns binary content deserialized as object of the given type or `null`, if no content is present.
+     * Only available for Kotlin.
+     *
+     * Example Usage:
+     * ```kotlin
+     * val obj = body.asObject<MyClass>()
+     * val arr = body.asObject<Array<BodyClass>>()
+     * val list = body.asObject<List<MyClass>>()
+     * ```
+     * @param T Class to which request body content should be parsed.
+     * @throws ParseException if content could not be parsed to instance of type [T].
+     */
+    inline fun <reified T> asObject(): T? {
+        return asObject(object : TypeReference<T>() {})
     }
 }
