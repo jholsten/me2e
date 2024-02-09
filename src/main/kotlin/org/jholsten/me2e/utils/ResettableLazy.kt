@@ -21,8 +21,8 @@ internal class ResettableLazy<out T>(private var initializer: () -> T) : Lazy<T>
     override fun isInitialized() = wrap.lazy.isInitialized()
 
     /**
-     * Resets the lazy property to initiate a recomputation when the value is retrieved
-     * the next time.
+     * Resets the lazy property to initiate a recomputation when the value
+     * is retrieved the next time.
      */
     @JvmSynthetic
     fun reset() {

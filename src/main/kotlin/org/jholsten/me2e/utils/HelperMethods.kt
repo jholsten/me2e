@@ -49,6 +49,7 @@ internal inline fun <K, reified T> Map<K, *>.filterValuesIsInstance(): Map<K, T>
 /**
  * Returns the Hex value of the given color.
  */
+@JvmSynthetic
 internal fun Color.toHex(): String {
     return "#" + Integer.toHexString(this.rgb).substring(2)
 }

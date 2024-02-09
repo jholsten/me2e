@@ -58,19 +58,16 @@ class Me2eAssertHealthyExtension : BeforeEachCallback {
         if (unhealthyContainers.size != containersToRestart.size) {
             val deadContainers = unhealthyContainers - containersToRestart.toSet()
             val message = "${deadContainers.size} containers were already restarted before: [${deadContainers.joinToString(", ")}]. " +
-                "Since they are unhealthy again - even after a restart - the test is aborted. " +
-                "To disable this behavior, set 'assertHealthy' in the 'Me2eTestConfig' to false."
-            logger.warn(message)
+                "Since they are unhealthy again - even after a restart - the test is aborted."
+            logger.warn("$message To disable this behavior, set 'assertHealthy' in the 'Me2eTestConfig' to false.")
             throw TestAbortedException(message)
         }
         restartedContainers.addAll(unhealthyContainers)
         try {
             Me2eTest.containerManager.restart(containersToRestart)
         } catch (e: HealthTimeoutException) {
-            val message =
-                "Test was aborted since at least one of the containers in the environment did not become healthy after a restart. " +
-                    "To disable this behavior, set 'assertHealthy' in the 'Me2eTestConfig' to false."
-            logger.warn(message)
+            val message = "Test was aborted since at least one of the containers in the environment did not become healthy after a restart."
+            logger.warn("$message To disable this behavior, set 'assertHealthy' in the 'Me2eTestConfig' to false.")
             throw TestAbortedException(message, e)
         }
     }
