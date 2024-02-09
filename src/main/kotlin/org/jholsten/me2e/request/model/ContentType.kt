@@ -1,5 +1,6 @@
 package org.jholsten.me2e.request.model
 
+import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 
 /**
@@ -12,9 +13,6 @@ class ContentType(
     val value: String,
 ) {
     companion object {
-        private const val TOKEN = "[0-9A-Za-z!#\$%&'*+.^_`|~-]+"
-        private val TYPE_REGEX = Regex("($TOKEN)/($TOKEN)")
-
         /**
          * Content type for JSON data, encoded with charset UTF-8.
          */
@@ -29,7 +27,7 @@ class ContentType(
     }
 
     /**
-     * High-level media type, such as `text` or `application`.
+     * High-level content type, such as `text` or `application`.
      */
     val type: String
 
@@ -39,11 +37,9 @@ class ContentType(
     val subtype: String
 
     init {
-        assertContentTypeIsValid()
-        val match = TYPE_REGEX.find(value)
-        requireNotNull(match) { "Invalid media type \"$value\"" }
-        this.type = match.groupValues[1]
-        this.subtype = match.groupValues[2]
+        val parsedType = assertContentTypeIsValid()
+        this.type = parsedType.type
+        this.subtype = parsedType.subtype
     }
 
     /**
@@ -54,15 +50,15 @@ class ContentType(
     }
 
     /**
-     * Returns whether this media type should be interpreted as a string.
-     * This includes all media types of type `"text"`, as well as `application/json` and `application/xml`.
+     * Returns whether this content type should be interpreted as a string.
+     * This includes all content types of type `"text"`, as well as `application/json` and `application/xml`.
      * In any other case, the value is represented as a byte string or file.
      */
     fun isStringType(): Boolean {
         return type.lowercase() == "text" || listOf("application/json", "application/xml").contains(withoutParameters().lowercase())
     }
 
-    private fun assertContentTypeIsValid() {
-        requireNotNull(value.toMediaTypeOrNull()) { "Invalid Content Type format: $value" }
+    private fun assertContentTypeIsValid(): MediaType {
+        return requireNotNull(value.toMediaTypeOrNull()) { "Invalid content type \"$value\"" }
     }
 }
