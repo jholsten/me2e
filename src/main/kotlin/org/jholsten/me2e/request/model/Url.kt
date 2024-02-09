@@ -54,7 +54,7 @@ class Url(
 
     /**
      * Appends the given [relativeUrl] to this base URL.
-     * @return New instance with the absolute URL
+     * @return New instance with the absolute URL.
      * @throws IllegalArgumentException if format of generated absolute URL is invalid
      */
     fun withRelativeUrl(relativeUrl: RelativeUrl): Url {
@@ -68,7 +68,7 @@ class Url(
         private val relativeUrlBuilder = RelativeUrl.Builder()
 
         internal constructor(httpUrl: Url) : this() {
-            val url = httpUrl.value.toHttpUrlOrNull() ?: throw IllegalArgumentException("Invalid URL format")
+            val url = requireNotNull(httpUrl.value.toHttpUrlOrNull()) { "Invalid URL format: ${httpUrl.value}" }
             this.scheme = Scheme.parse(url.scheme)
             this.host = url.host
             this.port = when {
@@ -84,6 +84,8 @@ class Url(
 
         /**
          * Sets the given URL [scheme] for this URL.
+         * @param scheme of the URL to set.
+         * @return This builder instance, to use for chaining.
          */
         fun withScheme(scheme: Scheme) = apply {
             this.scheme = scheme
@@ -91,6 +93,8 @@ class Url(
 
         /**
          * Sets the given [host] for this URL.
+         * @param host Host of the URL to set.
+         * @return This builder instance, to use for chaining.
          */
         fun withHost(host: String) = apply {
             this.host = host
@@ -99,6 +103,8 @@ class Url(
         /**
          * Sets the given [port] to use to connect to the web server.
          * This only needs to be set if it differs from the default HTTP (80) or HTTPS (443) port.
+         * @param port Port of the URL to set.
+         * @return This builder instance, to use for chaining.
          */
         fun withPort(port: Int) = apply {
             require(port in 1..65535) { "Port number needs to be between 1 and 65535" }
@@ -110,6 +116,8 @@ class Url(
          * Examples:
          * - `/search`
          * - `/account/groups`
+         * @param path Path of the URL to set.
+         * @return This builder instance, to use for chaining.
          */
         fun withPath(path: String) = apply {
             this.relativeUrlBuilder.withPath(path)
@@ -117,7 +125,10 @@ class Url(
 
         /**
          * Sets the given list of values as query parameters for the given [key].
-         * Overwrites all values which were previously set.
+         * Overwrites all values which were previously set for this [key].
+         * @param key Key of the query parameter to add or update.
+         * @param values Values of the query parameter to set.
+         * @return This builder instance, to use for chaining.
          */
         fun withQueryParameter(key: String, values: List<String>) = apply {
             this.relativeUrlBuilder.withQueryParameter(key, values)
@@ -125,6 +136,9 @@ class Url(
 
         /**
          * Adds the given query parameter value to the list of values for the given [key].
+         * @param key Key of the query parameter to add or update.
+         * @param value Value to add for the query parameter with the given key.
+         * @return This builder instance, to use for chaining.
          */
         fun withQueryParameter(key: String, value: String) = apply {
             this.relativeUrlBuilder.withQueryParameter(key, value)
@@ -132,6 +146,7 @@ class Url(
 
         /**
          * Sets the given [fragment] for this URL.
+         * @return This builder instance, to use for chaining.
          */
         fun withFragment(fragment: String) = apply {
             this.relativeUrlBuilder.withFragment(fragment)
@@ -175,10 +190,17 @@ class Url(
         return value.hashCode()
     }
 
+    /**
+     * Scheme of a URL. Only `http` and `https` are supported in this context.
+     */
     enum class Scheme {
         HTTP, HTTPS;
 
         companion object {
+            /**
+             * Parses the given value to an instance of this enum.
+             * @throws IllegalArgumentException if value is unknown.
+             */
             @JvmStatic
             fun parse(value: String): Scheme {
                 return when (value.lowercase()) {
