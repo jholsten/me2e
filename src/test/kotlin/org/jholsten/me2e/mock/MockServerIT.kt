@@ -1,5 +1,6 @@
 package org.jholsten.me2e.mock
 
+import com.fasterxml.jackson.core.type.TypeReference
 import com.github.tomakehurst.wiremock.http.JvmProxyConfigurer
 import org.apache.hc.client5.http.classic.methods.HttpGet
 import org.apache.hc.client5.http.classic.methods.HttpPost
@@ -19,6 +20,7 @@ import org.jholsten.me2e.mock.stubbing.request.StringMatcher
 import org.jholsten.me2e.mock.stubbing.response.MockServerStubResponse
 import org.jholsten.me2e.mock.stubbing.response.MockServerStubResponseBody
 import org.jholsten.me2e.mock.verification.ExpectedRequest
+import org.jholsten.me2e.request.assertions.AssertableResponseIT
 import org.jholsten.me2e.request.model.*
 import org.jholsten.util.RecursiveComparison
 import org.jholsten.util.assertDoesNotThrow
@@ -63,6 +65,18 @@ class MockServerIT {
                     headers = mapOf("Content-Type" to listOf("text/plain"))
                 )
             )
+        )
+    )
+
+    private val expectedObj = AssertableResponseIT.BodyClass(
+        name = "John",
+        nested = AssertableResponseIT.NestedBodyClass(
+            key1 = "value1",
+            key2 = "value2",
+        ),
+        details = listOf(
+            AssertableResponseIT.DetailsBodyClass(detail = 1),
+            AssertableResponseIT.DetailsBodyClass(detail = 2),
         )
     )
 
@@ -128,6 +142,9 @@ class MockServerIT {
                     .withJsonBody(containsNode("nested.key2").withValue(equalTo("value2")))
                     .withJsonBody(containsNode("details[0].detail").withValue(equalTo("1")))
                     .withJsonBody(containsNode("details[1].detail").withValue(equalTo("2")))
+                    .withObjectBody(AssertableResponseIT.BodyClass::class.java, equalTo(expectedObj))
+                    .withObjectBody(object : TypeReference<AssertableResponseIT.BodyClass>() {}, equalTo(expectedObj))
+                    .withObjectBody<AssertableResponseIT.BodyClass>(equalTo(expectedObj))
                     .andNoOther()
             )
         }

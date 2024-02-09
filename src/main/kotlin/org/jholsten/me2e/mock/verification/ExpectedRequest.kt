@@ -1,8 +1,8 @@
 package org.jholsten.me2e.mock.verification
 
+import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
-import com.fasterxml.jackson.databind.node.NullNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.github.tomakehurst.wiremock.http.Request
 import org.jholsten.me2e.assertions.AssertionFailure
@@ -10,9 +10,11 @@ import org.jholsten.me2e.assertions.matchers.Assertable
 import org.jholsten.me2e.assertions.matchers.JsonBodyAssertion
 import org.jholsten.me2e.mock.MockServer
 import org.jholsten.me2e.mock.stubbing.MockServerStub
+import org.jholsten.me2e.parsing.exception.ParseException
 import org.jholsten.me2e.request.mapper.HttpRequestMapper
 import org.jholsten.me2e.request.model.HttpMethod
 import org.jholsten.me2e.request.model.HttpRequest
+import org.jholsten.me2e.request.model.HttpRequestBody
 import org.jholsten.me2e.utils.toJson
 
 /**
@@ -29,6 +31,7 @@ class ExpectedRequest {
     private val queryParameters: MutableList<Assertable<Map<String, List<*>>?>> = mutableListOf()
     private val contentType: MutableList<Assertable<String?>> = mutableListOf()
     private val body: MutableList<Assertable<String?>> = mutableListOf()
+    private val objectBody: MutableList<ObjectBodyAssertion<*>> = mutableListOf()
     private val binaryBody: MutableList<Assertable<ByteArray?>> = mutableListOf()
     private val base64Body: MutableList<Assertable<String?>> = mutableListOf()
     private val jsonBody: MutableList<Assertable<JsonNode?>> = mutableListOf()
@@ -149,6 +152,61 @@ class ExpectedRequest {
     }
 
     /**
+     * Expects that the body of the expected incoming request, deserialized to [type], satisfies the given assertion.
+     * For Kotlin, it is recommended to use the inline function [withObjectBody] instead.
+     * You may call this function multiple times to place multiple requirements on the body.
+     * Not setting an expectation means that the body of the expected request is arbitrary.
+     *
+     * Example:
+     * ```java
+     * assertThat(mockServer).receivedRequest(ExpectedRequest().withObjectBody(MyClass.class, equalTo(obj)));
+     * ```
+     * @param expected Expectation for the value of the [HttpRequest.body].
+     * @param type Type to which the request body content should be deserialized.
+     * @return This instance, to use for chaining.
+     */
+    fun <T> withObjectBody(type: Class<T>, expected: Assertable<T?>) = apply {
+        this.objectBody.add(ObjectBodyAssertion(type = type, expected = expected))
+    }
+
+    /**
+     * Expects that the body of the expected incoming request, deserialized to [type], satisfies the given assertion.
+     * In Java, this is useful for deserializing lists of objects, for example.
+     * For Kotlin, it is recommended to use the inline function [withObjectBody] instead.
+     * You may call this function multiple times to place multiple requirements on the body.
+     * Not setting an expectation means that the body of the expected request is arbitrary.
+     *
+     * Example:
+     * ```java
+     * assertThat(mockServer).receivedRequest(ExpectedRequest().withObjectBody(new TypeReference<List<MyClass>>(){}, equalTo(list)));
+     * ```
+     * @param expected Expectation for the value of the [HttpRequest.body].
+     * @param type Type to which the request body content should be deserialized.
+     * @return This instance, to use for chaining.
+     */
+    fun <T> withObjectBody(type: TypeReference<T>, expected: Assertable<T?>) = apply {
+        this.objectBody.add(ObjectBodyAssertion(typeReference = type, expected = expected))
+    }
+
+    /**
+     * Expects that the body of the expected incoming request, deserialized to type [T], satisfies the given assertion.
+     * Only available for Kotlin. You may call this function multiple times to place multiple requirements
+     * on the body.
+     * Not setting an expectation means that the body of the expected request is arbitrary.
+     *
+     * Example:
+     * ```java
+     * assertThat(mockServer).receivedRequest(ExpectedRequest().withObjectBody<MyClass>(equalTo(list)));
+     * ```
+     * @param expected Expectation for the value of the [HttpRequest.body].
+     * @param T Type to which the request body content should be deserialized.
+     * @return This instance, to use for chaining.
+     */
+    inline fun <reified T> withObjectBody(expected: Assertable<T?>) = apply {
+        withObjectBody(object : TypeReference<T>() {}, expected)
+    }
+
+    /**
      * Expects that the body of the expected incoming request, encoded as byte array, satisfies the given assertion.
      * You may call this function multiple times to place multiple requirements on the request body.
      * Not setting an expectation means that the body of the expected request is arbitrary.
@@ -226,6 +284,7 @@ class ExpectedRequest {
             headers.map { it.assertion(mappedRequest.headers.entries) },
             queryParameters.map { it.assertion(mappedRequest.url.queryParameters) },
             body.map { it.assertion(mappedRequest.body?.asString()) },
+            objectBody.map { it.evaluateBody(mappedRequest.body) },
             binaryBody.map { it.assertion(mappedRequest.body?.asBinary()) },
             base64Body.map { it.assertion(mappedRequest.body?.asBase64()) },
             jsonBody.map { it.assertion(json) },
@@ -266,6 +325,10 @@ class ExpectedRequest {
         return toJson(json)
     }
 
+    /**
+     * Creates array node with entries of the given list, if it is not empty.
+     * Is used to represent this expected request as JSON.
+     */
     private fun List<Assertable<*>>.toJson(): JsonNode? {
         if (this.isEmpty()) {
             return null
@@ -275,5 +338,39 @@ class ExpectedRequest {
             node.add(assertable.toString())
         }
         return node
+    }
+
+    /**
+     * Wrapper for assertions concerning the object body deserialized to a given type.
+     */
+    private inner class ObjectBodyAssertion<T>(
+        val type: Class<T>? = null,
+        val typeReference: TypeReference<T>? = null,
+        val expected: Assertable<T?>,
+    ) {
+        /**
+         *
+         * Evaluates the given assertion on the given request body.
+         */
+        fun evaluateBody(body: HttpRequestBody?): Boolean {
+            val obj = try {
+                deserializeBody(body)
+            } catch (e: ParseException) {
+                throw AssertionFailure("Unable to deserialize body: ${e.message}")
+            }
+            return expected.assertion(obj)
+        }
+
+        /**
+         * Deserializes the given request body to an instance of type [T].
+         * @throws ParseException if content could not be deserialized.
+         */
+        private fun deserializeBody(body: HttpRequestBody?): T? {
+            return if (type != null) {
+                body?.asObject(type)
+            } else {
+                body?.asObject(typeReference!!)
+            }
+        }
     }
 }
