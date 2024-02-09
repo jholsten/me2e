@@ -11,6 +11,25 @@ import org.junit.jupiter.api.extension.ExtendWith
 
 /**
  * Base class for the definition of ME2E-Tests.
+ *
+ * When initializing this class, i.e. when starting a test in a class that inherits from [Me2eTest],
+ * the test environment including all containers and Mock Servers are started and the services are
+ * injected into the fields annotated with [org.jholsten.me2e.container.injection.InjectService].
+ * For this purpose, the [Me2eTestConfig] annotation defined in this project is first searched for
+ * and the configuration file specified in [Me2eTestConfig.config] is parsed. The containers and
+ * Mock Servers are then started using the [ContainerManager] and [MockServerManager].
+ *
+ * The environment is started once when the first test class, which inherits from [Me2eTest], is
+ * initialized. The instantiated environment is then reused for all subsequent test classes.
+ * After all tests have been executed, the containers and Mock Servers are automatically shut down.
+ *
+ * To invoke functions on the containers and Mock Servers, use [org.jholsten.me2e.container.injection.InjectService].
+ * You may also use the [containerManager] and [mockServerManager] referenced in this class to
+ * execute functions for managing the environment.
+ * @see org.jholsten.me2e.container.injection.InjectService
+ * @see Me2eTestConfig
+ * @see ContainerManager
+ * @see MockServerManager
  */
 @ExtendWith(Me2eAssertHealthyExtension::class, Me2eStateResetExtension::class)
 open class Me2eTest {
@@ -19,6 +38,7 @@ open class Me2eTest {
 
         /**
          * Configuration annotation that is used to configure the tests.
+         * @throws RuntimeException if [Me2eTestConfig] annotation is not defined in the current project.
          */
         @get:JvmStatic
         val configAnnotation: Me2eTestConfig by lazy {
@@ -27,6 +47,7 @@ open class Me2eTest {
 
         /**
          * Parsed test configuration.
+         * @throws RuntimeException if [Me2eTestConfig] annotation is not defined in the current project.
          */
         @get:JvmStatic
         val config: TestConfig by lazy {

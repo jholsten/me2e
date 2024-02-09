@@ -4,6 +4,9 @@ import io.github.classgraph.ClassGraph
 import io.github.classgraph.ClassInfo
 import org.jholsten.me2e.utils.logger
 
+/**
+ * Utility class which scans the current project for instantiations of the [Me2eTestConfig] annotations.
+ */
 internal class Me2eTestConfigScanner {
     companion object {
         private val logger = logger<Me2eTestConfigScanner>()
@@ -11,6 +14,8 @@ internal class Me2eTestConfigScanner {
         /**
          * Finds [Me2eTestConfig] annotation definition in the project.
          * If multiple annotations are defined, the first one is used.
+         * @return First [Me2eTestConfig] annotation defined in the current project or `null`, if
+         * no such instance could be found.
          */
         @JvmSynthetic
         fun findFirstTestConfigAnnotation(): Me2eTestConfig? {
@@ -23,12 +28,8 @@ internal class Me2eTestConfigScanner {
                 }
                 val annotatedClass = annotatedClasses.first()
                 logger.info("Reading test configuration from ${annotatedClass.name}.")
-                return extractAnnotationFromAnnotatedClass(annotatedClass)
+                return annotatedClass.loadClass().getAnnotation(Me2eTestConfig::class.java)
             }
-        }
-
-        private fun extractAnnotationFromAnnotatedClass(annotatedClass: ClassInfo): Me2eTestConfig {
-            return annotatedClass.loadClass().getAnnotation(Me2eTestConfig::class.java)
         }
     }
 }
