@@ -97,6 +97,17 @@ class HttpRequestBody {
         }
 
         /**
+         * Serializes the given object to a JSON string and sets this as the string content of the request body.
+         * @param content Object to serialize.
+         * @return This builder instance, to use for chaining.
+         * @throws java.io.IOException if content could not be serialized.
+         */
+        fun <T> withJsonContent(content: T) = apply {
+            this.stringContent = DeserializerFactory.getObjectMapper().writeValueAsString(content)
+            this.contentType = MediaType.JSON_UTF8
+        }
+
+        /**
          * Sets the given content type for the request body.
          * @param contentType Content type of the request body to set.
          * @return This builder instance, to use for chaining.

@@ -42,6 +42,16 @@ internal class HttpRequestBodyTest {
         assertEquals(MediaType.TEXT_PLAIN_UTF8, body.contentType)
     }
 
+    @Test
+    fun `Object should be serialized and content type should be set to JSON`() {
+        val body = HttpRequestBody.Builder()
+            .withJsonContent(Pair("value1", "value2"))
+            .build()
+
+        assertEquals("{\"first\":\"value1\",\"second\":\"value2\"}", body.asString())
+        assertEquals("application/json; charset=utf-8", body.contentType?.value)
+    }
+
     @ParameterizedTest(name = "[{index}] with {0}")
     @ArgumentsSource(FileBodyArgumentProvider::class)
     @Suppress("UNUSED_PARAMETER")
