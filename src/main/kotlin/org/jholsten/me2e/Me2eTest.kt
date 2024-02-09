@@ -12,7 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 /**
  * Base class for the definition of ME2E-Tests.
  */
-@ExtendWith(Me2eAssertHealthyExtension::class, Me2eRequestInterceptorResetExtension::class)
+@ExtendWith(Me2eAssertHealthyExtension::class, Me2eStateResetExtension::class)
 open class Me2eTest {
     companion object {
         private val logger = logger<Me2eTest>()

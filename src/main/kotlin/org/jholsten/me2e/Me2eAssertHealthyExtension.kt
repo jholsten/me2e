@@ -12,6 +12,7 @@ import org.opentest4j.TestAbortedException
  * it is assumed that this would lead to a flaky and therefore not meaningful test result. Therefore, an attempt
  * is made to restart the container once. If this attempt fails or if the container is still unhealthy, the test
  * is aborted.
+ * @see Me2eTestConfig.assertHealthy
  */
 class Me2eAssertHealthyExtension : BeforeEachCallback {
     companion object {
