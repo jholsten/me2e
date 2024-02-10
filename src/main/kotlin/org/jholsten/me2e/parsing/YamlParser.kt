@@ -47,6 +47,8 @@ internal open class YamlParser<T>(
         } catch (e: MismatchedInputException) {
             val path = e.path.filter { it.fieldName != null }.joinToString(".") { it.fieldName }
             throw ValidationException(listOf("$path: ${e.message}"))
+        } catch (e: ValidationException) {
+            throw e
         } catch (e: Exception) {
             throw ParseException("Parsing value '$value' failed: ${e.message}")
         }

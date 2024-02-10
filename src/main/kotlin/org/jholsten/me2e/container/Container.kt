@@ -167,6 +167,7 @@ open class Container internal constructor(
     /**
      * Executes the given command inside the container in the container's working directory,
      * as using [`docker exec`](https://docs.docker.com/engine/reference/commandline/exec/).
+     * Note that the exit code of the result is not checked, i.e. the execution may have been unsuccessful.
      * @param command Command to execute in array format. Example: `["echo", "a", "&&", "echo", "b"]`
      * @return Result of the execution.
      * @throws IllegalStateException if container is not initialized, i.e. not started.
@@ -185,6 +186,7 @@ open class Container internal constructor(
     /**
      * Executes the given command inside the container as the given user in the container's working directory, as using
      * [`docker exec -u user`](https://docs.docker.com/engine/reference/commandline/exec/).
+     * Note that the exit code of the result is not checked, i.e. the execution may have been unsuccessful.
      * @param user Username or UID to execute command with. Format is one of: `user`, `user:group`, `uid` or `uid:gid`.
      * @param command Command to execute in array format. Example: `["echo", "a", "&&", "echo", "b"]`
      * @return Result of the execution.

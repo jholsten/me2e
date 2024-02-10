@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.databind.node.ObjectNode
 import org.jholsten.me2e.config.model.DockerConfig
 import org.jholsten.me2e.config.model.TestEnvironmentConfig
+import org.jholsten.me2e.config.parser.DockerComposeValidator
 import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.container.database.DatabaseManagementSystem
 import org.jholsten.me2e.container.model.ContainerType
@@ -132,13 +133,14 @@ internal class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironm
     }
 
     /**
-     * Deserializes services from the given Docker-Compose file to Map of `(containerName, container)`.
-     * Reads configuration properties from labels.
+     * Validates the contents of the given Docker-Compose file and then deserializes the services to
+     * Map of `(containerName, container)`. Reads configuration properties from labels.
      * @return Deserialized map of `(containerName, container)`.
      */
-    private fun deserializeContainers(dockerConfig: DockerConfig, dockerComposeFile: String): Map<String, Container> {
-        val dockerComposeContent = FileUtils.readFileContentsFromResources(dockerComposeFile)
-        val dockerCompose = DeserializerFactory.getYamlMapper().readTree(dockerComposeContent)
+    private fun deserializeContainers(dockerConfig: DockerConfig, dockerComposePath: String): Map<String, Container> {
+        val dockerComposeFile = FileUtils.getResourceAsFile(dockerComposePath)
+        DockerComposeValidator().validate(dockerComposeFile)
+        val dockerCompose = DeserializerFactory.getYamlMapper().readTree(dockerComposeFile.readText())
         val serviceNode = dockerCompose.get("services")
         require(serviceNode != null) { "Docker-Compose needs to have services defined." }
         val services = serviceNode.fields()
