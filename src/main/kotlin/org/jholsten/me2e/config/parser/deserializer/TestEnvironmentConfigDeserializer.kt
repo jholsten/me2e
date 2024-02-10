@@ -18,75 +18,95 @@ import org.jholsten.me2e.parsing.utils.FileUtils
 import org.jholsten.me2e.utils.logger
 
 /**
- * Custom deserializer for deserializing test environment configuration.
- * Deserializes services in `docker-compose` file to [Container] instances.
- * Also, it sets the name of the specified Mock Servers to the corresponding key.
- * TODO: Check if working with invalid enum values + make container type optional
- * TODO: Maybe add upper level "settings"?
+ * Custom deserializer for parsing the test environment defined in the `environment` section of the config file
+ * to an instance of [TestEnvironmentConfig]. Deserializes services in Docker-Compose file to [Container] instances
+ * and sets the `name` of the Mock Servers to their corresponding key.
+ *
+ * Prior to executing this deserializer, the schema has already been validated using the
+ * [org.jholsten.me2e.config.parser.ConfigSchemaValidator], so that it can be assumed that all required
+ * fields are set for the environment definition.
  */
 internal class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironmentConfig>() {
     companion object {
         /**
-         * Label key for specifying the container type of a service
+         * Label key for specifying the container type of a service.
+         * @see Container.type
          */
         private const val CONTAINER_TYPE_KEY = "org.jholsten.me2e.container-type"
 
         /**
          * Label key for specifying the URL of a microservice.
+         * @see org.jholsten.me2e.container.microservice.MicroserviceContainer.url
          */
         private const val URL_KEY = "org.jholsten.me2e.url"
 
         /**
          * Label key for specifying the database type (i.e. Database Management System) of a service.
          * Only applicable to services of type [ContainerType.DATABASE].
+         * @see org.jholsten.me2e.container.database.DatabaseContainer.system
          */
         private const val DATABASE_SYSTEM_KEY = "org.jholsten.me2e.database.system"
 
         /**
          * Label key for specifying the name of the database of a service.
          * Only applicable to services of type [ContainerType.DATABASE].
+         * @see org.jholsten.me2e.container.database.DatabaseContainer.database
          */
         private const val DATABASE_NAME_KEY = "org.jholsten.me2e.database.name"
 
         /**
          * Label key for specifying the schema of the database of a service.
-         * Only applicable to services of type [ContainerType.DATABASE] and systems of type [DatabaseManagementSystem.POSTGRESQL].
+         * Only applicable to services of type [ContainerType.DATABASE] and SQL database management systems.
+         * @see org.jholsten.me2e.container.database.DatabaseContainer.schema
          */
         private const val DATABASE_SCHEMA_KEY = "org.jholsten.me2e.database.schema"
 
         /**
          * Label key for specifying the username of the database of a service.
          * Only applicable to services of type [ContainerType.DATABASE].
+         * @see org.jholsten.me2e.container.database.DatabaseContainer.username
          */
         private const val DATABASE_USERNAME_KEY = "org.jholsten.me2e.database.username"
 
         /**
          * Label key for specifying the password of the database of a service.
          * Only applicable to services of type [ContainerType.DATABASE].
+         * @see org.jholsten.me2e.container.database.DatabaseContainer.password
          */
         private const val DATABASE_PASSWORD_KEY = "org.jholsten.me2e.database.password"
 
         /**
          * Regex to match label keys for specifying initialization scripts for the database.
          * Only applicable to services of type [ContainerType.DATABASE].
+         * @see org.jholsten.me2e.container.database.DatabaseContainer.initializationScripts
          */
         private val DATABASE_INIT_SCRIPTS_KEY_REGEX = Regex("org\\.jholsten\\.me2e\\.database\\.init-script\\.(.*)")
 
         /**
          * Label key for specifying the pull policy for this container.
+         * @see Container.pullPolicy
          */
         private const val PULL_POLICY_KEY = "org.jholsten.me2e.pull-policy"
     }
 
     private val logger = logger<TestEnvironmentConfigDeserializer>()
-    private var mapper = DeserializerFactory.getObjectMapper()
 
+    /**
+     * Object mapper to use for deserializing containers and Mock Servers.
+     */
+    private lateinit var mapper: ObjectMapper
+
+    /**
+     * Deserializes the JSON node containing the environment definition to an instance of [TestEnvironmentConfig].
+     * Parses the services defined in the referenced Docker-Compose file to instances of [Container].
+     * @return Deserialized test environment config.
+     */
     override fun deserialize(p: JsonParser, ctxt: DeserializationContext): TestEnvironmentConfig {
         mapper = p.codec as ObjectMapper
         val node = p.readValueAsTree<ObjectNode>()
         val fields = node.fields().asSequence().map { it.key to it.value }.toMap()
         val dockerCompose = fields["docker-compose"]!!.asText()
-        val dockerConfig = ctxt.findInjectableValue("dockerConfig", null, null) as DockerConfig
+        val dockerConfig = ctxt.findInjectableValue(TestConfigDeserializer.INJECTABLE_DOCKER_CONFIG_FIELD_NAME, null, null) as DockerConfig
         return TestEnvironmentConfig(
             dockerCompose = dockerCompose,
             containers = deserializeContainers(dockerConfig, dockerCompose),
@@ -97,6 +117,8 @@ internal class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironm
     /**
      * Deserializes Mock Server instances to Map of `(mockServerName, mockServer)`.
      * Sets `name` field to `mockServerName` for each Mock Server.
+     * @return Deserialized map of `(mockServerName, mockServer)`.
+     * @see MockServerDeserializer
      */
     private fun deserializeMockServers(mockServersNode: JsonNode): Map<String, MockServer> {
         val result = mutableMapOf<String, MockServer>()
@@ -110,8 +132,9 @@ internal class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironm
     }
 
     /**
-     * Deserializes services from the given Docker-Compose file to Map of `(containerName, Container)`.
+     * Deserializes services from the given Docker-Compose file to Map of `(containerName, container)`.
      * Reads configuration properties from labels.
+     * @return Deserialized map of `(containerName, container)`.
      */
     private fun deserializeContainers(dockerConfig: DockerConfig, dockerComposeFile: String): Map<String, Container> {
         val dockerComposeContent = FileUtils.readFileContentsFromResources(dockerComposeFile)
@@ -122,27 +145,37 @@ internal class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironm
         return deserializeContainers(dockerConfig, services)
     }
 
+    /**
+     * Deserializes the given map of services defined in the Docker-Compose file to a map of
+     * `(containerName, container)`. Sets `name` field to `containerName` for each Container and reads
+     * the configuration properties from the labels defined for each service.
+     * @return Deserialized map of `(containerName, container)`.
+     */
     private fun deserializeContainers(
         dockerConfig: DockerConfig,
         services: Iterator<MutableMap.MutableEntry<String, JsonNode>>
     ): Map<String, Container> {
         val result = mutableMapOf<String, Container>()
-        for (entry in services) {
-            val node = entry.value as ObjectNode
+        for ((key, jsonNode) in services) {
+            val node = jsonNode as ObjectNode
             convertListToMap(node, "labels")
             convertListToMap(node, "environment")
             val labels = getImageLabels(node.get("labels"))
-            node.put("name", entry.key)
+            node.put("name", key)
             node.put("type", labels[CONTAINER_TYPE_KEY] ?: "MISC")
             node.put("predefinedUrl", labels[URL_KEY])
             node.put("pullPolicy", labels[PULL_POLICY_KEY] ?: dockerConfig.pullPolicy.name)
             node.put("hasHealthcheck", node.has("healthcheck"))
             setDatabaseProperties(node, labels, node.get("environment"), getDatabaseInitializationScripts(node.get("labels")))
-            result[entry.key] = mapper.treeToValue(node, Container::class.java)
+            result[key] = mapper.treeToValue(node, Container::class.java)
         }
         return result
     }
 
+    /**
+     * Reads database configuration properties from the labels of the service represented by the given node.
+     * Tries to read properties from the environment definition if labels are not defined.
+     */
     private fun setDatabaseProperties(
         node: ObjectNode,
         labels: Map<String, String?>,
@@ -178,6 +211,11 @@ internal class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironm
         node.set<ObjectNode>("initializationScripts", databaseInitializationScripts.toJsonNode())
     }
 
+    /**
+     * Returns database initialization scripts defined in the given `labels` node.
+     * Each initialization script is composed of a name and the path to the corresponding file.
+     * @return Map of `name` and `path`
+     */
     private fun getDatabaseInitializationScripts(labelsNode: JsonNode?): Map<String, String> {
         val fields = labelsNode?.fields() ?: return mapOf()
         val scripts = fields.asSequence().mapNotNull { (key, node) ->
@@ -190,6 +228,10 @@ internal class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironm
         return scripts.associate { (match, node) -> match.groupValues[1] to node.asText() }
     }
 
+    /**
+     * Reads all configuration properties from the `labels` defined in the given node.
+     * @return Map of `labelName` and `labelValue`.
+     */
     private fun getImageLabels(labelsNode: JsonNode?): Map<String, String?> {
         return mapOf(
             CONTAINER_TYPE_KEY to labelsNode?.get(CONTAINER_TYPE_KEY)?.asText(),
@@ -227,18 +269,21 @@ internal class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironm
             return
         }
 
-        val result = mutableMapOf<String, String>()
+        val result = mutableMapOf<String, String?>()
         for (entry in serviceNode[key].elements()) {
             val keyValuePair = entry.asText().split("=")
-            if (keyValuePair.size != 2) {
-                logger.warn("Ignoring entry ${entry.asText()} in $key since the entry is not in the required format.")
-                continue
+            when (keyValuePair.size) {
+                1 -> result[keyValuePair[0]] = null
+                2 -> result[keyValuePair[0]] = keyValuePair[1]
+                else -> logger.warn("Ignoring entry ${entry.asText()} in $key since the entry is not in the required format.")
             }
-            result[keyValuePair[0]] = keyValuePair[1]
         }
         serviceNode.replace(key, mapper.valueToTree(result))
     }
 
+    /**
+     * Transforms the given Map to a JSON node.
+     */
     private fun Map<String, String>.toJsonNode(): JsonNode {
         val node = JsonNodeFactory.instance.objectNode()
         for ((key, value) in this.entries) {

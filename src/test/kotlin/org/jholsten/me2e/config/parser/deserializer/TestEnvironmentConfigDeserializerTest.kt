@@ -11,7 +11,6 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import io.mockk.*
 import org.jholsten.me2e.config.model.DockerConfig
-import org.jholsten.me2e.config.parser.deserializer.TestEnvironmentConfigDeserializer
 import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.mock.MockServer
 import org.jholsten.me2e.parsing.utils.DeserializerFactory
@@ -172,10 +171,51 @@ class TestEnvironmentConfigDeserializerTest {
         val expectedService = expectedApiGateway()
             .set<ObjectNode>(
                 "environment", JsonNodeFactory.instance.objectNode()
+                    .put("DB_PASSWORD: 123", null as String?)
                     .put("DB_USER", "user")
             )
             .set<ObjectNode>(
                 "labels", JsonNodeFactory.instance.objectNode()
+                    .put("org.jholsten.me2e.container-type: MICROSERVICE", null as String?)
+            )
+            .put("type", "MISC")
+            .put("pullPolicy", "MISSING")
+        verify { mockedMapper.treeToValue(expectedService, Container::class.java) }
+        verify { mockedMapper.treeToValue(expectedMockServer(), MockServer::class.java) }
+    }
+
+    @Test
+    fun `Deserializing environment config with empty values should succeed`() {
+        val dockerComposeContents = """
+            services:
+                api-gateway:
+                    image: api-gateway-service:latest
+                    ports:
+                      - 1234
+                      - 1235:80
+                    environment:
+                      DB_USER:
+                    healthcheck:
+                      test: curl --fail http://localhost:1234/health || exit 1
+                    labels:
+                      - "some-label"
+        """.trimIndent()
+        mockReadingDockerCompose(dockerComposeContents)
+
+        val parser = prepareParser(contents)
+        val config = TestEnvironmentConfigDeserializer().deserialize(parser, mockedDeserializationContext)
+
+        assertKeysAsExpected(listOf("api-gateway"), config.containers)
+        assertKeysAsExpected(listOf("mock-server"), config.mockServers)
+
+        val expectedService = expectedApiGateway()
+            .set<ObjectNode>(
+                "environment", JsonNodeFactory.instance.objectNode()
+                    .put("DB_USER", null as String?)
+            )
+            .set<ObjectNode>(
+                "labels", JsonNodeFactory.instance.objectNode()
+                    .put("some-label", null as String?)
             )
             .put("type", "MISC")
             .put("pullPolicy", "MISSING")
