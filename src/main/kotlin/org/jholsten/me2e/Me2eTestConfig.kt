@@ -1,8 +1,8 @@
 package org.jholsten.me2e
 
 import org.jholsten.me2e.config.model.ConfigFormat
-import org.jholsten.me2e.report.result.ReportGenerator
-import org.jholsten.me2e.report.result.html.HtmlReportGenerator
+import org.jholsten.me2e.report.generator.ReportGenerator
+import org.jholsten.me2e.report.generator.html.HtmlReportGenerator
 import kotlin.reflect.KClass
 
 /**

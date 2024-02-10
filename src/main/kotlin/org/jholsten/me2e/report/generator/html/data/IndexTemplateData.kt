@@ -1,6 +1,6 @@
-package org.jholsten.me2e.report.result.html.data
+package org.jholsten.me2e.report.generator.html.data
 
-import org.jholsten.me2e.report.result.html.HtmlReportGenerator
+import org.jholsten.me2e.report.generator.html.HtmlReportGenerator
 import org.jholsten.me2e.report.result.model.TestExecutionResult
 import org.jholsten.me2e.report.result.model.TestResult
 import org.jholsten.me2e.report.result.utils.getDescendants

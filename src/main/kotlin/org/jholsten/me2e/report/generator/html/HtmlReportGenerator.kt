@@ -1,10 +1,10 @@
-package org.jholsten.me2e.report.result.html
+package org.jholsten.me2e.report.generator.html
 
 import org.jholsten.me2e.parsing.utils.FileUtils
-import org.jholsten.me2e.report.result.ReportGenerator
-import org.jholsten.me2e.report.result.html.data.IndexTemplateData
-import org.jholsten.me2e.report.result.html.data.TemplateData
-import org.jholsten.me2e.report.result.html.data.TestDetailTemplateData
+import org.jholsten.me2e.report.generator.ReportGenerator
+import org.jholsten.me2e.report.generator.html.data.IndexTemplateData
+import org.jholsten.me2e.report.generator.html.data.TemplateData
+import org.jholsten.me2e.report.generator.html.data.TestDetailTemplateData
 import org.jholsten.me2e.report.result.model.TestExecutionResult
 import org.jholsten.me2e.report.result.model.TestResult
 import org.jholsten.me2e.utils.logger

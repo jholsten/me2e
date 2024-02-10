@@ -1,4 +1,4 @@
-package org.jholsten.me2e.report.result
+package org.jholsten.me2e.report.generator
 
 import org.jholsten.me2e.report.result.model.TestExecutionResult
 

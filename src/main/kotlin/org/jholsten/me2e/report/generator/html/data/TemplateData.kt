@@ -1,4 +1,4 @@
-package org.jholsten.me2e.report.result.html.data
+package org.jholsten.me2e.report.generator.html.data
 
 import org.thymeleaf.context.Context
 import java.time.Instant

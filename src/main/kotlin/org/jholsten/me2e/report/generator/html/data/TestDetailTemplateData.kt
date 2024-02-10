@@ -1,8 +1,8 @@
-package org.jholsten.me2e.report.result.html.data
+package org.jholsten.me2e.report.generator.html.data
 
 import org.jholsten.me2e.report.logs.model.AggregatedLogEntry
 import org.jholsten.me2e.report.logs.model.ServiceSpecification
-import org.jholsten.me2e.report.result.html.HtmlReportGenerator
+import org.jholsten.me2e.report.generator.html.HtmlReportGenerator
 import org.jholsten.me2e.report.result.model.*
 import org.jholsten.me2e.report.result.utils.getDescendants
 import org.jholsten.me2e.report.stats.model.AggregatedStatsEntry

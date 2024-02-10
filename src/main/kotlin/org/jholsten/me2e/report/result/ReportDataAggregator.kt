@@ -2,10 +2,11 @@ package org.jholsten.me2e.report.result
 
 import org.jholsten.me2e.Me2eTestConfigStorage
 import org.jholsten.me2e.container.Container
+import org.jholsten.me2e.report.generator.ReportGenerator
 import org.jholsten.me2e.report.logs.LogAggregator
 import org.jholsten.me2e.report.logs.model.AggregatedLogEntry
 import org.jholsten.me2e.report.logs.model.ServiceSpecification
-import org.jholsten.me2e.report.result.html.HtmlReportGenerator
+import org.jholsten.me2e.report.generator.html.HtmlReportGenerator
 import org.jholsten.me2e.report.stats.StatsAggregator
 import org.jholsten.me2e.report.result.mapper.ReportEntryMapper
 import org.jholsten.me2e.report.result.model.*

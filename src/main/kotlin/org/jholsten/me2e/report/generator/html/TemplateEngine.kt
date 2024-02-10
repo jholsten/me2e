@@ -1,7 +1,7 @@
-package org.jholsten.me2e.report.result.html
+package org.jholsten.me2e.report.generator.html
 
 import org.apache.commons.io.FileUtils
-import org.jholsten.me2e.report.result.html.data.TemplateData
+import org.jholsten.me2e.report.generator.html.data.TemplateData
 import org.thymeleaf.TemplateEngine
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
 import java.io.File
