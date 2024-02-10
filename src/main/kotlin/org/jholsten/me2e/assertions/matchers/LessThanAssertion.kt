@@ -6,7 +6,7 @@ package org.jholsten.me2e.assertions.matchers
  * @param expected Numeric value which should be greater than the actual value.
  * @param T Numeric datatype of the values to compare.
  */
-class LessThanAssertion<T>(private val expected: T) : Assertable<T?>(
+class LessThanAssertion<T> internal constructor(private val expected: T) : Assertable<T?>(
     assertion = { actual -> actual?.let { actual < expected } == true },
     message = "to be less than\n\t$expected",
 ) where T : Number?, T : Comparable<T> {

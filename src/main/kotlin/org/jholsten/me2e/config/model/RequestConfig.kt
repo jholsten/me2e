@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 /**
  * Configuration for all HTTP requests to [org.jholsten.me2e.container.microservice.MicroserviceContainer] instances.
  */
-class RequestConfig(
+data class RequestConfig internal constructor(
     /**
      * Connect timeout in seconds.
      */

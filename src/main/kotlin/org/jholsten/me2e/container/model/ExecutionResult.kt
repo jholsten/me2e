@@ -3,7 +3,7 @@ package org.jholsten.me2e.container.model
 /**
  * Result of the execution of a command inside a Docker container.
  */
-data class ExecutionResult(
+data class ExecutionResult internal constructor(
     /**
      * Exit code of the command.
      */

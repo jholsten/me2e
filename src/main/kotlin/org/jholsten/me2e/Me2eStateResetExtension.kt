@@ -13,7 +13,7 @@ import org.junit.jupiter.api.extension.ExtensionContext
  * Resetting the state after each test ensures a more predictable behavior so that a state modified in
  * previous tests does not influence the result of other tests.
  */
-class Me2eStateResetExtension : AfterEachCallback {
+class Me2eStateResetExtension internal constructor() : AfterEachCallback {
     private val logger = logger<Me2eStateResetExtension>()
 
     /**

@@ -7,7 +7,7 @@ import java.math.BigDecimal
  * Result of the execution of all tests.
  * Contains metrics about the number of tests and their duration as well as the details of each test execution.
  */
-class TestExecutionResult(
+class TestExecutionResult internal constructor(
     /**
      * Total number of tests that were executed.
      */

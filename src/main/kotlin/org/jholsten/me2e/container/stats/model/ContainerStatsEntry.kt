@@ -8,7 +8,7 @@ import java.time.Instant
  * Contains aggregated resource usage information about CPU, memory and network input and output.
  * @see com.github.dockerjava.api.model.Statistics
  */
-open class ContainerStatsEntry(
+open class ContainerStatsEntry internal constructor(
     /**
      * Timestamp of when this entry was received.
      */

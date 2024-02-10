@@ -8,7 +8,7 @@ import java.util.UUID
  * Specification of one service instance, used for representation.
  * In this context, a service may be a [org.jholsten.me2e.container.Container] or the Test Runner for example.
  */
-data class ServiceSpecification(
+data class ServiceSpecification internal constructor(
     /**
      * Unique identifier of the service instance.
      */

@@ -12,7 +12,7 @@ import java.time.Instant
  * Summary of a test or test container for which the execution was finished.
  * Includes succeeded, failed and aborted tests and test containers.
  */
-class FinishedTestResult(
+class FinishedTestResult internal constructor(
     /**
      * Unique identifier of the test or test container.
      * @see org.junit.platform.launcher.TestIdentifier.getUniqueId

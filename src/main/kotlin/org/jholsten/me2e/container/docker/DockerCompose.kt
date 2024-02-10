@@ -257,7 +257,7 @@ class DockerCompose private constructor(
      * Custom implementation to execute Docker-Compose commands locally.
      * @see org.testcontainers.containers.LocalDockerCompose
      */
-    inner class Local {
+    inner class Local internal constructor() {
         private val logger = DockerLoggerFactory.getLogger(composeExecutable)
 
         /**

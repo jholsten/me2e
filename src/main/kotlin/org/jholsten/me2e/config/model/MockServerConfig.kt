@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 /**
  * Configuration for all [org.jholsten.me2e.mock.MockServer] instances.
  */
-data class MockServerConfig(
+data class MockServerConfig internal constructor(
     /**
      * Path to the keystore containing the TLS certificate to use for the [org.jholsten.me2e.mock.MockServer] instances.
      * Can be either an absolute path to a file or a resource on the classpath.

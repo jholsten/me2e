@@ -6,7 +6,7 @@ import org.jholsten.me2e.container.docker.DockerComposeVersion
 /**
  * Configuration for Docker/Docker-Compose.
  */
-class DockerConfig(
+data class DockerConfig internal constructor(
     /**
      * Docker-Compose version to use.
      */

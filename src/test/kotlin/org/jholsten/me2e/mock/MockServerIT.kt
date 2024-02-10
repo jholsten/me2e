@@ -13,7 +13,7 @@ import org.jholsten.me2e.assertions.containsKey
 import org.jholsten.me2e.assertions.containsNode
 import org.jholsten.me2e.assertions.equalTo
 import org.jholsten.me2e.config.model.MockServerConfig
-import org.jholsten.me2e.mock.exception.VerificationException
+import org.jholsten.me2e.mock.verification.exception.VerificationException
 import org.jholsten.me2e.mock.stubbing.MockServerStub
 import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequestMatcher
 import org.jholsten.me2e.mock.stubbing.request.StringMatcher

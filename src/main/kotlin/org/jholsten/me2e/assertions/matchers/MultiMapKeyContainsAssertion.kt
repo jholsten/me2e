@@ -5,7 +5,7 @@ package org.jholsten.me2e.assertions.matchers
  * For assertions concerning the value of the entry with the [expectedKey], use [withValue] and [withValues].
  * @param K Datatype of the keys of the maps to compare.
  */
-class MultiMapKeyContainsAssertion<K>(private val expectedKey: K) : Assertable<Map<K, List<*>>?>(
+class MultiMapKeyContainsAssertion<K> internal constructor(private val expectedKey: K) : Assertable<Map<K, List<*>>?>(
     assertion = { actual -> actual?.containsKey(expectedKey) ?: false },
     message = "to contain key\n\t$expectedKey",
 ) {

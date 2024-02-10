@@ -44,7 +44,7 @@ import org.jholsten.me2e.assertions.AssertionFailure
  * assertThat(response).jsonBody(containsNode("journal.title").withValue(equalTo("IEEE Software")))
  * ```
  */
-class JsonBodyAssertion(private val expectedPath: String) : Assertable<JsonNode?>(
+class JsonBodyAssertion internal constructor(private val expectedPath: String) : Assertable<JsonNode?>(
     assertion = { actual -> actual != null && findNodeByPath(actual, expectedPath) != null },
     message = "to contain node with path\n\t$expectedPath",
 ) {

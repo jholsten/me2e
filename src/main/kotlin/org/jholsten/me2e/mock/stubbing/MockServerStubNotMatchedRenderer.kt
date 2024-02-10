@@ -24,7 +24,7 @@ import kotlin.math.max
  * This body is both printed in the logs and returned as a response body to the request.
  * @see [com.github.tomakehurst.wiremock.verification.notmatched.PlainTextStubNotMatchedRenderer]
  */
-class MockServerStubNotMatchedRenderer : NotMatchedRenderer() {
+internal class MockServerStubNotMatchedRenderer : NotMatchedRenderer() {
     override fun render(admin: Admin, request: Request): ResponseDefinition {
         val loggedRequest = LoggedRequest.createFrom(request.originalRequest.or(request))
         val nearMisses = admin.findTopNearMissesFor(loggedRequest).nearMisses

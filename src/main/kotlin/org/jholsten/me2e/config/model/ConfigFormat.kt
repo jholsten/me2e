@@ -10,7 +10,8 @@ enum class ConfigFormat(
     /**
      * Parser to use for reading the test configuration.
      */
-    val parser: ConfigParser
+    @JvmSynthetic
+    internal val parser: ConfigParser
 ) {
     YAML(YamlConfigParser())
 }

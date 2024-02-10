@@ -6,7 +6,7 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent
 import org.jholsten.me2e.mock.stubbing.MockServerStub
 import org.jholsten.me2e.config.parser.deserializer.MockServerDeserializer
-import org.jholsten.me2e.mock.exception.VerificationException
+import org.jholsten.me2e.mock.verification.exception.VerificationException
 import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequestMapper.Companion.METADATA_MOCK_SERVER_NAME_KEY
 import org.jholsten.me2e.mock.verification.ExpectedRequest
 import org.jholsten.me2e.request.mapper.HttpRequestMapper
@@ -19,7 +19,7 @@ import org.jholsten.me2e.request.model.HttpRequest
  * to and how. The [hostname] is used to specify the name of the host of the third party service to be mocked.
  */
 @JsonDeserialize(using = MockServerDeserializer::class)
-class MockServer(
+class MockServer internal constructor(
     /**
      * Unique name of this Mock Server.
      */

@@ -9,7 +9,7 @@ import org.jholsten.me2e.config.parser.deserializer.TestConfigDeserializer
  * of the test environment and additional settings.
  */
 @JsonDeserialize(using = TestConfigDeserializer::class)
-class TestConfig(
+data class TestConfig internal constructor(
     /**
      * Settings for running the End-to-End tests.
      */

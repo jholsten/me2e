@@ -3,7 +3,7 @@ package org.jholsten.me2e.mock.stubbing.response
 /**
  * Definition of the response to be returned by a Mock Server.
  */
-class MockServerStubResponse(
+class MockServerStubResponse internal constructor(
     /**
      * HTTP status code to return.
      */

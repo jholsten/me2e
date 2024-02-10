@@ -3,9 +3,9 @@ package org.jholsten.me2e.config.model
 import com.fasterxml.jackson.annotation.JsonProperty
 
 /**
- * Settings for running the End-to-End tests, parsed from the `settings` section of the config file.
+ * Settings for the engine running the End-to-End tests, parsed from the `settings` section of the config file.
  */
-data class TestSettings(
+data class TestSettings internal constructor(
     /**
      * Configuration for Docker/Docker-Compose.
      */

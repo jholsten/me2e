@@ -21,7 +21,7 @@ import java.time.Instant
  * Offers commands for interacting with the database, if the [system] is supported, i.e. if it is set to any value
  * other than [DatabaseManagementSystem.OTHER].
  */
-class DatabaseContainer(
+class DatabaseContainer internal constructor(
     /**
      * Unique name of this container.
      */

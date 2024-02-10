@@ -17,7 +17,7 @@ import java.io.File
  * Manager for starting, stopping and managing all Docker containers.
  * Contains references to all [containers], [microservices] and [databases].
  */
-class ContainerManager(
+class ContainerManager internal constructor(
     /**
      * Reference to Docker-Compose file to start.
      */

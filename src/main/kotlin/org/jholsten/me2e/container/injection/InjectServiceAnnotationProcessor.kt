@@ -20,7 +20,7 @@ import kotlin.reflect.KClass
 @AutoService(Processor::class)
 @SupportedSourceVersion(SourceVersion.RELEASE_16)
 @SupportedAnnotationTypes("org.jholsten.me2e.container.injection.InjectService")
-class InjectServiceAnnotationProcessor : AbstractProcessor() {
+internal class InjectServiceAnnotationProcessor : AbstractProcessor() {
 
     /**
      * Ensures that the prerequisites are fulfilled for all fields annotated with [InjectService].

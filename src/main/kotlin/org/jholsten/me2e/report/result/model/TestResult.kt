@@ -10,7 +10,7 @@ import org.jholsten.me2e.utils.toJson
  * @see FinishedTestResult
  * @see SkippedTestResult
  */
-abstract class TestResult(
+abstract class TestResult internal constructor(
     /**
      * Unique identifier of the test or test container.
      * @see org.junit.platform.launcher.TestIdentifier.getUniqueId

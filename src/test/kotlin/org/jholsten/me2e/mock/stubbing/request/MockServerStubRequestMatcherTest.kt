@@ -8,6 +8,7 @@ import com.github.tomakehurst.wiremock.http.HttpHeaders
 import com.github.tomakehurst.wiremock.http.Request
 import com.github.tomakehurst.wiremock.http.RequestMethod
 import com.github.tomakehurst.wiremock.verification.LoggedRequest
+import org.jholsten.me2e.config.parser.deserializer.MockServerDeserializer
 import org.jholsten.me2e.request.model.HttpMethod
 import org.jholsten.util.RecursiveComparison
 import java.util.*
@@ -285,7 +286,7 @@ internal class MockServerStubRequestMatcherTest {
         """.trimIndent()
 
         val mapper = ObjectMapper().registerModule(KotlinModule.Builder().build())
-            .setInjectableValues(InjectableValues.Std().addValue("hostname", "example.com"))
+            .setInjectableValues(InjectableValues.Std().addValue(MockServerDeserializer.INJECTABLE_HOSTNAME_FIELD_NAME, "example.com"))
         val result = mapper.readValue(value, MockServerStubRequestMatcher::class.java)
 
         assertEquals(HttpMethod.GET, result.method)

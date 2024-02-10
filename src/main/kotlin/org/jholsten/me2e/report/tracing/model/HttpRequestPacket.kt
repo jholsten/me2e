@@ -6,7 +6,7 @@ import java.time.Instant
 /**
  * Represents the information about a captured HTTP request.
  */
-class HttpRequestPacket(
+internal class HttpRequestPacket(
     /**
      * Frame number of this packet.
      */

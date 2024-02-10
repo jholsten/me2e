@@ -10,7 +10,7 @@ import org.jholsten.me2e.mock.MockServer
  * `environment` section of the config file.
  */
 @JsonDeserialize(using = TestEnvironmentConfigDeserializer::class)
-class TestEnvironmentConfig(
+data class TestEnvironmentConfig internal constructor(
     /**
      * Path to Docker-Compose file. Needs to be located in `resources` folder.
      */

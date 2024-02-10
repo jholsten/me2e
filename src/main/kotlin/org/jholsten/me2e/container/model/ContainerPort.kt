@@ -4,7 +4,7 @@ package org.jholsten.me2e.container.model
  * Representation of a port mapping from container-internal port
  * to port that is accessible from localhost.
  */
-data class ContainerPort(
+data class ContainerPort internal constructor(
     /**
      * Container-internal port to be exposed.
      */

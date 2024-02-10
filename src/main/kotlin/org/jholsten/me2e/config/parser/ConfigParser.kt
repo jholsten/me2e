@@ -9,7 +9,7 @@ import kotlin.jvm.Throws
 /**
  * Interface for service class parsing the test configuration.
  */
-interface ConfigParser : Parser<TestConfig> {
+internal interface ConfigParser : Parser<TestConfig> {
 
     /**
      * Parses the test configuration from the given file.

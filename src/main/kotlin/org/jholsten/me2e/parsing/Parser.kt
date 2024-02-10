@@ -7,7 +7,7 @@ import java.io.FileNotFoundException
  * Generic interface for services that parse and validate values to a model.
  * @param T Model to which values should be parsed.
  */
-interface Parser<T> {
+internal interface Parser<T> {
 
     /**
      * Parses and validates the given value to the given model.

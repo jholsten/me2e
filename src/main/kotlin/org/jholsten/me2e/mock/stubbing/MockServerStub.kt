@@ -11,7 +11,7 @@ import org.jholsten.me2e.mock.stubbing.response.MockServerStubResponseMapper
  * Contains a matcher that specifies which requests this stub applies to and the corresponding
  * response to be returned by the Mock Server for these requests.
  */
-class MockServerStub(
+class MockServerStub internal constructor(
     /**
      * Optional unique name of this stub.
      */

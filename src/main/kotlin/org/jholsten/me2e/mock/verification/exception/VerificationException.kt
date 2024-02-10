@@ -1,4 +1,4 @@
-package org.jholsten.me2e.mock.exception
+package org.jholsten.me2e.mock.verification.exception
 
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent
 import org.jholsten.me2e.mock.verification.ExpectedRequest
@@ -6,7 +6,7 @@ import org.jholsten.me2e.mock.verification.ExpectedRequest
 /**
  * Exception that occurs when a Mock Server verification was not successful.
  */
-class VerificationException(message: String) : AssertionError(message) {
+class VerificationException internal constructor(message: String) : AssertionError(message) {
     companion object {
         /**
          * Returns [VerificationException] for the situation that a Mock Server did not receive the expected number of

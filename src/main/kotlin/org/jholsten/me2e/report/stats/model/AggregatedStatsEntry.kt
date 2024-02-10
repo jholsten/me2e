@@ -7,7 +7,7 @@ import java.time.Instant
 /**
  * Model representing one resource usage statistics entry from one Docker container.
  */
-class AggregatedStatsEntry(
+class AggregatedStatsEntry internal constructor(
     /**
      * Container for which this entry was collected.
      */

@@ -14,6 +14,7 @@ import org.jholsten.me2e.request.client.OkHttpClient
 import org.jholsten.me2e.request.model.*
 import org.jholsten.me2e.utils.logger
 import org.jholsten.me2e.Me2eTestConfig
+import org.jholsten.me2e.config.parser.deserializer.TestConfigDeserializer
 import org.testcontainers.containers.ContainerState
 import java.time.Instant
 import java.util.concurrent.TimeUnit
@@ -23,7 +24,7 @@ import java.util.concurrent.TimeUnit
  * In this context, a Microservice is expected to offer a REST API. Therefore, this class offers commands
  * for executing HTTP requests towards the container.
  */
-class MicroserviceContainer(
+class MicroserviceContainer internal constructor(
     /**
      * Unique name of this container.
      */
@@ -58,7 +59,7 @@ class MicroserviceContainer(
      * Configuration for executing HTTP requests.
      * Corresponds to the `requests` section of the ME2E configuration file.
      */
-    @JacksonInject("requestConfig")
+    @JacksonInject(TestConfigDeserializer.INJECTABLE_REQUEST_CONFIG_FIELD_NAME)
     private val requestConfig: RequestConfig,
 
     /**

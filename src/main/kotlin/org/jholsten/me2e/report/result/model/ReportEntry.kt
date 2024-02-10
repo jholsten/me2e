@@ -7,7 +7,7 @@ import java.time.Instant
  * be included in the test report.
  * @see org.junit.platform.engine.reporting.ReportEntry
  */
-data class ReportEntry(
+data class ReportEntry internal constructor(
     /**
      * Timestamp of when this report entry was created.
      */

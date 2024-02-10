@@ -5,7 +5,7 @@ import org.jholsten.me2e.utils.toJson
 /**
  * Summary of a test or test container for which the execution was skipped.
  */
-class SkippedTestResult(
+class SkippedTestResult internal constructor(
     /**
      * Unique identifier of the test or test container.
      * @see org.junit.platform.launcher.TestIdentifier.getUniqueId

@@ -8,7 +8,7 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import com.github.tomakehurst.wiremock.verification.LoggedRequest
 import io.mockk.*
 import org.jholsten.me2e.assertions.equalTo
-import org.jholsten.me2e.mock.exception.VerificationException
+import org.jholsten.me2e.mock.verification.exception.VerificationException
 import org.jholsten.me2e.mock.stubbing.MockServerStub
 import org.jholsten.me2e.mock.verification.ExpectedRequest
 import org.jholsten.me2e.request.mapper.HttpRequestMapper

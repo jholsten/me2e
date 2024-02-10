@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.github.tomakehurst.wiremock.http.HttpHeaders
 import com.github.tomakehurst.wiremock.http.Request
 import com.github.tomakehurst.wiremock.http.RequestMethod
+import org.jholsten.me2e.config.parser.deserializer.MockServerDeserializer
 import org.jholsten.me2e.request.model.HttpMethod
 import org.jholsten.me2e.utils.toJson
 
@@ -14,13 +15,13 @@ import org.jholsten.me2e.utils.toJson
  * Matches the request depending on certain patterns.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-class MockServerStubRequestMatcher(
+class MockServerStubRequestMatcher internal constructor(
     /**
      * Hostname of the third-party service to be mocked.
      * The value is set to the [org.jholsten.me2e.mock.MockServer]'s hostname while deserializing.
-     * @see org.jholsten.me2e.config.deserializer.MockServerDeserializer.parseStubFiles
+     * @see org.jholsten.me2e.config.parser.deserializer.MockServerDeserializer.parseStubFiles
      */
-    @JacksonInject("hostname")
+    @JacksonInject(MockServerDeserializer.INJECTABLE_HOSTNAME_FIELD_NAME)
     val hostname: String,
 
     /**

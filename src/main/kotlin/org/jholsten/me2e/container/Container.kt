@@ -55,7 +55,7 @@ import com.github.dockerjava.api.model.Container as DockerContainer
         JsonSubTypes.Type(value = DatabaseContainer::class, name = "DATABASE"),
     ]
 )
-open class Container(
+open class Container internal constructor(
     /**
      * Unique name of this container.
      */

@@ -7,7 +7,7 @@ import org.jholsten.me2e.config.parser.deserializer.ContainerPortListDeserialize
  * Representation of the port mappings of a container.
  */
 @JsonDeserialize(using = ContainerPortListDeserializer::class)
-class ContainerPortList(ports: List<ContainerPort> = listOf()) : ArrayList<ContainerPort>(ports) {
+class ContainerPortList internal constructor(ports: List<ContainerPort> = listOf()) : ArrayList<ContainerPort>(ports) {
     /**
      * Returns the first [ContainerPort] instance for which the internal port is equal to the given [port]
      * or `null`, if no such instance exists in this list.

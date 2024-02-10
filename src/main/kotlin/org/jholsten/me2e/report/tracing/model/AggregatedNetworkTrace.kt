@@ -8,7 +8,7 @@ import java.util.*
  * Represents one HTTP trace in the network with ID [networkId], which
  * is composed of one [request] and one [response].
  */
-data class AggregatedNetworkTrace(
+data class AggregatedNetworkTrace internal constructor(
 
     /**
      * Unique identifier of this trace.

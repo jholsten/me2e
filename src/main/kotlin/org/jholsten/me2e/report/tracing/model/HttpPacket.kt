@@ -24,7 +24,7 @@ import java.time.Instant
         JsonSubTypes.Type(value = HttpResponsePacket::class, name = "RESPONSE"),
     ]
 )
-abstract class HttpPacket(
+internal abstract class HttpPacket(
     /**
      * Frame number of this packet.
      */

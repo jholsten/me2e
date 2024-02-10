@@ -20,7 +20,7 @@ import org.jholsten.me2e.utils.logger
  * Manages one HTTP Mock Server for all [MockServer] instances and enables a multi-domain mapping.
  * As only one single HTTP server needs to be started, performance is improved.
  */
-class MockServerManager(
+class MockServerManager internal constructor(
     /**
      * Mock Servers mocking third-party services.
      */

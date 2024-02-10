@@ -14,7 +14,7 @@ import org.opentest4j.TestAbortedException
  * is aborted.
  * @see Me2eTestConfig.assertHealthy
  */
-class Me2eAssertHealthyExtension : BeforeEachCallback {
+class Me2eAssertHealthyExtension internal constructor() : BeforeEachCallback {
     companion object {
         /**
          * List of Docker container names that have already been restarted once. If one of the containers in this

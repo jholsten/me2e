@@ -6,7 +6,7 @@ import java.time.Instant
  * Model representing one event of a container returned by `docker events`.
  * @see com.github.dockerjava.api.model.Event
  */
-data class ContainerEvent(
+data class ContainerEvent internal constructor(
     /**
      * Timestamp of when this event occurred.
      */

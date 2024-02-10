@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode
 /**
  * Definition of the response body of a stubbed response.
  */
-class MockServerStubResponseBody(
+class MockServerStubResponseBody internal constructor(
     /**
      * Literal text content of the response body
      */

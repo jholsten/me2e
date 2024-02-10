@@ -6,7 +6,7 @@ import java.time.Instant
 /**
  * Model representing one log entry from one service.
  */
-class AggregatedLogEntry(
+class AggregatedLogEntry internal constructor(
     /**
      * Service which logged this entry.
      */

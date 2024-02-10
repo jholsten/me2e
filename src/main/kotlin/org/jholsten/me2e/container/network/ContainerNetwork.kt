@@ -6,7 +6,7 @@ package org.jholsten.me2e.container.network
  * [`docker inspect $containerId`](https://docs.docker.com/engine/reference/commandline/inspect).
  * @see <a href="https://docs.docker.com/engine/reference/commandline/inspect">Docker Documentation</a>
  */
-data class ContainerNetwork(
+data class ContainerNetwork internal constructor(
     /**
      * Custom IPAM configuration defined for the network.
      */
