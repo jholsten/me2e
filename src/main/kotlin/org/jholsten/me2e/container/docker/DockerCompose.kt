@@ -7,6 +7,8 @@ import org.jholsten.me2e.container.exception.ServiceShutdownException
 import org.jholsten.me2e.container.exception.ServiceStartupException
 import org.jholsten.me2e.container.health.ContainerWaitStrategyTarget
 import org.jholsten.me2e.container.health.exception.HealthTimeoutException
+import org.jholsten.me2e.container.model.ExecutionResult
+import org.jholsten.me2e.parsing.exception.ValidationException
 import org.jholsten.me2e.utils.ResettableLazy
 import org.jholsten.me2e.utils.logger
 import org.testcontainers.DockerClientFactory
@@ -18,12 +20,15 @@ import org.testcontainers.shaded.com.github.dockerjava.core.LocalDirectorySSLCon
 import org.testcontainers.shaded.com.google.common.base.Splitter
 import org.testcontainers.shaded.org.zeroturnaround.exec.InvalidExitValueException
 import org.testcontainers.shaded.org.zeroturnaround.exec.ProcessExecutor
+import org.testcontainers.shaded.org.zeroturnaround.exec.ProcessResult
 import org.testcontainers.shaded.org.zeroturnaround.exec.stream.slf4j.Slf4jStream
 import org.testcontainers.utility.CommandLine
 import org.testcontainers.utility.DockerLoggerFactory
+import java.io.ByteArrayOutputStream
 import org.testcontainers.containers.DockerComposeContainer as DockerComposeV1
 import org.testcontainers.containers.ComposeContainer as DockerComposeV2
 import java.io.File
+import java.io.OutputStream
 import java.time.Duration
 
 /**
@@ -184,7 +189,7 @@ class DockerCompose private constructor(
         if (servicesToRestart.isNotEmpty()) {
             isRestarting = true
             logger.info("Restarting services: [${servicesToRestart.joinToString(", ")}]...")
-            execute("restart ${servicesToRestart.joinToString(" ")}")
+            executeInternal("restart ${servicesToRestart.joinToString(" ")}")
             this._dockerContainers.reset()
             isRestarting = false
             waitUntilHealthy(servicesToRestart, healthTimeout)
@@ -230,17 +235,29 @@ class DockerCompose private constructor(
     fun pull(servicesToPull: List<String>) {
         if (servicesToPull.isNotEmpty()) {
             logger.info("Pulling images for services: [${servicesToPull.joinToString(", ")}]...")
-            execute("pull ${servicesToPull.joinToString(" ")}")
+            executeInternal("pull ${servicesToPull.joinToString(" ")}")
         }
     }
 
     /**
      * Executes the given Docker-Compose command locally.
-     * Redirects output and error to the [logger].
-     * @throws DockerException in case of errors.
+     * Note that the exit code of the result is not checked, i.e. the execution may have been unsuccessful.
+     * @param command Command to execute using Docker-Compose.
+     * @return Result of the execution.
      */
-    fun execute(command: String) {
-        local.execute(command)
+    fun execute(command: String): ExecutionResult {
+        return local.execute(command)
+    }
+
+    /**
+     * Validates the Docker-Compose [file] using `docker compose config`.
+     * @throws ValidationException if validation failed.
+     */
+    fun validate() {
+        val result = local.execute("config")
+        if (result.exitCode != 0) {
+            throw ValidationException("Docker-Compose '${file.name}' is invalid: ${result.stderr}")
+        }
     }
 
     /**
@@ -306,6 +323,7 @@ class DockerCompose private constructor(
 
         /**
          * Executes the given Docker-Compose command and redirects output and error to the [logger].
+         * Note that the exit code of the result is not checked, i.e. the execution may have been unsuccessful.
          *
          * Examples:
          *
@@ -315,9 +333,59 @@ class DockerCompose private constructor(
          * | V2          | `pull`                | `docker compose pull`                 |
          * | V2          | `-p "Project" up -d`  | `docker compose -p "Project" up -d`   |
          *
-         * @throws DockerException in case of errors.
+         * @param command Command to execute.
+         * @return Result of the execution.
          */
-        fun execute(command: String) {
+        fun execute(command: String): ExecutionResult {
+            ByteArrayOutputStream().use { stdOutStream ->
+                ByteArrayOutputStream().use { stdErrStream ->
+                    val result = execute(command, stdOutStream, stdErrStream, assertSuccess = false)
+
+                    return ExecutionResult(
+                        exitCode = result.exitValue,
+                        stdout = stdOutStream.toString(),
+                        stderr = stdErrStream.toString(),
+                    )
+                }
+            }
+        }
+
+        /**
+         * Executes the given Docker-Compose command and redirects output and error to the [logger].
+         * This function is only intended for internal usage. Use [execute] instead.
+         *
+         * Examples:
+         *
+         * | Version     | Provided Command      | Executed Command                      |
+         * | ----------- | --------------------- | ------------------------------------- |
+         * | V1          | `pull`                | `docker-compose pull`                 |
+         * | V2          | `pull`                | `docker compose pull`                 |
+         * | V2          | `-p "Project" up -d`  | `docker compose -p "Project" up -d`   |
+         *
+         * @param command Command to execute.
+         * @throws DockerException if execution was not successful.
+         */
+        @JvmSynthetic
+        internal fun executeInternal(command: String) {
+            execute(command, Slf4jStream.of(logger).asInfo(), Slf4jStream.of(logger).asError(), assertSuccess = true)
+        }
+
+        /**
+         * Executes the given Docker-Compose command and redirects STDOUT and STDERR to the given output streams.
+         * If [assertSuccess] is true, a [DockerException] is thrown in case the execution is not successful.
+         * @param command Command to execute.
+         * @param stdOutStream Output stream where STDOUT of the command is to be redirected.
+         * @param stdErrStream Output stream where STDERR of the command is to be redirected.
+         * @param assertSuccess Whether to assert that the execution was successful.
+         * @return Result of the execution.
+         * @throws DockerException if execution was not successful and [assertSuccess] is true.
+         */
+        private fun execute(
+            command: String,
+            stdOutStream: OutputStream,
+            stdErrStream: OutputStream,
+            assertSuccess: Boolean
+        ): ProcessResult {
             val environment = this.environment + mapOf("COMPOSE_PROJECT_NAME" to _project)
 
             val baseCommand = when (version) {
@@ -332,14 +400,18 @@ class DockerCompose private constructor(
 
             logger.debug("Running Docker-Compose command {}...", cmd)
             try {
-                ProcessExecutor()
+                val executor = ProcessExecutor()
                     .command(cmd)
-                    .redirectOutput(Slf4jStream.of(logger).asInfo())
-                    .redirectError(Slf4jStream.of(logger).asInfo())
+                    .redirectOutput(stdOutStream)
+                    .redirectError(stdErrStream)
                     .environment(environment)
                     .directory(pwd)
-                    .exitValueNormal()
-                    .executeNoTimeout()
+
+                if (assertSuccess) {
+                    executor.exitValueNormal()
+                }
+
+                return executor.executeNoTimeout()
             } catch (e: InvalidExitValueException) {
                 throw DockerException("Running Docker-Compose command $cmd failed: ${e.message}", e)
             }
@@ -464,6 +536,14 @@ class DockerCompose private constructor(
                 DockerComposeRemoveImagesStrategy.LOCAL -> DockerComposeV2.RemoveImages.LOCAL
             }
         }
+    }
+
+    /**
+     * Executes the given Docker-Compose command locally. Redirects output and error to the [logger].
+     * @throws DockerException if execution was not successful.
+     */
+    private fun executeInternal(command: String) {
+        local.executeInternal(command)
     }
 
     /**
