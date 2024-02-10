@@ -21,6 +21,11 @@ internal class ConfigSchemaValidatorIT {
         val value = """
             environment:
               docker-compose: docker-compose-parsing-test.yml
+              mock-servers:
+                payment-service:
+                  hostname: payment.example.com
+                  stubs:
+                    - request_stub.json
         """.trimIndent()
 
         assertDoesNotThrow { validator.validate(value) }
@@ -32,7 +37,15 @@ internal class ConfigSchemaValidatorIT {
         val value = """
             {
               "environment": {
-                "docker-compose": "docker-compose-parsing-test.yml"
+                "docker-compose": "docker-compose-parsing-test.yml",
+                "mock-servers": {
+                    "payment-service": {
+                        "hostname": "payment.example.com",
+                        "stubs": [
+                            "request_stub.json"
+                        ]
+                    }
+                }
               }
             }
         """.trimIndent()
@@ -53,6 +66,25 @@ internal class ConfigSchemaValidatorIT {
         assertNotNull(e.message)
         assertTrue(e.message!!.contains("environment"))
         assertTrue(e.message!!.contains("other"))
+    }
+
+    @Test
+    fun `Validating YAML with missing mock server fields should fail`() {
+        val validator = ConfigSchemaValidator(YAML_MAPPER)
+        val value = """
+            environment:
+              docker-compose: docker-compose-parsing-test.yml
+              mock-servers:
+                payment-service:
+                  stubs:
+                    - request_stub.json
+        """.trimIndent()
+
+        val e = assertFailsWith<ValidationException> { validator.validate(value) }
+
+        assertEquals(1, e.validationErrors.size)
+        assertNotNull(e.message)
+        assertTrue(e.message!!.contains("payment-service.hostname"))
     }
 
     @Test
