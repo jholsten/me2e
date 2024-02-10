@@ -1,0 +1,21 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.8.20'
+    id "org.jetbrains.kotlin.kapt" version "1.8.20"
+}
+
+group = 'org.jholsten'
+version = '0.0.1'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation "org.jetbrains.kotlin:kotlin-test-junit5"
+    testImplementation project(":")
+    kaptTest project(":")
+}
+
+test {
+    useJUnitPlatform()
+}

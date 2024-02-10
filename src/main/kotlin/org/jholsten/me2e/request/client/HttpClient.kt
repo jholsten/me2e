@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit
 
 /**
  * Client to use for executing requests over HTTP.
- * @sample OkHttpClient
+ * @see OkHttpClient
  */
 interface HttpClient {
 

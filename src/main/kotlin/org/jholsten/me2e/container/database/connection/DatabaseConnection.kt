@@ -9,8 +9,8 @@ import java.io.File
 /**
  * Representation of the connection to an SQL or No-SQL database.
  * Allows to initialize, query and reset the state of a database instance.
- * @sample SQLDatabaseConnection
- * @sample MongoDBConnection
+ * @see SQLDatabaseConnection
+ * @see MongoDBConnection
  */
 abstract class DatabaseConnection protected constructor(
     /**

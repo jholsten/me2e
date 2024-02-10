@@ -12,6 +12,8 @@ import java.util.*
 /**
  * Model representing the request body of an HTTP request.
  * Stores binary content of the body along with its content type.
+ * @sample org.jholsten.samples.request.httpRequestBodyWithStringContent
+ * @sample org.jholsten.samples.request.httpRequestBodyWithJsonContent
  */
 class HttpRequestBody {
     /**

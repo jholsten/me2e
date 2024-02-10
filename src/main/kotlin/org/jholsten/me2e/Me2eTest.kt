@@ -30,6 +30,7 @@ import org.junit.jupiter.api.extension.ExtendWith
  * @see Me2eTestConfig
  * @see ContainerManager
  * @see MockServerManager
+ * @sample org.jholsten.samples.Me2eTestSample
  */
 @ExtendWith(Me2eAssertHealthyExtension::class, Me2eStateResetExtension::class)
 open class Me2eTest {

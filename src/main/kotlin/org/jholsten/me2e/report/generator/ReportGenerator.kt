@@ -1,11 +1,13 @@
 package org.jholsten.me2e.report.generator
 
+import org.jholsten.me2e.report.result.ReportDataAggregator
 import org.jholsten.me2e.report.result.model.TestExecutionResult
 
 /**
  * Base class for generating the test report based on the data provided in the [ReportDataAggregator].
  * The method [generate] is called as soon as the execution of all tests has finished.
- * @sample org.jholsten.me2e.report.result.html.HtmlReportGenerator
+ * @sample org.jholsten.samples.report.CustomHtmlReportGenerator
+ * @sample org.jholsten.samples.report.LoggingReportGenerator
  */
 abstract class ReportGenerator {
     /**

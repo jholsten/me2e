@@ -5,6 +5,8 @@ import org.apache.commons.lang3.StringUtils
 /**
  * Model representing the relative part of a URL.
  * Includes path, query parameters and fragment.
+ * @sample org.jholsten.samples.request.relativeUrl
+ * @sample org.jholsten.samples.request.relativeUrlWithBuilder
  */
 class RelativeUrl(
     /**

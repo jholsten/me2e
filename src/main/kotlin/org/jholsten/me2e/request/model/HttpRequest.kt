@@ -2,6 +2,7 @@ package org.jholsten.me2e.request.model
 
 /**
  * Model representing an HTTP request.
+ * @sample org.jholsten.samples.request.httpRequestWithHeaders
  */
 class HttpRequest internal constructor(
     /**

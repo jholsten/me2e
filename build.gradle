@@ -137,10 +137,10 @@ dependencies {
 
 // Configuration for documentation
 dokkaHtml {
-    dokkaSourceSets {
+    dokkaSourceSets.configureEach {
         configureEach {
-            includeNonPublic.set(false)
-        }
+        includeNonPublic.set(false)
+        samples.from("$projectDir/samples")
     }
 }
 

@@ -9,7 +9,8 @@ import java.util.function.Consumer
 /**
  * Base class for consuming log entries of a container.
  * Whenever the container prints a log message, the callback function [accept] is executed.
- * @sample ContainerLogCollector
+ * @sample org.jholsten.samples.container.LoggingContainerLogConsumer
+ * @see ContainerLogCollector
  */
 abstract class ContainerLogConsumer : Consumer<OutputFrame> {
     private val logger = logger<ContainerLogConsumer>()

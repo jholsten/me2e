@@ -5,6 +5,7 @@ import okhttp3.internal.toImmutableMap
 
 /**
  * Representation of HTTP headers of an HTTP request or an HTTP response.
+ * @sample org.jholsten.samples.request.httpRequestWithHeaders
  */
 class HttpHeaders internal constructor(
     /**

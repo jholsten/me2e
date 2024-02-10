@@ -9,7 +9,8 @@ import java.util.function.Consumer
 /**
  * Base class for consuming events of a Docker container.
  * Whenever Docker sends a new event for the container, the callback function [accept] is executed.
- * @sample ContainerRestartListener
+ * @sample org.jholsten.samples.container.LoggingContainerEventConsumer
+ * @see ContainerRestartListener
  */
 abstract class ContainerEventConsumer : Consumer<Event> {
     private val logger = logger<ContainerEventConsumer>()

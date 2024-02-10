@@ -6,6 +6,8 @@ import org.apache.commons.lang3.StringUtils
 
 /**
  * Model representing an absolute URL.
+ * @sample org.jholsten.samples.request.url
+ * @sample org.jholsten.samples.request.urlWithBuilder
  */
 class Url(
     /**
