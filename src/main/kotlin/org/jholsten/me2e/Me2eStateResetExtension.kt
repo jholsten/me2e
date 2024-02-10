@@ -21,6 +21,9 @@ class Me2eStateResetExtension internal constructor() : AfterEachCallback {
      * If activated in the [Me2eTestConfig], the state of all containers, Mock Servers and databases are reset.
      */
     override fun afterEach(context: ExtensionContext?) {
+        if (Me2eTest.configAnnotation.stateResetConfig.any() && context?.executionException?.isPresent == true) {
+            logger.warn("Resetting the state may not be possible since the test '${context.displayName}' threw an exception.")
+        }
         if (Me2eTest.configAnnotation.stateResetConfig.clearAllTables) {
             clearDatabases()
         }
@@ -46,7 +49,7 @@ class Me2eStateResetExtension internal constructor() : AfterEachCallback {
                 try {
                     connection!!.clearAll()
                 } catch (e: Exception) {
-                    logger.error("Unable to clear tables of database container ${database.name}:", e)
+                    logger.warn("Unable to clear tables of database container ${database.name}:", e)
                 }
             }
         }
@@ -73,8 +76,19 @@ class Me2eStateResetExtension internal constructor() : AfterEachCallback {
         if (mockServers.isNotEmpty()) {
             logger.debug("Resetting requests of ${mockServers.size} Mock Servers.")
             for (mockServer in mockServers) {
-                mockServer.reset()
+                try {
+                    mockServer.reset()
+                } catch (e: Exception) {
+                    logger.warn("Unable to reset captured requests of Mock Server ${mockServer.name}:", e)
+                }
             }
         }
+    }
+
+    /**
+     * Returns whether any state property should be reset.
+     */
+    private fun Me2eTestConfig.StateReset.any(): Boolean {
+        return clearAllTables || resetRequestInterceptors || resetMockServerRequests
     }
 }
