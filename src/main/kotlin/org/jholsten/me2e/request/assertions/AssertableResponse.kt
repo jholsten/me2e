@@ -50,7 +50,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ExpectedResponse].
      * @throws AssertionFailure if assertion was not successful.
      */
-    fun statusCode(expected: Assertable<Int?>) = apply {
+    fun statusCode(expected: Assertable<Int?>): AssertableResponse = apply {
         expected.evaluate("status code", this.response.statusCode)
     }
 
@@ -66,7 +66,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ExpectedResponse].
      * @throws AssertionFailure if assertion was not successful.
      */
-    fun protocol(expected: Assertable<String?>) = apply {
+    fun protocol(expected: Assertable<String?>): AssertableResponse = apply {
         expected.evaluate("protocol", this.response.protocol)
     }
 
@@ -82,7 +82,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ExpectedResponse].
      * @throws AssertionFailure if assertion was not successful.
      */
-    fun message(expected: Assertable<String?>) = apply {
+    fun message(expected: Assertable<String?>): AssertableResponse = apply {
         expected.evaluate("message", this.response.message)
     }
 
@@ -98,7 +98,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ExpectedResponse].
      * @throws AssertionFailure if assertion was not successful.
      */
-    fun headers(expected: Assertable<Map<String, List<*>>?>) = apply {
+    fun headers(expected: Assertable<Map<String, List<*>>?>): AssertableResponse = apply {
         expected.evaluate("headers", this.response.headers.entries)
     }
 
@@ -114,7 +114,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ExpectedResponse].
      * @throws AssertionFailure if content type is not set or if assertion was not successful.
      */
-    fun contentType(expected: Assertable<String?>) = apply {
+    fun contentType(expected: Assertable<String?>): AssertableResponse = apply {
         expected.evaluate("content type", this.response.body?.contentType?.value)
     }
 
@@ -130,7 +130,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ExpectedResponse].
      * @throws AssertionFailure if assertion was not successful.
      */
-    fun body(expected: Assertable<String?>) = apply {
+    fun body(expected: Assertable<String?>): AssertableResponse = apply {
         expected.evaluate("body", this.response.body?.asString())
     }
 
@@ -148,7 +148,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ExpectedResponse].
      * @throws AssertionFailure if assertion was not successful.
      */
-    fun <T> objectBody(type: Class<T>, expected: Assertable<T?>) = apply {
+    fun <T> objectBody(type: Class<T>, expected: Assertable<T?>): AssertableResponse = apply {
         val obj = try {
             this.response.body?.asObject(type)
         } catch (e: ParseException) {
@@ -172,7 +172,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ExpectedResponse].
      * @throws AssertionFailure if assertion was not successful.
      */
-    fun <T> objectBody(type: TypeReference<T>, expected: Assertable<T?>) = apply {
+    fun <T> objectBody(type: TypeReference<T>, expected: Assertable<T?>): AssertableResponse = apply {
         val obj = try {
             this.response.body?.asObject(type)
         } catch (e: ParseException) {
@@ -195,7 +195,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ExpectedResponse].
      * @throws AssertionFailure if assertion was not successful.
      */
-    inline fun <reified T> objectBody(expected: Assertable<T?>) = apply {
+    inline fun <reified T> objectBody(expected: Assertable<T?>): AssertableResponse = apply {
         objectBody(object : TypeReference<T>() {}, expected)
     }
 
@@ -211,7 +211,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ExpectedResponse].
      * @throws AssertionFailure if assertion was not successful.
      */
-    fun binaryBody(expected: Assertable<ByteArray?>) = apply {
+    fun binaryBody(expected: Assertable<ByteArray?>): AssertableResponse = apply {
         expected.evaluate("binary body", this.response.body?.asBinary())
     }
 
@@ -227,7 +227,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ExpectedResponse].
      * @throws AssertionFailure if assertion was not successful.
      */
-    fun base64Body(expected: Assertable<String?>) = apply {
+    fun base64Body(expected: Assertable<String?>): AssertableResponse = apply {
         expected.evaluate("base 64 body", this.response.body?.asBase64())
     }
 
@@ -244,7 +244,7 @@ class AssertableResponse internal constructor(private val response: HttpResponse
      * assertion fails. To evaluate all assertions, use [conformsTo] in combination with [ExpectedResponse].
      * @throws AssertionFailure if assertion was not successful.
      */
-    fun jsonBody(expected: Assertable<JsonNode?>) = apply {
+    fun jsonBody(expected: Assertable<JsonNode?>): AssertableResponse = apply {
         val json = try {
             this.response.body?.asJson()
         } catch (e: Exception) {

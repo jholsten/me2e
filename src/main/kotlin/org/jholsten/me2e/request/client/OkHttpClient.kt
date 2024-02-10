@@ -107,27 +107,27 @@ class OkHttpClient private constructor(
         private var baseUrl: Url? = null
         private val configuration: Configuration = Configuration()
 
-        override fun withBaseUrl(baseUrl: Url) = apply {
+        override fun withBaseUrl(baseUrl: Url): Builder = apply {
             this.baseUrl = baseUrl
         }
 
-        override fun withRequestInterceptors(interceptors: List<RequestInterceptor>) = apply {
+        override fun withRequestInterceptors(interceptors: List<RequestInterceptor>): Builder = apply {
             configuration.setRequestInterceptors(interceptors)
         }
 
-        override fun addRequestInterceptor(interceptor: RequestInterceptor) = apply {
+        override fun addRequestInterceptor(interceptor: RequestInterceptor): Builder = apply {
             configuration.addRequestInterceptor(interceptor)
         }
 
-        override fun withConnectTimeout(timeout: Long, unit: TimeUnit) = apply {
+        override fun withConnectTimeout(timeout: Long, unit: TimeUnit): Builder = apply {
             configuration.setConnectTimeout(timeout, unit)
         }
 
-        override fun withReadTimeout(timeout: Long, unit: TimeUnit) = apply {
+        override fun withReadTimeout(timeout: Long, unit: TimeUnit): Builder = apply {
             configuration.setReadTimeout(timeout, unit)
         }
 
-        override fun withWriteTimeout(timeout: Long, unit: TimeUnit) = apply {
+        override fun withWriteTimeout(timeout: Long, unit: TimeUnit): Builder = apply {
             configuration.setWriteTimeout(timeout, unit)
         }
 
@@ -173,27 +173,27 @@ class OkHttpClient private constructor(
         var writeTimeout: Long = 10000
 
         @JvmSynthetic
-        override fun setRequestInterceptors(interceptors: List<RequestInterceptor>) = apply {
+        override fun setRequestInterceptors(interceptors: List<RequestInterceptor>): Configuration = apply {
             requestInterceptors = interceptors.toMutableList()
         }
 
         @JvmSynthetic
-        override fun addRequestInterceptor(interceptor: RequestInterceptor) = apply {
+        override fun addRequestInterceptor(interceptor: RequestInterceptor): Configuration = apply {
             requestInterceptors.add(interceptor)
         }
 
         @JvmSynthetic
-        override fun setConnectTimeout(timeout: Long, unit: TimeUnit) = apply {
+        override fun setConnectTimeout(timeout: Long, unit: TimeUnit): Configuration = apply {
             connectTimeout = checkTimeout(timeout, unit)
         }
 
         @JvmSynthetic
-        override fun setReadTimeout(timeout: Long, unit: TimeUnit) = apply {
+        override fun setReadTimeout(timeout: Long, unit: TimeUnit): Configuration = apply {
             readTimeout = checkTimeout(timeout, unit)
         }
 
         @JvmSynthetic
-        override fun setWriteTimeout(timeout: Long, unit: TimeUnit) = apply {
+        override fun setWriteTimeout(timeout: Long, unit: TimeUnit): Configuration = apply {
             writeTimeout = checkTimeout(timeout, unit)
         }
 

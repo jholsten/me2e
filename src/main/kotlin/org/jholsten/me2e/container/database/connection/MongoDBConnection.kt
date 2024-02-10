@@ -175,7 +175,7 @@ class MongoDBConnection private constructor(
          * @param container Reference to the Docker container which serves this database.
          * @return This builder instance, to use for chaining.
          */
-        fun withContainer(container: Container?) = apply {
+        fun withContainer(container: Container?): Builder = apply {
             this.container = container
         }
 
@@ -185,7 +185,7 @@ class MongoDBConnection private constructor(
          * @param settings Settings to use for the connection to MongoDB.
          * @return This builder instance, to use for chaining.
          */
-        fun withSettings(settings: MongoClientSettings) = apply {
+        fun withSettings(settings: MongoClientSettings): Builder = apply {
             this.settings = settings
         }
 

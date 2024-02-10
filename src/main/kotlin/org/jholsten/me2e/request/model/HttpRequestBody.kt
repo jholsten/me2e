@@ -74,7 +74,7 @@ class HttpRequestBody {
          * @param content String content of the request body to set.
          * @return This builder instance, to use for chaining.
          */
-        fun withContent(content: String) = apply {
+        fun withContent(content: String): Builder = apply {
             this.stringContent = content
         }
 
@@ -84,7 +84,7 @@ class HttpRequestBody {
          * @param content File content of the request body to set.
          * @return This builder instance, to use for chaining.
          */
-        fun withContent(content: File) = apply {
+        fun withContent(content: File): Builder = apply {
             this.fileContent = content
         }
 
@@ -93,7 +93,7 @@ class HttpRequestBody {
          * @param content Binary content of the request body to set.
          * @return This builder instance, to use for chaining.
          */
-        fun withContent(content: ByteArray) = apply {
+        fun withContent(content: ByteArray): Builder = apply {
             this.binaryContent = content
         }
 
@@ -103,7 +103,7 @@ class HttpRequestBody {
          * @return This builder instance, to use for chaining.
          * @throws java.io.IOException if content could not be serialized.
          */
-        fun <T> withJsonContent(content: T) = apply {
+        fun <T> withJsonContent(content: T): Builder = apply {
             this.stringContent = DeserializerFactory.getObjectMapper().writeValueAsString(content)
             this.contentType = ContentType.JSON_UTF8
         }
@@ -113,7 +113,7 @@ class HttpRequestBody {
          * @param contentType Content type of the request body to set.
          * @return This builder instance, to use for chaining.
          */
-        fun withContentType(contentType: ContentType?) = apply {
+        fun withContentType(contentType: ContentType?): Builder = apply {
             this.contentType = contentType
         }
 
@@ -123,7 +123,7 @@ class HttpRequestBody {
          * @param charset Charset to use for encoding the string content.
          * @return This builder instance, to use for chaining.
          */
-        fun withCharset(charset: Charset) = apply {
+        fun withCharset(charset: Charset): Builder = apply {
             this.charset = charset
         }
 

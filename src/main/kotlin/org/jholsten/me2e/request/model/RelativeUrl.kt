@@ -50,7 +50,7 @@ class RelativeUrl(
          * @param path Path to set for the URL.
          * @return This builder instance, to use for chaining.
          */
-        fun withPath(path: String) = apply {
+        fun withPath(path: String): Builder = apply {
             this.path = path
         }
 
@@ -61,7 +61,7 @@ class RelativeUrl(
          * @param values Values of the query parameter to set.
          * @return This builder instance, to use for chaining.
          */
-        fun withQueryParameter(key: String, values: List<String>) = apply {
+        fun withQueryParameter(key: String, values: List<String>): Builder = apply {
             this.queryParameters[key] = values.toMutableList()
         }
 
@@ -71,7 +71,7 @@ class RelativeUrl(
          * @param value Value to add for the query parameter with the given key.
          * @return This builder instance, to use for chaining.
          */
-        fun withQueryParameter(key: String, value: String) = apply {
+        fun withQueryParameter(key: String, value: String): Builder = apply {
             if (queryParameters.containsKey(key)) {
                 this.queryParameters[key]!!.add(value)
             } else {
@@ -84,7 +84,7 @@ class RelativeUrl(
          * @param fragment Fragment to set for this URL.
          * @return This builder instance, to use for chaining.
          */
-        fun withFragment(fragment: String?) = apply {
+        fun withFragment(fragment: String?): Builder = apply {
             this.fragment = fragment
         }
 

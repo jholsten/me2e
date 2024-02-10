@@ -51,7 +51,7 @@ class ExpectedRequest {
      * @param stubName Name of the stub whose request pattern should match the actual request.
      * @return This instance, to use for chaining.
      */
-    fun matchingStub(stubName: String) = apply {
+    fun matchingStub(stubName: String): ExpectedRequest = apply {
         this.stubName = stubName
     }
 
@@ -67,7 +67,7 @@ class ExpectedRequest {
      * @param expected Expectation for the value of the [HttpRequest.method].
      * @return This instance, to use for chaining.
      */
-    fun withMethod(expected: Assertable<HttpMethod?>) = apply {
+    fun withMethod(expected: Assertable<HttpMethod?>): ExpectedRequest = apply {
         this.method.add(expected)
     }
 
@@ -83,7 +83,7 @@ class ExpectedRequest {
      * @param expected Expectation for the value of the [org.jholsten.me2e.request.model.Url.path].
      * @return This instance, to use for chaining.
      */
-    fun withPath(expected: Assertable<String?>) = apply {
+    fun withPath(expected: Assertable<String?>): ExpectedRequest = apply {
         this.path.add(expected)
     }
 
@@ -99,7 +99,7 @@ class ExpectedRequest {
      * @param expected Expectation for the value of the [HttpRequest.headers].
      * @return This instance, to use for chaining.
      */
-    fun withHeaders(expected: Assertable<Map<String, List<*>>?>) = apply {
+    fun withHeaders(expected: Assertable<Map<String, List<*>>?>): ExpectedRequest = apply {
         this.headers.add(expected)
     }
 
@@ -115,7 +115,7 @@ class ExpectedRequest {
      * @param expected Expectation for the value of the [org.jholsten.me2e.request.model.HttpRequestBody.contentType].
      * @return This instance, to use for chaining.
      */
-    fun withContentType(expected: Assertable<String?>) = apply {
+    fun withContentType(expected: Assertable<String?>): ExpectedRequest = apply {
         this.contentType.add(expected)
     }
 
@@ -131,7 +131,7 @@ class ExpectedRequest {
      * @param expected Expectation for the value of the [org.jholsten.me2e.request.model.Url.queryParameters].
      * @return This instance, to use for chaining.
      */
-    fun withQueryParameters(expected: Assertable<Map<String, List<*>>?>) = apply {
+    fun withQueryParameters(expected: Assertable<Map<String, List<*>>?>): ExpectedRequest = apply {
         this.queryParameters.add(expected)
     }
 
@@ -147,7 +147,7 @@ class ExpectedRequest {
      * @param expected Expectation for the value of the [HttpRequest.body].
      * @return This instance, to use for chaining.
      */
-    fun withBody(expected: Assertable<String?>) = apply {
+    fun withBody(expected: Assertable<String?>): ExpectedRequest = apply {
         this.body.add(expected)
     }
 
@@ -165,7 +165,7 @@ class ExpectedRequest {
      * @param type Type to which the request body content should be deserialized.
      * @return This instance, to use for chaining.
      */
-    fun <T> withObjectBody(type: Class<T>, expected: Assertable<T?>) = apply {
+    fun <T> withObjectBody(type: Class<T>, expected: Assertable<T?>): ExpectedRequest = apply {
         this.objectBody.add(ObjectBodyAssertion(type = type, expected = expected))
     }
 
@@ -184,7 +184,7 @@ class ExpectedRequest {
      * @param type Type to which the request body content should be deserialized.
      * @return This instance, to use for chaining.
      */
-    fun <T> withObjectBody(type: TypeReference<T>, expected: Assertable<T?>) = apply {
+    fun <T> withObjectBody(type: TypeReference<T>, expected: Assertable<T?>): ExpectedRequest = apply {
         this.objectBody.add(ObjectBodyAssertion(typeReference = type, expected = expected))
     }
 
@@ -202,7 +202,7 @@ class ExpectedRequest {
      * @param T Type to which the request body content should be deserialized.
      * @return This instance, to use for chaining.
      */
-    inline fun <reified T> withObjectBody(expected: Assertable<T?>) = apply {
+    inline fun <reified T> withObjectBody(expected: Assertable<T?>): ExpectedRequest = apply {
         withObjectBody(object : TypeReference<T>() {}, expected)
     }
 
@@ -218,7 +218,7 @@ class ExpectedRequest {
      * @param expected Expectation for the value of the [HttpRequest.body].
      * @return This instance, to use for chaining.
      */
-    fun withBinaryBody(expected: Assertable<ByteArray?>) = apply {
+    fun withBinaryBody(expected: Assertable<ByteArray?>): ExpectedRequest = apply {
         this.binaryBody.add(expected)
     }
 
@@ -234,7 +234,7 @@ class ExpectedRequest {
      * @param expected Expectation for the value of the [HttpRequest.body].
      * @return This instance, to use for chaining.
      */
-    fun withBase64Body(expected: Assertable<String?>) = apply {
+    fun withBase64Body(expected: Assertable<String?>): ExpectedRequest = apply {
         this.base64Body.add(expected)
     }
 
@@ -251,7 +251,7 @@ class ExpectedRequest {
      * @param expected Expectation for the value of the [HttpRequest.body].
      * @return This instance, to use for chaining.
      */
-    fun withJsonBody(expected: Assertable<JsonNode?>) = apply {
+    fun withJsonBody(expected: Assertable<JsonNode?>): ExpectedRequest = apply {
         this.jsonBody.add(expected)
     }
 
@@ -259,7 +259,7 @@ class ExpectedRequest {
      * Expect that the Mock Server only received this specified request and no other.
      * @return This instance, to use for chaining.
      */
-    fun andNoOther() = apply {
+    fun andNoOther(): ExpectedRequest = apply {
         this.noOther = true
     }
 

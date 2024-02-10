@@ -150,7 +150,7 @@ class SQLDatabaseConnection private constructor(
          * @param system Database management system which contains the database.
          * @return This builder instance, to use for chaining.
          */
-        fun withSystem(system: DatabaseManagementSystem) = apply {
+        fun withSystem(system: DatabaseManagementSystem): Builder = apply {
             this.system = system
         }
 
@@ -161,7 +161,7 @@ class SQLDatabaseConnection private constructor(
          * @param schema Name of the schema to which this database belongs.
          * @return This builder instance, to use for chaining.
          */
-        fun withSchema(schema: String?) = apply {
+        fun withSchema(schema: String?): Builder = apply {
             this.schema = schema
         }
 

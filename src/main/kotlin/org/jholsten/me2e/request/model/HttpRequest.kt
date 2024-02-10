@@ -50,7 +50,7 @@ class HttpRequest internal constructor(
          * @param url URL of the request to set.
          * @return This builder instance, to use for chaining.
          */
-        fun withUrl(url: Url) = apply {
+        fun withUrl(url: Url): Builder = apply {
             this.url = url
         }
 
@@ -59,7 +59,7 @@ class HttpRequest internal constructor(
          * @param method HTTP request method to set.
          * @return This builder instance, to use for chaining.
          */
-        fun withMethod(method: HttpMethod) = apply {
+        fun withMethod(method: HttpMethod): Builder = apply {
             this.method = method
         }
 
@@ -68,7 +68,7 @@ class HttpRequest internal constructor(
          * @param headers HTTP headers to set.
          * @return This builder instance, to use for chaining.
          */
-        fun withHeaders(headers: HttpHeaders) = apply {
+        fun withHeaders(headers: HttpHeaders): Builder = apply {
             this.headerBuilder = headers.newBuilder()
         }
 
@@ -78,7 +78,7 @@ class HttpRequest internal constructor(
          * @param value Value of the header to add.
          * @return This builder instance, to use for chaining.
          */
-        fun addHeader(key: String, value: String) = apply {
+        fun addHeader(key: String, value: String): Builder = apply {
             this.headerBuilder.add(key, value)
         }
 
@@ -87,7 +87,7 @@ class HttpRequest internal constructor(
          * @param body Request body to set.
          * @return This builder instance, to use for chaining.
          */
-        fun withBody(body: HttpRequestBody?) = apply {
+        fun withBody(body: HttpRequestBody?): Builder = apply {
             this.body = body
         }
 

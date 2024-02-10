@@ -25,7 +25,7 @@ class IndexTemplateData(context: Context) : TemplateData(context) {
          * - `allTests:` [List]<[TestResult]> - All tests and test containers included in the result, i.e. all of the [TestExecutionResult.roots],
          * their children and their children, recursively.
          */
-        fun withTestExecutionResult(result: TestExecutionResult) = apply {
+        fun withTestExecutionResult(result: TestExecutionResult): Builder = apply {
             withVariable("numberOfTests", result.numberOfTests)
             withVariable("numberOfFailures", result.numberOfFailures)
             withVariable("numberOfSkipped", result.numberOfSkipped)

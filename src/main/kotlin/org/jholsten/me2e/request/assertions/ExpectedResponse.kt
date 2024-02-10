@@ -38,7 +38,7 @@ class ExpectedResponse {
      * @return This instance, to use for chaining.
      * @see AssertableResponse.statusCode
      */
-    fun expectStatusCode(expected: Assertable<Int?>) = apply {
+    fun expectStatusCode(expected: Assertable<Int?>): ExpectedResponse = apply {
         this.statusCode.add(expected)
     }
 
@@ -54,7 +54,7 @@ class ExpectedResponse {
      * @return This instance, to use for chaining.
      * @see AssertableResponse.protocol
      */
-    fun expectProtocol(expected: Assertable<String?>) = apply {
+    fun expectProtocol(expected: Assertable<String?>): ExpectedResponse = apply {
         this.protocol.add(expected)
     }
 
@@ -70,7 +70,7 @@ class ExpectedResponse {
      * @return This instance, to use for chaining.
      * @see AssertableResponse.message
      */
-    fun expectMessage(expected: Assertable<String?>) = apply {
+    fun expectMessage(expected: Assertable<String?>): ExpectedResponse = apply {
         this.message.add(expected)
     }
 
@@ -86,7 +86,7 @@ class ExpectedResponse {
      * @return This instance, to use for chaining.
      * @see AssertableResponse.headers
      */
-    fun expectHeaders(expected: Assertable<Map<String, List<*>>?>) = apply {
+    fun expectHeaders(expected: Assertable<Map<String, List<*>>?>): ExpectedResponse = apply {
         this.headers.add(expected)
     }
 
@@ -102,7 +102,7 @@ class ExpectedResponse {
      * @return This instance, to use for chaining.
      * @see AssertableResponse.contentType
      */
-    fun expectContentType(expected: Assertable<String?>) = apply {
+    fun expectContentType(expected: Assertable<String?>): ExpectedResponse = apply {
         this.contentType.add(expected)
     }
 
@@ -118,7 +118,7 @@ class ExpectedResponse {
      * @return This instance, to use for chaining.
      * @see AssertableResponse.body
      */
-    fun expectBody(expected: Assertable<String?>) = apply {
+    fun expectBody(expected: Assertable<String?>): ExpectedResponse = apply {
         this.body.add(expected)
     }
 
@@ -136,7 +136,7 @@ class ExpectedResponse {
      * @return This instance, to use for chaining.
      * @see AssertableResponse.objectBody
      */
-    fun <T> expectObjectBody(type: Class<T>, expected: Assertable<T?>) = apply {
+    fun <T> expectObjectBody(type: Class<T>, expected: Assertable<T?>): ExpectedResponse = apply {
         this.objectBody.add(ObjectBodyAssertion(type = type, expected = expected))
     }
 
@@ -155,7 +155,7 @@ class ExpectedResponse {
      * @return This instance, to use for chaining.
      * @see AssertableResponse.objectBody
      */
-    fun <T> expectObjectBody(type: TypeReference<T>, expected: Assertable<T?>) = apply {
+    fun <T> expectObjectBody(type: TypeReference<T>, expected: Assertable<T?>): ExpectedResponse = apply {
         this.objectBody.add(ObjectBodyAssertion(typeReference = type, expected = expected))
     }
 
@@ -173,7 +173,7 @@ class ExpectedResponse {
      * @return This instance, to use for chaining.
      * @see AssertableResponse.objectBody
      */
-    inline fun <reified T> expectObjectBody(expected: Assertable<T?>) = apply {
+    inline fun <reified T> expectObjectBody(expected: Assertable<T?>): ExpectedResponse = apply {
         expectObjectBody(object : TypeReference<T>() {}, expected)
     }
 
@@ -189,7 +189,7 @@ class ExpectedResponse {
      * @return This instance, to use for chaining.
      * @see AssertableResponse.binaryBody
      */
-    fun expectBinaryBody(expected: Assertable<ByteArray?>) = apply {
+    fun expectBinaryBody(expected: Assertable<ByteArray?>): ExpectedResponse = apply {
         this.binaryBody.add(expected)
     }
 
@@ -205,7 +205,7 @@ class ExpectedResponse {
      * @return This instance, to use for chaining.
      * @see AssertableResponse.base64Body
      */
-    fun expectBase64Body(expected: Assertable<String?>) = apply {
+    fun expectBase64Body(expected: Assertable<String?>): ExpectedResponse = apply {
         this.base64Body.add(expected)
     }
 
@@ -222,7 +222,7 @@ class ExpectedResponse {
      * @return This instance, to use for chaining.
      * @see AssertableResponse.jsonBody
      */
-    fun expectJsonBody(expected: Assertable<JsonNode?>) = apply {
+    fun expectJsonBody(expected: Assertable<JsonNode?>): ExpectedResponse = apply {
         this.jsonBody.add(expected)
     }
 

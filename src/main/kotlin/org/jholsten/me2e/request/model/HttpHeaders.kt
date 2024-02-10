@@ -77,7 +77,7 @@ class HttpHeaders internal constructor(
          * @param value Value of the header to add.
          * @return This builder instance, to use for chaining.
          */
-        fun add(key: String, value: String) = apply {
+        fun add(key: String, value: String): Builder = apply {
             add(key, listOf(value))
         }
 
@@ -88,7 +88,7 @@ class HttpHeaders internal constructor(
          * @return This builder instance, to use for chaining.
          * @throws IllegalArgumentException if [key] is blank or [values] are empty.
          */
-        fun add(key: String, values: List<String>) = apply {
+        fun add(key: String, values: List<String>): Builder = apply {
             require(key.isNotBlank()) { "Key cannot be blank" }
             require(values.isNotEmpty()) { "List of values need to contain at least one entry" }
             if (this.values.containsKey(key)) {
@@ -105,7 +105,7 @@ class HttpHeaders internal constructor(
          * @param value Value of the HTTP header to remove.
          * @return This builder instance, to use for chaining.
          */
-        fun remove(key: String, value: String) = apply {
+        fun remove(key: String, value: String): Builder = apply {
             if (this.values.containsKey(key)) {
                 this.values[key]!!.remove(value)
                 if (this.values[key]!!.isEmpty()) {
@@ -120,7 +120,7 @@ class HttpHeaders internal constructor(
          * @param key Key of the HTTP headers to remove.
          * @return This builder instance, to use for chaining.
          */
-        fun remove(key: String) = apply {
+        fun remove(key: String): Builder = apply {
             this.values.remove(key)
         }
 
@@ -131,7 +131,7 @@ class HttpHeaders internal constructor(
          * @param value Value of the HTTP header to set.
          * @return This builder instance, to use for chaining.
          */
-        operator fun set(key: String, value: String) = apply {
+        operator fun set(key: String, value: String): Builder = apply {
             this.values[key] = mutableListOf(value)
         }
 

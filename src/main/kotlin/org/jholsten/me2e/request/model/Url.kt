@@ -87,7 +87,7 @@ class Url(
          * @param scheme of the URL to set.
          * @return This builder instance, to use for chaining.
          */
-        fun withScheme(scheme: Scheme) = apply {
+        fun withScheme(scheme: Scheme): Builder = apply {
             this.scheme = scheme
         }
 
@@ -96,7 +96,7 @@ class Url(
          * @param host Host of the URL to set.
          * @return This builder instance, to use for chaining.
          */
-        fun withHost(host: String) = apply {
+        fun withHost(host: String): Builder = apply {
             this.host = host
         }
 
@@ -106,7 +106,7 @@ class Url(
          * @param port Port of the URL to set.
          * @return This builder instance, to use for chaining.
          */
-        fun withPort(port: Int) = apply {
+        fun withPort(port: Int): Builder = apply {
             require(port in 1..65535) { "Port number needs to be between 1 and 65535" }
             this.port = port
         }
@@ -119,7 +119,7 @@ class Url(
          * @param path Path of the URL to set.
          * @return This builder instance, to use for chaining.
          */
-        fun withPath(path: String) = apply {
+        fun withPath(path: String): Builder = apply {
             this.relativeUrlBuilder.withPath(path)
         }
 
@@ -130,7 +130,7 @@ class Url(
          * @param values Values of the query parameter to set.
          * @return This builder instance, to use for chaining.
          */
-        fun withQueryParameter(key: String, values: List<String>) = apply {
+        fun withQueryParameter(key: String, values: List<String>): Builder = apply {
             this.relativeUrlBuilder.withQueryParameter(key, values)
         }
 
@@ -140,7 +140,7 @@ class Url(
          * @param value Value to add for the query parameter with the given key.
          * @return This builder instance, to use for chaining.
          */
-        fun withQueryParameter(key: String, value: String) = apply {
+        fun withQueryParameter(key: String, value: String): Builder = apply {
             this.relativeUrlBuilder.withQueryParameter(key, value)
         }
 
@@ -148,7 +148,7 @@ class Url(
          * Sets the given [fragment] for this URL.
          * @return This builder instance, to use for chaining.
          */
-        fun withFragment(fragment: String) = apply {
+        fun withFragment(fragment: String): Builder = apply {
             this.relativeUrlBuilder.withFragment(fragment)
         }
 

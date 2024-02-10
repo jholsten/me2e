@@ -373,7 +373,7 @@ class DockerCompose private constructor(
          * @see DockerComposeV1.withLocalCompose
          * @see DockerComposeV2.withLocalCompose
          */
-        fun withLocalCompose(localCompose: Boolean) = apply {
+        fun withLocalCompose(localCompose: Boolean): Builder = apply {
             when (this.version) {
                 DockerComposeVersion.V1 -> v1.value.withLocalCompose(localCompose)
                 DockerComposeVersion.V2 -> v2.value.withLocalCompose(localCompose)
@@ -385,7 +385,7 @@ class DockerCompose private constructor(
          * @see DockerComposeV1.withBuild
          * @see DockerComposeV2.withBuild
          */
-        fun withBuild(build: Boolean) = apply {
+        fun withBuild(build: Boolean): Builder = apply {
             when (this.version) {
                 DockerComposeVersion.V1 -> v1.value.withBuild(build)
                 DockerComposeVersion.V2 -> v2.value.withBuild(build)
@@ -397,7 +397,7 @@ class DockerCompose private constructor(
          * @see DockerComposeV1.withRemoveImages
          * @see DockerComposeV2.withRemoveImages
          */
-        fun withRemoveImages(removeImages: DockerComposeRemoveImagesStrategy) = apply {
+        fun withRemoveImages(removeImages: DockerComposeRemoveImagesStrategy): Builder = apply {
             when (this.version) {
                 DockerComposeVersion.V1 -> v1.value.withRemoveImages(removeImages.toV1())
                 DockerComposeVersion.V2 -> v2.value.withRemoveImages(removeImages.toV2())
@@ -409,7 +409,7 @@ class DockerCompose private constructor(
          * @see DockerComposeV1.withRemoveVolumes
          * @see DockerComposeV2.withRemoveVolumes
          */
-        fun withRemoveVolumes(removeVolumes: Boolean) = apply {
+        fun withRemoveVolumes(removeVolumes: Boolean): Builder = apply {
             when (this.version) {
                 DockerComposeVersion.V1 -> v1.value.withRemoveVolumes(removeVolumes)
                 DockerComposeVersion.V2 -> v2.value.withRemoveVolumes(removeVolumes)
@@ -423,7 +423,7 @@ class DockerCompose private constructor(
          * @see DockerComposeV1.waitingFor
          * @see DockerComposeV2.waitingFor
          */
-        fun waitingFor(serviceName: String, waitStrategy: WaitStrategy) = apply {
+        fun waitingFor(serviceName: String, waitStrategy: WaitStrategy): Builder = apply {
             when (this.version) {
                 DockerComposeVersion.V1 -> v1.value.waitingFor(serviceName, waitStrategy)
                 DockerComposeVersion.V2 -> v2.value.waitingFor(serviceName, waitStrategy)

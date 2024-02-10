@@ -56,7 +56,7 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
          * - `reason:` [String]? - Message describing why the execution has been skipped (see [SkippedTestResult.reason]).
          * **Only available if [TestResult.status] is [TestResult.Status.SKIPPED]**.
          */
-        fun withTestResult(result: TestResult) = apply {
+        fun withTestResult(result: TestResult): Builder = apply {
             withVariable("testId", result.testId)
             withVariable("source", result.source)
             withVariable("path", result.path)
