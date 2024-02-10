@@ -163,6 +163,10 @@ internal class IntermediateTestResult(
             children.isNotEmpty() -> children.sumOf { it.numberOfAborted }
             else -> if (status == TestResult.Status.ABORTED) 1 else 0
         }
+        val status = when {
+            children.any { it.status == TestResult.Status.FAILED } -> TestResult.Status.FAILED
+            else -> status
+        }
         val path = parents.map { it.testId to it.displayName } + Pair(testId, displayName)
         if (status == TestResult.Status.SKIPPED) {
             val reason = when {
@@ -175,7 +179,7 @@ internal class IntermediateTestResult(
                 path = path,
                 parentId = parentId,
                 children = children,
-                status = status!!,
+                status = status,
                 numberOfTests = numberOfTests,
                 numberOfFailures = numberOfFailures,
                 numberOfSkipped = numberOfSkipped,
