@@ -144,6 +144,11 @@ dokkaHtml {
     }
 }
 
+// Disable testcontainer's Ryuk for all tests
+tasks.withType(Test).configureEach {
+    environment "TESTCONTAINERS_RYUK_DISABLED", "true"
+}
+
 // Apply a specific Java toolchain to ease working on different environments.
 java {
     toolchain {
