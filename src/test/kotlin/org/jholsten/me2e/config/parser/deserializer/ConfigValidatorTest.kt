@@ -1,9 +1,10 @@
-package org.jholsten.me2e.config.utils
+package org.jholsten.me2e.config.parser.deserializer
 
 import org.jholsten.me2e.config.model.RequestConfig
 import org.jholsten.me2e.config.model.TestConfig
 import org.jholsten.me2e.config.model.TestEnvironmentConfig
 import org.jholsten.me2e.config.model.TestSettings
+import org.jholsten.me2e.config.parser.ConfigValidator
 import org.jholsten.me2e.container.microservice.MicroserviceContainer
 import org.jholsten.me2e.mock.MockServer
 import org.jholsten.me2e.mock.stubbing.MockServerStub

@@ -52,7 +52,9 @@ class DatabaseContainer(
 
     /**
      * Pull policy for this Docker container.
-     * Corresponds to the value of the label `org.jholsten.me2e.pull-policy` in the Docker-Compose.
+     * If not overwritten in the label `org.jholsten.me2e.pull-policy` for this container, the global
+     * pull policy [org.jholsten.me2e.config.model.DockerConfig.pullPolicy] is used.
+     * @see org.jholsten.me2e.config.model.DockerConfig.pullPolicy
      */
     pullPolicy: DockerConfig.PullPolicy = DockerConfig.PullPolicy.MISSING,
 

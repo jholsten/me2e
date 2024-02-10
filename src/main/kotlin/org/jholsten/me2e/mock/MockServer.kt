@@ -5,7 +5,7 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent
 import org.jholsten.me2e.mock.stubbing.MockServerStub
-import org.jholsten.me2e.config.utils.MockServerDeserializer
+import org.jholsten.me2e.config.parser.deserializer.MockServerDeserializer
 import org.jholsten.me2e.mock.exception.VerificationException
 import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequestMapper.Companion.METADATA_MOCK_SERVER_NAME_KEY
 import org.jholsten.me2e.mock.verification.ExpectedRequest

@@ -18,7 +18,7 @@ class MockServerStubRequestMatcher(
     /**
      * Hostname of the third-party service to be mocked.
      * The value is set to the [org.jholsten.me2e.mock.MockServer]'s hostname while deserializing.
-     * @see org.jholsten.me2e.config.utils.MockServerDeserializer.parseStubFiles
+     * @see org.jholsten.me2e.config.deserializer.MockServerDeserializer.parseStubFiles
      */
     @JacksonInject("hostname")
     val hostname: String,

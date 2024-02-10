@@ -1,4 +1,4 @@
-package org.jholsten.me2e.config.utils
+package org.jholsten.me2e.config.parser.deserializer
 
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
@@ -21,8 +21,10 @@ import org.jholsten.me2e.utils.logger
  * Custom deserializer for deserializing test environment configuration.
  * Deserializes services in `docker-compose` file to [Container] instances.
  * Also, it sets the name of the specified Mock Servers to the corresponding key.
+ * TODO: Check if working with invalid enum values + make container type optional
+ * TODO: Maybe add upper level "settings"?
  */
-class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironmentConfig>() {
+internal class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironmentConfig>() {
     companion object {
         /**
          * Label key for specifying the container type of a service

@@ -1,4 +1,4 @@
-package org.jholsten.me2e.config.utils
+package org.jholsten.me2e.config.parser.deserializer
 
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
@@ -13,7 +13,7 @@ import org.jholsten.me2e.parsing.utils.DeserializerFactory
 /**
  * Custom deserializer that provides [RequestConfig] instance to be injected in other parsed instances.
  */
-class TestConfigDeserializer : JsonDeserializer<TestConfig>() {
+internal class TestConfigDeserializer : JsonDeserializer<TestConfig>() {
     private var mapper = DeserializerFactory.getObjectMapper()
 
     override fun deserialize(p: JsonParser, ctxt: DeserializationContext): TestConfig {

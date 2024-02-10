@@ -1,5 +1,6 @@
 package org.jholsten.me2e.container.docker
 
+import org.jholsten.me2e.config.model.DockerConfig.DockerComposeRemoveImagesStrategy
 import com.github.dockerjava.api.model.Container as DockerContainer
 import org.jholsten.me2e.container.exception.DockerException
 import org.jholsten.me2e.container.exception.ServiceShutdownException

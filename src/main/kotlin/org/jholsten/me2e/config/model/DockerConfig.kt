@@ -1,7 +1,6 @@
 package org.jholsten.me2e.config.model
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import org.jholsten.me2e.container.docker.DockerComposeRemoveImagesStrategy
 import org.jholsten.me2e.container.docker.DockerComposeVersion
 
 /**
@@ -16,6 +15,9 @@ class DockerConfig(
 
     /**
      * Policy on pulling Docker images.
+     * With this setting, the pull policy is set globally, but can be overwritten for individual containers by setting
+     * the label `org.jholsten.me2e.pull-policy`.
+     * @see org.jholsten.me2e.container.Container.pullPolicy
      */
     @JsonProperty("pull-policy")
     val pullPolicy: PullPolicy = PullPolicy.MISSING,
@@ -55,6 +57,9 @@ class DockerConfig(
     val healthTimeout: Long = 10,
 ) {
 
+    /**
+     * Available policies specifying whether to pull existing Docker images.
+     */
     enum class PullPolicy {
         /**
          * Only pull missing Docker images.
@@ -65,5 +70,29 @@ class DockerConfig(
          * Always pull the latest version of all Docker images.
          */
         ALWAYS,
+    }
+
+    /**
+     * Available strategies that can be used to specify whether and which images used by
+     * services should be removed after the containers shut down.
+     *
+     * If not [NONE], applies `--rmi=${strategy.lowercase()}` in `docker compose down` command.
+     * @see <a href="https://docs.docker.com/engine/reference/commandline/compose_down/#options">Docker Documentation</a>
+     */
+    enum class DockerComposeRemoveImagesStrategy {
+        /**
+         * Do not remove any images after the containers shut down.
+         */
+        NONE,
+
+        /**
+         * Remove all images used by services in Docker-Compose.
+         */
+        ALL,
+
+        /**
+         * Remove only images used by services in Docker-Compose that don't have a custom tag.
+         */
+        LOCAL
     }
 }

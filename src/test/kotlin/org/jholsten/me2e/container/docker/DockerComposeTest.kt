@@ -1,6 +1,7 @@
 package org.jholsten.me2e.container.docker
 
 import io.mockk.*
+import org.jholsten.me2e.config.model.DockerConfig.DockerComposeRemoveImagesStrategy
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.testcontainers.containers.wait.strategy.WaitAllStrategy

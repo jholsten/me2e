@@ -1,8 +1,9 @@
-package org.jholsten.me2e.config.utils
+package org.jholsten.me2e.config.parser.deserializer
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import org.jholsten.me2e.config.parser.ConfigSchemaValidator
 import org.jholsten.me2e.parsing.exception.ValidationException
 import org.jholsten.util.assertDoesNotThrow
 import kotlin.test.*

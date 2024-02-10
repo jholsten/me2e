@@ -1,4 +1,4 @@
-package org.jholsten.me2e.config.utils
+package org.jholsten.me2e.config.parser.deserializer
 
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
@@ -11,6 +11,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import io.mockk.*
 import org.jholsten.me2e.config.model.DockerConfig
+import org.jholsten.me2e.config.parser.deserializer.TestEnvironmentConfigDeserializer
 import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.mock.MockServer
 import org.jholsten.me2e.parsing.utils.DeserializerFactory

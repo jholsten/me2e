@@ -1,4 +1,4 @@
-package org.jholsten.me2e.config.utils
+package org.jholsten.me2e.config.parser
 
 import org.jholsten.me2e.config.model.TestConfig
 import org.jholsten.me2e.parsing.exception.ValidationException

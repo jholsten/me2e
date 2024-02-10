@@ -12,7 +12,6 @@ import org.jholsten.me2e.parsing.exception.ValidationException
 import org.jholsten.me2e.config.model.TestConfig
 import org.jholsten.me2e.config.model.TestEnvironmentConfig
 import org.jholsten.me2e.config.model.TestSettings
-import org.jholsten.me2e.config.utils.ConfigSchemaValidator
 import org.jholsten.me2e.parsing.utils.DeserializerFactory
 import org.jholsten.me2e.parsing.utils.FileUtils
 import org.jholsten.me2e.container.microservice.MicroserviceContainer

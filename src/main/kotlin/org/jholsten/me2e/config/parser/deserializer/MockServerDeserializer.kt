@@ -1,4 +1,4 @@
-package org.jholsten.me2e.config.utils
+package org.jholsten.me2e.config.parser.deserializer
 
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
@@ -14,7 +14,7 @@ import org.jholsten.me2e.parsing.utils.DeserializerFactory
 /**
  * Custom deserializer that parses stub files to [MockServerStub] instances.
  */
-class MockServerDeserializer: JsonDeserializer<MockServer>() {
+internal class MockServerDeserializer : JsonDeserializer<MockServer>() {
     override fun deserialize(p: JsonParser, ctxt: DeserializationContext): MockServer {
         val node = p.readValueAsTree<ObjectNode>()
         val fields = node.fields().asSequence().map { it.key to it.value }.toMap()

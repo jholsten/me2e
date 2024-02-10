@@ -1,7 +1,7 @@
 package org.jholsten.me2e.container.model
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import org.jholsten.me2e.config.utils.ContainerPortListDeserializer
+import org.jholsten.me2e.config.parser.deserializer.ContainerPortListDeserializer
 
 /**
  * Representation of the port mappings of a container.

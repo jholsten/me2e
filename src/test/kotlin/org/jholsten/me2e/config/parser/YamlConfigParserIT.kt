@@ -10,7 +10,7 @@ import org.jholsten.me2e.config.model.TestConfig
 import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.container.database.DatabaseContainer
 import org.jholsten.me2e.container.database.DatabaseManagementSystem
-import org.jholsten.me2e.container.docker.DockerComposeRemoveImagesStrategy
+import org.jholsten.me2e.config.model.DockerConfig.DockerComposeRemoveImagesStrategy
 import org.jholsten.me2e.container.microservice.MicroserviceContainer
 import org.jholsten.me2e.container.model.ContainerType
 import org.jholsten.me2e.mock.MockServer
