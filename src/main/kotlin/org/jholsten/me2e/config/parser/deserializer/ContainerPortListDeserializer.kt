@@ -8,9 +8,20 @@ import org.jholsten.me2e.container.model.ContainerPort
 import org.jholsten.me2e.container.model.ContainerPortList
 
 /**
- * Custom deserializer for extracting container ports from list of ports specified in Docker-Compose file.
+ * Custom deserializer for extracting internal container ports from list of ports specified in a Docker-Compose file.
+ * @see <a href="https://docs.docker.com/compose/compose-file/compose-file-v3/#ports>Docker Documentation</a>
  */
 internal class ContainerPortListDeserializer : JsonDeserializer<ContainerPortList>() {
+
+    /**
+     * Deserializes the array node containing entries for the ports of a container to an instance
+     * of [ContainerPortList]. Resolves port ranges to the individual values.
+     *
+     * As the external ports of a container do not have to be specified in the Docker-Compose file
+     * and may be set randomly, the [ContainerPort.external] ports are only set after the container
+     * has been started (see [org.jholsten.me2e.container.Container.initializeOnContainerStarted]).
+     * @return Deserialized list of container ports.
+     */
     override fun deserialize(p: JsonParser, ctxt: DeserializationContext): ContainerPortList {
         val containerPorts = mutableListOf<Int>()
         val node = p.readValueAsTree<ArrayNode>()
@@ -58,8 +69,9 @@ internal class ContainerPortListDeserializer : JsonDeserializer<ContainerPortLis
 
     /**
      * Extracts list of port numbers from a given range.
+     *
      * Example:
-     * ```
+     * ```kotlin
      * extractRangeOfContainerPorts("3002-3004")
      * // [3002, 3003, 3004]
      * ```
