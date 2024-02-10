@@ -11,12 +11,20 @@ import org.jholsten.me2e.utils.logger
 internal class ConfigValidator : Validator<TestConfig> {
     private val logger = logger<ConfigValidator>()
 
+    /**
+     * Validates that the given deserialized test configuration is valid.
+     * @throws ValidationException if validation was not successful.
+     */
     @JvmSynthetic
     override fun validate(value: TestConfig) {
         validateMockServers(value)
         validateMockServerStubs(value)
     }
 
+    /**
+     * Validates the Mock Servers defined in the given test configuration.
+     * Logs warning if multiple Mock Servers share the same Hostname.
+     */
     private fun validateMockServers(testConfig: TestConfig) {
         val duplicateHostnames = testConfig.environment.mockServers.values.map { it.hostname }.getDuplicates()
         if (duplicateHostnames.isNotEmpty()) {
@@ -28,16 +36,23 @@ internal class ConfigValidator : Validator<TestConfig> {
         }
     }
 
+    /**
+     * Validates the stubs defined for the Mock Servers in the given test configuration.
+     * Ensures that each [org.jholsten.me2e.mock.stubbing.MockServerStub.name] is unique.
+     */
     private fun validateMockServerStubs(testConfig: TestConfig) {
         val duplicateStubNames = testConfig.environment.mockServers.values
             .map { it.name to it.stubs.mapNotNull { stub -> stub.name }.getDuplicates() }
             .filter { it.second.isNotEmpty() }
         if (duplicateStubNames.isNotEmpty()) {
-            throwVerificationExceptionForDuplicateStubNames(duplicateStubNames)
+            throwValidationExceptionForDuplicateStubNames(duplicateStubNames)
         }
     }
 
-    private fun throwVerificationExceptionForDuplicateStubNames(duplicateStubNames: List<Pair<String, Map<String, Int>>>) {
+    /**
+     * Throws validation exception for the given duplicate stub names.
+     */
+    private fun throwValidationExceptionForDuplicateStubNames(duplicateStubNames: List<Pair<String, Map<String, Int>>>) {
         val stringBuilder = StringBuilder()
         stringBuilder.appendLine("Detected request stubs with duplicate names for at least one Mock Server:")
         for ((mockServerName, duplicateNames) in duplicateStubNames) {
@@ -50,10 +65,17 @@ internal class ConfigValidator : Validator<TestConfig> {
         throw ValidationException(stringBuilder.toString())
     }
 
+    /**
+     * Returns duplicate string values contained in the given List.
+     * @return Map of duplicate value and the number of occurrences.
+     */
     private fun List<String>.getDuplicates(): Map<String, Int> {
         return this.groupingBy { it }.eachCount().filter { it.value > 1 }
     }
 
+    /**
+     * Builds string representation of the given map.
+     */
     private fun Map<String, Int>.toStringList(indent: Int = 0): List<String> {
         return this.map { (value, count) -> "${" ".repeat(indent)}- $value ($count times)" }
     }
