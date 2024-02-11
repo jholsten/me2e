@@ -65,11 +65,15 @@ publish-package:
     - tags
 
 # Publishes KDoc to GitLab pages
-publish-kdoc:
+pages:
   stage: publish
   image: openjdk:17.0.2-jdk-slim
   before_script:
     #- export VERSION_NUMBER=$CI_COMMIT_TAG
     - chmod +x ./gradlew
   script:
-    - ./gradlew dokkaHtml
+    - ./gradlew --build-cache dokkaHtml
+    - cp -Rp build/dokka/html ../public/
+  artifacts:
+    paths:
+      - public
