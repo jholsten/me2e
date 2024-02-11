@@ -185,6 +185,7 @@ class MicroserviceContainer internal constructor(
             .withConnectTimeout(requestConfig.connectTimeout, TimeUnit.SECONDS)
             .withReadTimeout(requestConfig.readTimeout, TimeUnit.SECONDS)
             .withWriteTimeout(requestConfig.writeTimeout, TimeUnit.SECONDS)
+            .withRetryOnConnectionFailure(requestConfig.retryOnConnectionFailure)
             .build()
     }
 

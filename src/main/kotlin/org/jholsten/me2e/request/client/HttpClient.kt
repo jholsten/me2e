@@ -204,6 +204,14 @@ interface HttpClient {
         fun withWriteTimeout(timeout: Long, unit: TimeUnit): SELF
 
         /**
+         * Set whether to retry requests when a connectivity problem is encountered.
+         * @param retryOnConnectionFailure Whether to retry requests when a connectivity
+         * problem is encountered.
+         * @return This builder instance, to use for chaining.
+         */
+        fun withRetryOnConnectionFailure(retryOnConnectionFailure: Boolean): SELF
+
+        /**
          * Builds an instance of the [HttpClient] using the properties set in this builder.
          */
         fun build(): HttpClient
@@ -246,5 +254,12 @@ interface HttpClient {
          * @param unit Time unit of the [timeout] value to set.
          */
         fun setWriteTimeout(timeout: Long, unit: TimeUnit): Configuration
+
+        /**
+         * Set whether to retry requests when a connectivity problem is encountered.
+         * @param retryOnConnectionFailure Whether to retry requests when a connectivity
+         * problem is encountered.
+         */
+        fun setRetryOnConnectionFailure(retryOnConnectionFailure: Boolean): Configuration
     }
 }

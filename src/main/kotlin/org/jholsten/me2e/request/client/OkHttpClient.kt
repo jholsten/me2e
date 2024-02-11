@@ -137,6 +137,10 @@ class OkHttpClient private constructor(
             configuration.setWriteTimeout(timeout, unit)
         }
 
+        override fun withRetryOnConnectionFailure(retryOnConnectionFailure: Boolean): Builder = apply {
+            configuration.setRetryOnConnectionFailure(retryOnConnectionFailure)
+        }
+
         override fun build(): OkHttpClient {
             val baseUrl = requireNotNull(this.baseUrl) { "Base URL cannot be null" }
             configuration.apply()
@@ -178,6 +182,12 @@ class OkHttpClient private constructor(
         @JvmSynthetic
         var writeTimeout: Long = 10000
 
+        /**
+         * Whether to retry requests when a connectivity problem is encountered.
+         */
+        @JvmSynthetic
+        var retryOnConnectionFailure: Boolean = true
+
         @JvmSynthetic
         override fun setRequestInterceptors(interceptors: List<RequestInterceptor>): Configuration = apply {
             requestInterceptors = interceptors.toMutableList()
@@ -203,6 +213,10 @@ class OkHttpClient private constructor(
             writeTimeout = checkTimeout(timeout, unit)
         }
 
+        override fun setRetryOnConnectionFailure(retryOnConnectionFailure: Boolean): Configuration = apply {
+            this.retryOnConnectionFailure = retryOnConnectionFailure
+        }
+
         /**
          * Applies the configuration to the OkHttp client.
          * Since the client's fields are immutable, a new instance is created.
@@ -213,6 +227,7 @@ class OkHttpClient private constructor(
                 .connectTimeout(connectTimeout, TimeUnit.MILLISECONDS)
                 .readTimeout(readTimeout, TimeUnit.MILLISECONDS)
                 .writeTimeout(writeTimeout, TimeUnit.MILLISECONDS)
+                .retryOnConnectionFailure(retryOnConnectionFailure)
 
             for (interceptor in requestInterceptors) {
                 builder.addInterceptor(OkHttpRequestInterceptor.fromRequestInterceptor(interceptor))

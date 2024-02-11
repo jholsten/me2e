@@ -34,7 +34,7 @@ internal class YamlConfigParserIT {
         val config = YamlConfigParser().parseFile("me2e-config-parsing-test.yaml")
         assertContainersAsExpected(config)
         assertMockServersAsExpected(config)
-        assertRequestConfigAsExpected(RequestConfig(10, 15, 20), config)
+        assertRequestConfigAsExpected(RequestConfig(10, 15, 20, false), config)
         assertDockerConfigAsExpected(
             DockerConfig(
                 dockerComposeVersion = DockerComposeVersion.V1,

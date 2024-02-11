@@ -23,4 +23,10 @@ data class RequestConfig internal constructor(
      */
     @JsonProperty("write-timeout")
     val writeTimeout: Long = 10,
+
+    /**
+     * Whether to retry requests when a connectivity problem is encountered.
+     */
+    @JsonProperty("retry-on-connection-failure")
+    val retryOnConnectionFailure: Boolean = true,
 )

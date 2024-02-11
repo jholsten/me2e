@@ -11,6 +11,7 @@ settings:
     connect-timeout: 10
     read-timeout: 15
     write-timeout: 20
+    retry-on-connection-failure: false
 
   mock-servers:
     keystore-path: keystore.jks
