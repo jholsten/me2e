@@ -83,7 +83,7 @@ dependencies {
 
     // Dependency for Kotlin support for Jackson
     implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.8"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.8.20"
 
     // Dependency for parsing YAML files
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.2"
