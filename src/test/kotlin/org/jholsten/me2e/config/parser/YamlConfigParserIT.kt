@@ -21,6 +21,7 @@ import org.jholsten.me2e.mock.stubbing.response.MockServerStubResponse
 import org.jholsten.me2e.mock.stubbing.response.MockServerStubResponseBody
 import org.jholsten.me2e.parsing.exception.InvalidFormatException
 import org.jholsten.me2e.parsing.exception.ParseException
+import org.jholsten.me2e.parsing.exception.ValidationException
 import org.jholsten.me2e.request.model.HttpMethod
 import org.jholsten.util.RecursiveComparison
 import java.io.FileNotFoundException
@@ -73,7 +74,12 @@ internal class YamlConfigParserIT {
 
     @Test
     fun `Parsing YAML config with non-existent Docker-Compose should fail`() {
-        assertFailsWith<ParseException> { YamlConfigParser().parseFile("me2e-config-invalid-docker-compose.yaml") }
+        assertFailsWith<ParseException> { YamlConfigParser().parseFile("me2e-config-non-existent-docker-compose.yaml") }
+    }
+
+    @Test
+    fun `Parsing YAML config with invalid Docker-Compose should fail`() {
+        assertFailsWith<ValidationException> { YamlConfigParser().parseFile("me2e-config-invalid-docker-compose.yaml") }
     }
 
     @Test

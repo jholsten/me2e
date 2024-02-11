@@ -1,2 +1,2 @@
 environment:
-  docker-compose: non-existent.yml
+  docker-compose: docker-compose-invalid.yml
