@@ -1,7 +1,6 @@
 package org.jholsten.me2e
 
 import io.github.classgraph.ClassGraph
-import io.github.classgraph.ClassInfo
 import org.jholsten.me2e.utils.logger
 
 /**

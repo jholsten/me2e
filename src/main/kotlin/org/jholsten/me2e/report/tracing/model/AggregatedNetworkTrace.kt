@@ -63,7 +63,10 @@ data class AggregatedNetworkTrace internal constructor(
      */
     val duration: Long = Duration.between(request.timestamp, response.timestamp).toMillis()
 
-    class RequestPacket(
+    /**
+     * Represents the information about one captured HTTP request packet.
+     */
+    class RequestPacket internal constructor(
         /**
          * Frame number of this packet.
          */
@@ -139,7 +142,10 @@ data class AggregatedNetworkTrace internal constructor(
         )
     }
 
-    class ResponsePacket(
+    /**
+     * Represents the information about one captured HTTP response packet.
+     */
+    class ResponsePacket internal constructor(
         /**
          * Frame number of this packet.
          */

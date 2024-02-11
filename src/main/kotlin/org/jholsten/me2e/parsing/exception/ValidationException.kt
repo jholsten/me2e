@@ -8,6 +8,11 @@ package org.jholsten.me2e.parsing.exception
  *  - value cannot be deserialized to the given type
  */
 class ValidationException : ParseException {
+    /**
+     * List of messages for each validation error.
+     * In case this exception represents only one failed validation, this list
+     * only contains the one validation error message.
+     */
     val validationErrors: List<String>
 
     internal constructor(validationErrors: List<String>) : super("Validation failed: $validationErrors") {
@@ -15,6 +20,6 @@ class ValidationException : ParseException {
     }
 
     internal constructor(message: String) : super(message) {
-        this.validationErrors = listOf()
+        this.validationErrors = listOf(message)
     }
 }

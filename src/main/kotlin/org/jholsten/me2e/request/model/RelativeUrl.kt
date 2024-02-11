@@ -18,6 +18,9 @@ class RelativeUrl(
      */
     value: String,
 ) {
+    /**
+     * Relative URL that this instance represents.
+     */
     val value: String
 
     init {

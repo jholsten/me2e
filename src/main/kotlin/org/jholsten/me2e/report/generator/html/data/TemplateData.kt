@@ -26,6 +26,9 @@ open class TemplateData(
      * @constructor Instantiates a new builder instance for constructing [TemplateData].
      */
     open class Builder<SELF : Builder<SELF>> {
+        /**
+         * Configured Thymeleaf context which contains the variables.
+         */
         protected val context: Context = Context()
 
         /**

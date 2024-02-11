@@ -131,10 +131,34 @@ abstract class DatabaseConnection protected constructor(
      * Base class for builders for instantiating instances of [DatabaseConnection].
      */
     abstract class Builder<SELF : Builder<SELF>> {
+        /**
+         * Hostname on which the database container is running.
+         * @see DatabaseConnection.host
+         */
         protected var host: String? = null
+
+        /**
+         * Port on which the database container is accessible.
+         * @see DatabaseConnection.port
+         */
         protected var port: Int? = null
+
+        /**
+         * Name of the database to which the connection should be established.
+         * @see DatabaseConnection.database
+         */
         protected var database: String? = null
+
+        /**
+         * Username to use for logging in.
+         * @see DatabaseConnection.username
+         */
         protected var username: String? = null
+
+        /**
+         * Password to use for logging in.
+         * @see DatabaseConnection.password
+         */
         protected var password: String? = null
 
         /**

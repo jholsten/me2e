@@ -72,7 +72,14 @@ data class ContainerNetwork internal constructor(
      * @see <a href="https://docs.docker.com/compose/compose-file/06-networks/#ipam">Docker Documentation</a>
      */
     data class IpamConfig(
+        /**
+         * Configured IPv4 address.
+         */
         val ipV4Address: String?,
+
+        /**
+         * Configured IPv6 address.
+         */
         val ipV6Address: String?,
     )
 

@@ -1,10 +1,7 @@
 package org.jholsten.me2e.report.result.utils
 
 import java.math.BigDecimal
-import java.time.Duration
 import java.time.Instant
-import java.time.OffsetDateTime
-import java.time.ZoneOffset
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull

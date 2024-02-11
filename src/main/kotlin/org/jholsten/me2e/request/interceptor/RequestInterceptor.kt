@@ -15,6 +15,10 @@ interface RequestInterceptor {
      */
     fun intercept(chain: Chain): HttpResponse
 
+    /**
+     * Base interface for the interceptor chain, which is an ordered list of interceptors
+     * associated with specific segments of the message processing pipeline.
+     */
     interface Chain {
         /**
          * Returns the outgoing HTTP request.
@@ -22,7 +26,7 @@ interface RequestInterceptor {
         fun getRequest(): HttpRequest
 
         /**
-         * Proceeds the HTTP request.
+         * Proceeds the interceptor chain.
          * @param request Request with which the chain should proceed.
          */
         fun proceed(request: HttpRequest): HttpResponse

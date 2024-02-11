@@ -55,8 +55,19 @@ enum class DatabaseManagementSystem(
      * values from the corresponding environment variables.
      */
     data class EnvironmentKeys(
+        /**
+         * Name of the environment key which is used to specify the name of the database.
+         */
         val databaseName: String? = null,
+
+        /**
+         * Name of the environment key which is used to specify the username to log into the database.
+         */
         val username: String? = null,
+
+        /**
+         * Name of the environment key which is used to specify the password to log into the database.
+         */
         val password: String? = null,
     )
 }
