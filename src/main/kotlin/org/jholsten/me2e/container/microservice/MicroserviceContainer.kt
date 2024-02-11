@@ -34,7 +34,7 @@ class MicroserviceContainer internal constructor(
      * Image to start the container from.
      * Corresponds to the value given for the `image` keyword in Docker-Compose.
      */
-    image: String,
+    image: String?,
 
     /**
      * Environment variables for this container.

@@ -150,6 +150,33 @@ class TestEnvironmentConfigDeserializerTest {
     }
 
     @Test
+    fun `Deserializing environment config without image should succeed`() {
+        val dockerComposeContents = """
+            services:
+                api-gateway:
+                    build: .
+        """.trimIndent()
+        mockReadingDockerCompose(dockerComposeContents)
+        mockDockerComposeValidator(shouldThrow = false)
+
+        val parser = prepareParser(contents)
+        val config = TestEnvironmentConfigDeserializer().deserialize(parser, mockedDeserializationContext)
+
+        assertKeysAsExpected(listOf("api-gateway"), config.containers)
+        assertKeysAsExpected(listOf("mock-server"), config.mockServers)
+
+        val expectedService = JsonNodeFactory.instance.objectNode()
+            .put("build", ".")
+            .put("name", "api-gateway")
+            .put("type", "MISC")
+            .put("predefinedUrl", null as String?)
+            .put("pullPolicy", "MISSING")
+            .put("hasHealthcheck", false)
+        verify { mockedMapper.treeToValue(expectedService, Container::class.java) }
+        verify { mockedMapper.treeToValue(expectedMockServer(), MockServer::class.java) }
+    }
+
+    @Test
     fun `Deserializing environment config with invalid key value pairs should succeed`() {
         val dockerComposeContents = """
             services:

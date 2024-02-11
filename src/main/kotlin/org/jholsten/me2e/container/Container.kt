@@ -71,7 +71,7 @@ open class Container internal constructor(
      * Image to start the container from.
      * Corresponds to the value given for the `image` keyword in Docker-Compose.
      */
-    val image: String, // TODO: Check with build .
+    val image: String?,
 
     /**
      * Environment variables for this container.

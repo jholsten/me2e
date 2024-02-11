@@ -113,7 +113,7 @@ internal class YamlConfigParserIT {
             containers = containers,
             name = "api-gateway",
             type = ContainerType.MICROSERVICE,
-            image = "api-gateway-service:latest",
+            image = null,
             environment = mapOf(
                 "DB_PASSWORD" to "123",
                 "DB_USER" to "user",
@@ -188,7 +188,7 @@ internal class YamlConfigParserIT {
         containers: Map<String, Container>,
         name: String,
         type: ContainerType,
-        image: String,
+        image: String?,
         environment: Map<String, String>?,
         pullPolicy: DockerConfig.PullPolicy,
         hasHealthcheck: Boolean,

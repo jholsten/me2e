@@ -1,6 +1,6 @@
 services:
   api-gateway:
-    image: api-gateway-service:latest
+    build: .
     ports:
       - 1234
       - 1235:80
