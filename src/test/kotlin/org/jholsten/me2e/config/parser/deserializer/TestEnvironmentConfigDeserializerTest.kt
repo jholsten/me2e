@@ -11,10 +11,13 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import io.mockk.*
 import org.jholsten.me2e.config.model.DockerConfig
+import org.jholsten.me2e.config.parser.DockerComposeValidator
 import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.mock.MockServer
+import org.jholsten.me2e.parsing.exception.ValidationException
 import org.jholsten.me2e.parsing.utils.DeserializerFactory
 import org.jholsten.me2e.parsing.utils.FileUtils
+import java.nio.file.Files
 import kotlin.test.*
 
 class TestEnvironmentConfigDeserializerTest {
@@ -83,6 +86,7 @@ class TestEnvironmentConfigDeserializerTest {
     @Test
     fun `Deserializing environment config should succeed`() {
         mockReadingDockerCompose(dockerComposeContents)
+        mockDockerComposeValidator(shouldThrow = false)
 
         val parser = prepareParser(contents)
         val config = TestEnvironmentConfigDeserializer().deserialize(parser, mockedDeserializationContext)
@@ -100,6 +104,7 @@ class TestEnvironmentConfigDeserializerTest {
     fun `Deserializing environment config without Mock Servers should succeed`() {
         val contents = "docker-compose: docker-compose-parsing-test.yml"
         mockReadingDockerCompose(dockerComposeContents)
+        mockDockerComposeValidator(shouldThrow = false)
 
         val parser = prepareParser(contents)
         val config = TestEnvironmentConfigDeserializer().deserialize(parser, mockedDeserializationContext)
@@ -127,6 +132,7 @@ class TestEnvironmentConfigDeserializerTest {
                       test: curl --fail http://localhost:1234/health || exit 1
         """.trimIndent()
         mockReadingDockerCompose(dockerComposeContents)
+        mockDockerComposeValidator(shouldThrow = false)
 
         val parser = prepareParser(contents)
         val config = TestEnvironmentConfigDeserializer().deserialize(parser, mockedDeserializationContext)
@@ -161,6 +167,7 @@ class TestEnvironmentConfigDeserializerTest {
                       - "org.jholsten.me2e.container-type: MICROSERVICE"
         """.trimIndent()
         mockReadingDockerCompose(dockerComposeContents)
+        mockDockerComposeValidator(shouldThrow = false)
 
         val parser = prepareParser(contents)
         val config = TestEnvironmentConfigDeserializer().deserialize(parser, mockedDeserializationContext)
@@ -201,6 +208,7 @@ class TestEnvironmentConfigDeserializerTest {
                       - "some-label"
         """.trimIndent()
         mockReadingDockerCompose(dockerComposeContents)
+        mockDockerComposeValidator(shouldThrow = false)
 
         val parser = prepareParser(contents)
         val config = TestEnvironmentConfigDeserializer().deserialize(parser, mockedDeserializationContext)
@@ -240,6 +248,7 @@ class TestEnvironmentConfigDeserializerTest {
                       - "org.jholsten.me2e.database.init-script.init_2=database/init_2.sql"
         """.trimIndent()
         mockReadingDockerCompose(dockerComposeContents)
+        mockDockerComposeValidator(shouldThrow = false)
 
         val parser = prepareParser(contents)
         val config = TestEnvironmentConfigDeserializer().deserialize(parser, mockedDeserializationContext)
@@ -289,6 +298,7 @@ class TestEnvironmentConfigDeserializerTest {
                       - "org.jholsten.me2e.database.system=POSTGRESQL"
         """.trimIndent()
         mockReadingDockerCompose(dockerComposeContents)
+        mockDockerComposeValidator(shouldThrow = false)
 
         val parser = prepareParser(contents)
         val config = TestEnvironmentConfigDeserializer().deserialize(parser, mockedDeserializationContext)
@@ -332,6 +342,7 @@ class TestEnvironmentConfigDeserializerTest {
                       - "org.jholsten.me2e.database.system=MY_SQL"
         """.trimIndent()
         mockReadingDockerCompose(dockerComposeContents)
+        mockDockerComposeValidator(shouldThrow = false)
 
         val parser = prepareParser(contents)
         val config = TestEnvironmentConfigDeserializer().deserialize(parser, mockedDeserializationContext)
@@ -376,6 +387,7 @@ class TestEnvironmentConfigDeserializerTest {
                       - "org.jholsten.me2e.database.system=MARIA_DB"
         """.trimIndent()
         mockReadingDockerCompose(dockerComposeContents)
+        mockDockerComposeValidator(shouldThrow = false)
 
         val parser = prepareParser(contents)
         val config = TestEnvironmentConfigDeserializer().deserialize(parser, mockedDeserializationContext)
@@ -420,6 +432,7 @@ class TestEnvironmentConfigDeserializerTest {
                       - "org.jholsten.me2e.database.system=MONGO_DB"
         """.trimIndent()
         mockReadingDockerCompose(dockerComposeContents)
+        mockDockerComposeValidator(shouldThrow = false)
 
         val parser = prepareParser(contents)
         val config = TestEnvironmentConfigDeserializer().deserialize(parser, mockedDeserializationContext)
@@ -460,6 +473,7 @@ class TestEnvironmentConfigDeserializerTest {
                       - "org.jholsten.me2e.database.system=OTHER"
         """.trimIndent()
         mockReadingDockerCompose(dockerComposeContents)
+        mockDockerComposeValidator(shouldThrow = false)
 
         val parser = prepareParser(contents)
         val config = TestEnvironmentConfigDeserializer().deserialize(parser, mockedDeserializationContext)
@@ -484,16 +498,30 @@ class TestEnvironmentConfigDeserializerTest {
     fun `Deserializing environment config with invalid Docker-Compose should fail`() {
         val dockerComposeContents = "something: else"
         mockReadingDockerCompose(dockerComposeContents)
+        mockDockerComposeValidator(shouldThrow = true)
 
         val parser = prepareParser(contents)
-        assertFailsWith<IllegalArgumentException> {
+        assertFailsWith<ValidationException> {
             TestEnvironmentConfigDeserializer().deserialize(parser, mockedDeserializationContext)
         }
     }
 
     private fun mockReadingDockerCompose(dockerComposeContents: String) {
         mockkObject(FileUtils)
-        every { FileUtils.readFileContentsFromResources(any()) } returns dockerComposeContents
+        val dockerCompose = Files.createTempFile("tmp_", null)
+        Files.writeString(dockerCompose, dockerComposeContents)
+        val dockerComposeFile = dockerCompose.toFile()
+        dockerComposeFile.deleteOnExit()
+        every { FileUtils.getResourceAsFile(any()) } returns dockerComposeFile
+    }
+
+    private fun mockDockerComposeValidator(shouldThrow: Boolean) {
+        mockkConstructor(DockerComposeValidator::class)
+        if (!shouldThrow) {
+            every { anyConstructed<DockerComposeValidator>().validate(any()) } just runs
+        } else {
+            every { anyConstructed<DockerComposeValidator>().validate(any()) } throws ValidationException("Invalid Docker-Compose")
+        }
     }
 
     private fun initializeMockedMapper() {
