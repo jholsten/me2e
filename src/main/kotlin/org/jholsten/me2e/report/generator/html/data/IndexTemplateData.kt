@@ -14,6 +14,10 @@ import org.thymeleaf.context.Context
  * @param context Thymeleaf context containing the data to set.
  */
 class IndexTemplateData(context: Context) : TemplateData(context) {
+    /**
+     * Builder for instantiating instances of [IndexTemplateData].
+     * @constructor Instantiates a new builder instance for constructing [IndexTemplateData].
+     */
     class Builder : TemplateData.Builder<Builder>() {
         /**
          * Sets variables for the data contained in the given [result].
@@ -27,6 +31,8 @@ class IndexTemplateData(context: Context) : TemplateData(context) {
          * - `roots:` [List]<[TestResult]> - Roots of all tests included in the result (see [TestExecutionResult.roots]).
          * - `allTests:` [List]<[TestResult]> - All tests and test containers included in the result, i.e. all of the [TestExecutionResult.roots],
          * their children and their children, recursively.
+         * @param result Result of the execution of all tests.
+         * @return This builder instance, to use for chaining.
          */
         fun withTestExecutionResult(result: TestExecutionResult): Builder = apply {
             withVariable("numberOfTests", result.numberOfTests)

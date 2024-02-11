@@ -419,7 +419,11 @@ class DockerCompose private constructor(
     }
 
     /**
-     * Builder to instantiate a [DockerCompose] instance.
+     * Builder for instantiating instances of [DockerCompose].
+     * @constructor Instantiates a new builder instance for constructing a [DockerCompose].
+     * @param identifier Unique identifier of the Docker-Compose project. Is used as a prefix for the [project] name.
+     * @param file Reference to the Docker-Compose file to use.
+     * @param version Docker-Compose version to use for executing commands.
      */
     class Builder(
         private val identifier: String,
@@ -441,7 +445,9 @@ class DockerCompose private constructor(
         }
 
         /**
-         * Whether to use a local Docker-Compose binary instead of a container.
+         * Set whether to use a local Docker-Compose binary instead of a container.
+         * @param localCompose Whether to use local Docker-Compose binary instead of a container.
+         * @return This builder instance, to use for chaining.
          * @see DockerComposeV1.withLocalCompose
          * @see DockerComposeV2.withLocalCompose
          */
@@ -453,7 +459,9 @@ class DockerCompose private constructor(
         }
 
         /**
-         * Whether to always build images before starting containers.
+         * Set whether to always build images before starting containers.
+         * @param build Whether to always build images before starting containers.
+         * @return This builder instance, to use for chaining.
          * @see DockerComposeV1.withBuild
          * @see DockerComposeV2.withBuild
          */
@@ -465,7 +473,9 @@ class DockerCompose private constructor(
         }
 
         /**
-         * Whether to remove images after containers shut down.
+         * Set whether to remove images after containers shut down.
+         * @param removeImages Strategy for removing images after containers shut down.
+         * @return This builder instance, to use for chaining.
          * @see DockerComposeV1.withRemoveImages
          * @see DockerComposeV2.withRemoveImages
          */
@@ -477,7 +487,9 @@ class DockerCompose private constructor(
         }
 
         /**
-         * Whether to remove volumes after containers shut down.
+         * Set whether to remove volumes after containers shut down.
+         * @param removeVolumes Whether to remove volumes after containers shut down.
+         * @return This builder instance, to use for chaining.
          * @see DockerComposeV1.withRemoveVolumes
          * @see DockerComposeV2.withRemoveVolumes
          */
@@ -492,6 +504,7 @@ class DockerCompose private constructor(
          * Specify the [WaitStrategy] to use to determine if the container is ready.
          * @param serviceName the name of the service to wait for
          * @param waitStrategy the wait strategy to use
+         * @return This builder instance, to use for chaining.
          * @see DockerComposeV1.waitingFor
          * @see DockerComposeV2.waitingFor
          */

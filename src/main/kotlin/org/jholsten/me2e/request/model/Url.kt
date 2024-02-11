@@ -66,6 +66,10 @@ class Url(
         return Url(StringUtils.stripEnd(this.toString(), "/") + relativeUrl.toString())
     }
 
+    /**
+     * Builder for instantiating instances of [Url].
+     * @constructor Instantiates a new builder instance for constructing a [Url].
+     */
     class Builder() {
         private var scheme: Scheme? = null
         private var host: String? = null

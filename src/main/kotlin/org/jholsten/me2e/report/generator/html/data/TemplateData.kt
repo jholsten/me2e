@@ -10,7 +10,8 @@ import java.util.Locale
  * Data to be inserted into a Thymeleaf template.
  * For representing the data for the `index.html`, use the [IndexTemplateData].
  * For representing the data for a test detail page, use the [TestDetailTemplateData].
- * @constructor Instantiates a new instance for specifying the data of the template.
+ * @constructor Instantiates a new instance for specifying the data of the template. To set the variables
+ * of the context individually, use the [Builder] instead.
  * @param context Thymeleaf context containing the data to set.
  */
 open class TemplateData(
@@ -20,7 +21,10 @@ open class TemplateData(
      */
     val context: Context,
 ) {
-
+    /**
+     * Builder for instantiating instances of [TemplateData].
+     * @constructor Instantiates a new builder instance for constructing [TemplateData].
+     */
     open class Builder<SELF : Builder<SELF>> {
         protected val context: Context = Context()
 

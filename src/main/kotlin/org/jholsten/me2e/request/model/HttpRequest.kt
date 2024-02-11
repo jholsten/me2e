@@ -2,6 +2,8 @@ package org.jholsten.me2e.request.model
 
 /**
  * Model representing an HTTP request.
+ *
+ * To instantiate instances of this class, use the [Builder].
  * @sample org.jholsten.samples.request.httpRequestWithHeaders
  */
 class HttpRequest internal constructor(
@@ -33,6 +35,10 @@ class HttpRequest internal constructor(
         return Builder(this)
     }
 
+    /**
+     * Builder for instantiating instances of [HttpRequest].
+     * @constructor Instantiates a new builder instance for constructing an [HttpRequest].
+     */
     class Builder() {
         private var url: Url? = null
         private var method: HttpMethod? = null

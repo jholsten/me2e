@@ -127,6 +127,9 @@ abstract class DatabaseConnection protected constructor(
      */
     abstract fun close()
 
+    /**
+     * Base class for builders for instantiating instances of [DatabaseConnection].
+     */
     abstract class Builder<SELF : Builder<SELF>> {
         protected var host: String? = null
         protected var port: Int? = null

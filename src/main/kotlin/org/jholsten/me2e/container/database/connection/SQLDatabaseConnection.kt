@@ -15,6 +15,8 @@ import java.sql.Statement
 /**
  * Representation of the connection to an SQL database.
  * Allows to initialize, query and reset the state of an SQL database instance.
+ *
+ * To instantiate instances of this class, use the [Builder].
  */
 class SQLDatabaseConnection private constructor(
     /**
@@ -139,6 +141,10 @@ class SQLDatabaseConnection private constructor(
         connection.close()
     }
 
+    /**
+     * Builder for instantiating instances of [SQLDatabaseConnection].
+     * @constructor Instantiates a new builder instance for constructing a [SQLDatabaseConnection].
+     */
     class Builder : DatabaseConnection.Builder<Builder>() {
         private val logger = logger<Builder>()
 

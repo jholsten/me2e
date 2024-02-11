@@ -17,6 +17,10 @@ import java.time.Instant
  * @param context Thymeleaf context containing the data to set.
  */
 class TestDetailTemplateData(context: Context) : TemplateData(context) {
+    /**
+     * Builder for instantiating instances of [TestDetailTemplateData].
+     * @constructor Instantiates a new builder instance for constructing [TestDetailTemplateData].
+     */
     class Builder : TemplateData.Builder<Builder>() {
         /**
          * Sets variables for the data contained in the given [result].
@@ -58,6 +62,8 @@ class TestDetailTemplateData(context: Context) : TemplateData(context) {
          * (see [FinishedTestResult.stackTrace]). **Only available if [TestResult.status] is not [TestResult.Status.SKIPPED]**.
          * - `reason:` [String]? - Message describing why the execution has been skipped (see [SkippedTestResult.reason]).
          * **Only available if [TestResult.status] is [TestResult.Status.SKIPPED]**.
+         * @param result Result of the execution of the test container for which the HTML template is to be built.
+         * @return This builder instance, to use for chaining.
          */
         fun withTestResult(result: TestResult): Builder = apply {
             withVariable("testId", result.testId)

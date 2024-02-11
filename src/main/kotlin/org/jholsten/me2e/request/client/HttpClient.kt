@@ -161,18 +161,21 @@ interface HttpClient {
         /**
          * Sets the base URL of the client.
          * @param baseUrl Base URL to set.
+         * @return This builder instance, to use for chaining.
          */
         fun withBaseUrl(baseUrl: Url): SELF
 
         /**
          * Sets the given interceptors for all outgoing requests.
          * @param interceptors Request interceptor to set.
+         * @return This builder instance, to use for chaining.
          */
         fun withRequestInterceptors(interceptors: List<RequestInterceptor>): SELF
 
         /**
          * Adds the given interceptor for all outgoing requests.
          * @param interceptor Request interceptor to add.
+         * @return This builder instance, to use for chaining.
          */
         fun addRequestInterceptor(interceptor: RequestInterceptor): SELF
 
@@ -180,6 +183,7 @@ interface HttpClient {
          * Sets the given connect timeout for new connections. The default value is 10 seconds.
          * @param timeout Connect timeout in [unit] to set.
          * @param unit Time unit of the [timeout] value to set.
+         * @return This builder instance, to use for chaining.
          */
         fun withConnectTimeout(timeout: Long, unit: TimeUnit): SELF
 
@@ -187,6 +191,7 @@ interface HttpClient {
          * Sets the given read timeout for new connections. The default value is 10 seconds.
          * @param timeout Read timeout in [unit] to set.
          * @param unit Time unit of the [timeout] value to set.
+         * @return This builder instance, to use for chaining.
          */
         fun withReadTimeout(timeout: Long, unit: TimeUnit): SELF
 
@@ -194,6 +199,7 @@ interface HttpClient {
          * Sets the given write timeout for new connections. The default value is 10 seconds.
          * @param timeout Write timeout in [unit] to set.
          * @param unit Time unit of the [timeout] value to set.
+         * @return This builder instance, to use for chaining.
          */
         fun withWriteTimeout(timeout: Long, unit: TimeUnit): SELF
 

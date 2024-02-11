@@ -66,6 +66,10 @@ class HttpRequestBody {
         this.contentType = contentType
     }
 
+    /**
+     * Builder for instantiating instances of [HttpRequestBody].
+     * @constructor Instantiates a new builder instance for constructing an [HttpRequestBody].
+     */
     class Builder {
         private var contentType: ContentType? = null
         private var stringContent: String? = null

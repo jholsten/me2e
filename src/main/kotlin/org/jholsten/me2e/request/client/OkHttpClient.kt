@@ -11,6 +11,8 @@ import java.util.concurrent.TimeUnit
 /**
  * Client to use for executing requests over HTTP.
  * Uses OkHttp internally for executing and processing the requests.
+ *
+ * To instantiate instances of this class, use the [Builder].
  */
 class OkHttpClient private constructor(
     /**
@@ -103,6 +105,10 @@ class OkHttpClient private constructor(
         }
     }
 
+    /**
+     * Builder for instantiating instances of [OkHttpClient].
+     * @constructor Instantiates a new builder instance for constructing an [OkHttpClient].
+     */
     class Builder : HttpClient.Builder<Builder> {
         private var baseUrl: Url? = null
         private val configuration: Configuration = Configuration()

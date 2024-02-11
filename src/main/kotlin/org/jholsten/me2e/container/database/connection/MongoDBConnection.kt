@@ -17,6 +17,8 @@ import java.io.FileNotFoundException
 /**
  * Representation of the connection to a MongoDB database.
  * Allows to initialize, query and reset the state of a MongoDB database instance.
+ *
+ * To instantiate instances of this class, use the [Builder].
  */
 class MongoDBConnection private constructor(
     /**
@@ -165,6 +167,10 @@ class MongoDBConnection private constructor(
         client.close()
     }
 
+    /**
+     * Builder for instantiating instances of [MongoDBConnection].
+     * @constructor Instantiates a new builder instance for constructing a [MongoDBConnection].
+     */
     class Builder : DatabaseConnection.Builder<Builder>() {
         private var container: Container? = null
         private var settings: MongoClientSettings? = null

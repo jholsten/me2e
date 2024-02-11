@@ -3,8 +3,7 @@ package org.jholsten.me2e.request.model
 import org.apache.commons.lang3.StringUtils
 
 /**
- * Model representing the relative part of a URL.
- * Includes path, query parameters and fragment.
+ * Model representing the relative part of a URL. Includes path, query parameters and fragment.
  * @sample org.jholsten.samples.request.relativeUrl
  * @sample org.jholsten.samples.request.relativeUrlWithBuilder
  * @constructor Instantiates a new relative url instance. Appends leading slash automatically.
@@ -42,6 +41,10 @@ class RelativeUrl(
         }
     }
 
+    /**
+     * Builder for instantiating instances of [RelativeUrl].
+     * @constructor Instantiates a new builder instance for constructing a [RelativeUrl].
+     */
     class Builder {
         private var path: String? = null
         private var queryParameters: MutableMap<String, MutableList<String>> = mutableMapOf()

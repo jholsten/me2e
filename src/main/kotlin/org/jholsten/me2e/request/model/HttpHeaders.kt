@@ -5,6 +5,8 @@ import okhttp3.internal.toImmutableMap
 
 /**
  * Representation of HTTP headers of an HTTP request or an HTTP response.
+ *
+ * To instantiate instances of this class, use the [Builder].
  * @sample org.jholsten.samples.request.httpRequestWithHeaders
  */
 class HttpHeaders internal constructor(
@@ -63,6 +65,10 @@ class HttpHeaders internal constructor(
         return Builder(this.values)
     }
 
+    /**
+     * Builder for instantiating instances of [HttpHeaders].
+     * @constructor Instantiates a new builder instance for constructing [HttpHeaders].
+     */
     class Builder {
         private val values: MutableMap<String, MutableList<String>>
 
