@@ -73,7 +73,7 @@ pages:
     - chmod +x ./gradlew
   script:
     - ./gradlew --build-cache dokkaHtml
-    - cp -Rp build/dokka/html ../public/
+    - cp -Rp build/dokka/html public/
   artifacts:
     paths:
       - public
