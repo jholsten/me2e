@@ -18,7 +18,7 @@ plugins {
     id "org.jetbrains.kotlin.kapt" version "1.8.20"
 
     // Apply Dokka Plugin to support generation of Kotlin documentation
-    id "org.jetbrains.dokka" version "1.6.0"
+    id "org.jetbrains.dokka" version "1.9.10"
 }
 
 group = "org.jholsten"
