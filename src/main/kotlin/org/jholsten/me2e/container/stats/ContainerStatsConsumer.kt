@@ -13,12 +13,12 @@ import java.util.function.Consumer
 
 /**
  * Base class for consuming statistics of a container.
- * Whenever docker sends a new statistics entry for the container, the callback function [accept] is executed.
+ * Whenever Docker sends a new statistics entry for the container, the callback function [accept] is executed.
  * @sample org.jholsten.samples.container.LoggingContainerStatsConsumer
  * @see ContainerStatsCollector
  * @constructor Instantiates a new container stats consumer.
  */
-abstract class ContainerStatsConsumer : Consumer<Statistics> {
+abstract class ContainerStatsConsumer : Consumer<ContainerStatsEntry> {
     private val logger = logger<ContainerStatsConsumer>()
     private val mc: MathContext = MathContext(5)
 
@@ -26,13 +26,18 @@ abstract class ContainerStatsConsumer : Consumer<Statistics> {
      * Callback function to execute when a new statistics entry is received for a container.
      * @param entry Aggregated statistics entry received from the Docker container.
      */
-    abstract fun accept(entry: ContainerStatsEntry)
+    abstract override fun accept(entry: ContainerStatsEntry)
 
-    override fun accept(t: Statistics) {
-        try {
-            accept(aggregateStatistics(t))
-        } catch (e: Exception) {
-            logger.error("Exception occurred while trying to consume statistics entry:", e)
+    /**
+     * Consumer to use for consuming the container stats with testcontainers.
+     */
+    internal inner class InternalStatsConsumer : Consumer<Statistics> {
+        override fun accept(t: Statistics) {
+            try {
+                accept(aggregateStatistics(t))
+            } catch (e: Exception) {
+                logger.error("Exception occurred while trying to consume statistics entry:", e)
+            }
         }
     }
 

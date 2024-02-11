@@ -30,7 +30,7 @@ internal class ContainerLogUtils {
         fun getLogs(dockerContainer: ContainerState, since: Int, until: Int?): List<ContainerLogEntry> {
             val collector = ContainerLogCollector()
             val wait = WaitingConsumer()
-            val consumer = collector.andThen(wait)
+            val consumer = collector.InternalLogConsumer().andThen(wait)
 
             attachConsumer(dockerContainer, consumer, followStream = false, since = since, until = until).use {
                 wait.waitUntilEnd()
@@ -50,7 +50,7 @@ internal class ContainerLogUtils {
          */
         @JvmSynthetic
         fun followOutput(dockerContainer: ContainerState, consumer: ContainerLogConsumer, since: Int = 0): Closeable {
-            return attachConsumer(dockerContainer, consumer, followStream = true, since = since)
+            return attachConsumer(dockerContainer, consumer.InternalLogConsumer(), followStream = true, since = since)
         }
 
         private fun attachConsumer(

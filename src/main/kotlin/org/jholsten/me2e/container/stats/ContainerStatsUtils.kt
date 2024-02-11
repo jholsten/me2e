@@ -20,7 +20,7 @@ internal class ContainerStatsUtils {
         fun getStats(dockerContainer: ContainerState): ContainerStatsEntry {
             val collector = ContainerStatsCollector()
             val wait = ContainerStatsWaitingConsumer()
-            val consumer = collector.andThen(wait)
+            val consumer = collector.InternalStatsConsumer().andThen(wait)
 
             attachConsumer(dockerContainer, consumer, followStream = false).use {
                 wait.waitUntilEnd()
@@ -38,7 +38,7 @@ internal class ContainerStatsUtils {
          */
         @JvmSynthetic
         fun followOutput(dockerContainer: ContainerState, consumer: ContainerStatsConsumer): Closeable {
-            return attachConsumer(dockerContainer, consumer, followStream = true)
+            return attachConsumer(dockerContainer, consumer.InternalStatsConsumer(), followStream = true)
         }
 
         private fun attachConsumer(dockerContainer: ContainerState, consumer: Consumer<Statistics>, followStream: Boolean): Closeable {

@@ -146,7 +146,7 @@ internal class ContainerStatsConsumerTest {
     @Test
     fun `Aggregating statistics with all values set should succeed`() {
         val statistics = DeserializerFactory.getObjectMapper().readValue(dockerStatsContent, Statistics::class.java)
-        consumer.accept(statistics)
+        consumer.InternalStatsConsumer().accept(statistics)
 
         val entry = consumer.entry
         val expected = ContainerStatsEntry(
@@ -172,7 +172,7 @@ internal class ContainerStatsConsumerTest {
     @Test
     fun `Aggregating statistics with no values set should succeed`() {
         val statistics = DeserializerFactory.getObjectMapper().readValue(dockerStatsWithoutOptionalsContent, Statistics::class.java)
-        consumer.accept(statistics)
+        consumer.InternalStatsConsumer().accept(statistics)
 
         val entry = consumer.entry
         val expected = ContainerStatsEntry(

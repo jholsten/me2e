@@ -13,20 +13,25 @@ import java.util.function.Consumer
  * @see ContainerRestartListener
  * @constructor Instantiates a new container event consumer.
  */
-abstract class ContainerEventConsumer : Consumer<Event> {
+abstract class ContainerEventConsumer : Consumer<ContainerEvent> {
     private val logger = logger<ContainerEventConsumer>()
 
     /**
      * Callback function to execute when a new event is received for a container.
      * @param event Event received for the Docker container.
      */
-    abstract fun accept(event: ContainerEvent)
+    abstract override fun accept(event: ContainerEvent)
 
-    override fun accept(t: Event) {
-        try {
-            parseEvent(t)?.let { accept(it) }
-        } catch (e: Exception) {
-            logger.error("Exception occurred while trying to consume container event:", e)
+    /**
+     * Consumer to use for consuming the container events with testcontainers.
+     */
+    internal inner class InternalEventConsumer : Consumer<Event> {
+        override fun accept(t: Event) {
+            try {
+                parseEvent(t)?.let { accept(it) }
+            } catch (e: Exception) {
+                logger.error("Exception occurred while trying to consume container event:", e)
+            }
         }
     }
 

@@ -25,7 +25,7 @@ internal class ContainerEventsUtils {
             consumer: ContainerEventConsumer,
             eventFilters: List<ContainerEvent.Type>?,
         ): Closeable {
-            return attachConsumer(dockerContainer, consumer, eventFilters)
+            return attachConsumer(dockerContainer, consumer.InternalEventConsumer(), eventFilters)
         }
 
         private fun attachConsumer(

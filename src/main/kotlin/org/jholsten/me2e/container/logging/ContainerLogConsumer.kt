@@ -13,7 +13,7 @@ import java.util.function.Consumer
  * @see ContainerLogCollector
  * @constructor Instantiates a new container log consumer.
  */
-abstract class ContainerLogConsumer : Consumer<OutputFrame> {
+abstract class ContainerLogConsumer : Consumer<ContainerLogEntry> {
     private val logger = logger<ContainerLogConsumer>()
 
     /**
@@ -23,13 +23,18 @@ abstract class ContainerLogConsumer : Consumer<OutputFrame> {
      * When registering the consumer, all previous log entries are received.
      * @param entry Log entry received from the Docker container.
      */
-    abstract fun accept(entry: ContainerLogEntry)
+    abstract override fun accept(entry: ContainerLogEntry)
 
-    override fun accept(t: OutputFrame) {
-        try {
-            parseLogEntry(t)?.let { accept(it) }
-        } catch (e: Exception) {
-            logger.error("Exception occurred while trying to consume log entry:", e)
+    /**
+     * Consumer to use for consuming the container logs with testcontainers.
+     */
+    internal inner class InternalLogConsumer : Consumer<OutputFrame> {
+        override fun accept(t: OutputFrame) {
+            try {
+                parseLogEntry(t)?.let { accept(it) }
+            } catch (e: Exception) {
+                logger.error("Exception occurred while trying to consume log entry:", e)
+            }
         }
     }
 
