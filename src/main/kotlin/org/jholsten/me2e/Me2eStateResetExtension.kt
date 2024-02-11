@@ -10,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtensionContext
  * - [org.jholsten.me2e.container.database.DatabaseContainer]: Database entries
  * - [org.jholsten.me2e.container.microservice.MicroserviceContainer]: Request Interceptors
  * - [org.jholsten.me2e.mock.MockServer]: Received requests
+ *
  * Resetting the state after each test ensures a more predictable behavior so that a state modified in
  * previous tests does not influence the result of other tests.
  */

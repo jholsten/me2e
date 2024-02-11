@@ -102,7 +102,7 @@ class MicroserviceContainer internal constructor(
     /**
      * Performs authentication for requests to this microservice using the given [authenticator].
      * The [Authenticator.getRequestInterceptor] is executed for every subsequent request in the current test so that all
-     * of the following requests are authenticated. Note that - unless deactivated in [Me2eTestConfig.resetRequestInterceptors] -
+     * of the following requests are authenticated. Note that - unless deactivated in [Me2eTestConfig.StateReset.resetRequestInterceptors] -
      * all request interceptors are reset after each test so that the authentication only applies to the current test.
      * @param authenticator Authenticator to use for authenticating the HTTP requests.
      */

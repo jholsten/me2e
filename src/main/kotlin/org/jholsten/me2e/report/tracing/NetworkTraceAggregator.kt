@@ -396,7 +396,7 @@ internal class NetworkTraceAggregator {
      * in the given network, it is ignored.
      */
     private fun registerContainer(network: ContainerNetwork, container: Container, specification: ServiceSpecification) {
-        if (network.ipAddress == null) {
+        if (network.ipAddress.isNullOrBlank()) {
             logger.warn(
                 "No IP address set for container ${container.name} in network $network. " +
                     "Unable to associate HTTP packets from and to this container with the container instance."
@@ -410,7 +410,7 @@ internal class NetworkTraceAggregator {
             specification = specification,
         )
         monitoredNetworks[network.networkId] = networkContainers
-        logger.info("Registered IP address ${network.ipAddress} of container ${container.name} in network ${network.networkId}.")
+        logger.info("Registered IP address ${network.ipAddress} of container '${container.name}' in network ${network.networkId}.")
     }
 
     /**
