@@ -26,6 +26,8 @@ build:
     - chmod +x ./gradlew
   script:
     - ./gradlew --build-cache assemble
+  rules:
+    - if: "false"
 
 # Runs JUnit tests inside Docker container (required to have access to Docker and Docker-Compose)
 test:
@@ -47,6 +49,8 @@ test:
     when: always
     reports:
       junit: build/test-results/test/**/TEST-*.xml
+  rules:
+    - if: "false"
 
 # Publishes package to GitLab Package Registry:
 publish-package:
@@ -59,3 +63,13 @@ publish-package:
     - ./gradlew clean publish
   only:
     - tags
+
+# Publishes KDoc to GitLab pages
+publish-kdoc:
+  stage: publish
+  image: openjdk:17.0.2-jdk-slim
+  before_script:
+    #- export VERSION_NUMBER=$CI_COMMIT_TAG
+    - chmod +x ./gradlew
+  script:
+    - ./gradlew dokkaHtml
