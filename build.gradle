@@ -163,6 +163,6 @@ test {
     // Show log output while running tests
     testLogging.showStandardStreams = true
     testLogging.showStackTraces = true
-    // Delete ReportGeneratingListener for internal tests
+    // Disable ReportGeneratingListener for internal tests
     systemProperty("junit.platform.execution.listeners.deactivate", "org.jholsten.me2e.report.ReportGeneratingListener")
 }
