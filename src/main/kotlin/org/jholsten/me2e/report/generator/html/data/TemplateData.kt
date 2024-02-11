@@ -36,7 +36,6 @@ open class TemplateData(
          * In the template, the keys in `messages_$locale.properties` can then be referenced with `#{key}`.
          * @param locale Locale to use for the Thymeleaf template.
          * @return This builder instance, to use for chaining.
-         * TODO: Verify
          */
         fun withLocale(locale: Locale): SELF {
             context.locale = locale
