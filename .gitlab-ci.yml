@@ -26,8 +26,8 @@ build:
     - chmod +x ./gradlew
   script:
     - ./gradlew --build-cache assemble
-  rules:
-    - if: "false"
+  only:
+    - tags
 
 # Runs JUnit tests inside Docker container (required to have access to Docker and Docker-Compose)
 test:
@@ -49,8 +49,8 @@ test:
     when: always
     reports:
       junit: build/test-results/test/**/TEST-*.xml
-  rules:
-    - if: "false"
+  only:
+    - tags
 
 # Publishes package to GitLab Package Registry:
 publish-package:
