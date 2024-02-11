@@ -26,6 +26,23 @@ build:
     - chmod +x ./gradlew
   script:
     - ./gradlew --build-cache assemble
+  only:
+    - tags
+
+# Builds and pushes Dockerfile on changes
+build-docker:
+  stage: build
+  image: docker:20.10.20
+  variables:
+    IMAGE: $CI_REGISTRY_IMAGE:latest
+  services:
+    - name: docker:20.10.20-dind
+      alias: docker
+      command: [ "--tls=false" ]
+  script:
+    - docker login -u REGISTRY_TOKEN -p $REGISTRY_TOKEN $CI_REGISTRY
+    - docker build -t $IMAGE .
+    - docker push $IMAGE
 
 # Runs JUnit tests inside Docker container (required to have access to Docker and Docker-Compose)
 test:
@@ -47,6 +64,8 @@ test:
     when: always
     reports:
       junit: build/test-results/test/**/TEST-*.xml
+  only:
+    - tags
 
 # Publishes package to GitLab Package Registry:
 publish-package:
