@@ -10,6 +10,8 @@ import java.util.Locale
  * Data to be inserted into a Thymeleaf template.
  * For representing the data for the `index.html`, use the [IndexTemplateData].
  * For representing the data for a test detail page, use the [TestDetailTemplateData].
+ * @constructor Instantiates a new instance for specifying the data of the template.
+ * @param context Thymeleaf context containing the data to set.
  */
 open class TemplateData(
     /**

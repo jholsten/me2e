@@ -16,6 +16,7 @@ import java.util.function.Consumer
  * Whenever docker sends a new statistics entry for the container, the callback function [accept] is executed.
  * @sample org.jholsten.samples.container.LoggingContainerStatsConsumer
  * @see ContainerStatsCollector
+ * @constructor Instantiates a new container stats consumer.
  */
 abstract class ContainerStatsConsumer : Consumer<Statistics> {
     private val logger = logger<ContainerStatsConsumer>()

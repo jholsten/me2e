@@ -8,6 +8,9 @@ import org.apache.commons.lang3.StringUtils
  * Model representing an absolute URL.
  * @sample org.jholsten.samples.request.url
  * @sample org.jholsten.samples.request.urlWithBuilder
+ * @constructor Instantiates a new Url instance with the given value. May throw [IllegalArgumentException]
+ * if [value] is invalid. To set the properties of the URL individually, use the [Builder] instead.
+ * @param value URL that the instance represents.
  */
 class Url(
     /**

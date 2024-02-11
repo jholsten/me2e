@@ -12,6 +12,9 @@ import java.time.Instant
 /**
  * Data of a [TestResult] instance to be inserted into a Thymeleaf template.
  * Sets variables for the properties of the instance to be used in the [HtmlReportGenerator.testDetailTemplate].
+ * @constructor Instantiates a new instance for specifying the data of the detail template. To automatically
+ * set the variables for the test results, use the [Builder] instead.
+ * @param context Thymeleaf context containing the data to set.
  */
 class TestDetailTemplateData(context: Context) : TemplateData(context) {
     class Builder : TemplateData.Builder<Builder>() {

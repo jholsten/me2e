@@ -9,7 +9,7 @@ import org.jholsten.me2e.utils.toJson
  * This matcher is used to match the properties of the request stubs to the requests that the Mock Server receives.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-class StringMatcher(
+class StringMatcher internal constructor(
     /**
      * Matches only if the string is exactly equal to the defined one.
      * A value of `null` indicates that the actual value does not value to be equal.

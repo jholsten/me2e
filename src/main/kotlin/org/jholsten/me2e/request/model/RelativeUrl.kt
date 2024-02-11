@@ -7,6 +7,9 @@ import org.apache.commons.lang3.StringUtils
  * Includes path, query parameters and fragment.
  * @sample org.jholsten.samples.request.relativeUrl
  * @sample org.jholsten.samples.request.relativeUrlWithBuilder
+ * @constructor Instantiates a new relative url instance. Appends leading slash automatically.
+ * To set the properties of the URL individually, use the [Builder] instead.
+ * @param value Relative URL that he instance should represent.
  */
 class RelativeUrl(
     /**

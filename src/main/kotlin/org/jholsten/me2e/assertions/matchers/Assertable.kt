@@ -5,6 +5,9 @@ import org.jholsten.me2e.assertions.AssertionFailure
 /**
  * Base class for assertions. Enables to evaluate an assertion and throw a corresponding [AssertionFailure]
  * if the assertion was not successful.
+ * @constructor Instantiates a new [Assertable] instance.
+ * @param assertion Assertion which should evaluate to `true`.
+ * @param message Message representing the expectation to output in case the assertion was not successful.
  * @param T Datatype of the values to compare.
  */
 open class Assertable<T> internal constructor(

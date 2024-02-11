@@ -24,6 +24,10 @@ import java.time.Instant
  * To extend or modify this report generator, implement a subclass and set its reference in your project's
  * [org.jholsten.me2e.Me2eTestConfig.reportGenerators].
  * @see <a href="https://www.thymeleaf.org/">Thymeleaf</a>
+ * @constructor Instantiates a new HTML report generator.
+ * @param indexTemplate Path to the Thymeleaf template to use for the `index.html`.
+ * @param testDetailTemplate Path to the Thymeleaf template to use for the details of the execution of one test class.
+ * @param additionalResources Additional resources required for the templates (e.g. `.css` or `.js` files).
  */
 open class HtmlReportGenerator(
     /**

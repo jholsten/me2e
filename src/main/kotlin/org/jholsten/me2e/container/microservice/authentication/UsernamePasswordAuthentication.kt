@@ -7,6 +7,9 @@ import java.util.Base64
 /**
  * Basic authenticator, which sets username and password Base64 encoded in the `Authorization` header
  * of each HTTP request.
+ * @constructor Instantiates a new basic authenticator.
+ * @param username Username to set in the `Authorization` header.
+ * @param password Password to set in the `Authorization` header.
  */
 class UsernamePasswordAuthentication(
     /**

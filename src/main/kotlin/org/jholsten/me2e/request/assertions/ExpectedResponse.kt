@@ -13,6 +13,7 @@ import org.jholsten.me2e.request.model.HttpResponse
  * can be defined, which are then evaluated collectively. This enables to evaluate several assertions and obtain all
  * failed assertions and not just the first one. Furthermore, the specification can be reused across multiple tests.
  * @see AssertableResponse.conformsTo
+ * @constructor Instantiates a new expected response.
  */
 class ExpectedResponse {
     private val statusCode: MutableList<Assertable<Int?>> = mutableListOf()

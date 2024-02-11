@@ -13,6 +13,13 @@ import kotlin.reflect.KClass
  * in the project is searched for and used for the configuration of the test execution.
  * @see Me2eTest.configAnnotation
  * @see Me2eTestConfigScanner
+ * @constructor Instantiates a new configuration for the ME2E tests.
+ * @param config Path to the configuration file.
+ * @param format Format of the configuration file.
+ * @param reportGenerators Report generators to use for generating the test report.
+ * @param assertHealthy Whether to assert that all containers are healthy before each test.
+ * @param stateResetConfig Configuration for resetting the state of containers, Mock Servers
+ * and databases after each test.
  */
 @Target(AnnotationTarget.CLASS)
 annotation class Me2eTestConfig(
@@ -49,6 +56,15 @@ annotation class Me2eTestConfig(
      */
     val stateResetConfig: StateReset = StateReset()
 ) {
+    /**
+     * Configuration for resetting the state of containers, Mock Servers and databases after each test.
+     * @constructor Instantiates a new configuration for resetting the state.
+     * @param clearAllTables Whether to clear all entries from all tables for all database containers for which a
+     * connection to the database is established via a [org.jholsten.me2e.container.database.connection.DatabaseConnection]
+     * after each test.
+     * @param resetRequestInterceptors Whether to reset all request interceptors of all microservice containers after each test.
+     * @param resetMockServerRequests Whether to reset all captured requests for all Mock Servers after each test.
+     */
     annotation class StateReset(
         /**
          * Whether to clear all entries from all tables for all database containers for which a connection to the

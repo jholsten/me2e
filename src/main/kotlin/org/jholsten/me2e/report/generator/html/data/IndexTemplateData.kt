@@ -9,6 +9,9 @@ import org.thymeleaf.context.Context
 /**
  * Data of a [TestExecutionResult] instance to be inserted into a Thymeleaf template.
  * Sets variables for the properties of the instance to be used in the [HtmlReportGenerator.indexTemplate].
+ * @constructor Instantiates a new instance for specifying the data of the index template. To automatically
+ * set the variables for the test results, use the [Builder] instead.
+ * @param context Thymeleaf context containing the data to set.
  */
 class IndexTemplateData(context: Context) : TemplateData(context) {
     class Builder : TemplateData.Builder<Builder>() {

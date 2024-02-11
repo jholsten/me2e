@@ -12,6 +12,7 @@ import org.jholsten.me2e.request.interceptor.RequestInterceptor
  * once when [org.jholsten.me2e.container.microservice.MicroserviceContainer.authenticate] is called.
  * @sample org.jholsten.samples.container.ApiKeyAuthenticator
  * @see UsernamePasswordAuthentication
+ * @constructor Instantiates a new authenticator.
  */
 abstract class Authenticator {
 

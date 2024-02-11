@@ -22,6 +22,7 @@ import org.jholsten.me2e.utils.toJson
  * For this specification, all expectations for the properties of an [org.jholsten.me2e.request.model.HttpRequest]
  * can be defined, which are then collectively compared to the actual requests that the Mock Server has received.
  * @see MockServerVerification.receivedRequest
+ * @constructor Instantiates a new expected request.
  */
 class ExpectedRequest {
     private var stubName: String? = null

@@ -29,6 +29,8 @@ class HttpRequestBody {
     /**
      * Instantiates a new request body with the given String content and the given content type.
      * The contents of the body are encoded to a byte array using the given charset.
+     *
+     * To set the properties of the request body individually, use the [Builder] instead.
      * @param content String content of the request body.
      * @param contentType Content type of the request body.
      * @param charset Charset to use for encoding the string content to a byte array.
@@ -42,6 +44,8 @@ class HttpRequestBody {
     /**
      * Instantiates a new request body with the given File content and the given content type.
      * The content of the body is encoded to a byte array.
+     *
+     * To set the properties of the request body individually, use the [Builder] instead.
      * @param content File content of the request body.
      * @param contentType Content type of the request body.
      */
@@ -52,6 +56,8 @@ class HttpRequestBody {
 
     /**
      * Instantiates a new request body with the given byte array content and the given content type.
+     *
+     * To set the properties of the request body individually, use the [Builder] instead.
      * @param content Binary content of the request body.
      * @param contentType Content type of the request body.
      */

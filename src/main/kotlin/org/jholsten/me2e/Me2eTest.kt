@@ -31,6 +31,8 @@ import org.junit.jupiter.api.extension.ExtendWith
  * @see ContainerManager
  * @see MockServerManager
  * @sample org.jholsten.samples.Me2eTestSample
+ * @constructor Instantiates a new [Me2eTest] instance. Injects services into the fields annotated with
+ * [org.jholsten.me2e.container.injection.InjectService].
  */
 @ExtendWith(Me2eAssertHealthyExtension::class, Me2eStateResetExtension::class)
 open class Me2eTest {

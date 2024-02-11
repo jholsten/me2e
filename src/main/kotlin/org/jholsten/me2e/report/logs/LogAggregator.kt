@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory
 /**
  * Service which collects all log entries from all containers and from the Test Runner.
  */
-internal class LogAggregator internal constructor() {
+internal class LogAggregator {
     private val logger = logger<LogAggregator>()
 
     /**

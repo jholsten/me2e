@@ -5,7 +5,7 @@ import org.jholsten.me2e.parsing.YamlParser
 import org.jholsten.me2e.parsing.utils.DeserializerFactory
 
 /**
- * Class for parsing test configuration defined in YAML file.
+ * Class for the parsing test configuration defined in a YAML file.
  */
 internal class YamlConfigParser : ConfigParser, YamlParser<TestConfig>(
     schemaValidator = ConfigSchemaValidator(DeserializerFactory.getYamlMapper()),

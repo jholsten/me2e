@@ -5,6 +5,9 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 
 /**
  * Type to describe the content type of an HTTP request or response body.
+ * @constructor Instantiates a new content type instance with the given value. May throw
+ * [IllegalArgumentException] in case the [value] is invalid.
+ * @param value Value of the content type, as specified in RFC 2045.
  */
 class ContentType(
     /**

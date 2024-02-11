@@ -9,6 +9,10 @@ import java.nio.charset.Charset
 
 /**
  * Engine which fills HTML templates using Thymeleaf.
+ * @constructor Instantiates a new Thymeleaf engine.
+ * @param template Path to the Thymeleaf template to be filled.
+ * @param data Data to be inserted into the Thymeleaf template.
+ * @param outputPath Path where generated HTML file is to be stored.
  */
 class TemplateEngine(
     /**

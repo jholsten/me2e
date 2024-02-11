@@ -8,6 +8,8 @@ import org.jholsten.me2e.container.events.model.ContainerEvent
  * The sequence of events for a restart is as follows: (1) `kill`, (2) `die`, (3) `stop`, (4) `start`, (5) `restart`.
  * As certain properties of the container, such as its port mapping, can change during a restart (see
  * [GitHub Issue #31926](https://github.com/moby/moby/issues/31926)), this listener enables to react to such changes accordingly.
+ * @constructor Instantiates a new restart listener.
+ * @param container Container which should be notified in case the Docker container is restarted.
  */
 class ContainerRestartListener(
     /**

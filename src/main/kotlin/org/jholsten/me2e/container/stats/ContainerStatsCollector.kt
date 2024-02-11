@@ -5,6 +5,7 @@ import org.jholsten.me2e.container.stats.model.ContainerStatsEntry
 /**
  * Container stats consumer which collects all statistics entries and
  * stores them in a local variable [stats].
+ * @constructor Instantiates a new container stats collector.
  */
 class ContainerStatsCollector : ContainerStatsConsumer() {
     /**
