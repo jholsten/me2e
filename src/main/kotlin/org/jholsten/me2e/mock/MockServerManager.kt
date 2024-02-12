@@ -69,7 +69,9 @@ class MockServerManager internal constructor(
         mockServerConfig.truststorePassword?.let { configuration.trustStorePassword(it) }
 
         wireMockServer = WireMockServer(configuration)
-        initializeMockServers()
+        if (mockServers.isNotEmpty()) {
+            initializeMockServers()
+        }
     }
 
     /**
