@@ -273,7 +273,7 @@ internal class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironm
 
         val result = mutableMapOf<String, String?>()
         for (entry in serviceNode[key].elements()) {
-            val keyValuePair = entry.asText().split("=")
+            val keyValuePair = entry.asText().split("=", limit = 2)
             when (keyValuePair.size) {
                 1 -> result[keyValuePair[0]] = null
                 2 -> result[keyValuePair[0]] = keyValuePair[1]
