@@ -1,12 +1,14 @@
 package org.jholsten.me2e
 
+import org.jholsten.me2e.config.model.StateResetConfig
+import org.jholsten.me2e.config.model.TestSettings
 import org.jholsten.me2e.utils.logger
 import org.junit.jupiter.api.extension.AfterEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
 
 /**
- * JUnit5 extension which - if activated in the [Me2eTestConfig] - resets the state of all containers,
- * Mock Servers and databases after each test. Includes the following states:
+ * JUnit5 extension which - if activated in the [TestSettings.stateReset] - resets the state of all
+ *  containers, Mock Servers and databases after each test. Includes the following states:
  * - [org.jholsten.me2e.container.database.DatabaseContainer]: Database entries
  * - [org.jholsten.me2e.container.microservice.MicroserviceContainer]: Request Interceptors
  * - [org.jholsten.me2e.mock.MockServer]: Received requests
@@ -22,16 +24,16 @@ class Me2eStateResetExtension internal constructor() : AfterEachCallback {
      * If activated in the [Me2eTestConfig], the state of all containers, Mock Servers and databases are reset.
      */
     override fun afterEach(context: ExtensionContext?) {
-        if (Me2eTest.configAnnotation.stateResetConfig.any() && context?.executionException?.isPresent == true) {
+        if (Me2eTest.config.settings.stateReset.any() && context?.executionException?.isPresent == true) {
             logger.warn("Resetting the state may not be possible since the test '${context.displayName}' threw an exception.")
         }
-        if (Me2eTest.configAnnotation.stateResetConfig.clearAllTables) {
+        if (Me2eTest.config.settings.stateReset.clearAllTables) {
             clearDatabases()
         }
-        if (Me2eTest.configAnnotation.stateResetConfig.resetRequestInterceptors) {
+        if (Me2eTest.config.settings.stateReset.resetRequestInterceptors) {
             resetRequestInterceptors()
         }
-        if (Me2eTest.configAnnotation.stateResetConfig.resetMockServerRequests) {
+        if (Me2eTest.config.settings.stateReset.resetMockServerRequests) {
             resetMockServerRequests()
         }
     }
@@ -89,7 +91,7 @@ class Me2eStateResetExtension internal constructor() : AfterEachCallback {
     /**
      * Returns whether any state property should be reset.
      */
-    private fun Me2eTestConfig.StateReset.any(): Boolean {
+    private fun StateResetConfig.any(): Boolean {
         return clearAllTables || resetRequestInterceptors || resetMockServerRequests
     }
 }

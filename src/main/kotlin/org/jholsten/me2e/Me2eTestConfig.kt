@@ -17,9 +17,6 @@ import kotlin.reflect.KClass
  * @param config Path to the configuration file.
  * @param format Format of the configuration file.
  * @param reportGenerators Report generators to use for generating the test report.
- * @param assertHealthy Whether to assert that all containers are healthy before each test.
- * @param stateResetConfig Configuration for resetting the state of containers, Mock Servers
- * and databases after each test.
  */
 @Target(AnnotationTarget.CLASS)
 annotation class Me2eTestConfig(
@@ -41,49 +38,4 @@ annotation class Me2eTestConfig(
      * @see org.jholsten.me2e.report.result.ReportDataAggregator.generateReports
      */
     val reportGenerators: Array<KClass<out ReportGenerator>> = [HtmlReportGenerator::class],
-
-    /**
-     * Whether to assert that all containers are healthy before each test.
-     * If activated, it is checked whether all containers for which a healthcheck is defined are currently healthy
-     * before each test. Restarts containers if necessary and aborts tests if containers remain unhealthy.
-     * @see Me2eAssertHealthyExtension
-     */
-    val assertHealthy: Boolean = true,
-
-    /**
-     * Configuration for resetting the state of containers, Mock Servers and databases after each test.
-     * @see Me2eStateResetExtension
-     */
-    val stateResetConfig: StateReset = StateReset()
-) {
-    /**
-     * Configuration for resetting the state of containers, Mock Servers and databases after each test.
-     * @constructor Instantiates a new configuration for resetting the state.
-     * @param clearAllTables Whether to clear all entries from all tables for all database containers for which a
-     * connection to the database is established via a [org.jholsten.me2e.container.database.connection.DatabaseConnection]
-     * after each test.
-     * @param resetRequestInterceptors Whether to reset all request interceptors of all microservice containers after each test.
-     * @param resetMockServerRequests Whether to reset all captured requests for all Mock Servers after each test.
-     */
-    annotation class StateReset(
-        /**
-         * Whether to clear all entries from all tables for all database containers for which a connection to the
-         * database is established via a [org.jholsten.me2e.container.database.connection.DatabaseConnection] after
-         * each test.
-         * @see Me2eStateResetExtension.clearDatabases
-         */
-        val clearAllTables: Boolean = true,
-
-        /**
-         * Whether to reset all request interceptors of all microservice containers after each test.
-         * @see Me2eStateResetExtension.resetRequestInterceptors
-         */
-        val resetRequestInterceptors: Boolean = true,
-
-        /**
-         * Whether to reset all captured requests for all Mock Servers after each test.
-         * @see Me2eStateResetExtension.resetMockServerRequests
-         */
-        val resetMockServerRequests: Boolean = true,
-    )
-}
+)

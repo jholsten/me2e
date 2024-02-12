@@ -48,6 +48,14 @@
         },
         "mock-servers": {
           "$ref": "#/definitions/mock-server-config"
+        },
+        "state-reset": {
+          "$ref": "#/definitions/state-reset-config"
+        },
+        "assert-healthy": {
+          "type": "boolean",
+          "description": "Whether to assert that all containers are healthy before each test.",
+          "default": true
         }
       },
       "additionalProperties": false
@@ -170,6 +178,29 @@
           "type": "boolean",
           "description": "Whether TLS needs client authentication.",
           "default": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "state-reset-config": {
+      "$id": "#/definitions/state-reset-config",
+      "type": "object",
+      "description": "Configuration for resetting the state of containers, Mock Servers and databases after each test.",
+      "properties": {
+        "clear-all-tables": {
+          "type": "boolean",
+          "description": "Whether to clear all entries from all tables for all database containers for which a connection to the database is established.",
+          "default": true
+        },
+        "reset-request-interceptors": {
+          "type": "boolean",
+          "description": "Whether to reset all request interceptors of all microservice containers after each test.",
+          "default": true
+        },
+        "reset-mock-server-requests": {
+          "type": "boolean",
+          "description": "Whether to reset all captured requests for all Mock Servers after each test.",
+          "default": true
         }
       },
       "additionalProperties": false

@@ -2,6 +2,7 @@ package org.jholsten.me2e.container.microservice
 
 import com.fasterxml.jackson.annotation.JacksonInject
 import org.jholsten.me2e.config.model.DockerConfig
+import org.jholsten.me2e.config.model.StateResetConfig
 import com.github.dockerjava.api.model.Container as DockerContainer
 import org.jholsten.me2e.config.model.RequestConfig
 import org.jholsten.me2e.container.Container
@@ -13,7 +14,6 @@ import org.jholsten.me2e.request.client.HttpClient
 import org.jholsten.me2e.request.client.OkHttpClient
 import org.jholsten.me2e.request.model.*
 import org.jholsten.me2e.utils.logger
-import org.jholsten.me2e.Me2eTestConfig
 import org.jholsten.me2e.config.parser.deserializer.TestConfigDeserializer
 import org.testcontainers.containers.ContainerState
 import java.time.Instant
@@ -102,7 +102,7 @@ class MicroserviceContainer internal constructor(
     /**
      * Performs authentication for requests to this microservice using the given [authenticator].
      * The [Authenticator.getRequestInterceptor] is executed for every subsequent request in the current test so that all
-     * of the following requests are authenticated. Note that - unless deactivated in [Me2eTestConfig.StateReset.resetRequestInterceptors] -
+     * of the following requests are authenticated. Note that - unless deactivated in [StateResetConfig.resetRequestInterceptors] -
      * all request interceptors are reset after each test so that the authentication only applies to the current test.
      * @param authenticator Authenticator to use for authenticating the HTTP requests.
      */

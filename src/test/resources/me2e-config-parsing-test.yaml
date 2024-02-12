@@ -23,6 +23,13 @@ settings:
     truststore-type: BKS
     needs-client-auth: true
 
+  state-reset:
+    clear-all-tables: false
+    reset-request-interceptors: false
+    reset-mock-server-requests: false
+
+  assert-healthy: false
+
 environment:
   docker-compose: docker-compose-parsing-test.yml
   mock-servers:

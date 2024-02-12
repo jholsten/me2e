@@ -2,11 +2,8 @@ package org.jholsten.me2e.config.parser
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.databind.node.ObjectNode
+import org.jholsten.me2e.config.model.*
 import org.jholsten.me2e.container.docker.DockerComposeVersion
-import org.jholsten.me2e.config.model.DockerConfig
-import org.jholsten.me2e.config.model.MockServerConfig
-import org.jholsten.me2e.config.model.RequestConfig
-import org.jholsten.me2e.config.model.TestConfig
 import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.container.database.DatabaseContainer
 import org.jholsten.me2e.container.database.DatabaseManagementSystem
@@ -57,6 +54,15 @@ internal class YamlConfigParserIT {
                 needsClientAuth = true,
             ), config
         )
+        assertStateResetConfigAsExpected(
+            StateResetConfig(
+                clearAllTables = false,
+                resetRequestInterceptors = false,
+                resetMockServerRequests = false,
+            ),
+            config,
+        )
+        assertFalse(config.settings.assertHealthy)
     }
 
     @Test
@@ -106,6 +112,10 @@ internal class YamlConfigParserIT {
 
     private fun assertRequestConfigAsExpected(expectedRequestConfig: RequestConfig, testConfig: TestConfig) {
         RecursiveComparison.assertEquals(expectedRequestConfig, testConfig.settings.requests)
+    }
+
+    private fun assertStateResetConfigAsExpected(expectedStateResetConfig: StateResetConfig, testConfig: TestConfig) {
+        RecursiveComparison.assertEquals(expectedStateResetConfig, testConfig.settings.stateReset)
     }
 
     private fun assertApiGatewayAsExpected(containers: Map<String, Container>, pullPolicy: DockerConfig.PullPolicy? = null) {
