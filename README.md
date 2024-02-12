@@ -1,6 +1,25 @@
-# me2e Library for End-to-End Tests for Microservice Applications
+# me2e Library for End-to-End Tests for Microservice Systems
+me2e (*Microservice End-to-End*) is a library for writing functional End-to-End-Tests for REST APIs of Microservice Systems in JUnit5.
+These tests, referred to as *subcutaneous* by [Martin Fowler](https://martinfowler.com/bliki/SubcutaneousTest.html), can be used to verify whether the Microservices work together as expected at the level of their REST over HTTP APIs.
 
-me2e (Microservice End-to-End) is a library for writing end-to-end tests for microservice applications.
+In contrast to testing Monoliths, testing Microservice Systems, which may consist of a multitude of independent components, poses numerous challenges.
+One of these challenges is that one transaction usually spans across multiple services, which complicates debugging and makes the data flow difficult to trace.
+In addition, the communication through the network increases the risk of *flaky* tests - that is tests that unpredictably produce sometimes positive and sometimes negative results without changes to the code base - which makes the test results unreliable and can no longer be relied upon as a safety net.
+Furthermore, the heterogeneity of the individual components of a Microservice System also makes it difficult to set up the test environment on which the End-to-End-Tests are executed.
+
+The fundamental aim of me2e is to reduce these difficulties when developing End-to-End-Tests for Microservice Systems and to simplify writing such tests with as little effort as possible.
+To this end, me2e uses [JUnit5](https://junit.org/junit5/) as a test framework and [Docker-Compose](https://docs.docker.com/compose/) for defining and setting up the test environment.
+The library offers interfaces for the following core functions:
+- **Setting up the Test Environment:** Using Docker-Compose, a temporary test environment is started for each execution of the End-to-End-Tests
+- **Simulating external Services:** Mocking the REST APIs of third-party services
+- **Data Management:** Setting the initial state of databases and resetting their state after each test
+- **Executing HTTP Requests and Verifying their Responses**
+
+In addition, a detailed test report is generated after the execution of all tests, which, besides basic metrics such as the success rate and execution times, also shows the logs of all Docker containers, their resource consumption over time and traces of the HTTP requests across the various components.
+
+## Prerequisites
+The definition and starting of the test environment relies on Docker and Docker-Compose.
+Accordingly, a prerequisite for using this library is that the Microservices are available as Docker images and that Docker-Compose (version 1 or 2) is installed on the system that executes the tests.
 
 ## Usage
 ### Import
@@ -107,10 +126,10 @@ TODO: How to set ME2E-Environment in Docker-Containers?
 - via Environment-Variables
 
 #### Mock Server Configuration
-To enable forwarding requests to third-party services to the corresponding mock server, you need to point the services' hostname to the host's IP address.
+To enable forwarding requests to third-party services to the corresponding Mock Server, you need to point the services' hostname to the host's IP address.
 For each microservice which is communication with the third-party service, add an [extra_hosts](https://docs.docker.com/compose/compose-file/compose-file-v3/#extra_hosts) entry to the Docker-Compose file.
 
-Example: To forward requests to `example.com` and `google.com` to the corresponding mock servers, set:
+Example: To forward requests to `example.com` and `google.com` to the corresponding Mock Servers, set:
 ```yaml
     extra_hosts:
       - "example.com:host-gateway"
