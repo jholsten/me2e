@@ -367,7 +367,7 @@ class DockerCompose private constructor(
          */
         @JvmSynthetic
         internal fun executeInternal(command: String) {
-            execute(command, Slf4jStream.of(logger).asInfo(), Slf4jStream.of(logger).asError(), assertSuccess = true)
+            execute(command, Slf4jStream.of(logger).asInfo(), Slf4jStream.of(logger).asInfo(), assertSuccess = true)
         }
 
         /**
