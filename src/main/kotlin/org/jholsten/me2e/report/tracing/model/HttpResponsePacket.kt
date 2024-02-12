@@ -1,6 +1,7 @@
 package org.jholsten.me2e.report.tracing.model
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import org.jholsten.me2e.utils.toJson
 import java.time.Instant
 
 /**
@@ -96,4 +97,6 @@ internal class HttpResponsePacket(
     version = version,
     headers = headers,
     payload = payload,
-)
+) {
+    override fun toString(): String = toJson(this)
+}
