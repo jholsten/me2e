@@ -111,9 +111,11 @@ class MockServerManager internal constructor(
      */
     fun start() {
         check(!isRunning) { "Mock Server is already running" }
-        assertPortsAreAvailable()
-        registerAllStubs()
-        startHTTPMockServer()
+        if (mockServers.isNotEmpty()) {
+            assertPortsAreAvailable()
+            registerAllStubs()
+            startHTTPMockServer()
+        }
     }
 
     /**
