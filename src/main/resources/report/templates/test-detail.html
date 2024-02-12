@@ -123,7 +123,7 @@
             }
 
             & th:nth-child(2) {
-                width: 110px;
+                width: 140px;
             }
 
             & td:first-child {
@@ -131,7 +131,7 @@
             }
 
             & td:nth-child(2) {
-                width: 112px;
+                width: 142px;
             }
 
             & tbody {
@@ -195,6 +195,22 @@
                 box-shadow: inset -1px 0 0 0 #A6A6A6;
                 text-align: start;
                 white-space: nowrap;
+            }
+
+            > tbody > tr > td:first-child > .overflow {
+                display: inline-block;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 400px;
+                vertical-align: text-bottom;
+
+                &:hover {
+                    overflow: visible;
+                }
+
+                &:hover span {
+                    background-color: white;
+                }
             }
 
             > tbody > tr:first-child > td:first-child,
@@ -545,7 +561,9 @@
                                 <span th:text="${status}"
                                       th:styleappend="${'background-color:' + (status <= 199 ? '#1a6bff' : (status <= 299 ? '#0BBD58' : (status <= 399 ? '#1ac0ff' : (status <= 499 ? '#ffb91a' : '#FF5F56'))))}"
                                       class="status"></span>
-                                <span th:text="${request.statusLine}" class="inline-code"></span>
+                                <span class="overflow">
+                                    <span th:text="${request.statusLine}" class="inline-code"></span>
+                                </span>
                             </td>
                             <td th:with="left=${@java.time.Duration@between(timeSeries[0], request.timestamp).toMillis() * 1.5}">
                                 <div class="gantt-row">
