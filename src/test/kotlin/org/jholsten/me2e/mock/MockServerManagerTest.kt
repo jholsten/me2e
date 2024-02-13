@@ -61,7 +61,7 @@ internal class MockServerManagerTest {
         every { anyConstructed<WireMockServer>().start() } just runs
         every { anyConstructed<WireMockServer>().isRunning } returns false andThen true
 
-        val manager = MockServerManager(mapOf(), mockServerConfig)
+        val manager = mockServerManager()
         manager.start()
 
         verify { PortUtils.isPortAvailable(80) }
@@ -87,7 +87,7 @@ internal class MockServerManagerTest {
         every { PortUtils.isPortAvailable(443) } returns true
         every { anyConstructed<WireMockServer>().isRunning } returns false
 
-        val manager = MockServerManager(mapOf(), mockServerConfig)
+        val manager = mockServerManager()
         assertFailsWith<ServiceStartupException> { manager.start() }
     }
 
@@ -97,7 +97,7 @@ internal class MockServerManagerTest {
         every { PortUtils.isPortAvailable(443) } returns false
         every { anyConstructed<WireMockServer>().isRunning } returns false
 
-        val manager = MockServerManager(mapOf(), mockServerConfig)
+        val manager = mockServerManager()
         assertFailsWith<ServiceStartupException> { manager.start() }
     }
 
@@ -107,7 +107,7 @@ internal class MockServerManagerTest {
         every { anyConstructed<WireMockServer>().start() } just runs
         every { anyConstructed<WireMockServer>().isRunning } returns false
 
-        val manager = MockServerManager(mapOf(), mockServerConfig)
+        val manager = mockServerManager()
         assertFailsWith<HealthTimeoutException> { manager.start() }
 
         verify { PortUtils.isPortAvailable(80) }
@@ -122,7 +122,7 @@ internal class MockServerManagerTest {
         every { anyConstructed<WireMockServer>().start() } throws FatalStartupException(RuntimeException())
         every { anyConstructed<WireMockServer>().isRunning } returns false
 
-        val manager = MockServerManager(mapOf(), mockServerConfig)
+        val manager = mockServerManager()
         val e = assertFailsWith<ServiceStartupException> { manager.start() }
 
         assertContains(e.message!!, "Mock Server could not be started")

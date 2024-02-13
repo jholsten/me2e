@@ -144,7 +144,7 @@ internal class MockServerManagerIT {
 
     @Test
     fun `Mock Server should respond with 404 if no stubs are registered`() {
-        val manager = startManager(mockServers = mapOf())
+        val manager = startManager(mockServers = mapOf("example-server" to MockServer("example-server", "example.com", listOf())))
 
         val request = HttpGet("http://localhost")
         val response = client.execute(request)
@@ -192,8 +192,12 @@ internal class MockServerManagerIT {
 
     @Test
     fun `Trying to start Mock Server if port is already in use should throw exception`() {
-        val manager1 = MockServerManager(mapOf(), mockServerConfig)
-        val manager2 = MockServerManager(mapOf(), mockServerConfig)
+        val mockServers: Map<String, MockServer> = mapOf(
+            "example-service" to exampleServer,
+            "google-service" to googleServer,
+        )
+        val manager1 = MockServerManager(mockServers, mockServerConfig)
+        val manager2 = MockServerManager(mockServers, mockServerConfig)
 
         try {
             manager1.start()
