@@ -169,6 +169,7 @@ internal class YamlConfigParserIT {
             username = "user",
             password = "123",
             initializationScripts = mapOf("init_1" to "database/init_1.sql", "init_2" to "database/init_2.sql"),
+            tablesToSkipOnReset = listOf("tableA", "tableB", "tableC"),
         )
     }
 
@@ -191,6 +192,7 @@ internal class YamlConfigParserIT {
             username = "user",
             password = "123",
             initializationScripts = mapOf(),
+            tablesToSkipOnReset = listOf(),
         )
     }
 
@@ -209,6 +211,7 @@ internal class YamlConfigParserIT {
         username: String? = null,
         password: String? = null,
         initializationScripts: Map<String, String>? = null,
+        tablesToSkipOnReset: List<String>? = null,
     ) {
         val container = containers[name]
         assertNotNull(container)
@@ -234,6 +237,7 @@ internal class YamlConfigParserIT {
             assertEquals(username, container.username)
             assertEquals(password, container.password)
             RecursiveComparison.assertEquals(initializationScripts, container.initializationScripts)
+            assertEquals(tablesToSkipOnReset, container.tablesToSkipOnReset)
         }
     }
 

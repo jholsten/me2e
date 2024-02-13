@@ -101,6 +101,14 @@ class DatabaseContainer internal constructor(
      * Only applicable if connection to the database via the [DatabaseConnection] could be established.
      */
     val initializationScripts: Map<String, String> = mapOf(),
+
+    /**
+     * List of table names to skip when automatically clearing the database after each test (see
+     * [org.jholsten.me2e.Me2eStateResetExtension.clearDatabases]).
+     * Corresponds to the list of comma separated values of the label `org.jholsten.me2e.database.reset.skip-tables` in the Docker-Compose.
+     * Only required for interacting with the database via the [DatabaseConnection].
+     */
+    val tablesToSkipOnReset: List<String> = listOf(),
 ) : Container(
     name = name,
     image = image,

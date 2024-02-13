@@ -41,6 +41,7 @@ class Me2eStateResetExtension internal constructor() : AfterEachCallback {
     /**
      * Clears all entries from all tables for all database containers for which a connection to the database
      * is established via a [org.jholsten.me2e.container.database.connection.DatabaseConnection].
+     * Skips clearing tables defined in [org.jholsten.me2e.container.database.DatabaseContainer.tablesToSkipOnReset].
      */
     private fun clearDatabases() {
         val databaseConnections = Me2eTest.containerManager.databases.values
@@ -50,7 +51,7 @@ class Me2eStateResetExtension internal constructor() : AfterEachCallback {
             logger.debug("Resetting entries of ${databaseConnections.size} databases.")
             for ((database, connection) in databaseConnections) {
                 try {
-                    connection!!.clearAll()
+                    connection!!.clearAllExcept(database.tablesToSkipOnReset)
                 } catch (e: Exception) {
                     logger.warn("Unable to clear tables of database container ${database.name}:", e)
                 }

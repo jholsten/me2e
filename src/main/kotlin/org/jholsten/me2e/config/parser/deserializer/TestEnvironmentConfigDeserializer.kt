@@ -84,6 +84,13 @@ internal class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironm
         private val DATABASE_INIT_SCRIPTS_KEY_REGEX = Regex("org\\.jholsten\\.me2e\\.database\\.init-script\\.(.*)")
 
         /**
+         * Label key for specifying which tables to skip when clearing the database.
+         * Only applicable to services of type [ContainerType.DATABASE].
+         * @see org.jholsten.me2e.container.database.DatabaseContainer.password
+         */
+        private const val DATABASE_RESET_SKIP_TABLES_KEY = "org.jholsten.me2e.database.reset.skip-tables"
+
+        /**
          * Label key for specifying the pull policy for this container.
          * @see Container.pullPolicy
          */
@@ -205,12 +212,19 @@ internal class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironm
             password = environment[system.environmentKeys.password]
         }
 
+        var tablesToSkipOnReset: List<String> = listOf()
+        val tablesValue = labels[DATABASE_RESET_SKIP_TABLES_KEY]
+        if (tablesValue != null) {
+            tablesToSkipOnReset = tablesValue.split("[\\s,]+".toRegex())
+        }
+
         node.put("system", system.name)
         node.put("schema", schema)
         node.put("database", database)
         node.put("username", username)
         node.put("password", password)
         node.set<ObjectNode>("initializationScripts", databaseInitializationScripts.toJsonNode())
+        node.set<ObjectNode>("tablesToSkipOnReset", tablesToSkipOnReset.toArrayNode())
     }
 
     /**
@@ -243,6 +257,7 @@ internal class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironm
             DATABASE_SCHEMA_KEY to labelsNode?.get(DATABASE_SCHEMA_KEY)?.asText(),
             DATABASE_USERNAME_KEY to labelsNode?.get(DATABASE_USERNAME_KEY)?.asText(),
             DATABASE_PASSWORD_KEY to labelsNode?.get(DATABASE_PASSWORD_KEY)?.asText(),
+            DATABASE_RESET_SKIP_TABLES_KEY to labelsNode?.get(DATABASE_RESET_SKIP_TABLES_KEY)?.asText(),
             PULL_POLICY_KEY to labelsNode?.get(PULL_POLICY_KEY)?.asText(),
         )
     }
@@ -291,6 +306,15 @@ internal class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironm
         for ((key, value) in this.entries) {
             node.put(key, value)
         }
+        return node
+    }
+
+    /**
+     * Transforms the given list of Strings to an array node.
+     */
+    private fun List<String>.toArrayNode(): JsonNode {
+        val node = JsonNodeFactory.instance.arrayNode()
+        this.forEach { node.add(it) }
         return node
     }
 }

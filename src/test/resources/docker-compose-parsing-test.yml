@@ -37,6 +37,7 @@ services:
       - "org.jholsten.me2e.database.password=123"
       - "org.jholsten.me2e.database.init-script.init_1=database/init_1.sql"
       - "org.jholsten.me2e.database.init-script.init_2=database/init_2.sql"
+      - "org.jholsten.me2e.database.reset.skip-tables=tableA, tableB,tableC"
 
   no-sql-database:
     image: mongo:4.4.27
