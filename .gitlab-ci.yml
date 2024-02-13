@@ -81,7 +81,7 @@ publish-package:
   only:
     - tags
 
-# Publishes KDoc to GitLab pages
+# Publishes KDoc and JSON schemas to GitLab pages
 pages:
   stage: publish
   image: openjdk:17.0.2-jdk-slim
@@ -90,7 +90,11 @@ pages:
     - chmod +x ./gradlew
   script:
     - ./gradlew --build-cache dokkaHtml
-    - cp -Rp build/dokka/html public/
+    - mkdir -p public/kdoc
+    - cp -Rp build/dokka/html public/kdoc
+    - mkdir -p public/json-schemas
+    - cp -p src/main/resources/config_schema.json public/json-schemas/config_schema.json
+    - cp -p src/main/resources/stub_schema.json public/json-schemas/stub_schema.json
   artifacts:
     paths:
       - public
