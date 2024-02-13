@@ -8,7 +8,7 @@ In addition, the communication through the network increases the risk of *flaky*
 Furthermore, the heterogeneity of the individual components of a Microservice System also makes it difficult to set up the test environment on which the End-to-End-Tests are executed.
 
 The fundamental aim of me2e is to reduce these difficulties when developing End-to-End-Tests for Microservice Systems and to simplify writing such tests with as little effort as possible.
-To this end, me2e uses [JUnit5](https://junit.org/junit5/) as a test framework and [Docker-Compose](https://docs.docker.com/compose/) for defining and setting up the test environment.
+To this end, me2e uses [JUnit5](https://junit.org/junit5/) (a.k.a. JUnit Jupiter) as a test framework and [Docker-Compose](https://docs.docker.com/compose/) for defining and setting up the test environment.
 The library offers interfaces for the following core functions:
 - **Setting up the Test Environment:** Using Docker-Compose, a temporary test environment is started for each execution of the End-to-End-Tests
 - **Simulating external Services:** Mocking the REST APIs of third-party services
@@ -20,6 +20,122 @@ In addition, a detailed test report is generated after the execution of all test
 ## Prerequisites
 The definition and starting of the test environment relies on Docker and Docker-Compose.
 Accordingly, a prerequisite for using this library is that the Microservices are available as Docker images and that Docker-Compose (version 1 or 2) is installed on the system that executes the tests.
+
+## Getting Started
+### 1. Set up a new Project
+As the End-to-End-Tests affect the entire Microservice System and therefore cannot be assigned to an individual component, a new project should be set up for their development.
+You can choose between Java and Kotlin for the programming language and between Gradle and Maven for the build tool.
+The following explanations contain instructions for setting up the project with Gradle.
+For Maven, the procedure is similar.
+
+- Create a new directory for your project and switch into this directory.
+```shell
+mkdir e2e
+cd e2e
+```
+- Execute the [Gradle `init`](https://docs.gradle.org/current/userguide/build_init_plugin.html) task.
+
+<details>
+    <summary><u>For <b>Java</b> Projects:</u></summary>
+    
+ ```shell
+ gradle init \
+   --type java-application \
+   --test-framework junit-jupiter \
+   --dsl groovy \
+   --package com.example.e2e \
+   --no-split-project
+ ```
+</details>
+
+<details open>
+    <summary><u>For <b>Kotlin</b> Projects:</u></summary>
+    
+```shell
+gradle init \
+  --type kotlin-application \
+  --test-framework kotlintest \
+  --dsl groovy \
+  --package com.example.e2e \
+  --no-split-project
+```
+</details>
+
+### 2. Install the me2e Library
+Add the me2e library as a test dependency to your project.
+
+<details>
+    <summary><u>For <b>Java</b> Projects:</u></summary>
+    
+ ```groovy
+// build.gradle
+dependencies {
+     // ...
+     testImplementation "org.jholsten:me2e:1.0.0"
+     testAnnotationProcessor "org.jholsten:me2e:1.0.0"
+}
+ ```
+</details>
+
+<details open>
+    <summary><u>For <b>Kotlin</b> Projects:</u></summary>
+In case you are using Kotlin, you need to use the <a href="https://kotlinlang.org/docs/kapt.html">kapt compiler plugin</a> for integrating the library's annotation processor.
+    
+```groovy
+// build.gradle
+plugins {
+    // ...
+    id "org.jetbrains.kotlin.kapt" version "1.8.20" // Should be the same as your Kotlin version
+}
+dependencies {
+     // ...
+     testImplementation "org.jholsten:me2e:1.0.0"
+     kaptTest "org.jholsten:me2e:1.0.0"
+}
+ ```
+</details>
+
+### 3. Add the Docker-Compose of your Microservice System
+Place the Docker-Compose file, which contains all the components of your Microservice System, in the `resources` folder of your newly created test project.
+To be able to use the functions of the library as effectively as possible, you should make some configurations using labels in the [`labels` section](https://docs.docker.com/compose/compose-file/compose-file-v3/#labels-2) of the services.
+For the most basic configuration, you should use the `org.jholsten.me2e.container-type` label to specify the container type of each service.
+
+```yaml
+# docker-compose.yml
+services:
+  microservice:
+    # ...
+    labels:
+      "org.jholsten.me2e.container-type": "MICROSERVICE"
+```
+
+In me2e, we distinguish between 3 different container types:
+
+| Container Type                      | Description                                                                                                                                                                                                                                                                                              |
+|:------------------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `MICROSERVICE`                      | A Microservice that contains a publicly accessible HTTP REST API.<br/> With containers of this type, you can access their API via an HTTP client.                                                                                                                                                        |
+| `DATABASE`                          | A container containing a database.<br/> With containers of this type, you can interact with the database by, for example, executing scripts or resetting the database state. Note that only MySQL, PostgreSQL, MariaDB and MongoDB are currently supported by default for interacting with the database. |
+| `MISC`                              | All other container types that do not contain a publicly accessible REST API and are not database containers.<br/> You do not need to set the label for this type. It is used by default.                                                                                                                |
+ 
+To ensure that the test execution only starts when all services are completely up and running, you should also define a healthcheck for each service, if it does not already exist.
+
+A minimally configured Microservice definition as part of the Docker-Compose file may look like this:
+```yaml
+order-service:
+    image: gitlab.informatik.uni-bremen.de:5005/master-thesis1/evaluation/pizza-delivery/order-service:latest
+    ports:
+        - 8081:8081
+    healthcheck:
+        test: ["CMD-SHELL", "curl --fail http://localhost:8081/health || exit 1"]
+        interval: 5s
+        timeout: 5s
+        retries: 10
+    labels:
+        "org.jholsten.me2e.container-type": "MICROSERVICE"
+```
+
+### 4. Define the me2e-config File
+
 
 ## Usage
 ### Import
