@@ -91,7 +91,8 @@ pages:
   script:
     - ./gradlew --build-cache dokkaHtml
     - mkdir -p public/kdoc
-    - cp -Rp build/dokka/html public/kdoc/
+    - cp -Rp build/dokka/html/* public/kdoc/
+    - ls -l public/kdoc/
     - mkdir -p public/json-schemas
     - cp -p src/main/resources/config_schema.json public/json-schemas/config_schema.json
     - cp -p src/main/resources/stub_schema.json public/json-schemas/stub_schema.json
