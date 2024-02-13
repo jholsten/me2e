@@ -9,7 +9,9 @@ import org.jholsten.me2e.Me2eStateResetExtension
  * @param clearAllTables Whether to clear all entries from all tables for all database containers for which a
  * connection to the database is established via a [org.jholsten.me2e.container.database.connection.DatabaseConnection]
  * after each test. Tables defined in [org.jholsten.me2e.container.database.DatabaseContainer.tablesToSkipOnReset] will
- * be excluded and are not cleared.
+ * be excluded and are not cleared. Note that after clearing the database, all initialization scripts defined in
+ * [org.jholsten.me2e.container.database.DatabaseContainer.initializationScripts] are executed to restore the original
+ * state of the database.
  * @param resetRequestInterceptors Whether to reset all request interceptors of all microservice containers after each test.
  * @param resetMockServerRequests Whether to reset all captured requests for all Mock Servers after each test.
  */
@@ -18,7 +20,9 @@ data class StateResetConfig internal constructor(
      * Whether to clear all entries from all tables for all database containers for which a connection to the
      * database is established via a [org.jholsten.me2e.container.database.connection.DatabaseConnection] after
      * each test. Tables defined in [org.jholsten.me2e.container.database.DatabaseContainer.tablesToSkipOnReset]
-     * will be excluded and are not cleared.
+     * will be excluded and are not cleared. Note that after clearing the database, all initialization scripts
+     * defined in [org.jholsten.me2e.container.database.DatabaseContainer.initializationScripts] are executed to
+     * restore the original state of the database.
      * @see Me2eStateResetExtension.clearDatabases
      */
     @JsonProperty("clear-all-tables")

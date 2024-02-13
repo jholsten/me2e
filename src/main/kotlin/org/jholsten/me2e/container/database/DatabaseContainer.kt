@@ -99,6 +99,8 @@ class DatabaseContainer internal constructor(
      * Database initialization scripts to run when the container is started as map of `(name, path)`.
      * Corresponds to the values of the labels with pattern `org.jholsten.me2e.database.init-script.$name` in the Docker-Compose.
      * Only applicable if connection to the database via the [DatabaseConnection] could be established.
+     * Note that these initialization scripts are executed after clearing all database tables in
+     * [org.jholsten.me2e.Me2eStateResetExtension.clearDatabases] to restore the original state of the database.
      */
     val initializationScripts: Map<String, String> = mapOf(),
 
