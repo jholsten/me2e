@@ -100,13 +100,12 @@ class DatabaseContainer internal constructor(
      * Corresponds to the values of the labels with pattern `org.jholsten.me2e.database.init-script.$name` in the Docker-Compose.
      * Only applicable if connection to the database via the [DatabaseConnection] could be established.
      * Note that these initialization scripts are executed after clearing all database tables in
-     * [org.jholsten.me2e.Me2eStateResetExtension.clearDatabases] to restore the original state of the database.
+     * [org.jholsten.me2e.Me2eExtension.clearDatabases] to restore the original state of the database.
      */
     val initializationScripts: Map<String, String> = mapOf(),
 
     /**
-     * List of table names to skip when automatically clearing the database after each test (see
-     * [org.jholsten.me2e.Me2eStateResetExtension.clearDatabases]).
+     * List of table names to skip when automatically clearing the database after each test (see [org.jholsten.me2e.Me2eExtension.clearDatabases]).
      * Corresponds to the list of comma separated values of the label `org.jholsten.me2e.database.reset.skip-tables` in the Docker-Compose.
      * Only required for interacting with the database via the [DatabaseConnection].
      */

@@ -1,8 +1,7 @@
 package org.jholsten.me2e.config.model
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import org.jholsten.me2e.Me2eAssertHealthyExtension
-import org.jholsten.me2e.Me2eStateResetExtension
+import org.jholsten.me2e.Me2eExtension
 
 /**
  * Settings for running the End-to-End tests, parsed from the `settings` section of the config file.
@@ -26,7 +25,7 @@ data class TestSettings internal constructor(
 
     /**
      * Configuration for resetting the state of containers, Mock Servers and databases after each test.
-     * @see Me2eStateResetExtension
+     * @see Me2eExtension.afterEach
      */
     @JsonProperty("state-reset")
     val stateReset: StateResetConfig = StateResetConfig(),
@@ -35,7 +34,7 @@ data class TestSettings internal constructor(
      * Whether to assert that all containers are healthy before each test.
      * If activated, it is checked whether all containers for which a healthcheck is defined are currently healthy
      * before each test. Restarts containers if necessary and aborts tests if containers remain unhealthy.
-     * @see Me2eAssertHealthyExtension
+     * @see Me2eExtension.beforeEach
      */
     @JsonProperty("assert-healthy")
     val assertHealthy: Boolean = true,
