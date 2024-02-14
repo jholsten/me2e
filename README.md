@@ -111,30 +111,127 @@ services:
 
 In me2e, we distinguish between 3 different container types:
 
-| Container Type                      | Description                                                                                                                                                                                                                                                                                              |
-|:------------------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `MICROSERVICE`                      | A Microservice that contains a publicly accessible HTTP REST API.<br/> With containers of this type, you can access their API via an HTTP client.                                                                                                                                                        |
-| `DATABASE`                          | A container containing a database.<br/> With containers of this type, you can interact with the database by, for example, executing scripts or resetting the database state. Note that only MySQL, PostgreSQL, MariaDB and MongoDB are currently supported by default for interacting with the database. |
-| `MISC`                              | All other container types that do not contain a publicly accessible REST API and are not database containers.<br/> You do not need to set the label for this type. It is used by default.                                                                                                                |
+| Container Type | Description                                                                                                                                                                                                                                                                                             | Represented by Class                                                                                                                                                          |
+|:---------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `MICROSERVICE` | A Microservice that contains a publicly accessible HTTP REST API.<br/> With containers of this type, you can access their API via an HTTP client.                                                                                                                                                       | [`MicroserviceContainer`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.microservice/-microservice-container/index.html) |
+| `DATABASE`     | A container containing a database.<br/> With containers of this type, you can interact with the database by, for example, executing scripts or resetting the database state. Not that only MySQL, PostgreSQL, MariaDB and MongoDB are currently supported by default for interacting with the database. | [`DatabaseContainer`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.database/-database-container/index.html)             |
+| `MISC`         | All other container types that do not contain a publicly accessible REST API and are not database containers.<br/> You do not need to set the label for this type. It is used by default.                                                                                                               | [`Container`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container/-container/index.html)                                       |
  
 To ensure that the test execution only starts when all services are completely up and running, you should also define a healthcheck for each service, if it does not already exist.
 
 A minimally configured Microservice definition as part of the Docker-Compose file may look like this:
 ```yaml
-order-service:
-    image: gitlab.informatik.uni-bremen.de:5005/master-thesis1/evaluation/pizza-delivery/order-service:latest
+# docker-compose.yml
+services:
+  delivery-service:
+    image: gitlab.informatik.uni-bremen.de:5005/master-thesis1/evaluation/pizza-delivery/delivery-service:latest
     ports:
-        - 8081:8081
+      - 8082:8082
     healthcheck:
-        test: ["CMD-SHELL", "curl --fail http://localhost:8081/health || exit 1"]
-        interval: 5s
-        timeout: 5s
-        retries: 10
+      test: ["CMD-SHELL", "curl --fail http://localhost:8082/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     labels:
-        "org.jholsten.me2e.container-type": "MICROSERVICE"
+      "org.jholsten.me2e.container-type": "MICROSERVICE"
 ```
 
 ### 4. Define the me2e-config File
+For configuring the test runner, me2e relies on a me2e-config file in which you can define the test environment and adjust additional settings, such as the Docker-Compose version to be used or different timeouts.
+You can find more information about the contents and format of the me2e-config file [here](#configuration).
+For the minimal configuration, first create a file named `me2e-config.yml` in the `resources` folder of your test project with the following contents:
+
+```yaml
+# me2e-config.yml
+environment:
+  docker-compose: docker-compose.yml
+```
+
+### 5. Write your first End-to-End-Test
+Now that you have set everything up, you can write your first End-to-End-Test.
+To do this, create a test class that inherits from [`org.jholsten.me2e.Me2eTest`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e/-me2e-test/index.html).
+
+```kotlin
+class E2ETest : Me2eTest() {
+    
+}
+```
+
+`Me2eTest` is the base class for all End-to-End-Tests, which starts the test environment once during initialization and contains references to all components of the environment.
+You can use this class to access the containers via their names in the Docker-Compose file using the [`containerManager`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e/-me2e-test/-companion/container-manager.html).
+
+```kotlin
+val deliveryService = containerManager.containers["delivery-service"]
+```
+
+However, it is simpler and also the recommended procedure to inject the container instances using the [`@InjectService`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.injection/-inject-service/index.html) annotation.
+To do this, define an attribute in your test class with the name of the service to be injected.
+The name of the attribute is automatically converted to Kebab-Case and an attempt is made to find a service in the Docker-Compose file that has exactly this key.
+
+```kotlin
+class E2ETest : Me2eTest() {
+
+    @InjectService
+    private lateinit var deliveryService: MicroserviceContainer
+}
+```
+
+Alternatively, you can also specify the name of the service explicitly using the `name` parameter in the `@InjectService` annotation.
+For more information on the annotation, see the section on [injecting services](#injecting-services).
+
+You can now interact with the container and, in the case of a service of type `MICROSERVICE`, send requests to its REST API via the integrated HTTP client, for example.
+
+```kotlin
+val response = deliveryService.get(RelativeUrl("/health"))
+```
+
+To verify that the response meets the expectations, use the [`assertThat`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.assertions/assert-that.html) method.
+This method, in combination with the [`assertions`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.assertions/), allows you to check all possible properties of the response.
+To find out more about the available assertions, take a look [here](#verifying-http-responses).
+
+```kotlin
+class E2ETest : Me2eTest() {
+
+    @InjectService
+    private lateinit var deliveryService: MicroserviceContainer
+    
+    @Test
+    fun `Requesting health status should return OK`() {
+        val response = deliveryService.get(RelativeUrl("/health"))
+        
+        assertThat(response)
+            .statusCode(equalTo(200))
+            .body(containsString("OK"))
+    }
+}
+```
+
+### 6. Execute your End-to-End-Test
+You can now run the tests either directly in your IDE or via the terminal with the following command:
+
+```shell
+./gradlew test
+```
+
+Before starting the test execution, the Docker-Compose is started and it is waited until all containers are healthy.
+The tests are then executed and finally the report is generated using the [`HtmlReportGenerator`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.report.generator.html/-html-report-generator/index.html), the path of which can be found in the logs.
+
+The following report was generated for the E2E test example above:
+
+| Landing Page                                               | Details                                                     |
+|------------------------------------------------------------|-------------------------------------------------------------|
+| ![Test Report Example](docs/test_report_example_index.png) | ![Test Report Example](docs/test_report_example_detail.png) |
+
+On the landing page, you can see an overview of all executed test classes and their tests as well as their execution status and duration.
+Below the "Executed Tests" section you will also find statistics on the resource usage of all containers of the environment over the entire duration of the test execution.
+Finally, in the bottom section you can see the aggregated logs of the Test Runner and all services of your environment that were collected during the execution.
+As the environment is started before the actual test execution, you will also find the logs that were output when the environment was started here.
+
+Clicking on the test class takes you to the details page of the report, where you can see the HTTP network traces and the specific logs for a test execution along with basic metrics for each test of a test class.
+Please note that the resource usage statistics for a test class are only displayed if data was collected during the execution of the specific test class.
+As Docker only sends the statistics entries once per second, you will not see any data at this point if the execution of the class took less than 1 second.
+
+Detailed information on the contents of the test report and its customizability can be found [here](#test-report).
 
 
 ## Usage
