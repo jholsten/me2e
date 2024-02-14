@@ -263,11 +263,16 @@ class DockerCompose private constructor(
     /**
      * Returns reference to the [DockerContainer] instance of the service with the given name.
      * May contain outdated information and is only updated when the Docker-Compose is started or any service is restarted.
-     * @throws IllegalStateException if Docker-Compose is currently not running or the service does not exist.
+     * @throws IllegalStateException if Docker-Compose is currently not running.
+     * @throws IllegalArgumentException if service with the given name does not exist.
      */
     @JvmSynthetic
     internal fun getDockerContainer(serviceName: String): DockerContainer {
-        return dockerContainers[serviceName] ?: throw IllegalStateException("Unknown service $serviceName.")
+        return dockerContainers[serviceName]
+            ?: throw IllegalArgumentException(
+                "Unknown service $serviceName. " +
+                    "Are you sure that the Docker-Compose has been started successfully?"
+            )
     }
 
     /**
