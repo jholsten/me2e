@@ -1,5 +1,6 @@
 package org.jholsten.me2e.container.docker
 
+import com.github.dockerjava.api.command.HealthState
 import org.jholsten.me2e.config.model.DockerConfig.DockerComposeRemoveImagesStrategy
 import com.github.dockerjava.api.model.Container as DockerContainer
 import org.jholsten.me2e.container.exception.DockerException
@@ -575,7 +576,11 @@ class DockerCompose private constructor(
             waitStrategy.waitUntilReady(ContainerWaitStrategyTarget(getDockerContainer(serviceName).id))
             logger.debug("Service $serviceName is healthy.")
         } catch (e: ContainerLaunchException) {
-            throw HealthTimeoutException("Timed out waiting for container $serviceName to become healthy.")
+            val healthState = getHealthcheckInfo(serviceName)?.buildMessage()
+            val message = "Timed out waiting for container '$serviceName' to become healthy. " +
+                "To increase the timeout, change the value for `settings.docker.health-timeout` in your me2e-config file." +
+                if (healthState != null) "\nCurrent health state:\n$healthState" else ""
+            throw HealthTimeoutException(message)
         }
     }
 
@@ -583,9 +588,16 @@ class DockerCompose private constructor(
      * Returns whether there is a healthcheck defined for the service with the given name.
      */
     private fun hasHealthcheck(serviceName: String): Boolean {
+        return getHealthcheckInfo(serviceName) != null
+    }
+
+    /**
+     * Returns information about the health state of the service with the given name.
+     */
+    private fun getHealthcheckInfo(serviceName: String): HealthState? {
         val containerId = getDockerContainer(serviceName).id
         val containerInfo = DockerClientFactory.lazyClient().inspectContainerCmd(containerId).exec()
-        return containerInfo.state.health != null
+        return containerInfo.state.health
     }
 
     /**
@@ -600,5 +612,26 @@ class DockerCompose private constructor(
             .exec()
             .filter { container -> container.names.any { name -> name.startsWith("/$identifier") } }
             .associateBy { container -> container.labels["com.docker.compose.service"]!! }
+    }
+
+    /**
+     * Builds message representing the given health state of a container.
+     */
+    private fun HealthState.buildMessage(): String {
+        val stringBuilder = StringBuilder()
+        stringBuilder.appendLine("- Status: $status")
+        stringBuilder.appendLine("- Failing Streak: $failingStreak")
+        if (this.log != null) {
+            stringBuilder.appendLine("Results of the last health checks:\n")
+            for (log in this.log) {
+                stringBuilder.appendLine("- Start: ${log.start}")
+                stringBuilder.appendLine("- End: ${log.end}")
+                stringBuilder.appendLine("- Exit Code: ${log.exitCodeLong}")
+                stringBuilder.appendLine("Output:")
+                stringBuilder.appendLine(log.output)
+                stringBuilder.appendLine("-".repeat(50))
+            }
+        }
+        return stringBuilder.toString()
     }
 }
