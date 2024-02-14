@@ -19,30 +19,6 @@
             background-color: #f7f7ff;
         }
 
-        .container-chip {
-            & input {
-                appearance: none;
-                -webkit-appearance: none;
-                -moz-appearance: none;
-                margin: 0;
-            }
-
-            & input:checked + .label {
-                border-color: #4541DD;
-                background-color: #4541DD;
-                color: white;
-                box-shadow: -5px 10px 20px 0 rgba(69, 65, 221, 0.25);
-            }
-
-            & .label {
-                border-radius: 100px;
-                background-color: #fff;
-                border: 1px solid #b5b5b5;
-                padding: 5px 10px;
-                cursor: pointer;
-            }
-        }
-
         table {
             & .label {
                 font-weight: 600;
@@ -92,62 +68,6 @@
                 & td:nth-child(5) {
                     padding: 5px 0;
                 }
-            }
-        }
-
-        .log-table {
-            table-layout: fixed;
-
-            > thead {
-                position: sticky;
-                box-shadow: 0 1px 0 0 #A6A6A6;
-                background-color: #FBFBFB;
-
-                > tr > th > input[type="search"] {
-                    margin-left: 12px;
-                }
-            }
-
-            & th {
-                text-align: start;
-                padding: 10px 0;
-            }
-
-            & td {
-                padding: 3px 0;
-                vertical-align: top;
-            }
-
-            & th:first-child {
-                width: 95px;
-            }
-
-            & th:nth-child(2) {
-                width: 140px;
-            }
-
-            & td:first-child {
-                width: 97px;
-            }
-
-            & td:nth-child(2) {
-                width: 142px;
-            }
-
-            & tbody {
-                display: block;
-                overflow-y: auto;
-                max-height: 400px;
-            }
-
-            & tr {
-                display: table;
-                width: 100%;
-            }
-
-            & .filter-modal label {
-                font-family: monospace;
-                font-size: 16px;
             }
         }
 
