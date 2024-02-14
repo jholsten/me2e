@@ -105,8 +105,8 @@
         },
         "health-timeout": {
           "type": "integer",
-          "description": "Number of seconds to wait at most until containers are healthy. Only applicable if at least one healthcheck is defined in Docker-Compose. Default: 10",
-          "default": 10
+          "description": "Number of seconds to wait at most until containers are healthy. Only applicable if at least one healthcheck is defined in Docker-Compose. Default: 30",
+          "default": 30
         }
       },
       "additionalProperties": false

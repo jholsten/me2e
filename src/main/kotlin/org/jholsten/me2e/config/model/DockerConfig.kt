@@ -54,7 +54,7 @@ data class DockerConfig internal constructor(
      * Only applicable if at least one healthcheck is defined in Docker-Compose.
      */
     @JsonProperty("health-timeout")
-    val healthTimeout: Long = 10,
+    val healthTimeout: Long = 30,
 ) {
 
     /**
