@@ -21,7 +21,7 @@ internal class Me2eTestConfigScanner {
             ClassGraph().enableAnnotationInfo().disableJarScanning().scan().use { scanResult ->
                 val annotatedClasses = scanResult.getClassesWithAnnotation(Me2eTestConfig::class.java)
                 if (annotatedClasses.isEmpty()) {
-                    logger.warn("Unable to find Me2eTestConfig annotation. Will be using the default values.")
+                    logger.info("Unable to find Me2eTestConfig annotation. Will be using the default values.")
                     return Me2eTestConfig()
                 } else if (annotatedClasses.size != 1) {
                     logger.warn("Found ${annotatedClasses.size} Me2eTestConfig annotations. Will be using the first one...")
