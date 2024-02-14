@@ -18,7 +18,6 @@ import kotlin.reflect.KClass
  * If any of these requirements is not met, the compiler will show an error.
  */
 @AutoService(Processor::class)
-@SupportedSourceVersion(SourceVersion.RELEASE_16)
 @SupportedAnnotationTypes("org.jholsten.me2e.container.injection.InjectService")
 internal class InjectServiceAnnotationProcessor : AbstractProcessor() {
 
@@ -36,6 +35,10 @@ internal class InjectServiceAnnotationProcessor : AbstractProcessor() {
         }
 
         return true
+    }
+
+    override fun getSupportedSourceVersion(): SourceVersion {
+        return SourceVersion.latest()
     }
 
     /**
