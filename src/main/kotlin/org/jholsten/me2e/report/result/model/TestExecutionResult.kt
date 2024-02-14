@@ -1,13 +1,27 @@
 package org.jholsten.me2e.report.result.model
 
+import org.jholsten.me2e.report.logs.model.AggregatedLogEntry
+import org.jholsten.me2e.report.result.utils.calculateDurationInSeconds
 import org.jholsten.me2e.report.result.utils.calculateSuccessRate
+import org.jholsten.me2e.report.stats.model.AggregatedStatsEntry
 import java.math.BigDecimal
+import java.time.Instant
 
 /**
  * Result of the execution of all tests.
  * Contains metrics about the number of tests and their duration as well as the details of each test execution.
  */
 class TestExecutionResult internal constructor(
+    /**
+     * Timestamp of when the test execution has started.
+     */
+    val startTime: Instant,
+
+    /**
+     * Timestamp of when the test execution has finished.
+     */
+    val endTime: Instant,
+
     /**
      * Total number of tests that were executed.
      */
@@ -29,6 +43,18 @@ class TestExecutionResult internal constructor(
     val numberOfAborted: Int,
 
     /**
+     * Logs that were collected for the execution of all tests.
+     * Includes Test Runner logs as well as Docker container logs.
+     */
+    val logs: List<AggregatedLogEntry>,
+
+    /**
+     * Resource usage statistics of all Docker containers that were collected for
+     * the execution of all tests.
+     */
+    val stats: List<AggregatedStatsEntry>,
+
+    /**
      * Roots of all tests included in this result along with their detailed test results.
      * Typically, this list contains the executed test classes, whose children in turn contain
      * the executed tests. Along with nested classes and parameterized tests, this forms a tree
@@ -47,19 +73,7 @@ class TestExecutionResult internal constructor(
 
     /**
      * Number of seconds that executing all tests took.
-     * Is set to `null` in case no tests were executed.
+     * Includes the duration it took to start and stop the test environment.
      */
-    val duration: BigDecimal? = calculateDuration()
-
-    /**
-     * Calculates the overall duration of the test execution by building the sum over the execution
-     * of all finished tests. Returns `null` in case all tests were skipped.
-     */
-    private fun calculateDuration(): BigDecimal? {
-        val finishedTests = roots.filterIsInstance<FinishedTestResult>()
-        if (finishedTests.isEmpty()) {
-            return null
-        }
-        return finishedTests.sumOf { it.duration }
-    }
+    val duration: BigDecimal = calculateDurationInSeconds(startTime, endTime)
 }

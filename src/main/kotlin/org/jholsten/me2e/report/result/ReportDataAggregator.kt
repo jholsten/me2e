@@ -45,6 +45,11 @@ internal class ReportDataAggregator private constructor() {
         internal val testRunner: ServiceSpecification = ServiceSpecification(name = "Test Runner")
 
         /**
+         * Timestamp of when the test execution has started.
+         */
+        private lateinit var testExecutionStart: Instant
+
+        /**
          * Log collector which collects the logs of the test runner and of all Docker containers.
          */
         private val logAggregator: LogAggregator = LogAggregator()
@@ -80,6 +85,7 @@ internal class ReportDataAggregator private constructor() {
          */
         @JvmSynthetic
         internal fun onTestExecutionStarted() {
+            testExecutionStart = Instant.now()
             logAggregator.initializeOnTestExecutionStarted()
         }
 
@@ -154,9 +160,11 @@ internal class ReportDataAggregator private constructor() {
         @JvmSynthetic
         internal fun onTestExecutionFinished(testPlan: TestPlan) {
             logger.info("Aggregating test summaries...")
-            val result = aggregateSummaries(testPlan)
-            networkTraceAggregator.collectPackets(result.roots.filterIsInstance<FinishedTestResult>())
-            collectContainerLogsAndStats(result.roots.filterIsInstance<FinishedTestResult>())
+            val testExecutionEnd = Instant.now()
+            val roots = buildTestTree(testPlan)
+            networkTraceAggregator.collectPackets(roots.filterIsInstance<FinishedTestResult>())
+            val (logs, stats) = collectContainerLogsAndStats(roots.filterIsInstance<FinishedTestResult>())
+            val result = aggregateResults(testPlan, roots, logs, stats, testExecutionEnd)
             generateReports(result)
         }
 
@@ -173,25 +181,41 @@ internal class ReportDataAggregator private constructor() {
         }
 
         /**
-         * Aggregates the intermediate execution results saved before and after each test execution and
-         * supplements them with the information from the given test plan. The result contains a tree of
-         * all tests, which is organized by test containers and their subordinate tests.
+         * Aggregates the results of all test executions to provide an overall test execution result.
+         * Includes all logs and container stats in the execution result.
          * @param testPlan Describes the tree of tests that have been executed.
+         * @param roots Aggregated roots of the test tree. Does not include the result of the test engine.
+         * @param logs Logs collected from all containers during the test execution.
+         * @param stats Resource usage statistics collected from all containers during the test execution.
+         * @param testExecutionEnd Timestamp of when the test execution has finished.
          * @return Aggregated result of the test execution.
          */
-        private fun aggregateSummaries(testPlan: TestPlan): TestExecutionResult {
-            val roots = buildTestTree(testPlan)
+        private fun aggregateResults(
+            testPlan: TestPlan,
+            roots: List<TestResult>,
+            logs: List<AggregatedLogEntry>,
+            stats: List<AggregatedStatsEntry>,
+            testExecutionEnd: Instant,
+        ): TestExecutionResult {
+            val engineTestRunnerLogs = testPlan.roots.flatMap { getIntermediateResult(it).logs }
             return TestExecutionResult(
+                startTime = testExecutionStart,
+                endTime = testExecutionEnd,
                 numberOfTests = roots.sumOf { it.numberOfTests },
                 numberOfFailures = roots.sumOf { it.numberOfFailures },
                 numberOfSkipped = roots.sumOf { it.numberOfSkipped },
                 numberOfAborted = roots.sumOf { it.numberOfAborted },
+                logs = (engineTestRunnerLogs + logs).sortedBy { it.timestamp },
+                stats = stats,
                 roots = roots,
             )
         }
 
         /**
          * Builds tree of the test containers and tests which were executed.
+         * Aggregates the intermediate execution results saved before and after each test execution and
+         * supplements them with the information from the given test plan. The result contains a tree of
+         * all tests, which is organized by test containers and their subordinate tests.
          * The original roots of the test plan, i.e. the test engine such as `[engine:junit-jupiter]`,
          * are not included in the tree. Instead, the roots of the tree to be built are formed by
          * the underlying children, which are typically the executed test classes.
@@ -260,13 +284,15 @@ internal class ReportDataAggregator private constructor() {
          * container is currently busy), the entries can only be assigned to the corresponding tests at the very end, after all
          * tests have been executed.
          * @param roots Aggregated roots of the test tree.
+         * @return All collected container logs and stats.
          */
-        private fun collectContainerLogsAndStats(roots: List<FinishedTestResult>) {
+        private fun collectContainerLogsAndStats(roots: List<FinishedTestResult>): Pair<List<AggregatedLogEntry>, List<AggregatedStatsEntry>> {
             val logs = logAggregator.collectContainerLogs()
             val stats = statsAggregator.collectStats()
             for (test in roots) {
                 matchLogsAndStatsToTest(test, logs, stats)
             }
+            return logs to stats
         }
 
         /**
