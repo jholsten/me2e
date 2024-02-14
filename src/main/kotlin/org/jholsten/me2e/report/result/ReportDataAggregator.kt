@@ -308,7 +308,7 @@ internal class ReportDataAggregator private constructor() {
          * @param result Aggregated result of the test execution.
          */
         private fun generateReports(result: TestExecutionResult) {
-            val reportGeneratorClasses = Me2eTestConfigStorage.configAnnotation?.reportGenerators ?: arrayOf(HtmlReportGenerator::class)
+            val reportGeneratorClasses = Me2eTestConfigStorage.configAnnotation.reportGenerators
             for (reportGeneratorClass in reportGeneratorClasses) {
                 generateReport(reportGeneratorClass, result)
             }

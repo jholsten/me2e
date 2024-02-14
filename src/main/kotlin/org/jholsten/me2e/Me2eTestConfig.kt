@@ -24,7 +24,7 @@ annotation class Me2eTestConfig(
      * Path to the configuration file. Needs to be located in `resources` folder.
      * @see org.jholsten.me2e.config.model.TestConfig
      */
-    val config: String,
+    val config: String = "me2e-config.yml",
 
     /**
      * Format of the configuration file.

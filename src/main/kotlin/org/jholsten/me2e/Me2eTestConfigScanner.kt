@@ -11,17 +11,18 @@ internal class Me2eTestConfigScanner {
         private val logger = logger<Me2eTestConfigScanner>()
 
         /**
-         * Finds [Me2eTestConfig] annotation definition in the project.
-         * If multiple annotations are defined, the first one is used.
+         * Finds [Me2eTestConfig] annotation definition in the project. If multiple annotations are defined, the first one is used.
+         * If no annotation is found, the default is returned.
          * @return First [Me2eTestConfig] annotation defined in the current project or `null`, if
          * no such instance could be found.
          */
         @JvmSynthetic
-        fun findFirstTestConfigAnnotation(): Me2eTestConfig? {
+        fun findFirstTestConfigAnnotation(): Me2eTestConfig {
             ClassGraph().enableAnnotationInfo().disableJarScanning().scan().use { scanResult ->
                 val annotatedClasses = scanResult.getClassesWithAnnotation(Me2eTestConfig::class.java)
                 if (annotatedClasses.isEmpty()) {
-                    return null
+                    logger.warn("Unable to find Me2eTestConfig annotation. Will be using the default values.")
+                    return Me2eTestConfig()
                 } else if (annotatedClasses.size != 1) {
                     logger.warn("Found ${annotatedClasses.size} Me2eTestConfig annotations. Will be using the first one...")
                 }

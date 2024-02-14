@@ -82,18 +82,14 @@ internal class NetworkTraceAggregator {
      * Requests to the Mock Servers are assigned via the name specified in the host header.
      */
     private val mockServers: Map<String, NetworkNodeSpecification> by lazy {
-        if (Me2eTestConfigStorage.config != null) {
-            Me2eTestConfigStorage.config!!.environment.mockServers.values
-                .associate {
-                    it.hostname to NetworkNodeSpecification(
-                        nodeType = NetworkNodeSpecification.NodeType.MOCK_SERVER,
-                        ipAddress = hostIpAddress,
-                        specification = ServiceSpecification(name = it.name),
-                    )
-                }
-        } else {
-            mapOf()
-        }
+        Me2eTestConfigStorage.config.environment.mockServers.values
+            .associate {
+                it.hostname to NetworkNodeSpecification(
+                    nodeType = NetworkNodeSpecification.NodeType.MOCK_SERVER,
+                    ipAddress = hostIpAddress,
+                    specification = ServiceSpecification(name = it.name),
+                )
+            }
     }
 
     /**

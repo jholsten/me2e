@@ -12,20 +12,18 @@ internal class Me2eTestConfigStorage {
     companion object {
         /**
          * Configuration annotation that is used to configure the tests.
-         * May be `null` if no test configuration is defined in the project.
          */
         @get:JvmSynthetic
-        val configAnnotation: Me2eTestConfig? by lazy {
+        val configAnnotation: Me2eTestConfig by lazy {
             Me2eTestConfigScanner.findFirstTestConfigAnnotation()
         }
 
         /**
          * Parsed test configuration.
-         * May be `null` if no test configuration is defined in the project.
          */
         @get:JvmSynthetic
-        val config: TestConfig? by lazy {
-            configAnnotation?.let { it.format.parser.parseFile(it.config) }
+        val config: TestConfig by lazy {
+            configAnnotation.format.parser.parseFile(configAnnotation.config)
         }
     }
 }

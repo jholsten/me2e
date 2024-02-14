@@ -41,20 +41,18 @@ open class Me2eTest {
 
         /**
          * Configuration annotation that is used to configure the tests.
-         * @throws RuntimeException if [Me2eTestConfig] annotation is not defined in the current project.
          */
         @get:JvmStatic
         val configAnnotation: Me2eTestConfig by lazy {
-            Me2eTestConfigStorage.configAnnotation ?: throw RuntimeException("Unable to find Me2eTestConfig annotation.")
+            Me2eTestConfigStorage.configAnnotation
         }
 
         /**
          * Parsed test configuration.
-         * @throws RuntimeException if [Me2eTestConfig] annotation is not defined in the current project.
          */
         @get:JvmStatic
         val config: TestConfig by lazy {
-            Me2eTestConfigStorage.config ?: throw RuntimeException("Unable to find Me2eTestConfig annotation.")
+            Me2eTestConfigStorage.config
         }
 
         /**
