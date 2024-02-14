@@ -172,6 +172,7 @@ internal class IntermediateTestResult(
             val reason = when {
                 skippingReason != null -> skippingReason
                 else -> parents.find { it.status == TestResult.Status.SKIPPED }?.skippingReason
+                    ?: parents.find { it.throwable != null }?.throwable?.message
             }
             return SkippedTestResult(
                 testId = testId,
