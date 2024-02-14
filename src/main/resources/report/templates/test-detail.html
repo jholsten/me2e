@@ -327,7 +327,7 @@
         <tbody>
         <tr th:each="test : ${allTests}" th:data-tt-id="${test.testId}" th:data-tt-parent-id="${test.parentId}">
             <td class="align-left">
-                <a th:classappend="${test.status.name == 'SKIPPED' ? 'skipped' : (test.status.name == 'ABORTED' ? 'aborted' : (test.numberOfFailures > 0 ? 'failure' : (test.numberOfAborted > 0 ? 'aborted' : 'success')))}"
+                <a th:classappend="${test.status.name == 'SKIPPED' ? 'skipped' : (test.status.name == 'FAILED' ? 'failure' : (test.status.name == 'ABORTED' ? 'aborted' : 'success'))}"
                    th:href="${'../sources/' + test.source + '.html#' + test.testId}"
                 >
                     <span th:text="${test.displayName}"></span>
@@ -337,7 +337,7 @@
             <td th:text="${test.numberOfFailures}"></td>
             <td th:text="${test.numberOfSkipped + test.numberOfAborted}"></td>
             <td th:text="${test.status.name != 'SKIPPED' ? test.duration + 's' : '-'}"></td>
-            <td th:classappend="${test.status.name == 'SKIPPED' ? 'skipped' : (test.numberOfFailures > 0 ? 'failure' : (test.numberOfAborted > 0 ? 'aborted' : 'success'))}"
+            <td th:classappend="${test.status.name == 'SKIPPED' ? 'skipped' : (test.status.name == 'FAILED' ? 'failure' : (test.status.name == 'ABORTED' ? 'aborted' : 'success'))}"
                 th:text="${(test.successRate != null && test.status.name != 'ABORTED') ? test.successRate + ' %' : '-'}"
             ></td>
         </tr>
@@ -499,7 +499,7 @@
                 <tbody>
                 <tr th:each="child : ${test.children}">
                     <td>
-                        <a th:classappend="${child.status.name == 'SKIPPED' ? 'skipped' : (child.numberOfFailures > 0 ? 'failure' : (child.numberOfAborted > 0 ? 'aborted' : 'success'))}"
+                        <a th:classappend="${child.status.name == 'SKIPPED' ? 'skipped' : (child.status.name == 'FAILED' ? 'failure' : (child.status.name == 'ABORTED' ? 'aborted' : 'success'))}"
                            th:href="${'../sources/' + child.source + '.html#' + child.testId}"
                         >
                             <span th:text="${child.displayName}"></span>
