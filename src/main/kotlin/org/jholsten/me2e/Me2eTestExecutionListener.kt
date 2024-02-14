@@ -1,4 +1,4 @@
-package org.jholsten.me2e.report
+package org.jholsten.me2e
 
 import com.google.auto.service.AutoService
 import org.jholsten.me2e.report.result.ReportDataAggregator
@@ -13,7 +13,15 @@ import org.junit.platform.launcher.TestPlan
  * test report after all tests were executed. This listener is automatically detected by JUnit.
  */
 @AutoService(TestExecutionListener::class)
-internal class ReportGeneratingListener : TestExecutionListener {
+internal class Me2eTestExecutionListener : TestExecutionListener {
+
+    /**
+     * Callback function which is executed before the execution of the tests starts.
+     * @param testPlan Describes the tree of tests about to be executed.
+     */
+    override fun testPlanExecutionStarted(testPlan: TestPlan?) {
+        ReportDataAggregator.onTestExecutionStarted()
+    }
 
     /**
      * Callback function which is executed when the execution of a test or test container is about to be started.
@@ -59,14 +67,6 @@ internal class ReportGeneratingListener : TestExecutionListener {
         if (testIdentifier != null && entry != null) {
             ReportDataAggregator.onReportingEntryPublished(entry)
         }
-    }
-
-    /**
-     * Callback function which is executed before the execution of the tests starts.
-     * @param testPlan Describes the tree of tests about to be executed.
-     */
-    override fun testPlanExecutionStarted(testPlan: TestPlan?) {
-        ReportDataAggregator.onTestExecutionStarted()
     }
 
     /**
