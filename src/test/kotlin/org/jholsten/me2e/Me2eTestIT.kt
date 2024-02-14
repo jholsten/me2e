@@ -15,6 +15,7 @@ import org.jholsten.me2e.request.model.ContentType
 import org.jholsten.me2e.request.model.RelativeUrl
 import org.jholsten.me2e.utils.logger
 import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
@@ -44,6 +45,13 @@ class Me2eTestIT : Me2eTest() {
     private lateinit var paymentServiceAlt: MockServer
 
     companion object {
+        @JvmStatic
+        @BeforeAll
+        fun beforeAll() {
+            mockServerManager.start()
+            containerManager.start()
+        }
+        
         @JvmStatic
         @AfterAll
         fun afterAll() {
