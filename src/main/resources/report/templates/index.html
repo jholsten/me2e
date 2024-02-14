@@ -99,7 +99,7 @@
         <tbody>
         <tr th:each="test : ${allTests}" th:data-tt-id="${test.testId}" th:data-tt-parent-id="${test.parentId}">
             <td class="align-left">
-                <a th:classappend="${test.status.name == 'SKIPPED' ? 'skipped' : (test.numberOfFailures > 0 ? 'failure' : (test.numberOfAborted > 0 ? 'aborted' : 'success'))}"
+                <a th:classappend="${test.status.name == 'SKIPPED' ? 'skipped' : (test.status.name == 'ABORTED' ? 'aborted' : (test.numberOfFailures > 0 ? 'failure' : (test.numberOfAborted > 0 ? 'aborted' : 'success')))}"
                    th:href="${'sources/' + test.source + '.html' + (test.parentId != null ? '#' + test.testId : '')}"
                 >
                     <span th:text="${test.displayName}"></span>
