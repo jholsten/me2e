@@ -111,11 +111,11 @@ services:
 
 In me2e, we distinguish between 3 different container types:
 
-| Container Type | Description                                                                                                                                                                                                                                                                                             | Represented by Class                                                                                                                                                          |
-|:---------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `MICROSERVICE` | A Microservice that contains a publicly accessible HTTP REST API.<br/> With containers of this type, you can access their API via an HTTP client.                                                                                                                                                       | [`MicroserviceContainer`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.microservice/-microservice-container/index.html) |
-| `DATABASE`     | A container containing a database.<br/> With containers of this type, you can interact with the database by, for example, executing scripts or resetting the database state. Not that only MySQL, PostgreSQL, MariaDB and MongoDB are currently supported by default for interacting with the database. | [`DatabaseContainer`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.database/-database-container/index.html)             |
-| `MISC`         | All other container types that do not contain a publicly accessible REST API and are not database containers.<br/> You do not need to set the label for this type. It is used by default.                                                                                                               | [`Container`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container/-container/index.html)                                       |
+| Container Type | Description                                                                                                                                                                                                                                                                                              | Represented by Class                                                                                                                                                          |
+|:---------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `MICROSERVICE` | A Microservice that contains a publicly accessible HTTP REST API.<br/> With containers of this type, you can access their API via an HTTP client.                                                                                                                                                        | [`MicroserviceContainer`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.microservice/-microservice-container/index.html) |
+| `DATABASE`     | A container containing a database.<br/> With containers of this type, you can interact with the database by, for example, executing scripts or resetting the database state. Note that only MySQL, PostgreSQL, MariaDB and MongoDB are currently supported by default for interacting with the database. | [`DatabaseContainer`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.database/-database-container/index.html)             |
+| `MISC`         | All other container types that do not contain a publicly accessible REST API and are not database containers.<br/> You do not need to set the label for this type. It is used by default.                                                                                                                | [`Container`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container/-container/index.html)                                       |
  
 To ensure that the test execution only starts when all services are completely up and running, you should also define a healthcheck for each service, if it does not already exist.
 
@@ -157,7 +157,7 @@ class E2ETest : Me2eTest() {
 }
 ```
 
-`Me2eTest` is the base class for all End-to-End-Tests, which starts the test environment once during initialization and contains references to all components of the environment.
+`Me2eTest` is the base class for all End-to-End-Tests, which contains references to all components of the environment.
 You can use this class to access the containers via their names in the Docker-Compose file using the [`containerManager`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e/-me2e-test/-companion/container-manager.html).
 
 ```kotlin
@@ -233,6 +233,90 @@ As Docker only sends the statistics entries once per second, you will not see an
 
 Detailed information on the contents of the test report and its customizability can be found [here](#test-report).
 
+## Usage
+In the following, the configuration options, a more detailed description of the options for creating tests as well as the test report are provided.
+For the detailed Kotlin documentation, take a look [here](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/index.html).
+
+### Configuration
+The configuration of the me2e library is mainly realized in the me2e-config file in YAML format.
+The schema is divided into two sections at the top level:
+- `settings`: Settings that affect the runtime execution of the tests, interactions with Docker and with the containers
+- `environment`: Definition of the test environment
+
+When the test execuction is started, the file `me2e-config.yml` is loaded from the `resources` folder, parsed and then the test environment is started.
+To change the name of the config file to be searched for, you can annotate any class with the [`Me2eTestConfig`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e/-me2e-test-config/index.html) annotation anywhere in your project and set the `config` field to the name of your config file.
+
+```kotlin
+@Me2eTestConfig(config = "my-custom-path.yml")
+class AppTest {
+
+}
+```
+
+#### Enabling Autocompletion in IntelliJ
+To enable autocompletion and obtain descriptions for the fields of the `me2e-config.yml` file, you may load the corresponding JSON schema into the IDE.
+To do this, go to `Settings` &rarr; `Languages & Frameworks` &rarr; `Schemas and DTDs` &rarr; `JSON Schema Mappings` in IntelliJ and add a new entry named `me2e-config` on the left-hand side.
+Then enter the following URL for the JSON schema of the me2e-config in the `Schema file or URL` field on the right-hand side:
+```
+https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/json-schemas/config_schema.json
+``` 
+
+Now add a new entry in the lower right area and enter `me2e-config*.yml` as the file path pattern.
+IntelliJ will then automatically link this schema to all files that correspond to this file name pattern.
+
+![Test Report Example](docs/intellij_config_schema_mapping.png)
+
+For more information on using custom JSON schemas in IntelliJ, take a look at the [IntelliJ Documentation](https://www.jetbrains.com/help/idea/json.html#ws_json_schema_add_custom).
+
+#### Configuring the Execution Settings
+In the `settings` section of the me2e-config file, you can configure the following settings:
+<details>
+    <summary><code>docker</code>: Configuration of Docker and Docker-Compose</summary>
+    
+- `docker-compose-version`: Docker-Compose version to use (one of `V1`, `V2`)
+- `pull-policy`: Policy on pulling Docker images (one of `MISSING`, `ALWAYS`)
+- `build-images`: Whether to always build images before starting the containers
+- `remove-images`: Whether to remove images used by services after containers shut down (one of `NONE`, `ALL`, `LOCAL`)
+- `remove-volumes`: Whether to remove volumes after containers shut down
+- `health-timeout`: Number of seconds to wait at most until containers are healthy
+</details>
+
+<details>
+    <summary><code>requests</code>: Configuration of the HTTP requests that are sent to Microservice containers</summary>
+    
+- `connect-timeout`: Connect timeout in seconds
+- `read-timeout`: Read timeout in seconds
+- `write-timeout`: Write timeout in seconds
+- `retry-on-connection-failure`: Whether to retry requests when a connectivity problem is encountered
+</details>
+
+<details>
+    <summary><code>mock-servers</code>: Configuration of the Mock Servers</summary>
+
+For more information, see [here](#mock-servers-simulating-external-services)
+- `keystore-path`: Path to the keystore containing the TLS certificate to use for the Mock Server instances
+- `keystore-password`: Password to use to access the keystore
+- `key-manager-password`: Password used to access individual keys in the keystore
+- `keystore-type`: Type of the keystore
+- `truststore-path`: Path to the truststore to use for the Mock Server instances
+- `truststore-password`: Password used to access the truststore
+- `truststore-type`: Type of the truststore
+- `needs-client-auth`: Whether TLS needs client authentication
+</details>
+
+<details>
+    <summary><code>state-reset</code>: Configuration for resetting the state of containers, Mock Servers and databases after each test</summary>
+    
+- `clear-all-tables`: Whether to clear all entries from all tables for all database containers for which a connection to the database is established after each test
+- `reset-request-interceptors`: Whether to reset all request interceptors of all Microservice containers after each test
+- `reset-mock-server-requests`: Whether to reset all captured requests for all Mock Servers after each test
+</details>
+
+<details>
+    <summary><code>assert-healthy</code>: Configuration whether to ensure that all containers are healthy before each test</summary>
+    
+For more information, see [here](#assert-healthy)
+</details>
 
 ## Usage
 ### Import
