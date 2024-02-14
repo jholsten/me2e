@@ -1,6 +1,6 @@
 package org.jholsten.me2e.report.tracing
 
-import org.jholsten.me2e.Me2eTestConfigStorage
+import org.jholsten.me2e.Me2eTest
 import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.container.network.ContainerNetwork
 import org.jholsten.me2e.report.logs.model.ServiceSpecification
@@ -82,7 +82,7 @@ internal class NetworkTraceAggregator {
      * Requests to the Mock Servers are assigned via the name specified in the host header.
      */
     private val mockServers: Map<String, NetworkNodeSpecification> by lazy {
-        Me2eTestConfigStorage.config.environment.mockServers.values
+        Me2eTest.config.environment.mockServers.values
             .associate {
                 it.hostname to NetworkNodeSpecification(
                     nodeType = NetworkNodeSpecification.NodeType.MOCK_SERVER,

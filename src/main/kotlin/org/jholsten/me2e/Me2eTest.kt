@@ -44,7 +44,7 @@ open class Me2eTest {
          */
         @get:JvmStatic
         val configAnnotation: Me2eTestConfig by lazy {
-            Me2eTestConfigStorage.configAnnotation
+            Me2eTestConfigScanner.findFirstTestConfigAnnotation()
         }
 
         /**
@@ -52,7 +52,7 @@ open class Me2eTest {
          */
         @get:JvmStatic
         val config: TestConfig by lazy {
-            Me2eTestConfigStorage.config
+            configAnnotation.format.parser.parseFile(configAnnotation.config)
         }
 
         /**

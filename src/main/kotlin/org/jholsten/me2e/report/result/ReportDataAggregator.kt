@@ -1,12 +1,11 @@
 package org.jholsten.me2e.report.result
 
-import org.jholsten.me2e.Me2eTestConfigStorage
+import org.jholsten.me2e.Me2eTest
 import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.report.generator.ReportGenerator
 import org.jholsten.me2e.report.logs.LogAggregator
 import org.jholsten.me2e.report.logs.model.AggregatedLogEntry
 import org.jholsten.me2e.report.logs.model.ServiceSpecification
-import org.jholsten.me2e.report.generator.html.HtmlReportGenerator
 import org.jholsten.me2e.report.stats.StatsAggregator
 import org.jholsten.me2e.report.result.mapper.ReportEntryMapper
 import org.jholsten.me2e.report.result.model.*
@@ -308,7 +307,7 @@ internal class ReportDataAggregator private constructor() {
          * @param result Aggregated result of the test execution.
          */
         private fun generateReports(result: TestExecutionResult) {
-            val reportGeneratorClasses = Me2eTestConfigStorage.configAnnotation.reportGenerators
+            val reportGeneratorClasses = Me2eTest.configAnnotation.reportGenerators
             for (reportGeneratorClass in reportGeneratorClasses) {
                 generateReport(reportGeneratorClass, result)
             }
