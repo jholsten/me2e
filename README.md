@@ -109,7 +109,7 @@ services:
       "org.jholsten.me2e.container-type": "MICROSERVICE"
 ```
 
-In me2e, we distinguish between 3 different container types:
+In me2e, we distinguish between <span id="container-types">3 different container types</span>:
 
 | Container Type | Description                                                                                                                                                                                                                                                                                              | Represented by Class                                                                                                                                                          |
 |:---------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -126,7 +126,7 @@ services:
   delivery-service:
     image: gitlab.informatik.uni-bremen.de:5005/master-thesis1/evaluation/pizza-delivery/delivery-service:latest
     ports:
-      - 8082:8082
+      - 8082
     healthcheck:
       test: ["CMD-SHELL", "curl --fail http://localhost:8082/health || exit 1"]
       interval: 5s
@@ -317,6 +317,62 @@ For more information, see [here](#mock-servers-simulating-external-services)
     
 For more information, see [here](#assert-healthy)
 </details>
+
+#### Defining the Test Environment for the Microservice System
+The individual components of the Microservice System to be tested are defined in a regular Docker-Compose file.
+Before the tests are started, this file, which is defined in the me2e-config, is parsed, the services are deserialized and the environment is started by executing `docker compose up` (or `docker-compose up` if you specified to use Docker-Compose version 1 in the me2e-config file).
+Only then the execution of the first test class is started.
+
+The configuration of the individual containers of your Microservice System is performed via labels.
+These labels are read when the Docker-Compose file is parsed and set as attributes in the container instances.
+The basic labels that can be used for all container types include the following:
+
+| Label                              | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+|------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `org.jholsten.me2e.container-type` | Specifies the type of the container and thus determines to which class the container is deserialized.<br/>Possible values: `MICROSERVICE`, `DATABASE`, `MISC`.<br/>For more detailed descriptions of the different types, see [here](#container-types).                                                                                                                                                                                                                                                                                                                                                                         |
+| `org.jholsten.me2e.pull-policy`    | Specifies the pull policy for the specific container. By default, the value from the me2e-config file (`settings.docker.pull-policy`) is used for all containers. With this setting, you can change the policy for a specific container and, for example, ensure that the latest image is always pulled.<br/>Possible values:<br/>- `MISSING`: Only Docker images that are not yet available on the host are pulled<br/>- `ALWAYS`: The latest image from the registry is always pulled<br/>For more information, take a look at the [Docker Documentation](https://docs.docker.com/engine/reference/commandline/compose_pull). |
+
+##### Recommendations for the Definition of Services in the Docker-Compose File
+Except for the definition of the labels, you do not need to make any changes to your existing Docker-Compose file, but you should follow the recommendations below to ensure that the test execution delivers reliable results.
+
+For one, you should define appropriate **health checks** for each service so that all services are fully up and running before the first test execution begins.
+The health checks may either be defined in the Docker-Compose file or inside the Docker image itself.
+When the test environment is started, it then waits with a certain timeout until all containers have the status "healthy".
+The timeout is 30 seconds by default, but can be adjusted in the me2e-config file via `settings.docker.health-timeout`.
+
+In addition, you should also adjust the **port mapping** to allow multiple test executions to be performed simultaneously on one Docker host (as it is most probably the case when running the tests inside a CI/CD pipeline).
+If you specify a fixed external port for each container port, your container will always be reachable on this port on the Docker host.
+If you now start several of these test environments at the same time, conflicts will arise as the ports on the host are already occupied.
+The recommendation is therefore to only define the internal container port.
+This will cause Docker to randomly select an available port via which the container can be reached on the host.
+In the me2e library, we retrieve this external port from the container info so that we can communicate with the containers even if the port was chosen randomly.
+
+<table>
+    <tr>
+        <th>&#x2705; Do's</th>
+        <th>&#x274C; Don'ts</th>
+    </tr>
+    <tr>
+        <td>
+<pre>
+  delivery-service:
+    # ...
+    ports:
+      - 8082
+</pre>
+        </td>
+        <td>
+<pre>
+  delivery-service:
+    // ...
+    ports:
+      - 8082:8082
+</pre>
+        </td>
+    </tr>
+</table>
+
+
 
 ## Usage
 ### Import
