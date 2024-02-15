@@ -46,11 +46,6 @@ class DatabaseContainer internal constructor(
     ports: ContainerPortList = ContainerPortList(),
 
     /**
-     * Whether there is a healthcheck defined for this container in the Docker-Compose file.
-     */
-    hasHealthcheck: Boolean = false,
-
-    /**
      * Pull policy for this Docker container.
      * If not overwritten in the label `org.jholsten.me2e.pull-policy` for this container, the global
      * pull policy [org.jholsten.me2e.config.model.DockerConfig.pullPolicy] is used.
@@ -116,7 +111,6 @@ class DatabaseContainer internal constructor(
     type = ContainerType.DATABASE,
     environment = environment,
     ports = ports,
-    hasHealthcheck = hasHealthcheck,
     pullPolicy = pullPolicy,
 ) {
     private val logger = logger<DatabaseContainer>()

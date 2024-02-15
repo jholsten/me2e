@@ -171,7 +171,6 @@ class TestEnvironmentConfigDeserializerTest {
             .put("type", "MISC")
             .put("predefinedUrl", null as String?)
             .put("pullPolicy", "MISSING")
-            .put("hasHealthcheck", false)
         verify { mockedMapper.treeToValue(expectedService, Container::class.java) }
         verify { mockedMapper.treeToValue(expectedMockServer(), MockServer::class.java) }
     }
@@ -609,7 +608,6 @@ class TestEnvironmentConfigDeserializerTest {
             .put("type", "MICROSERVICE")
             .put("predefinedUrl", null as String?)
             .put("pullPolicy", "ALWAYS")
-            .put("hasHealthcheck", true)
     }
 
     private fun expectedAuthServer(): ObjectNode {
@@ -624,7 +622,6 @@ class TestEnvironmentConfigDeserializerTest {
             .put("type", "MICROSERVICE")
             .put("predefinedUrl", "http://auth-server")
             .put("pullPolicy", "MISSING")
-            .put("hasHealthcheck", false)
     }
 
     private fun expectedDatabase(): ObjectNode {
@@ -644,7 +641,6 @@ class TestEnvironmentConfigDeserializerTest {
             .put("type", "DATABASE")
             .put("predefinedUrl", null as String?)
             .put("pullPolicy", "MISSING")
-            .put("hasHealthcheck", false)
             .put("system", "POSTGRESQL")
             .put("schema", null as String?)
             .put("database", null as String?)

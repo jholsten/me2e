@@ -63,11 +63,6 @@ class MicroserviceContainer internal constructor(
     private val requestConfig: RequestConfig,
 
     /**
-     * Whether there is a healthcheck defined for this container in the Docker-Compose file.
-     */
-    hasHealthcheck: Boolean = false,
-
-    /**
      * Pull policy for this Docker container.
      * If not overwritten in the label `org.jholsten.me2e.pull-policy` for this container, the global
      * pull policy [org.jholsten.me2e.config.model.DockerConfig.pullPolicy] is used.
@@ -80,7 +75,6 @@ class MicroserviceContainer internal constructor(
     type = ContainerType.MICROSERVICE,
     environment = environment,
     ports = ports,
-    hasHealthcheck = hasHealthcheck,
     pullPolicy = pullPolicy,
 ) {
     private val logger = logger<MicroserviceContainer>()

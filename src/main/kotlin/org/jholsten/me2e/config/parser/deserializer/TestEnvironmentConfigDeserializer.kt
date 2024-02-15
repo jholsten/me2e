@@ -174,7 +174,6 @@ internal class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironm
             node.put("type", labels[CONTAINER_TYPE_KEY] ?: "MISC")
             node.put("predefinedUrl", labels[URL_KEY])
             node.put("pullPolicy", labels[PULL_POLICY_KEY] ?: dockerConfig.pullPolicy.name)
-            node.put("hasHealthcheck", node.has("healthcheck"))
             setDatabaseProperties(node, labels, node.get("environment"), getDatabaseInitializationScripts(node.get("labels")))
             result[key] = mapper.treeToValue(node, Container::class.java)
         }

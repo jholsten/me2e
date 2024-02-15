@@ -25,7 +25,6 @@ internal class ContainerManagerIT {
                 ports = ContainerPortList(
                     ports = listOf(ContainerPort(internal = 8000))
                 ),
-                hasHealthcheck = true,
             ),
             "database" to DatabaseContainer(
                 name = "database",
@@ -40,7 +39,6 @@ internal class ContainerManagerIT {
                 username = "user",
                 password = "123",
                 initializationScripts = mapOf(),
-                hasHealthcheck = true,
             ),
         )
     )

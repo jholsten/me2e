@@ -217,6 +217,14 @@ class DockerCompose private constructor(
     }
 
     /**
+     * Returns whether there is a healthcheck defined for the service with the given name.
+     * @param serviceName Name of the service for which it should be determined whether there is a healthcheck defined.
+     */
+    fun hasHealthcheck(serviceName: String): Boolean {
+        return getHealthcheckInfo(serviceName) != null
+    }
+
+    /**
      * Waits for up to [timeout] seconds until the services with the given names are healthy.
      * Services for which no health check is defined in the Docker-Compose are ignored.
      * @throws HealthTimeoutException if at least one of the containers did not become healthy within [timeout] seconds.
@@ -582,13 +590,6 @@ class DockerCompose private constructor(
                 if (healthState != null) "\nCurrent health state:\n$healthState" else ""
             throw HealthTimeoutException(message)
         }
-    }
-
-    /**
-     * Returns whether there is a healthcheck defined for the service with the given name.
-     */
-    private fun hasHealthcheck(serviceName: String): Boolean {
-        return getHealthcheckInfo(serviceName) != null
     }
 
     /**

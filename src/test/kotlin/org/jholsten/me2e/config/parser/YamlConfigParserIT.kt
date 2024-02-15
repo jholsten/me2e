@@ -129,7 +129,7 @@ internal class YamlConfigParserIT {
                 "DB_USER" to "user",
             ),
             pullPolicy = pullPolicy ?: DockerConfig.PullPolicy.ALWAYS,
-            hasHealthcheck = true,
+            hasHealthcheck = false,
             containerPorts = listOf(1234, 80, 1200, 1201, 1202),
         )
     }

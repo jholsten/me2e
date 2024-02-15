@@ -25,7 +25,6 @@ internal class MicroserviceContainerIT {
             ports = ContainerPortList(
                 ports = listOf(ContainerPort(internal = 8000))
             ),
-            hasHealthcheck = true,
         )
 
         private val manager = ContainerManager(

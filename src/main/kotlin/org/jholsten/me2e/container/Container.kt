@@ -86,11 +86,6 @@ open class Container internal constructor(
     val ports: ContainerPortList = ContainerPortList(),
 
     /**
-     * Whether there is a healthcheck defined for this container in the Docker-Compose file.
-     */
-    val hasHealthcheck: Boolean = false,
-
-    /**
      * Pull policy for this Docker container.
      * If not overwritten in the label `org.jholsten.me2e.pull-policy` for this container, the global
      * pull policy [org.jholsten.me2e.config.model.DockerConfig.pullPolicy] is used.
@@ -99,6 +94,13 @@ open class Container internal constructor(
     val pullPolicy: DockerConfig.PullPolicy = DockerConfig.PullPolicy.MISSING,
 ) {
     private val logger = logger<Container>()
+
+
+    /**
+     * Whether there is a healthcheck defined for this container either inside the Docker image
+     * or in the Docker-Compose file.
+     */
+    var hasHealthcheck: Boolean = false
 
     /**
      * Returns whether the container is currently up and running.
@@ -367,6 +369,7 @@ open class Container internal constructor(
     @JvmSynthetic
     internal open fun initializeOnContainerStarted(dockerContainer: DockerContainer, state: ContainerState, environment: DockerCompose) {
         this.dockerContainer = DockerContainerReference(dockerContainer, state, environment)
+        this.hasHealthcheck = environment.hasHealthcheck(name)
         mapContainerPorts(dockerContainer)
 
         ReportDataAggregator.onContainerStarted(this)
