@@ -460,6 +460,129 @@ services:
       "org.jholsten.me2e.database.reset.skip-tables": "flyway_schema_history"
 ```
 
+#### Mock Servers: Simulating external services
+Wenn dein Microservice System mit irgendwelchen Systemen von Drittanbietern kommuniziert, solltest du das Verhalten dieser externen Services für die End-to-End-Tests simulieren, d.h. mocken.
+Dadurch gelingt dir einerseits eine höhere Zuverlässigkeit der Tests, da diese nun nicht mehr von der Verfügbarkeit und Funktionalität der externen Systeme abhängen, und andererseits wird so auch erreicht, dass nicht bei jedem Testlauf das tatsächliche Verhalten bei dem externen System ausgelöst wird.
+Sendet beispielsweise ein Onlineshop-System im Rahmen der Abwicklung eines Auftrags Anfragen an einen Paketdienstleister, sollten die Pakete bei der Ausführung eines automatisierten Tests selbstverständlich nicht wirklich verschickt werden.
+
+Um diese externen Systeme möglichst realistisch zu simulieren, bietet me2e für deren Abbildung Mock-Server an, die als Teil der Testumgebung vor der Ausführung der Tests gestartet werden.
+Jegliche Anfrage an einen externen Dienst wird dann nicht mehr von dem realen Dienst, sondern von dem Mock-Server entgegengenommen, der eine vordefinierte Antwort zurückgibt.
+Für diese vordefinierten Antworten sind im Vorfeld Regeln zu hinterlegen, die festlegen, unter welchen Bedingungen welche Antwort zurückgegeben wird.
+Diese Kombination aus einem Request-Pattern und einer vordefinierten Antwort wird im me2e-Kontext als "**Stub**" bezeichnet.
+
+Die Definition eines Mock-Servers, der über das HTTP-Protokoll angesprochen wird, erfolgt in me2e in 3 Schritten:
+1. Mock-Server mit dem Hostnamen des externen Dienstes, der simuliert werden soll, in der me2e-config Datei definieren
+2. Stubs für die Anfragen an den externen Dienst definieren.
+3. DNS-Eintrag für den externen Dienst auf die IP-Adresse des Mock-Servers zeigen lassen
+
+Erfolgt die Kommunikation via HTTP over TLS (a.k.a. HTTPS), sind zusätzliche Konfigurationen vorzunehmen, die hier beschrieben werden.
+
+##### Mock Server Definition
+Die Mock Server werden in der me2e-config Datei im Abschnitt environment.mock-servers definiert.
+Ähnlich wie in einer Docker-Compose-Datei vergibst du für jeden zu mockenden Service einen eindeutigen Key, zu dem du jeweils folgende Angaben tätigst:
+- hostname: Hostname des zu mockenden Services, z.B. `example.com`
+- stubs: Liste von Stubs für diesen Mock Server (siehe [Stub Definition]) als Pfad zu den Stub-Dateien im resources-Ordner, die angeben, auf welche Anfragen der Mock Server wie antworten soll
+
+Berücksichtige, dass für jede Subdomain ein eigener Mockserver definiert werden muss.
+
+Kommuniziert dein Microservice-System beispielsweise beispielsweise mit zwei externen Systemen, die über http://example.com und http://payment.example.com erreichbar sind, könnte die Mock-Server Definition in der me2e-config wie folgt aussehen:
+
+```yaml
+# me2e-config.yml
+environment:
+  docker-compose: docker-compose.yml
+  mock-servers:
+    example-service:
+      hostname: example.com
+      stubs:
+        - stubs/example-service/example_request_stub.json
+    payment-service:
+      hostname: payment.example.com
+      stubs:
+        - stubs/payment-service/payment_request_stub.json
+        - stubs/payment-service/payment_authorization_request_stub.json
+```
+
+##### Stub Definition
+Mit einem Stub gibst du für einen Mock Server an, auf welche Requests der Server wie (d.h. mit welchem Response-Code, -Body und -Headern) antworten soll.
+Beim Starten des Mock Servers werden diese Stubs für den angegebenen Hostnamen registriert, sodass der Server diejenige Antwort zurückgibt, dessen Request-Pattern der tatsächlichen Anfrage am nächsten ist.
+Passt die tatsächliche Anfrage zu keinem der registrierten Stubs, gibt der Mock Server eine Antwort mit Status 404 und Informationen zu ähnlichen, möglicherweise gemeinten, Stubs zurück.
+
+Je ein Stub wird in je einer separaten JSON-Datei definiert, das dem [Stub-Schema](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/json-schemas/stub_schema.json) entsprechen muss.
+To enable autocompletion and obtain descriptions for the fields of the me2e-config file, follow the [instructions to load the JSON schema into your IDE](#autocomplete).
+
+
+
+Technisch wird diese Simulation von einem HTTP-Server umgesetzt, der auf dem Standard-HTTP Port 80 und dem Standard-HTTPS Port 443 erreichbar ist
+
+
+- Mock-Server-Definition
+- Stub-Definition
+- DNS-Überschreibung
+- TLS-Konfiguration
+
+Note that when running the tests in a CI/CD pipeline, the host executing the tests is most likely not the same as the Docker host.
+
+To enable forwarding requests to third-party services to the corresponding Mock Server, you need to point the services' hostname to the host's IP address.
+For each microservice which is communication with the third-party service, add an [extra_hosts](https://docs.docker.com/compose/compose-file/compose-file-v3/#extra_hosts) entry to the Docker-Compose file.
+
+Example: To forward requests to `example.com` and `google.com` to the corresponding Mock Servers, set:
+```yaml
+    extra_hosts:
+      - "example.com:host-gateway"
+      - "google.com:host-gateway"
+```
+
+In case you are receiving 403 errors and your operating system is Windows, you may need to [disable the automatic proxy detection](https://support.rezstream.com/hc/en-us/articles/360025156853-Disable-Auto-Proxy-Settings-in-Windows-10) (see [GitHub Issue](https://github.com/docker/for-win/issues/13127)).
+
+#### Data Management
+- Initialen Zustand setzen
+- Zustand zurücksetzen
+
+### Defining Tests
+#### Injecting services
+
+#### Interacting with Containers
+
+#### Interacting with Databases
+
+##### Interacting with other Database Management Systems
+Die Interaktion mit den Datenbanken erfolgt über die [`DatabaseConnection`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.database.connection/-database-connection/index.html)
+
+In order to interact with a currently not supported database management system via the me2e interfaces, you need to implement the [`DatabaseConnection`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.database.connection/-database-connection/index.html) yourself. 
+
+#### Executing HTTP Requests and Verifying their Responses
+##### Executing HTTP Requests
+- Authentifizierung
+
+##### Verifying HTTP Responses
+- assertThat
+
+#### Mock-Server Verifikation
+
+### Maßnahmen gegen flaky Tests
+
+#### Assert Healthy
+
+#### Request-Retry
+
+#### State Reset
+
+### Test Report
+#### Contents
+- Was sind die Inhalte des Berichts?
+- Wo kommen die Daten her?
+
+#### Configuring the Report
+- hier auch: wie kann ich selber einen eigenen Generator schreiben?
+
+### Automatisierung CI/CD
+- evtl. auch: wie kann ich den Report veröffentlichen? Siehe https://gitlab.com/gitlab-org/gitlab/-/issues/23323
+
+TODO: Fast vs. Slow? (Can be done with JUnit-Tags, but what's the purpose for E2E-Tests? 
+All tests are slow and running them separately would mean that I need to start the environment twice..)
+
+me2e (Microservice End-to-End) is a library for writing end-to-end tests for microservice applications.
 
 ## Usage
 ### Import
@@ -566,17 +689,7 @@ TODO: How to set ME2E-Environment in Docker-Containers?
 - via Environment-Variables
 
 #### Mock Server Configuration
-To enable forwarding requests to third-party services to the corresponding Mock Server, you need to point the services' hostname to the host's IP address.
-For each microservice which is communication with the third-party service, add an [extra_hosts](https://docs.docker.com/compose/compose-file/compose-file-v3/#extra_hosts) entry to the Docker-Compose file.
 
-Example: To forward requests to `example.com` and `google.com` to the corresponding Mock Servers, set:
-```yaml
-    extra_hosts:
-      - "example.com:host-gateway"
-      - "google.com:host-gateway"
-```
-
-In case you are receiving 403 errors and your operating system is Windows, you may need to [disable the automatic proxy detection](https://support.rezstream.com/hc/en-us/articles/360025156853-Disable-Auto-Proxy-Settings-in-Windows-10) (see [GitHub Issue](https://github.com/docker/for-win/issues/13127)).
 
 ------------
 We recommend to not set the public port of the services, as this may lead to port conflicts.
