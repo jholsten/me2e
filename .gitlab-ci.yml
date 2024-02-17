@@ -27,8 +27,6 @@ build:
     - chmod +x ./gradlew
   script:
     - ./gradlew --build-cache assemble
-  only:
-    - tags
 
 # Builds and pushes Dockerfile on changes
 build-docker:
@@ -66,8 +64,6 @@ test:
     when: always
     reports:
       junit: build/test-results/test/**/TEST-*.xml
-  only:
-    - tags
 
 # Publishes package to GitLab Package Registry:
 publish-package:
@@ -99,3 +95,5 @@ pages:
   artifacts:
     paths:
       - public
+  only:
+    - tags
