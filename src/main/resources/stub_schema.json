@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Me2e definition of stubs",
-  "description": "Stub definition for the Me2e Library",
+  "description": "Stub definition for the Me2e Library.",
   "type": "object",
   "properties": {
     "name": {
@@ -46,7 +46,7 @@
         },
         "headers": {
           "type": "object",
-          "description": "Headers of the request as map of header name and string matcher",
+          "description": "Headers of the request as map of header name and string matcher.",
           "patternProperties": {
             ".+": {
               "$ref": "#/definitions/string-matcher"
@@ -55,7 +55,7 @@
         },
         "query-parameters": {
           "type": "object",
-          "description": "Query parameters of the request as map of query parameter name and string matcher for the values",
+          "description": "Query parameters of the request as map of query parameter name and string matcher for the values.",
           "patternProperties": {
             ".+": {
               "$ref": "#/definitions/string-matcher"
@@ -64,29 +64,25 @@
         },
         "body-patterns": {
           "type": "array",
-          "description": "Patterns to match the request body",
+          "description": "Patterns to match the request body.",
           "items": {
             "$ref": "#/definitions/string-matcher"
           }
         }
-      },
-      "required": [
-        "method",
-        "path"
-      ]
+      }
     },
     "response": {
       "$id": "#/definitions/response",
       "type": "object",
-      "description": "Definition of the response to be returned by the mocked web server",
+      "description": "Definition of the response to be returned by the mocked web server.",
       "properties": {
         "code": {
           "type": "integer",
-          "description": "HTTP status code to return"
+          "description": "HTTP status code to return."
         },
         "headers": {
           "type": "object",
-          "description": "Headers of the response",
+          "description": "Headers of the response.",
           "patternProperties": {
             ".+": {
               "type": "array",
@@ -175,6 +171,10 @@
         "equals": {
           "type": "string",
           "description": "Matches only if the string is exactly equal to the defined one."
+        },
+        "not-equals": {
+          "type": "string",
+          "description": "Matches only if the string is not exactly equal to the defined one."
         },
         "matches": {
           "type": "string",

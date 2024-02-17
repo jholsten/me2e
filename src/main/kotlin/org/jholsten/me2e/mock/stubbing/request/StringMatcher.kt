@@ -20,6 +20,7 @@ class StringMatcher internal constructor(
      * Matches only if the string is not exactly equal to the defined one.
      * A value of `null` indicates that there are no requirements to the inequality of the actual value.
      */
+    @JsonProperty("not-equals")
     val notEquals: String? = null,
 
     /**
