@@ -12,7 +12,7 @@
     ]
   },
   "response": {
-    "code": 200,
+    "status-code": 200,
     "body": {
       "json-content": {
         "id": 123,

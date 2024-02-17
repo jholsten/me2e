@@ -43,7 +43,7 @@ class MockServerIT {
                     queryParameters = mapOf("id" to StringMatcher(equals = "123"))
                 ),
                 response = MockServerStubResponse(
-                    code = 200,
+                    statusCode = 200,
                     body = MockServerStubResponseBody(
                         stringContent = "A Response",
                     ),
@@ -58,7 +58,7 @@ class MockServerIT {
                     path = StringMatcher(equals = "/"),
                 ),
                 response = MockServerStubResponse(
-                    code = 200,
+                    statusCode = 200,
                     body = MockServerStubResponseBody(
                         stringContent = "Some Response"
                     ),

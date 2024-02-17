@@ -76,7 +76,7 @@
       "type": "object",
       "description": "Definition of the response to be returned by the mocked web server.",
       "properties": {
-        "code": {
+        "status-code": {
           "type": "integer",
           "description": "HTTP status code to return."
         },
@@ -98,7 +98,7 @@
         }
       },
       "required": [
-        "code"
+        "status-code"
       ]
     },
     "response-body": {

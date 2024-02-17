@@ -48,7 +48,7 @@ class MockServerDeserializerIT {
                         bodyPatterns = listOf(StringMatcher(contains = "\"id\": 123")),
                     ),
                     response = MockServerStubResponse(
-                        code = 200,
+                        statusCode = 200,
                         body = MockServerStubResponseBody(
                             jsonContent = JsonNodeFactory.instance.objectNode()
                                 .put("id", 123)
@@ -89,7 +89,7 @@ class MockServerDeserializerIT {
                         path = StringMatcher(matches = "\\/account\\/(.*)\\/authorize\$"),
                     ),
                     response = MockServerStubResponse(
-                        code = 200,
+                        statusCode = 200,
                         body = MockServerStubResponseBody(
                             jsonContent = JsonNodeFactory.instance.arrayNode()
                                 .add(

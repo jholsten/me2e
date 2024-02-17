@@ -1,5 +1,7 @@
 package org.jholsten.me2e.mock.stubbing.response
 
+import com.fasterxml.jackson.annotation.JsonProperty
+
 /**
  * Definition of the response to be returned by a Mock Server.
  */
@@ -7,7 +9,8 @@ class MockServerStubResponse internal constructor(
     /**
      * HTTP status code to return.
      */
-    val code: Int,
+    @JsonProperty("status-code")
+    val statusCode: Int,
 
     /**
      * Headers of the response to return.

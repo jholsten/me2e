@@ -43,7 +43,7 @@ internal class ConfigValidatorTest {
                                             hostname = "example.com",
                                         ),
                                         response = MockServerStubResponse(
-                                            code = 200,
+                                            statusCode = 200,
                                             headers = mapOf("header1" to listOf("headerValue")),
                                         )
                                     )
@@ -118,14 +118,14 @@ internal class ConfigValidatorTest {
                                         request = MockServerStubRequestMatcher(
                                             hostname = "example.com",
                                         ),
-                                        response = MockServerStubResponse(code = 200)
+                                        response = MockServerStubResponse(statusCode = 200)
                                     ),
                                     MockServerStub(
                                         name = "request-stub",
                                         request = MockServerStubRequestMatcher(
                                             hostname = "example.com",
                                         ),
-                                        response = MockServerStubResponse(code = 200)
+                                        response = MockServerStubResponse(statusCode = 200)
                                     ),
                                 )
                             )

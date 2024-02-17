@@ -194,5 +194,6 @@ internal class StringMatcherTest {
         assertEquals("\\/account\\/(.*)\\/authorize$", result.matches)
 
         assertTrue(result.matches("/account/123/authorize"))
+        assertFalse(result.matches("/account/123/authorize-xyz"))
     }
 }

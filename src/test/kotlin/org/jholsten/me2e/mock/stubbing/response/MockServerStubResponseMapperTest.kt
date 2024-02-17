@@ -10,7 +10,7 @@ internal class MockServerStubResponseMapperTest {
     @Test
     fun `Mapping response without body to response definition should succeed`() {
         val stubResponse = MockServerStubResponse(
-            code = 200,
+            statusCode = 200,
             headers = mapOf("Content-Length" to listOf("0")),
         )
 
@@ -24,7 +24,7 @@ internal class MockServerStubResponseMapperTest {
     @Test
     fun `Mapping response with string body to response definition should succeed`() {
         val stubResponse = MockServerStubResponse(
-            code = 200,
+            statusCode = 200,
             headers = mapOf("Content-Type" to listOf("text/plain")),
             body = MockServerStubResponseBody(
                 stringContent = "ABC",
@@ -43,7 +43,7 @@ internal class MockServerStubResponseMapperTest {
     fun `Mapping response with json body to response definition should succeed`() {
         val responseBodyContent = parseJsonNode("{\"name\": \"value\"}")
         val stubResponse = MockServerStubResponse(
-            code = 200,
+            statusCode = 200,
             headers = mapOf("Content-Type" to listOf("application/json")),
             body = MockServerStubResponseBody(
                 jsonContent = responseBodyContent,
@@ -61,7 +61,7 @@ internal class MockServerStubResponseMapperTest {
     @Test
     fun `Mapping response with base64 body to response definition should succeed`() {
         val stubResponse = MockServerStubResponse(
-            code = 200,
+            statusCode = 200,
             headers = mapOf("Content-Type" to listOf("application/json")),
             body = MockServerStubResponseBody(
                 base64Content = "YWJj",

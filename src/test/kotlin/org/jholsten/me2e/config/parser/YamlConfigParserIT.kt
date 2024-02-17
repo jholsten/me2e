@@ -256,7 +256,7 @@ internal class YamlConfigParserIT {
                         bodyPatterns = listOf(StringMatcher(contains = "\"id\": 123")),
                     ),
                     response = MockServerStubResponse(
-                        code = 200,
+                        statusCode = 200,
                         body = MockServerStubResponseBody(
                             jsonContent = JsonNodeFactory.instance.objectNode()
                                 .put("id", 123)

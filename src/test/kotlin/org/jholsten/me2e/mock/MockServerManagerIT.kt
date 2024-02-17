@@ -39,7 +39,7 @@ internal class MockServerManagerIT {
                     bodyPatterns = listOf(StringMatcher(contains = "\"id\": 123")),
                 ),
                 response = MockServerStubResponse(
-                    code = 200,
+                    statusCode = 200,
                     body = MockServerStubResponseBody(
                         jsonContent = parseJsonNode(responseBodyContent),
                     ),
@@ -53,7 +53,7 @@ internal class MockServerManagerIT {
                     path = StringMatcher(equals = "/"),
                 ),
                 response = MockServerStubResponse(
-                    code = 200,
+                    statusCode = 200,
                     body = MockServerStubResponseBody(
                         stringContent = "Some Response"
                     ),
@@ -71,7 +71,7 @@ internal class MockServerManagerIT {
                     method = HttpMethod.GET,
                 ),
                 response = MockServerStubResponse(
-                    code = 200,
+                    statusCode = 200,
                     body = MockServerStubResponseBody(
                         stringContent = "Response from mocked Google API"
                     ),

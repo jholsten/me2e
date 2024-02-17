@@ -15,7 +15,7 @@ internal class MockServerStubResponseMapper private constructor() {
          */
         @JvmSynthetic
         fun toWireMockResponseDefinition(stubResponse: MockServerStubResponse): ResponseDefinitionBuilder {
-            val builder = aResponse().withStatus(stubResponse.code)
+            val builder = aResponse().withStatus(stubResponse.statusCode)
             for (header in stubResponse.headers) {
                 header.value.forEach { builder.withHeader(header.key, it) }
             }
