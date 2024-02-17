@@ -79,6 +79,7 @@ internal class ContainerTest {
             DockerContainerPort().withPrivatePort(12347).withPublicPort(null),
             DockerContainerPort().withPrivatePort(null).withPublicPort(8002),
         )
+        every { environment.hasHealthcheck(any()) } returns true
 
         container.initializeOnContainerStarted(dockerContainer, dockerContainerState, environment)
 
@@ -88,6 +89,7 @@ internal class ContainerTest {
             ContainerPort(12348, null),
         )
         RecursiveComparison.assertEquals(expected, container.ports)
+        assertTrue(container.hasHealthcheck)
     }
 
     @Test
