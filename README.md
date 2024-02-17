@@ -354,24 +354,111 @@ In the me2e library, we retrieve this external port from the container info so t
     </tr>
     <tr>
         <td>
-<pre>
-  delivery-service:
+
+```yaml
+delivery-service:
     # ...
     ports:
-      - 8082
-</pre>
-        </td>
-        <td>
-<pre>
-  delivery-service:
-    // ...
+      - 8082 # Docker will choose the port randomly
+```
+
+</td>
+<td>
+        
+```yaml
+delivery-service:
+    # ...
     ports:
-      - 8082:8082
-</pre>
-        </td>
-    </tr>
+      - 8082:8082 # Fixed port on the Docker host
+```
+
+</td>
+</tr>
 </table>
 
+##### Specific Configuration for Containers of type `MICROSERVICE`
+By default, the base URL used to access the REST API of a Microservice with the HTTP client consists of the Docker host and the first publicly accessible port of the container, e.g. `http://localhost:1234`.
+If you want to use a different URL for a Microservice container instead, you can overwrite it by using the label `org.jholsten.me2e.url` in the Docker-Compose file.
+This URL is then used as the base URL for the HTTP client for the Microservice container.
+
+##### Specific Configuration for Containers of type `DATABASE`
+In order to be able to interact with the database management system within a database container via the me2e interfaces, some additional information is required, which is also set via labels in the Docker-Compose file.
+- `org.jholsten.me2e.database.system`: Name of the database management system. Currently supported are `MY_SQL`, `POSTGRESQL`, `MARIA_DB` and `MONGO_DB`; the value `OTHER` is set for all other systems. For more information, see [here](#interacting-with-other-database-management-systems).
+- `org.jholsten.me2e.database.name`: Name of the database to be interacted with.
+- `org.jholsten.me2e.database.schema`: Name of the database schema to which the database belongs. You only need to set this label for PostgreSQL databases if the database is not part of the `public` schema. For the other SQL database management systems, the schema corresponds to the name of the database.
+- `org.jholsten.me2e.database.username`: Username to be used for logging into the database. It is only necessary to set this label if interaction with the database requires authentication.
+- `org.jholsten.me2e.database.password`: Password to be used for logging into the database. As with the username, it is only necessary to set this label if interaction with the database requires authentication.
+
+For a PostgreSQL database named `orderdb` as part of the default schema `public` with username `order-service` and password `123`, the configuration in the Docker-Compose file should be the following:
+
+```yaml
+# docker-compose.yml
+services:
+  db:
+    image: postgres:12
+    # ...
+    environment:
+      POSTGRES_DB: "orderdb"
+      POSTGRES_USER: "order-service"
+      POSTGRES_PASSWORD: "123"
+    labels:
+      "org.jholsten.me2e.container-type": "DATABASE"
+      "org.jholsten.me2e.database.system": "POSTGRESQL"
+      "org.jholsten.me2e.database.name": "orderdb"
+      "org.jholsten.me2e.database.username": "order-service"
+      "org.jholsten.me2e.database.password": "123"
+```
+
+You do not necessarily need to set the database name, username and password in the labels if it is one of the supported database management systems.
+As you usually have to pass this information to the database container as environment variables anyway, me2e reads these variables if they are not explicitly set via the labels.
+For this, the following mapping of the environment variables to the database properties is used:
+
+| Database Management System | Environment Variable corresponding to label `org.jholsten.me2e.database.name`<br/>(Database Name) | Environment Variable corresponding to label `org.jholsten.me2e.database.username`<br/>(Database Username) | Environment Variable corresponding to label `org.jholsten.me2e.database.password`<br/>(Database Password) |
+|----------------------------|---------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------|
+| `MY_SQL`                   | `MYSQL_DATABASE`                                                                                  | `MYSQL_USER`                                                                                              | `MYSQL_PASSWORD`                                                                                          |
+| `POSTGRESQL`               | `POSTGRES_DB`                                                                                     | `POSTGRES_USER`                                                                                           | `POSTGRES_PASSWORD`                                                                                       |
+| `MARIA_DB`                 | `MYSQL_DATABASE`                                                                                  | `MYSQL_USER`                                                                                              | `MYSQL_PASSWORD`                                                                                          |
+| `MONGO_DB`                 | `MONGO_INITDB_DATABASE`                                                                           | `MONGO_INITDB_ROOT_USERNAME`                                                                              | `MONGO_INITDB_ROOT_PASSWORD`                                                                              |
+
+This allows you to simplify the above example of the database container definition to:
+
+```yaml
+# docker-compose.yml
+services:
+  db:
+    image: postgres:12
+    # ...
+    environment:
+      POSTGRES_DB: "orderdb"
+      POSTGRES_USER: "order-service"
+      POSTGRES_PASSWORD: "123"
+    labels:
+      "org.jholsten.me2e.container-type": "DATABASE"
+      "org.jholsten.me2e.database.system": "POSTGRESQL"
+```
+
+In addition to the previously described basic database properties, you can apply further configurations via the labels, which are explained in more detail in the following sections (see [here](#data-management)).
+- `org.jholsten.me2e.database.reset.skip-tables`: If not explicitly deactivated in the me2e-config file via `settings.state-reset.clear-all-tables`, all tables of all databases are cleared after each test. With the label `org.jholsten.me2e.database.reset.skip-tables`, you can specify the names of the tables to be skipped when the database is cleared as a comma-separated list. This configuration is particularly useful, for example, if you use a migration tool such as [Flyway](https://flywaydb.org/) and want to retain the table containing the migration history for all tests.
+- `org.jholsten.me2e.database.init-script.$name`: With labels that correspond to this pattern, you can define database scripts that are to be executed when the database is started and after a reset. Each script requires a unique name (`$name`) and with the label's value, you can specify the path to the script to be executed, which must be located in the `resources` folder of your project.
+
+For instance, a PostgreSQL database for which the table `flyway_schema_history` is to be skipped when the database is cleared and for which the initialization script named `init_db`, which is located in the `resources` folder at path `database/init_orderdb.sql`, is to be configured in the Docker-Compose as follows:
+
+```yaml
+# docker-compose.yml
+services:
+  db:
+    image: postgres:12
+    # ...
+    environment:
+      POSTGRES_DB: "orderdb"
+      POSTGRES_USER: "order-service"
+      POSTGRES_PASSWORD: "123"
+    labels:
+      "org.jholsten.me2e.container-type": "DATABASE"
+      "org.jholsten.me2e.database.system": "POSTGRESQL"
+      "org.jholsten.me2e.database.init-script.init_db": "database/init_orderdb.sql"
+      "org.jholsten.me2e.database.reset.skip-tables": "flyway_schema_history"
+```
 
 
 ## Usage
