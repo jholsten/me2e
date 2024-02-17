@@ -79,7 +79,8 @@ dependencies {
 
 <details open>
     <summary><u>For <b>Kotlin</b> Projects:</u></summary>
-In case you are using Kotlin, you need to use the <a href="https://kotlinlang.org/docs/kapt.html">kapt compiler plugin</a> for integrating the library's annotation processor.
+    
+In case you are using Kotlin, you need to use the [kapt compiler plugin](https://kotlinlang.org/docs/kapt.html) for integrating the library's annotation processor.
     
 ```groovy
 // build.gradle
@@ -146,6 +147,18 @@ For the minimal configuration, first create a file named `me2e-config.yml` in th
 environment:
   docker-compose: docker-compose.yml
 ```
+
+<details id="autocomplete">
+    <summary><b>Recommendation:</b> Enable Autocompletion in your IDE</summary>
+    
+To enable autocompletion and obtain descriptions for the fields of the `me2e-config.yml` file as well as for the [stub definitions for the Mock Servers](#stub-definition), you may load the corresponding JSON schema into the IDE.
+You can find the JSON schemas for these files here:
+- me2e-config files: https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/json-schemas/config_schema.json
+- stub definition files: https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/json-schemas/stub_schema.json
+
+If you are using IntelliJ, you can simply just download the [jsonSchemas.xml](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/json-schemas/jsonSchemas.xml) file and place it in the ".idea" folder of your test project.
+After you have reloaded your project, IntelliJ will automatically link all files matching the pattern `me2e-config*.yml` to the config schema and all files matching `*stub.json` to the stub schema.
+</details>
 
 ### 5. Write your first End-to-End-Test
 Now that you have set everything up, you can write your first End-to-End-Test.
@@ -243,6 +256,8 @@ The schema is divided into two sections at the top level:
 - `settings`: Settings that affect the runtime execution of the tests, interactions with Docker and with the containers
 - `environment`: Definition of the test environment
 
+To enable autocompletion and obtain descriptions for the fields of the me2e-config file, follow the [instructions to load the JSON schema into your IDE](#autocomplete).
+
 When the test execuction is started, the file `me2e-config.yml` is loaded from the `resources` folder, parsed and then the test environment is started.
 To change the name of the config file to be searched for, you can annotate any class with the [`Me2eTestConfig`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e/-me2e-test-config/index.html) annotation anywhere in your project and set the `config` field to the name of your config file.
 
@@ -252,21 +267,6 @@ class AppTest {
 
 }
 ```
-
-#### Enabling Autocompletion in IntelliJ
-To enable autocompletion and obtain descriptions for the fields of the `me2e-config.yml` file, you may load the corresponding JSON schema into the IDE.
-To do this, go to `Settings` &rarr; `Languages & Frameworks` &rarr; `Schemas and DTDs` &rarr; `JSON Schema Mappings` in IntelliJ and add a new entry named `me2e-config` on the left-hand side.
-Then enter the following URL for the JSON schema of the me2e-config in the `Schema file or URL` field on the right-hand side:
-```
-https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/json-schemas/config_schema.json
-``` 
-
-Now add a new entry in the lower right area and enter `me2e-config*.yml` as the file path pattern.
-IntelliJ will then automatically link this schema to all files that correspond to this file name pattern.
-
-![Test Report Example](docs/intellij_config_schema_mapping.png)
-
-For more information on using custom JSON schemas in IntelliJ, take a look at the [IntelliJ Documentation](https://www.jetbrains.com/help/idea/json.html#ws_json_schema_add_custom).
 
 #### Configuring the Execution Settings
 In the `settings` section of the me2e-config file, you can configure the following settings:
