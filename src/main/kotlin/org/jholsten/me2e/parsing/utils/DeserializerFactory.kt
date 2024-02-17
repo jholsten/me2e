@@ -1,5 +1,6 @@
 package org.jholsten.me2e.parsing.utils
 
+import com.fasterxml.jackson.core.json.JsonReadFeature
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
@@ -18,6 +19,7 @@ internal class DeserializerFactory private constructor() {
         private val YAML_MAPPER: ObjectMapper = YAMLMapper()
             .registerModule(KotlinModule.Builder().build())
             .registerModule(JavaTimeModule())
+            .enable(JsonReadFeature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER.mappedFeature())
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
 
@@ -27,6 +29,7 @@ internal class DeserializerFactory private constructor() {
         private val OBJECT_MAPPER: ObjectMapper = ObjectMapper()
             .registerModule(KotlinModule.Builder().build())
             .registerModule(JavaTimeModule())
+            .enable(JsonReadFeature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER.mappedFeature())
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
 

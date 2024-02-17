@@ -1,5 +1,6 @@
 package org.jholsten.me2e.mock.stubbing.request
 
+import com.fasterxml.jackson.core.json.JsonReadFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import kotlin.test.*
@@ -48,7 +49,7 @@ internal class StringMatcherTest {
 
     @Test
     fun `String matcher with pattern should match`() {
-        val matcher = StringMatcher(matches = "^[A-Z0-9._-]{7}\$", ignoreCase = false)
+        val matcher = StringMatcher(matches = "^[A-Z0-9._-]{7}$", ignoreCase = false)
 
         assertTrue(matcher.matchesPattern("A.1-2_3"))
         assertFalse(matcher.matchesPattern("a.1-2_3"))
@@ -60,7 +61,7 @@ internal class StringMatcherTest {
 
     @Test
     fun `String matcher with pattern should match ignoring case`() {
-        val matcher = StringMatcher(matches = "^[A-Z0-9._-]{7}\$", ignoreCase = true)
+        val matcher = StringMatcher(matches = "^[A-Z0-9._-]{7}$", ignoreCase = true)
 
         assertTrue(matcher.matchesPattern("A.1-2_3"))
         assertTrue(matcher.matchesPattern("a.1-2_3"))
@@ -72,7 +73,7 @@ internal class StringMatcherTest {
 
     @Test
     fun `String matcher with pattern should not match`() {
-        val matcher = StringMatcher(notMatches = "^[A-Z]{3}\$", ignoreCase = false)
+        val matcher = StringMatcher(notMatches = "^[A-Z]{3}$", ignoreCase = false)
 
         assertTrue(matcher.matchesPattern("abc"))
         assertFalse(matcher.matchesPattern("ABC"))
@@ -84,7 +85,7 @@ internal class StringMatcherTest {
 
     @Test
     fun `String matcher with pattern should not match ignoring case`() {
-        val matcher = StringMatcher(notMatches = "^[A-Z]{3}\$", ignoreCase = true)
+        val matcher = StringMatcher(notMatches = "^[A-Z]{3}$", ignoreCase = true)
 
         assertFalse(matcher.matchesPattern("abc"))
         assertFalse(matcher.matchesPattern("ABC"))
@@ -142,8 +143,8 @@ internal class StringMatcherTest {
     fun `String matcher with multiple requirements should match`() {
         val matcher = StringMatcher(
             equals = "ABC",
-            matches = "^[A-Z]{3}\$",
-            notMatches = "^[A-Z]{4}\$",
+            matches = "^[A-Z]{3}$",
+            notMatches = "^[A-Z]{4}$",
             contains = "A",
             notContains = "Z",
             ignoreCase = false,
@@ -167,6 +168,7 @@ internal class StringMatcherTest {
         """.trimIndent()
 
         val mapper = ObjectMapper().registerModule(KotlinModule.Builder().build())
+            .enable(JsonReadFeature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER.mappedFeature())
         val result = mapper.readValue(value, StringMatcher::class.java)
 
         assertEquals("abc", result.equals)
@@ -175,5 +177,22 @@ internal class StringMatcherTest {
         assertEquals("ABC", result.contains)
         assertEquals("999", result.notContains)
         assertTrue(result.ignoreCase)
+    }
+
+    @Test
+    fun `Deserializing string matcher with regex should set correct properties`() {
+        val value = """
+            {
+                "matches": "\\/account\\/(.*)\\/authorize$"
+            }
+        """.trimIndent()
+
+        val mapper = ObjectMapper().registerModule(KotlinModule.Builder().build())
+            .enable(JsonReadFeature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER.mappedFeature())
+        val result = mapper.readValue(value, StringMatcher::class.java)
+
+        assertEquals("\\/account\\/(.*)\\/authorize$", result.matches)
+
+        assertTrue(result.matches("/account/123/authorize"))
     }
 }

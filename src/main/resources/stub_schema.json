@@ -129,8 +129,7 @@
               "json-content",
               "base64-content"
             ]
-          },
-          "errorMessage": "Only of the specified contents can be set."
+          }
         },
         {
           "required": [
@@ -141,8 +140,7 @@
               "string-content",
               "base64-content"
             ]
-          },
-          "errorMessage": "Only of the specified contents can be set."
+          }
         },
         {
           "required": [
@@ -153,8 +151,7 @@
               "string-content",
               "json-content"
             ]
-          },
-          "errorMessage": "Only of the specified contents can be set."
+          }
         }
       ]
     },
@@ -178,11 +175,11 @@
         },
         "matches": {
           "type": "string",
-          "description": "Matches if the string conforms to the defined regex pattern."
+          "description": "Matches if the string conforms to the defined regex pattern. Note that you need to escape special characters with double backslashes, e.g. `\\/account\\/(.*)\\/authorize`."
         },
         "not-matches": {
           "type": "string",
-          "description": "Matches if the string does not conform to the defined regex pattern."
+          "description": "Matches if the string does not conform to the defined regex pattern. Note that you need to escape special characters with double backslashes, e.g. `\\/account\\/(.*)\\/authorize`."
         },
         "contains": {
           "type": "string",
