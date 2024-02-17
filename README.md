@@ -110,7 +110,9 @@ services:
       "org.jholsten.me2e.container-type": "MICROSERVICE"
 ```
 
-In me2e, we distinguish between <span id="container-types">3 different container types</span>:
+In me2e, we distinguish between 3 different container types:
+
+<a id="container-types"></a>
 
 | Container Type | Description                                                                                                                                                                                                                                                                                              | Represented by Class                                                                                                                                                          |
 |:---------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -148,9 +150,7 @@ environment:
   docker-compose: docker-compose.yml
 ```
 
-<details id="autocomplete">
-    <summary><b>Recommendation:</b> Enable Autocompletion in your IDE</summary>
-    
+#### Recommendation: Enable Autocompletion in your IDE
 To enable autocompletion and obtain descriptions for the fields of the `me2e-config.yml` file as well as for the [stub definitions for the Mock Servers](#stub-definition), you may load the corresponding JSON schema into the IDE.
 You can find the JSON schemas for these files here:
 - me2e-config files: https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/json-schemas/config_schema.json
@@ -158,7 +158,7 @@ You can find the JSON schemas for these files here:
 
 If you are using IntelliJ, you can simply just download the [jsonSchemas.xml](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/json-schemas/jsonSchemas.xml) file and place it in the ".idea" folder of your test project.
 After you have reloaded your project, IntelliJ will automatically link all files matching the pattern `me2e-config*.yml` to the config schema and all files matching `*stub.json` to the stub schema.
-</details>
+
 
 ### 5. Write your first End-to-End-Test
 Now that you have set everything up, you can write your first End-to-End-Test.
@@ -256,7 +256,7 @@ The schema is divided into two sections at the top level:
 - `settings`: Settings that affect the runtime execution of the tests, interactions with Docker and with the containers
 - `environment`: Definition of the test environment
 
-To enable autocompletion and obtain descriptions for the fields of the me2e-config file, follow the [instructions to load the JSON schema into your IDE](#autocomplete).
+To enable autocompletion and obtain descriptions for the fields of the me2e-config file, follow the [instructions to load the JSON schema into your IDE](#recommendation-enable-autocompletion-in-your-ide).
 
 When the test execuction is started, the file `me2e-config.yml` is loaded from the `resources` folder, parsed and then the test environment is started.
 To change the name of the config file to be searched for, you can annotate any class with the [`Me2eTestConfig`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e/-me2e-test-config/index.html) annotation anywhere in your project and set the `config` field to the name of your config file.
@@ -461,31 +461,33 @@ services:
 ```
 
 #### Mock Servers: Simulating external services
-Wenn dein Microservice System mit irgendwelchen Systemen von Drittanbietern kommuniziert, solltest du das Verhalten dieser externen Services für die End-to-End-Tests simulieren, d.h. mocken.
-Dadurch gelingt dir einerseits eine höhere Zuverlässigkeit der Tests, da diese nun nicht mehr von der Verfügbarkeit und Funktionalität der externen Systeme abhängen, und andererseits wird so auch erreicht, dass nicht bei jedem Testlauf das tatsächliche Verhalten bei dem externen System ausgelöst wird.
-Sendet beispielsweise ein Onlineshop-System im Rahmen der Abwicklung eines Auftrags Anfragen an einen Paketdienstleister, sollten die Pakete bei der Ausführung eines automatisierten Tests selbstverständlich nicht wirklich verschickt werden.
+If your Microservice System communicates with any third-party systems, you should simulate, i.e. mock, the behavior of these external services for the End-to-End-Tests.
+Not only will this make the tests more reliable, as they no longer depend on the availability and functionality of the external systems, but it will also ensure that the actual behavior of the external system is not triggered with every test run.
+For example, if an online shop system sends requests to a parcel service provider when processing an order, the parcels should of course not actually be sent when an automated test is executed.
 
-Um diese externen Systeme möglichst realistisch zu simulieren, bietet me2e für deren Abbildung Mock-Server an, die als Teil der Testumgebung vor der Ausführung der Tests gestartet werden.
-Jegliche Anfrage an einen externen Dienst wird dann nicht mehr von dem realen Dienst, sondern von dem Mock-Server entgegengenommen, der eine vordefinierte Antwort zurückgibt.
-Für diese vordefinierten Antworten sind im Vorfeld Regeln zu hinterlegen, die festlegen, unter welchen Bedingungen welche Antwort zurückgegeben wird.
-Diese Kombination aus einem Request-Pattern und einer vordefinierten Antwort wird im me2e-Kontext als "**Stub**" bezeichnet.
+In order to simulate these external systems as realistically as possible, me2e offers Mock Servers for their representation, which are started as part of the test environment before the tests are executed.
+Any request to an external service is then no longer received by the actual service, but by the Mock Server, which returns a predefined response.
+For these predefined responses, rules must be defined in advance that determine under which conditions which response is returned.
+Such a combination of a request pattern and a predefined response is referred to as a "**stub**" in the me2e context.
 
-Die Definition eines Mock-Servers, der über das HTTP-Protokoll angesprochen wird, erfolgt in me2e in 3 Schritten:
-1. Mock-Server mit dem Hostnamen des externen Dienstes, der simuliert werden soll, in der me2e-config Datei definieren
-2. Stubs für die Anfragen an den externen Dienst definieren.
-3. DNS-Eintrag für den externen Dienst auf die IP-Adresse des Mock-Servers zeigen lassen
+The definition of a Mock Server, which is addressed using the HTTP protocol, is done in 3 steps:
+1. Define the Mock Server with the hostname of the external service to be simulated in the me2e-config file
+2. Define stubs for the requests to the external service
+3. Point the DNS entry for the external service to the IP address of the Mock Server
 
-Erfolgt die Kommunikation via HTTP over TLS (a.k.a. HTTPS), sind zusätzliche Konfigurationen vorzunehmen, die hier beschrieben werden.
+If communication takes place via HTTP over TLS (a.k.a HTTPS), additional configurations are necessary, which are described [here](#tls-configuration).
 
 ##### Mock Server Definition
-Die Mock Server werden in der me2e-config Datei im Abschnitt environment.mock-servers definiert.
-Ähnlich wie in einer Docker-Compose-Datei vergibst du für jeden zu mockenden Service einen eindeutigen Key, zu dem du jeweils folgende Angaben tätigst:
-- hostname: Hostname des zu mockenden Services, z.B. `example.com`
-- stubs: Liste von Stubs für diesen Mock Server (siehe [Stub Definition]) als Pfad zu den Stub-Dateien im resources-Ordner, die angeben, auf welche Anfragen der Mock Server wie antworten soll
+The Mock Servers are defined in the me2e-config file in the `environment.mock-servers` section.
+Similar to a Docker-Compose file, you need to assign a unique key for each service to be mocked, for which you need to enter the following information:
+- `hostname`: Hostname of the service to be mocked, e.g. `example.com`
+- `stubs`: List of stubs for this Mock Server (see [stub definition](#stub-definition)) each as the path to the stub file in the `resources` folder
 
-Berücksichtige, dass für jede Subdomain ein eigener Mockserver definiert werden muss.
+Please note that a separate Mock Server must be defined for each domain and each subdomain.
 
-Kommuniziert dein Microservice-System beispielsweise beispielsweise mit zwei externen Systemen, die über http://example.com und http://payment.example.com erreichbar sind, könnte die Mock-Server Definition in der me2e-config wie folgt aussehen:
+<u>Example</u>
+
+If your Microservice System communicates with two external systems that are accessible via http://example.com and http//payment.example.com, the Mock Server definition in the me2e-config could look like this:
 
 ```yaml
 # me2e-config.yml
@@ -504,20 +506,376 @@ environment:
 ```
 
 ##### Stub Definition
-Mit einem Stub gibst du für einen Mock Server an, auf welche Requests der Server wie (d.h. mit welchem Response-Code, -Body und -Headern) antworten soll.
-Beim Starten des Mock Servers werden diese Stubs für den angegebenen Hostnamen registriert, sodass der Server diejenige Antwort zurückgibt, dessen Request-Pattern der tatsächlichen Anfrage am nächsten ist.
-Passt die tatsächliche Anfrage zu keinem der registrierten Stubs, gibt der Mock Server eine Antwort mit Status 404 und Informationen zu ähnlichen, möglicherweise gemeinten, Stubs zurück.
+With one stub, you specify for a Mock Server which requests the server should respond to and how (i.e. with which response code, body and headers).
+When the Mock Server is started, these stubs are registered for the specified hostname so that the server returns the response whose request pattern is closest to the actual request.
+If the actual request does not match any of the registered stubs, the Mock Server returns a response with status code 404 and information on similar, possibly targeted stubs.
 
-Je ein Stub wird in je einer separaten JSON-Datei definiert, das dem [Stub-Schema](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/json-schemas/stub_schema.json) entsprechen muss.
-To enable autocompletion and obtain descriptions for the fields of the me2e-config file, follow the [instructions to load the JSON schema into your IDE](#autocomplete).
+Each stub is defined in a separate JSON file, which must correspond to the [stub schema](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/json-schemas/stub_schema.json).
+To enable autocompletion and obtain descriptions for the fields of the stub definition file, follow the [instructions to load the JSON schema into your IDE](#recommendation-enable-autocompletion-in-your-ide).
+
+A stub definition consists of the following primary parts:
+- `request`: Definition of the request to which the Mock Server should respond.
+- `response`: Definition of the response that the Mock Server should return for a request that matches the specified `request`.
+
+In addition, you can optionally define a  name for this stub under the `name` key, which you can later use to [verify the requests to the Mock Server](#mock-server-verification).
+Note that the name must be unique for each Mock Server.
+
+<u>Example</u>
+
+A stub definition for the payment request mentioned in the example above may look like this: 
+
+```json
+// stubs/payment-service/payment_request_stub.json
+{
+  "request": {
+    "method": "POST",
+    "path": {
+      "equals": "/payment"
+    }
+  },
+  "response": {
+    "status-code": 201,
+    "body": {
+      "json-content": {
+        "payment_id": "8f6a1905-ebc6-424b-a2b3-37b7612b6a5b"
+      }
+    },
+    "headers": {
+      "Content-Type": [
+        "application/json"
+      ]
+    }
+  }
+}
+```
+
+With this stub, the Mock Server responds to every `POST` request to the path `/payment` with status code 201, content type `application/json` and the following response body:
+```json
+{
+  "payment_id": "8f6a1905-ebc6-424b-a2b3-37b7612b6a5b"
+}
+```
+
+The components of the stubs are explained in more detail below.
+
+###### Request
+With the `request`, you specify the properties of the requests for which the stub should be applied.
+You can specify the following properties:
+- `method`: HTTP method of the request.
+- `path`: URL path of the request as a [string matcher](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.mock.stubbing.request/-string-matcher/index.html). Matches if the actual path of the request matches the specified string matcher.
+- `query-parameters`: Query parameters of the request as a map of query parameter names and string matchers for the values. Only matches if the actual query parameters conform to all specifications (i.e. each query parameter name is included and the corresponding query parameter values conform to the specified string matcher).
+- `headers`: Headers of the request as a map of header names and string matcher for the values. Only matches if the actual request headers conform to all specifications (i.e. each header name is included and the corresponding header values conform to the specified string matcher).
+- `body-patterns`: List of string matchers for the request body. Only matches if the actual request body matches all of the specified string matchers.
+
+All fields are optional and for each property that is not set in the request definition, the stub matches any value.
+For matching most of the properties, a [string matcher](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.mock.stubbing.request/-string-matcher/index.html) is used to compare string values.
+You can specify comparisons of different types:
+
+<table>
+    <tr>
+        <th>Field</th>
+        <th>Description</th>
+        <th>Example Definition</th>
+        <th>Examples of actual Values</th>
+    </tr>
+    <tr>
+        <td><code>equals</code></td>
+        <td>Matches if the actual string is exactly the same as the specified string.</td>
+        <td>
+        
+```json
+{
+  "equals": "ABC"
+}
+```
+           
+</td>
+    <td>
+    
+&#x2705; `"ABC"`
+
+&#x274C; `"XYZ"`
+        
+</td>
+    </tr>
+    <tr>
+        <td><code>not-equals</code></td>
+        <td>Matches if the actual string is not exactly the same as the specified string.</td>
+        <td>
+        
+```json
+{
+  "not-equals": "ABC"
+}
+```
+           
+</td>
+    <td>
+    
+&#x2705; `"XYZ"`
+
+&#x274C; `"ABC"`
+        
+</td>
+    </tr>
+    <tr>
+        <td><code>matches</code></td>
+        <td>Matches if the actual string matches the specified regex.</td>
+        <td>
+        
+```json
+{
+  "matches": "^[A-Z]{3}$"
+}
+```
+           
+</td>
+    <td>
+    
+&#x2705; `"ABC"`
+
+&#x274C; `"123"`
+        
+</td>
+    </tr>
+    <tr>
+        <td><code>not-matches</code></td>
+        <td>Matches if the actual string does not match the specified regex.</td>
+        <td>
+        
+```json
+{
+  "not-matches": "^[A-Z]{3}$"
+}
+```
+           
+</td>
+    <td>
+    
+&#x2705; `"123"`
+
+&#x274C; `"ABC"`
+        
+</td>
+    </tr>
+    <tr>
+        <td><code>contains</code></td>
+        <td>Matches if the actual string contains the specified string.</td>
+        <td>
+        
+```json
+{
+  "contains": "A"
+}
+```
+           
+</td>
+    <td>
+    
+&#x2705; `"ABC"`
+
+&#x274C; `"XYZ"`
+        
+</td>
+    </tr>
+    <tr>
+        <td><code>not-contains</code></td>
+        <td>Matches if the actual string does not contain the specified string.</td>
+        <td>
+        
+```json
+{
+  "not-contains": "A"
+}
+```
+           
+</td>
+    <td>
+    
+&#x2705; `"XYZ"`
+
+&#x274C; `"ABC"`
+        
+</td>
+    </tr>
+    <tr>
+        <td><code>ignore-case</code></td>
+        <td>Switches off the case sensitivity for the string comparisons (only useful in combination with the other fields).</td>
+        <td>
+        
+```json
+{
+  "equals": "ABC",
+  "ignore-case": true
+}
+```
+           
+</td>
+    <td>
+    
+&#x2705; `"abc"`
+
+&#x274C; `"XYZ"`
+        
+</td>
+    </tr>
+</table>
+
+<br/>
 
 
+<u>Examples</u>
+<table>
+    <tr>
+        <th>Request Definition</th>
+        <th>Example of a Request matching the Stub</th>
+    </tr>
+    <tr>
+        <td>
+
+```json
+"request": {
+    "method": "POST",
+    "path": {
+      "equals": "/payment"
+    }
+}
+```
+</td>
+        <td>
+
+```
+POST /payment HTTP/1.1
+Host: payment.example.com
+Content-Type: application/json
+Content-Length: 19
+
+{"amount": "12.43"}
+```
+</td>
+    </tr>
+    <tr>
+        <td>
+
+```json
+"request": {
+    "method": "PUT",
+    "path": {
+      "matches": "\\/account\\/(.*)\\/authorize$",
+      "contains": "ABC",
+      "not-contains": "123",
+      "ignore-case": true
+    },
+    "query-parameters": {
+      "client": {
+        "equals": "some-client"
+      }
+    },
+    "body-patterns": [
+      {
+        "contains": "user123"
+      },
+      {
+        "contains": "12.43"
+      }
+    ]
+}
+```
+</td>
+        <td>
+
+```
+PUT /account/abcxyz/authorize HTTP/1.1
+Host: payment.example.com
+Content-Type: application/json
+Content-Length: 47
+
+{"account-id": "user123abc", "amount": "12.43"}
+```
+</td>
+    </tr>
+</table>
+
+###### Response
+With the response of a stub, you specify which response the Mock Server should return for this stub.
+You can specify the following properties of the response:
+- `status-code`: HTTP status code of the response
+- `headers` (*optional*): HTTP headers of the response as a map of header name and list of values as strings
+- `body` (*optional*): HTTP response body. You can specify the content of the body either as a string (via `string-content`), JSON array or object (via `json-content`) or as Base64 (via `base64-content`).
+
+<u>Examples</u>
+<table>
+    <tr>
+        <th>Response Definition</th>
+        <th>Actual HTTP Response</th>
+    </tr>
+    <tr>
+        <td>
+
+```json
+"response": {
+  "status-code": 201,
+  "body": {
+    "string-content": "Created"
+  },
+  "headers": {
+    "Content-Type": [
+      "text/plain"
+    ]
+  }
+}
+```
+</td>
+        <td>
+
+```
+HTTP/1.1 201
+Content-Type: text/plain
+Content-Length: 9
+
+Created
+```
+</td>
+    </tr>
+    <tr>
+        <td>
+
+```json
+"response": {
+  "status-code": 200,
+  "body": {
+    "json-content": {
+      "authorized": true,
+      "transaction_id": "8f6a1905-ebc6-424b-a2b3-37b7612b6a5b"
+    }
+  },
+  "headers": {
+    "Content-Type": [
+      "application/json"
+    ]
+  }
+}
+```
+</td>
+        <td>
+
+```
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 78
+
+{"authorized": true, "transaction_id": "8f6a1905-ebc6-424b-a2b3-37b7612b6a5b"}
+```
+</td>
+    </tr>
+</table>
+
+##### DNS Configuration
 
 Technisch wird diese Simulation von einem HTTP-Server umgesetzt, der auf dem Standard-HTTP Port 80 und dem Standard-HTTPS Port 443 erreichbar ist
 
+##### TLS Configuration
 
-- Mock-Server-Definition
-- Stub-Definition
 - DNS-Überschreibung
 - TLS-Konfiguration
 
@@ -558,7 +916,7 @@ In order to interact with a currently not supported database management system v
 ##### Verifying HTTP Responses
 - assertThat
 
-#### Mock-Server Verifikation
+#### Mock Server Verification
 
 ### Maßnahmen gegen flaky Tests
 
