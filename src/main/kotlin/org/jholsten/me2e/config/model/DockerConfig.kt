@@ -62,12 +62,12 @@ data class DockerConfig internal constructor(
      */
     enum class PullPolicy {
         /**
-         * Only pull missing Docker images.
+         * Instructs Docker to only pull missing Docker images.
          */
         MISSING,
 
         /**
-         * Always pull the latest version of all Docker images.
+         * Instructs Docker to always pull the latest version of all Docker images.
          */
         ALWAYS,
     }
