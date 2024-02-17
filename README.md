@@ -36,7 +36,7 @@ cd e2e
 - Execute the [Gradle `init`](https://docs.gradle.org/current/userguide/build_init_plugin.html) task.
 
 <details>
-    <summary><u>For <b>Java</b> Projects:</u></summary>
+    <summary><ins>For <b>Java</b> Projects:</ins></summary>
     
  ```shell
  gradle init \
@@ -49,7 +49,7 @@ cd e2e
 </details>
 
 <details open>
-    <summary><u>For <b>Kotlin</b> Projects:</u></summary>
+    <summary><ins>For <b>Kotlin</b> Projects:</ins></summary>
     
 ```shell
 gradle init \
@@ -65,7 +65,7 @@ gradle init \
 Add the me2e library as a test dependency to your project.
 
 <details>
-    <summary><u>For <b>Java</b> Projects:</u></summary>
+    <summary><ins>For <b>Java</b> Projects:</ins></summary>
     
  ```groovy
 // build.gradle
@@ -78,7 +78,7 @@ dependencies {
 </details>
 
 <details open>
-    <summary><u>For <b>Kotlin</b> Projects:</u></summary>
+    <summary><ins>For <b>Kotlin</b> Projects:</ins></summary>
     
 In case you are using Kotlin, you need to use the [kapt compiler plugin](https://kotlinlang.org/docs/kapt.html) for integrating the library's annotation processor.
     
@@ -112,7 +112,7 @@ services:
 
 In me2e, we distinguish between 3 different container types:
 
-<a id="container-types"></a>
+<a name="container-types"></a>
 
 | Container Type | Description                                                                                                                                                                                                                                                                                              | Represented by Class                                                                                                                                                          |
 |:---------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -485,7 +485,7 @@ Similar to a Docker-Compose file, you need to assign a unique key for each servi
 
 Please note that a separate Mock Server must be defined for each domain and each subdomain.
 
-<u>Example</u>
+<ins>Example</ins>
 
 If your Microservice System communicates with two external systems that are accessible via http://example.com and http//payment.example.com, the Mock Server definition in the me2e-config could look like this:
 
@@ -520,7 +520,7 @@ A stub definition consists of the following primary parts:
 In addition, you can optionally define a  name for this stub under the `name` key, which you can later use to [verify the requests to the Mock Server](#mock-server-verification).
 Note that the name must be unique for each Mock Server.
 
-<u>Example</u>
+<ins>Example</ins>
 
 A stub definition for the payment request mentioned in the example above may look like this: 
 
@@ -724,7 +724,7 @@ You can specify comparisons of different types:
 <br/>
 
 
-<u>Examples</u>
+<ins>Examples</ins>
 <table>
     <tr>
         <th>Request Definition</th>
@@ -803,7 +803,7 @@ You can specify the following properties of the response:
 - `headers` (*optional*): HTTP headers of the response as a map of header name and list of values as strings
 - `body` (*optional*): HTTP response body. You can specify the content of the body either as a string (via `string-content`), JSON array or object (via `json-content`) or as Base64 (via `base64-content`).
 
-<u>Examples</u>
+<ins>Examples</ins>
 <table>
     <tr>
         <th>Response Definition</th>
