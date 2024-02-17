@@ -15,6 +15,9 @@ enum class DatabaseManagementSystem(
      */
     val isSQL: Boolean,
 ) {
+    /**
+     * MySQL Database Management system.
+     */
     MY_SQL(
         EnvironmentKeys(
             databaseName = "MYSQL_DATABASE",
@@ -23,6 +26,10 @@ enum class DatabaseManagementSystem(
         ),
         isSQL = true,
     ),
+
+    /**
+     * PostgreSQL Database Management system.
+     */
     POSTGRESQL(
         EnvironmentKeys(
             databaseName = "POSTGRES_DB",
@@ -31,6 +38,10 @@ enum class DatabaseManagementSystem(
         ),
         isSQL = true,
     ),
+
+    /**
+     * MariaDB Database Management system.
+     */
     MARIA_DB(
         EnvironmentKeys(
             databaseName = "MYSQL_DATABASE",
@@ -39,6 +50,10 @@ enum class DatabaseManagementSystem(
         ),
         isSQL = true,
     ),
+
+    /**
+     * MongoDB Database Management system.
+     */
     MONGO_DB(
         EnvironmentKeys(
             databaseName = "MONGO_INITDB_DATABASE",
@@ -47,6 +62,10 @@ enum class DatabaseManagementSystem(
         ),
         isSQL = false,
     ),
+
+    /**
+     * Any other Database Management System.
+     */
     OTHER(EnvironmentKeys(), isSQL = false);
 
     /**

@@ -195,7 +195,7 @@ internal class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironm
         }
 
         val environment = environmentNode?.fields()?.asSequence()?.associate { (key, node) -> key to node.asText() } ?: mapOf()
-        val system = labels[DATABASE_SYSTEM_KEY]?.let { DatabaseManagementSystem.valueOf(it) } ?: DatabaseManagementSystem.OTHER
+        val system = labels.getDatabaseManagementSystem()
         val schema = labels[DATABASE_SCHEMA_KEY]
         var database = labels[DATABASE_NAME_KEY]
         var username = labels[DATABASE_USERNAME_KEY]
@@ -295,6 +295,19 @@ internal class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironm
             }
         }
         serviceNode.replace(key, mapper.valueToTree(result))
+    }
+
+    /**
+     * Reads the database management system from the given map of labels.
+     * If system is not specified or if it is not part of the [DatabaseManagementSystem] enum values, [DatabaseManagementSystem.OTHER]
+     * is returned. Otherwise, the value is parsed to the corresponding [DatabaseManagementSystem].
+     */
+    private fun Map<String, String?>.getDatabaseManagementSystem(): DatabaseManagementSystem {
+        val entry = this[DATABASE_SYSTEM_KEY]
+        if (entry == null || entry !in DatabaseManagementSystem.values().map { it.name }) {
+            return DatabaseManagementSystem.OTHER
+        }
+        return DatabaseManagementSystem.valueOf(entry)
     }
 
     /**

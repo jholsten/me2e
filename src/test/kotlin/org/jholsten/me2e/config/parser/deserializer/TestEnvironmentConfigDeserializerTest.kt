@@ -529,6 +529,38 @@ class TestEnvironmentConfigDeserializerTest {
     }
 
     @Test
+    fun `Deserializing database properties without labels should succeed for invalid system name`() {
+        val dockerComposeContents = """
+            services:
+                database:
+                    image: unknown-db:latest
+                    labels:
+                      - "org.jholsten.me2e.container-type=DATABASE"
+                      - "org.jholsten.me2e.database.system=ANOTHER_SYSTEM"
+        """.trimIndent()
+        mockReadingDockerCompose(dockerComposeContents)
+        mockDockerComposeValidator(shouldThrow = false)
+
+        val parser = prepareParser(contents)
+        val config = TestEnvironmentConfigDeserializer().deserialize(parser, mockedDeserializationContext)
+
+        assertKeysAsExpected(listOf("database"), config.containers)
+
+        val expectedDatabase = expectedDatabase()
+            .put("image", "unknown-db:latest")
+            .set<ObjectNode>(
+                "labels", JsonNodeFactory.instance.objectNode()
+                    .put("org.jholsten.me2e.container-type", "DATABASE")
+                    .put("org.jholsten.me2e.database.system", "ANOTHER_SYSTEM")
+            )
+            .put("pullPolicy", "MISSING")
+            .put("system", "OTHER")
+        expectedDatabase.remove("environment")
+
+        verify { mockedMapper.treeToValue(expectedDatabase, Container::class.java) }
+    }
+
+    @Test
     fun `Deserializing environment config with invalid Docker-Compose should fail`() {
         val dockerComposeContents = "something: else"
         mockReadingDockerCompose(dockerComposeContents)
