@@ -43,6 +43,8 @@ build-docker:
   rules:
     - changes:
         - Dockerfile
+  only:
+    - tags
 
 # Runs JUnit tests inside Docker container (required to have access to Docker and Docker-Compose)
 test:
@@ -64,6 +66,8 @@ test:
     when: always
     reports:
       junit: build/test-results/test/**/TEST-*.xml
+  only:
+    - tags
 
 # Publishes package to GitLab Package Registry:
 publish-package:
@@ -91,8 +95,7 @@ pages:
     - mkdir -p public/json-schemas
     - cp -p src/main/resources/config_schema.json public/json-schemas/config_schema.json
     - cp -p src/main/resources/stub_schema.json public/json-schemas/stub_schema.json
+    - cp -p src/main/resources/jsonSchemas.xml public/json-schemas/jsonSchemas.xml
   artifacts:
     paths:
       - public
-  only:
-    - tags
