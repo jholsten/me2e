@@ -497,7 +497,7 @@ class TestEnvironmentConfigDeserializerTest {
     }
 
     @Test
-    fun `Deserializing database properties without labels should succeed for unknown system`() {
+    fun `Deserializing database properties should succeed for unknown system`() {
         val dockerComposeContents = """
             services:
                 database:
@@ -529,7 +529,7 @@ class TestEnvironmentConfigDeserializerTest {
     }
 
     @Test
-    fun `Deserializing database properties without labels should succeed for invalid system name`() {
+    fun `Deserializing database properties should succeed for invalid system name`() {
         val dockerComposeContents = """
             services:
                 database:
@@ -555,6 +555,41 @@ class TestEnvironmentConfigDeserializerTest {
             )
             .put("pullPolicy", "MISSING")
             .put("system", "OTHER")
+        expectedDatabase.remove("environment")
+
+        verify { mockedMapper.treeToValue(expectedDatabase, Container::class.java) }
+    }
+
+    @Test
+    fun `Deserializing database properties without labels and without variables should succeed`() {
+        val dockerComposeContents = """
+            services:
+                database:
+                    image: postgres:12
+                    labels:
+                      - "org.jholsten.me2e.container-type=DATABASE"
+                      - "org.jholsten.me2e.database.system=POSTGRESQL"
+        """.trimIndent()
+        mockReadingDockerCompose(dockerComposeContents)
+        mockDockerComposeValidator(shouldThrow = false)
+
+        val parser = prepareParser(contents)
+        val config = TestEnvironmentConfigDeserializer().deserialize(parser, mockedDeserializationContext)
+
+        assertKeysAsExpected(listOf("database"), config.containers)
+
+        val expectedDatabase = expectedDatabase()
+            .set<ObjectNode>(
+                "labels", JsonNodeFactory.instance.objectNode()
+                    .put("org.jholsten.me2e.container-type", "DATABASE")
+                    .put("org.jholsten.me2e.database.system", "POSTGRESQL")
+            )
+            .put("pullPolicy", "MISSING")
+            .put("system", "POSTGRESQL")
+            .put("schema", null as String?)
+            .put("database", null as String?)
+            .put("username", null as String?)
+            .put("password", null as String?)
         expectedDatabase.remove("environment")
 
         verify { mockedMapper.treeToValue(expectedDatabase, Container::class.java) }
