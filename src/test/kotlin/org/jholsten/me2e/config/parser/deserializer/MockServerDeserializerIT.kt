@@ -67,6 +67,50 @@ class MockServerDeserializerIT {
         RecursiveComparison.assertEquals(expected, mockServer)
     }
 
+    @Test
+    fun `Deserializing Mock Server with list json-content should succeed`() {
+        val contents = """
+            name: mock-server
+            hostname: example.com
+            stubs:
+                - request_list_stub.json
+        """.trimIndent()
+        val mockServer = yamlMapper.readValue(contents, MockServer::class.java)
+
+        val expected = MockServer(
+            name = "mock-server",
+            hostname = "example.com",
+            stubs = listOf(
+                MockServerStub(
+                    name = "request-stub",
+                    request = MockServerStubRequestMatcher(
+                        hostname = "example.com",
+                        method = HttpMethod.POST,
+                        path = StringMatcher(equals = "/search"),
+                    ),
+                    response = MockServerStubResponse(
+                        code = 200,
+                        body = MockServerStubResponseBody(
+                            jsonContent = JsonNodeFactory.instance.arrayNode()
+                                .add(
+                                    JsonNodeFactory.instance.objectNode()
+                                        .put("id", 123)
+                                        .set<ObjectNode>(
+                                            "items", JsonNodeFactory.instance.arrayNode()
+                                                .add(JsonNodeFactory.instance.objectNode().put("name", "A").put("value", 42))
+                                                .add(JsonNodeFactory.instance.objectNode().put("name", "B").put("value", 1))
+                                        ),
+                                )
+                        ),
+                        headers = mapOf("Content-Type" to listOf("application/json")),
+                    )
+                )
+            )
+        )
+
+        RecursiveComparison.assertEquals(expected, mockServer)
+    }
+
     @ParameterizedTest
     @ValueSource(
         strings = [

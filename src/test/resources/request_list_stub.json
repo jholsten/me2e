@@ -1,0 +1,34 @@
+{
+  "name": "request-stub",
+  "request": {
+    "method": "POST",
+    "path": {
+      "equals": "/search"
+    }
+  },
+  "response": {
+    "code": 200,
+    "body": {
+      "json-content": [
+        {
+          "id": 123,
+          "items": [
+            {
+              "name": "A",
+              "value": 42
+            },
+            {
+              "name": "B",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    "headers": {
+      "Content-Type": [
+        "application/json"
+      ]
+    }
+  }
+}

@@ -42,7 +42,7 @@
         },
         "path": {
           "$ref": "#/definitions/string-matcher",
-          "description": "URL path of the request"
+          "description": "URL path of the request. Note that the actual path always contains a leading slash, e.g. `/search`."
         },
         "headers": {
           "type": "object",
@@ -108,36 +108,57 @@
     "response-body": {
       "$id": "#/definitions/response-body",
       "type": "object",
-      "description": "Definition of the response body",
+      "description": "Definition of the response body. Note that only one of the fields can be specified.",
       "properties": {
         "string-content": {
           "type": "string",
-          "description": "Literal text content of the response body"
+          "description": "Literal text content of the response body."
         },
         "json-content": {
-          "$ref": "#/definitions/dictionary",
-          "description": "JSON content of the response body as a dictionary"
+          "$ref": "#/definitions/dictionaryOrList",
+          "description": "JSON content of the response body as a dictionary or a list of dictionaries."
         },
         "base64-content": {
           "type": "string",
-          "description": "Binary content of the response body encoded as Base 64"
+          "description": "Binary content of the response body encoded as Base 64."
         }
       },
-      "anyOf": [
+      "oneOf": [
         {
           "required": [
             "string-content"
-          ]
+          ],
+          "not": {
+            "required": [
+              "json-content",
+              "base64-content"
+            ]
+          },
+          "errorMessage": "Only of the specified contents can be set."
         },
         {
           "required": [
             "json-content"
-          ]
+          ],
+          "not": {
+            "required": [
+              "string-content",
+              "base64-content"
+            ]
+          },
+          "errorMessage": "Only of the specified contents can be set."
         },
         {
           "required": [
             "base64-content"
-          ]
+          ],
+          "not": {
+            "required": [
+              "string-content",
+              "json-content"
+            ]
+          },
+          "errorMessage": "Only of the specified contents can be set."
         }
       ]
     },
@@ -149,49 +170,70 @@
     "string-matcher": {
       "$id": "#/definitions/string-matcher",
       "type": "object",
-      "description": "Pattern to match strings",
+      "description": "Pattern to match strings. Only matches if actual value conforms to all specified requirements.",
       "properties": {
         "equals": {
           "type": "string",
-          "description": "Matches only if the string is exactly equal to the defined one"
+          "description": "Matches only if the string is exactly equal to the defined one."
         },
         "matches": {
           "type": "string",
-          "description": "Matches if the string conforms to the defined regex pattern"
+          "description": "Matches if the string conforms to the defined regex pattern."
         },
         "not-matches": {
           "type": "string",
-          "description": "Matches if the string does not conform to the defined regex pattern"
+          "description": "Matches if the string does not conform to the defined regex pattern."
         },
         "contains": {
           "type": "string",
-          "description": "Matches if the string contains the defined one"
+          "description": "Matches if the string contains the defined one."
         },
         "not-contains": {
           "type": "string",
-          "description": "Matches if the string does not contain the defined one"
+          "description": "Matches if the string does not contain the defined one."
         },
         "ignore-case": {
           "type": "boolean",
-          "description": "Whether to disable case sensitivity for the string matching",
+          "description": "Whether to disable case sensitivity for the string matching.",
           "default": false
         }
       }
     },
-    "dictionary": {
-      "$id": "#/definitions/dictionary",
-      "type": "object",
-      "patternProperties": {
-        ".+": {
-          "type": [
-            "string",
-            "number",
-            "boolean",
-            "array",
-            "null"
-          ]
+    "dictionaryOrList": {
+      "$id": "#/definitions/dictionaryOrList",
+      "anyOf": [
+        {
+          "type": "object",
+          "patternProperties": {
+            ".+": {
+              "type": [
+                "string",
+                "number",
+                "boolean",
+                "array",
+                "null"
+              ]
+            }
+          }
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "patternProperties": {
+              ".+": {
+                "type": [
+                  "string",
+                  "number",
+                  "boolean",
+                  "array",
+                  "null"
+                ]
+              }
+            }
+          }
         }
-      }
+      ]
     }
   }
 }
