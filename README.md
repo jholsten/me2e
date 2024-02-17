@@ -485,8 +485,7 @@ Similar to a Docker-Compose file, you need to assign a unique key for each servi
 
 Please note that a separate Mock Server must be defined for each domain and each subdomain.
 
-<ins>Example</ins>
-
+<ins>Example</ins>\
 If your Microservice System communicates with two external systems that are accessible via http://example.com and http//payment.example.com, the Mock Server definition in the me2e-config could look like this:
 
 ```yaml
@@ -520,8 +519,7 @@ A stub definition consists of the following primary parts:
 In addition, you can optionally define a  name for this stub under the `name` key, which you can later use to [verify the requests to the Mock Server](#mock-server-verification).
 Note that the name must be unique for each Mock Server.
 
-<ins>Example</ins>
-
+<ins>Example</ins>\
 A stub definition for the payment request mentioned in the example above may look like this: 
 
 ```json
@@ -871,27 +869,74 @@ Content-Length: 78
 </table>
 
 ##### DNS Configuration
+Technically, the simulation of the external services is implemented in such a way that one HTTP server is started on the host which is running the tests and the stubbed requests are assigned to the correct Mock Server instance via the `Host` header.
+This HTTP server can be reached on the standard HTTP port 80 and the standard HTTPS port 443.
+In theory, you could therefore replace the URL of the external system with the IP address of the test runner for all services of your Microservice System that communicate with external systems.
+However, as this may involve a modification of the code base and may require a great deal of effort, the recommended approach is to have the DNS entry for the hostname of the external system point to the IP of the test runner instead.
+To do this, add an [extra_hosts](https://docs.docker.com/compose/compose-file/compose-file-v3/#extra_hosts) entry for the domain to be simulated to the Docker-Compose file for each Microservice that communicates with the third-party service.
+If the host on which the tests are executed is the same as the host on which Docker is running, you can use Dockers predefined `host-gateway` entry for the IP address of the test runner.
 
-Technisch wird diese Simulation von einem HTTP-Server umgesetzt, der auf dem Standard-HTTP Port 80 und dem Standard-HTTPS Port 443 erreichbar ist
+<ins>Example</ins>\
+To forward requests to `example.com` and `payment.example.com` to the corresponding Mock Server instances, set:
 
-##### TLS Configuration
-
-- DNS-Überschreibung
-- TLS-Konfiguration
-
-Note that when running the tests in a CI/CD pipeline, the host executing the tests is most likely not the same as the Docker host.
-
-To enable forwarding requests to third-party services to the corresponding Mock Server, you need to point the services' hostname to the host's IP address.
-For each microservice which is communication with the third-party service, add an [extra_hosts](https://docs.docker.com/compose/compose-file/compose-file-v3/#extra_hosts) entry to the Docker-Compose file.
-
-Example: To forward requests to `example.com` and `google.com` to the corresponding Mock Servers, set:
 ```yaml
+# docker-compose.yml
+services:
+  order-service:
+    # ...
     extra_hosts:
       - "example.com:host-gateway"
-      - "google.com:host-gateway"
+      - "payment.example.com:host-gateway"
 ```
 
-In case you are receiving 403 errors and your operating system is Windows, you may need to [disable the automatic proxy detection](https://support.rezstream.com/hc/en-us/articles/360025156853-Disable-Auto-Proxy-Settings-in-Windows-10) (see [GitHub Issue](https://github.com/docker/for-win/issues/13127)).
+In case you are receiving 403 errors and your operating system is Windows, you may need to [disable the automatic proxy detection](https://support.rezstream.com/hc/en-us/articles/360025156853-Disable-Auto-Proxy-Settings-in-Windows-10) (see [GitHub Issue #13127](https://github.com/docker/for-win/issues/13127)).
+
+##### TLS Configuration
+###### Server Authentication
+If you want to enable the Microservices to communicate with a Mock Server via HTTP over TLS, a common TLS certificate must be issued for all Mock Server instances.
+To do this, a keystore must first be created, for which the domains of the external services to be simulated must be specified as the *Subject Alternative Names* (SAN).
+To create such a keystore with the Java Keytool, execute the following command for a certificate for the domains `example.com` and `payment.example.com` to be mocked.
+
+```shell
+keytool -genkey -keyalg RSA -keysize 2048 -alias mock_server -validity 3650 -keypass mock_server -keystore mock_server_keystore.jks -storepass mock_server -ext SAN=dns:example.com,dns:payment.example.com
+```
+
+Now you can export the TLS certificate in PEM format with the following commands.
+
+```shell
+keytool -exportcert -alias mock_server -keystore mock_server_keystore.jks -storepass mock_server -file mock_server_certificate.crt
+openssl x509 -inform der -in mock_server_certificate.crt -out mock_server_certificate.pem
+```
+
+Now place the keystore file `mock_server_keystore.jks` in the `resources` folder of your test project.
+In order for the Mock Servers to use the certificate, you need to configure the following settings in the `settings` section of the me2e-config file:
+
+```yaml
+# me2e-config.yml
+settings:
+  mock-servers:
+    keystore-path: mock_server_keystore.jks
+    keystore-password: mock_server
+    key-manager-password: mock_server
+```
+
+If you have used a keystore tool other than the Java Keytool, you must also specify the `keystore-type` in these settings.
+
+With these settings, the Mock Servers will now use the previously created certificate.
+However, as this certificate is self-signed, you also need to ensure that the Microservices trust this certificate.
+
+###### Client Authentication
+If you also want to enable the Microservices to authenticate against the Mock Server, you must first generate a truststore.
+You can also use any tool for this, the type of which you must then specify in the me2e-config file under `truststore-type`.
+The path to the truststore and the truststore password also need to be specified here.
+
+```yaml
+# me2e-config.yml
+settings:
+  mock-servers:
+    truststore-path: mock_server_truststore.jks
+    truststore-password: mock_server
+```
 
 #### Data Management
 - Initialen Zustand setzen
@@ -1224,17 +1269,3 @@ RUN sh get-docker.sh
 CMD ./gradlew test
 ```
 
-## Mock Server Authentication
-### Generate Keystore
-https://gist.github.com/dentys/1bdd2897a53b1a8b56007a480243c33a
-https://www.ivankrizsan.se/2018/03/03/mocking-http-services-with-wiremock-part-2/
-
-```shell
-keytool -genkey -keyalg RSA -keysize 2048 -alias mock_server -validity 3650 -keypass mock_server -keystore mock_server_keystore.jks -storepass mock_server -ext SAN=dns:example.com,dns:payment.example.com
-```
-
-### Generate Server Certificate
-```shell
-keytool -exportcert -alias mock_server -keystore mock_server_keystore.jks -storepass mock_server -file mock_server_certificate.crt
-openssl x509 -inform der -in mock_server_certificate.crt -out mock_server_certificate.pem
-```
