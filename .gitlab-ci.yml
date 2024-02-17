@@ -95,5 +95,3 @@ pages:
   artifacts:
     paths:
       - public
-  only:
-    - tags
