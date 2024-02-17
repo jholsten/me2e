@@ -27,6 +27,8 @@ build:
     - chmod +x ./gradlew
   script:
     - ./gradlew --build-cache assemble
+  only:
+    - tags
 
 # Builds and pushes Dockerfile on changes
 build-docker:
@@ -43,8 +45,6 @@ build-docker:
   rules:
     - changes:
         - Dockerfile
-  only:
-    - tags
 
 # Runs JUnit tests inside Docker container (required to have access to Docker and Docker-Compose)
 test:
