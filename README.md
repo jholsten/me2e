@@ -1087,9 +1087,111 @@ With this setting, as soon as all containers are healthy, me2e will no longer at
 Please note that only the attributes defined in the `DatabaseConnection.Builder` (i.e. `host`, `port`, `database`, `username`, `password`) are available in your builder class. 
 
 ### Defining Tests
+Now that the configuration options for the me2e library have been explained in more detail, we will take a close look at the options for defining End-to-End-Tests.
+The prerequisite for using the functions described below is that the test class in which you defined the tests either directly or indirectly inherits from [`Me2eTest`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e/-me2e-test/index.html).
+
 #### Injecting services
+With the [`@InjectService`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.injection/-inject-service/index.html) annotation, you can inject individual container or Mock Server instances from your test environment into attributes of your test class using the instance's names.
+- For the Docker container instances, this name corresponds to the key of the container in the `services` section of the Docker-Compose file.
+- For the Mock Server instances, this name corresponds to the key of the Mock Server in the `mock-servers` section of the me2e-config file. 
+
+The name of the instance to be injected can either be specified via the attribute name or you can specify the name directly in the `@InjectService` annotation via the `name` parameter.
+If the `name` is not set in the annotation, the attribute name is converted to Kebab-Case and this converted value is used as the service name.
+Depending on the data type of the attribute, an attempt is then made to find either a container (for attributes of type [`Container`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container/-container/index.html)) or a Mock Server instance (for attributes of type [`MockServer`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.mock/-mock-server/index.html)) with exactly this name and the corresponding instance is set as the value of the annotated attribute.
+If no such instance can be found in the test environment or the datatype of the field does not match the datatype of the instance, an exception is thrown and each test of the test class fails.
+
+<ins>Examples</ins>
+<table>
+    <tr>
+        <th>Using the attribute name to specify the name of the service to inject</th>
+        <th>Using the <code>@InjectService</code>'s name parameter to specify the name of the service to inject</th>
+    </tr>
+    <tr>
+<td>
+
+```kotlin
+@InjectService
+private lateinit var backendApi: MicroserviceContainer
+```
+</td>
+<td>
+
+```kotlin
+@InjectService("backend-api")
+private lateinit var someContainer: MicroserviceContainer
+```
+</td>
+    </tr>
+    <tr>
+<td>
+
+```kotlin
+@InjectService
+private lateinit var paymentService: MockServer
+```
+</td>
+<td>
+
+```kotlin
+@InjectService("payment-service")
+private lateinit var someMockServer: MockServer
+```
+</td>
+    </tr>
+</table>
 
 #### Interacting with Containers
+In your tests, you can interact with the container instances defined in the Docker-Compose via its [interfaces](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container/-container/index.html), for example to execute certain commands or to copy files to or from the container.
+You can also use the attributes and functions to retrieve certain properties of the container, such as the Docker container ID or the container's logs.
+If you want to monitor the status of a container, you can attach consumers to the container to be notified when the status changes.
+To be specific, the following properties can be monitored with consumers:
+- Logs ([`addLogConsumer`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container/-container/add-log-consumer.html)): notifies you of every new log message that the container outputs
+- Resource Usage Statistics ([`addStatsConsumer`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container/-container/add-stats-consumer.html)): notifies you once per second about the resource consumption of the container
+- Events ([`addEventConsumer`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container/-container/add-event-consumer.html)): notifies you about every [Docker Event](https://docs.docker.com/engine/reference/commandline/system_events/#containers) for the container
+
+<ins>Examples</ins>
+<table>
+    <tr>
+        <th>Checking whether a Container logged a certain message</th>
+<td>
+    
+```kotlin
+@Test
+fun `Container should log certain message`() {
+    val logs = container.getLogs()
+    assertTrue(logs.any { it.message == "Received notification." }, "Container did not log expected message.")
+}
+```
+</td>
+    </tr>
+    <tr>
+        <th>Checking whether a file in the Container contains certain content</th>
+<td>
+    
+```kotlin
+@Test
+fun `File in container should have certain content`() {
+    val file = container.copyFileFromContainer("/app/file.txt", "/home/container_file.txt")
+    assertEquals("Expected Content", file.readText())
+}
+```
+</td>
+    </tr>
+    <tr>
+        <th>Checking whether an environment variable is set to a certain value</th>
+<td>
+    
+```kotlin
+@Test
+fun `Environment variable should have certain value`() {
+    val result = backendApi.execute("echo", "\$MY_ENV")
+    assertEquals(0, result.exitCode)
+    assertEquals("ExpectedContent", result.stdout)
+}
+```
+</td>
+    </tr>
+</table>
 
 #### Interacting with Databases
 
