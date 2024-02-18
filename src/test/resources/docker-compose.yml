@@ -28,11 +28,11 @@ services:
       POSTGRES_PASSWORD: 123
       POSTGRES_USER: user
       POSTGRES_DB: testdb
-    labels:
-      "org.jholsten.me2e.container-type": "DATABASE"
-      "org.jholsten.me2e.database.system": "POSTGRESQL"
     healthcheck:
-      test: "pg_isready -d db_prod"
+      test: [ "CMD-SHELL", "sh -c 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB'" ]
       interval: 3s
       timeout: 3s
       retries: 10
+    labels:
+      "org.jholsten.me2e.container-type": "DATABASE"
+      "org.jholsten.me2e.database.system": "POSTGRESQL"
