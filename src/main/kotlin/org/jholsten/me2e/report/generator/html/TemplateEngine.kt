@@ -50,9 +50,12 @@ class TemplateEngine(
     /**
      * Processes the [template] by filling it with the provided [data].
      * Stores the generated HTML at [outputPath].
+     * @return Generated HTML file.
      */
-    fun process() {
+    fun process(): File {
         val htmlContent = engine.process(template, data.context)
-        FileUtils.writeStringToFile(File(outputPath), htmlContent, Charset.forName("UTF-8"))
+        val outputFile = File(outputPath)
+        FileUtils.writeStringToFile(outputFile, htmlContent, Charset.forName("UTF-8"))
+        return outputFile
     }
 }

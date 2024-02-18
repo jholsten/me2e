@@ -77,40 +77,44 @@ open class HtmlReportGenerator(
      */
     protected open val outputLink: String = "file:///${getAbsolutePath("$outputDirectory/index.html")}"
 
-    override fun generate(result: TestExecutionResult) {
+    override fun generate(result: TestExecutionResult): List<File> {
         generationTimestamp = Instant.now()
         this.result = result
-        copyAdditionalResources()
-        generateIndexHtml()
+        val files: MutableList<File> = mutableListOf()
+        files.addAll(copyAdditionalResources())
+        files.add(generateIndexHtml())
         for (root in result.roots) {
-            generateTestDetailHtml(root)
+            files.add(generateTestDetailHtml(root))
         }
         logger.info("Generated and stored HTML report at $outputLink.")
+        return files
     }
 
     /**
      * Generates HTML file containing an overview of the test execution's result.
      * Should create a file named `index.html` in the [outputDirectory].
+     * @return Generated index HTML file.
      */
-    protected open fun generateIndexHtml() {
+    protected open fun generateIndexHtml(): File {
         val data = IndexTemplateData.Builder()
             .withGenerationTimestamp(generationTimestamp)
             .withTestExecutionResult(result)
             .build()
-        generateHtml(indexTemplate, data, "$outputDirectory/index.html")
+        return generateHtml(indexTemplate, data, "$outputDirectory/index.html")
     }
 
     /**
      * Generates HTML file containing the details of the given test result.
      * The result represents one test class, which may contain multiple tests and nested test classes.
      * Should create a file named [TestResult.source]`.html` in directory `sources` in the [outputDirectory].
+     * @return Generated test detail HTML file.
      */
-    protected open fun generateTestDetailHtml(result: TestResult) {
+    protected open fun generateTestDetailHtml(result: TestResult): File {
         val data = TestDetailTemplateData.Builder()
             .withGenerationTimestamp(generationTimestamp)
             .withTestResult(result)
             .build()
-        generateHtml(testDetailTemplate, data, "$outputDirectory/sources/${result.source}.html")
+        return generateHtml(testDetailTemplate, data, "$outputDirectory/sources/${result.source}.html")
     }
 
     /**
@@ -120,20 +124,24 @@ open class HtmlReportGenerator(
      * @param data Data containing the test results to be inserted into the Thymeleaf template.
      * @param outputPath Path where generated HTML file should be stored.
      */
-    protected open fun generateHtml(template: String, data: TemplateData, outputPath: String) {
-        TemplateEngine(template, data, outputPath).process()
+    protected open fun generateHtml(template: String, data: TemplateData, outputPath: String): File {
+        return TemplateEngine(template, data, outputPath).process()
     }
 
     /**
      * Copies additional resources required for the test report in the [outputDirectory].
+     * @return Files for the copied additional resources.
      */
-    protected open fun copyAdditionalResources() {
+    protected open fun copyAdditionalResources(): List<File> {
+        val files: MutableList<File> = mutableListOf()
         for ((destination, source) in additionalResources) {
             val resource = FileUtils.getResourceAsStream(source)
             val destinationFile = File("$outputDirectory/$destination")
             destinationFile.mkdirs()
             Files.copy(resource, destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
+            files.add(destinationFile)
         }
+        return files
     }
 
     /**

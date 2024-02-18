@@ -2,6 +2,7 @@ package org.jholsten.me2e.report.generator
 
 import org.jholsten.me2e.report.result.ReportDataAggregator
 import org.jholsten.me2e.report.result.model.TestExecutionResult
+import java.io.File
 
 /**
  * Base class for generating the test report based on the data provided in the [ReportDataAggregator].
@@ -14,6 +15,7 @@ abstract class ReportGenerator {
     /**
      * Generates a test report for the test execution result provided in [result].
      * @param result Result of the execution of all test containers and all tests.
+     * @return List of generated files.
      */
-    abstract fun generate(result: TestExecutionResult)
+    abstract fun generate(result: TestExecutionResult): List<File>
 }

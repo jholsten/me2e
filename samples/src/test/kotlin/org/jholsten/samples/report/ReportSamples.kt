@@ -4,6 +4,7 @@ import org.jholsten.me2e.report.generator.ReportGenerator
 import org.jholsten.me2e.report.generator.html.HtmlReportGenerator
 import org.jholsten.me2e.report.result.model.TestExecutionResult
 import org.slf4j.LoggerFactory
+import java.io.File
 
 /**
  * Sample of a custom [HtmlReportGenerator] which uses a custom Thymeleaf template for the `index.html`.
@@ -18,7 +19,8 @@ class CustomHtmlReportGenerator : HtmlReportGenerator(
 class LoggingReportGenerator : ReportGenerator() {
     private val logger = LoggerFactory.getLogger(LoggingReportGenerator::class.java)
 
-    override fun generate(result: TestExecutionResult) {
+    override fun generate(result: TestExecutionResult): List<File> {
         logger.info("Test execution finished with result $result")
+        return listOf()
     }
 }
