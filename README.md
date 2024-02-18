@@ -1476,7 +1476,7 @@ assertThat(response).conformsTo(expectedResponse)
 ##### Authentication
 If you want to send an authenticated request to a Microservice, for example with a Bearer token in the Authorization header, you can use the [`authenticate`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.microservice/-microservice-container/authenticate.html) method of the [`MicroserviceContainer`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.microservice/-microservice-container/index.html) class.
 You need to pass an instance of the [`Authenticator`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.microservice.authentication/-authenticator/index.html) class to this method, which uses the [`getRequestInterceptor`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.microservice.authentication/-authenticator/get-request-interceptor.html) function to provide a request interceptor that performs the required authentication and adapts the request accordingly.
-Note that this authenticator is used for all requests to this Microservice in the current test.
+Note that this authenticator is used for all subsequent requests to this Microservice in the current test.
 Unless set otherwise in the me2e-config file in `settings.state-reset.reset-request-interceptors` (see [here](#state-reset)), this request interceptor is only valid for the execution of a single test and the interceptors are reset afterwards.
 
 By default, me2e only provides [`UsernamePasswordAuthentication`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.microservice.authentication/-username-password-authentication/index.html) for basic authentication.
@@ -1492,19 +1492,95 @@ fun `Executing authenticated GET request should succeed`() {
 
     assertThat(response)
         .statusCode(equalTo(200))
-        .body(equalTo("\"admin\""))
+        .body(equalTo("admin"))
 }
 ```
 
 #### Mock Server Verification
+If you have set up a [Mock Server](#mock-servers-simulating-external-services) in your test environment to simulate an external system, you can also use the me2e functions to check whether an expected request has been set to a certain Mock Server.
+As before, use the [`assertThat`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.assertions/assert-that.html) method in combination with the functions from the [`assertions` package](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.assertions/index.html).
+Unlike before, however, in this context it only makes sense to compare all the properties of the requests that the Mock Server has received with the expectations.
+To do this, instantiate an object of the [`ExpectedRequest`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.mock.verification/-expected-request/index.html) class and set all the properties of the expected request.
+You can then use the [`receivedRequest`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.mock.verification/-mock-server-verification/received-request.html) method to verify that the Mock Server has received this expected request either any number of times or a certain number of times. 
 
-### Maßnahmen gegen flaky Tests
+<ins>Examples</ins>
+<table>
+    <tr>
+        <th>Verify that the Mock Server has received the expected request exactly once</th>
+<td>
+
+```kotlin
+assertThat(exampleServer).receivedRequest(
+    1,
+    ExpectedRequest()
+        .withMethod(equalTo(HttpMethod.GET))
+        .withPath(equalTo("/account"))
+        .withQueryParameters(containsKey("id").withValue(equalTo("123")))
+)
+```
+</td>
+    </tr>
+    <tr>
+        <th>Verify that the Mock Server has only received the expected request and no other</th>
+<td>
+
+```kotlin
+assertThat(exampleServer).receivedRequest(
+    ExpectedRequest()
+        .withMethod(equalTo(HttpMethod.GET))
+        .withPath(equalTo("/account"))
+        .withQueryParameters(containsKey("id").withValue(equalTo("123")))
+        .andNoOther()
+)
+```
+</td>
+    </tr>
+    <tr>
+        <th>Verify that the Mock Server has received the expected request an arbitrary number of times</th>
+<td>
+
+```kotlin
+assertThat(exampleServer).receivedRequest(
+    ExpectedRequest()
+        .withMethod(equalTo(HttpMethod.GET))
+        .withPath(equalTo("/account"))
+        .withQueryParameters(containsKey("id").withValue(equalTo("123")))
+)
+```
+</td>
+    </tr>
+</table>
+
+### Measures against Flaky Tests
+As already described in the introduction, flaky tests - i.e. tests that sometimes produce positive and sometimes negative results without changing the code - are major problem, especially in End-to-End-Tests for Microservice Systems.
+To prevent this problem, me2e offers a number of functions that can be used to reduce the risk and impact of flaky tests:
+- **Assert Healthy**: Before each test, it is ensured that all containers in the test environment are healthy
+- **Request-Retry**: Requests that fail due to connectivity problems are repeated
+- **State Reset**: The state of all services is reset after each test so that the order of the test execution does not affect their results
+
+All these functions are activated by default, but you can deactivate them in the `settings` section of the me2e-config file.
+
+| Measure        | Key in the me2e-config File                                                                                                                                    |
+|:---------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Assert Healthy | - `settings.assert-healthy`                                                                                                                                    |
+| Request-Retry  | - `settings.requests.retry-on-connection-failure`                                                                                                              |
+| State-Reset    | - `settings.state-reset.clear-all-tables`<br/>- `settings.state-reset.reset-request-interceptors`<br/>- `settings.state-reset.reset-mock-server-requests`<br/> |
 
 #### Assert Healthy
+Before each test, it is checked whether all Docker containers for which a healthchek is defined are currently healthy.
+If one of the containers is not healthy, it is assumed that this would lead to a flaky and therefore meaningless test result.
+Therefore, an attempt is made to restart the container once.
+If this attempt fails or if the container is still unhealthy, the current test is aborted.
 
 #### Request-Retry
+If the `retry-on-connection-failure` flag is activated, HTTP requests that fail due to a connectivity problem are silently retried by the HTTP client.
 
 #### State Reset
+To ensure that the state changes triggered by the execution of a test do not affect the results of subsequent tests, the state of all containers, Mock Servers and databases is reset by default after each test.
+This includes the following states:
+- for all database containers, all tables are cleared except for those specified in the `org.jholsten.me2e.database.reset.skip-tables` label
+- all request interceptors are removed for all Microservice containers
+- the list of all previously received requests is reset for all Mock Server instances
 
 ### Test Report
 #### Contents
