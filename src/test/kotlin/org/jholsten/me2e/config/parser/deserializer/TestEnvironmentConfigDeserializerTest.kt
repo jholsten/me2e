@@ -273,6 +273,7 @@ class TestEnvironmentConfigDeserializerTest {
                       - "org.jholsten.me2e.database.init-script.init_1=database/init_1.sql"
                       - "org.jholsten.me2e.database.init-script.init_2=database/init_2.sql"
                       - "org.jholsten.me2e.database.reset.skip-tables=tableA, tableB,tableC"
+                      - "org.jholsten.me2e.database.connection.implementation=org.jholsten.me2e.container.database.CustomDatabaseConnection"
         """.trimIndent()
         mockReadingDockerCompose(dockerComposeContents)
         mockDockerComposeValidator(shouldThrow = false)
@@ -294,6 +295,10 @@ class TestEnvironmentConfigDeserializerTest {
                     .put("org.jholsten.me2e.database.init-script.init_1", "database/init_1.sql")
                     .put("org.jholsten.me2e.database.init-script.init_2", "database/init_2.sql")
                     .put("org.jholsten.me2e.database.reset.skip-tables", "tableA, tableB,tableC")
+                    .put(
+                        "org.jholsten.me2e.database.connection.implementation",
+                        "org.jholsten.me2e.container.database.CustomDatabaseConnection"
+                    )
             )
             .put("pullPolicy", "MISSING")
             .put("system", "POSTGRESQL")
@@ -312,6 +317,7 @@ class TestEnvironmentConfigDeserializerTest {
                     .add("tableB")
                     .add("tableC")
             )
+            .put("databaseConnectionClass", "org.jholsten.me2e.container.database.CustomDatabaseConnection")
         expectedDatabase.remove("environment")
 
         verify { mockedMapper.treeToValue(expectedDatabase, Container::class.java) }
@@ -714,7 +720,8 @@ class TestEnvironmentConfigDeserializerTest {
             .put("username", null as String?)
             .put("password", null as String?)
             .set<ObjectNode>("initializationScripts", JsonNodeFactory.instance.objectNode())
-            .set("tablesToSkipOnReset", JsonNodeFactory.instance.arrayNode())
+            .set<ObjectNode>("tablesToSkipOnReset", JsonNodeFactory.instance.arrayNode())
+            .put("databaseConnectionClass", null as String?)
     }
 
     private fun expectedMockServer(): ObjectNode {

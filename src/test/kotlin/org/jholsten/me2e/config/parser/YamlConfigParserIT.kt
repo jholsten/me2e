@@ -8,6 +8,8 @@ import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.container.database.DatabaseContainer
 import org.jholsten.me2e.container.database.DatabaseManagementSystem
 import org.jholsten.me2e.config.model.DockerConfig.DockerComposeRemoveImagesStrategy
+import org.jholsten.me2e.container.database.CustomDatabaseConnection
+import org.jholsten.me2e.container.database.connection.DatabaseConnection
 import org.jholsten.me2e.container.microservice.MicroserviceContainer
 import org.jholsten.me2e.container.model.ContainerType
 import org.jholsten.me2e.mock.MockServer
@@ -193,6 +195,7 @@ internal class YamlConfigParserIT {
             password = "123",
             initializationScripts = mapOf(),
             tablesToSkipOnReset = listOf(),
+            databaseConnectionClass = CustomDatabaseConnection::class.java,
         )
     }
 
@@ -212,6 +215,7 @@ internal class YamlConfigParserIT {
         password: String? = null,
         initializationScripts: Map<String, String>? = null,
         tablesToSkipOnReset: List<String>? = null,
+        databaseConnectionClass: Class<out DatabaseConnection>? = null,
     ) {
         val container = containers[name]
         assertNotNull(container)
@@ -238,6 +242,7 @@ internal class YamlConfigParserIT {
             assertEquals(password, container.password)
             RecursiveComparison.assertEquals(initializationScripts, container.initializationScripts)
             assertEquals(tablesToSkipOnReset, container.tablesToSkipOnReset)
+            assertEquals(databaseConnectionClass, container.databaseConnectionClass)
         }
     }
 

@@ -1,6 +1,8 @@
 package org.jholsten.me2e.container.database
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import org.jholsten.me2e.config.model.DockerConfig
+import org.jholsten.me2e.config.parser.deserializer.DatabaseConnectionClassDeserializer
 import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.container.database.connection.DatabaseConnection
 import org.jholsten.me2e.container.database.connection.MongoDBConnection
@@ -105,6 +107,15 @@ class DatabaseContainer internal constructor(
      * Only required for interacting with the database via the [DatabaseConnection].
      */
     val tablesToSkipOnReset: List<String> = listOf(),
+
+    /**
+     * Implementation of the [DatabaseConnection] to use for establishing a connection to the database.
+     * This field is only needed if you want to enable interacting with a currently unsupported database.
+     * If not `null`, the builder of this class is used to instantiate the [connection] of this database.
+     * Corresponds to the value of the label `org.jholsten.me2e.database.connection.implementation` in the Docker-Compose.
+     */
+    @JsonDeserialize(using = DatabaseConnectionClassDeserializer::class)
+    val databaseConnectionClass: Class<out DatabaseConnection>? = null,
 ) : Container(
     name = name,
     image = image,
@@ -262,6 +273,10 @@ class DatabaseContainer internal constructor(
      * @param exposedPort Port on which the database is accessible.
      */
     private fun initializeConnection(state: ContainerState, exposedPort: ContainerPort) {
+        if (databaseConnectionClass != null) {
+            initializeConnectionWithCustomImplementation(state, exposedPort)
+            return
+        }
         if (system == DatabaseManagementSystem.MONGO_DB) {
             connection = MongoDBConnection.Builder()
                 .withContainer(this)
@@ -286,6 +301,44 @@ class DatabaseContainer internal constructor(
         logger.info(
             """
             Initialized connection to database container '$name': {
+               system: $system, database: $database, schema: $schema, username: $username, password: $password
+            }
+            """.trimIndent()
+        )
+    }
+
+    /**
+     * Initializes the connection to the database of this container using the custom implementation of the [DatabaseConnection]
+     * specified in [databaseConnectionClass].
+     * @param state Reference to the corresponding Docker container state.
+     * @param exposedPort Port on which the database is accessible.
+     */
+    private fun initializeConnectionWithCustomImplementation(state: ContainerState, exposedPort: ContainerPort) {
+        logger.info("Trying to establish connection to custom implementation $databaseConnectionClass...")
+        val builderClass = databaseConnectionClass!!.declaredClasses
+            .filterIsInstance<Class<out DatabaseConnection.Builder<*>>>()
+            .firstOrNull()
+        requireNotNull(builderClass) { "Database connection implementation $databaseConnectionClass needs to include builder extending the DatabaseConnection.Builder class." }
+
+        val builderInstance = try {
+            builderClass.getConstructor().newInstance()
+        } catch (e: Exception) {
+            throw IllegalArgumentException(
+                "Unable to instantiate builder $builderClass. " +
+                    "Please make sure that the builder has a public, no-args constructor.", e
+            )
+        }
+        connection = builderInstance
+            .withHost(state.host)
+            .withPort(exposedPort.external!!)
+            .withDatabase(database!!)
+            .withUsername(username)
+            .withPassword(password)
+            .build()
+
+        logger.info(
+            """
+            Initialized connection to database container '$name' with custom implementation $databaseConnectionClass: {
                system: $system, database: $database, schema: $schema, username: $username, password: $password
             }
             """.trimIndent()

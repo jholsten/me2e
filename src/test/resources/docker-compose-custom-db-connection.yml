@@ -1,0 +1,13 @@
+services:
+  database:
+    image: postgres:12
+    ports:
+      - 5432
+    environment:
+      POSTGRES_DB: testdb
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: 123
+    labels:
+      "org.jholsten.me2e.container-type": "DATABASE"
+      "org.jholsten.me2e.database.system": "POSTGRESQL"
+      "org.jholsten.me2e.database.connection.implementation": "org.jholsten.me2e.container.database.CustomDatabaseConnection"

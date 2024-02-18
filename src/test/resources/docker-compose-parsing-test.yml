@@ -50,3 +50,4 @@ services:
     labels:
       "org.jholsten.me2e.container-type": "DATABASE"
       "org.jholsten.me2e.database.system": "MONGO_DB"
+      "org.jholsten.me2e.database.connection.implementation": "org.jholsten.me2e.container.database.CustomDatabaseConnection"

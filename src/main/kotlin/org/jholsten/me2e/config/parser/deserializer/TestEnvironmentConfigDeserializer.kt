@@ -91,6 +91,14 @@ internal class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironm
         private const val DATABASE_RESET_SKIP_TABLES_KEY = "org.jholsten.me2e.database.reset.skip-tables"
 
         /**
+         * Label key for specifying the implementation of the [org.jholsten.me2e.container.database.connection.DatabaseConnection]
+         * to use for establishing a connection to the database.
+         * Only applicable to services of type [ContainerType.DATABASE].
+         * @see org.jholsten.me2e.container.database.DatabaseContainer.databaseConnectionClass
+         */
+        private const val DATABASE_CONNECTION_IMPLEMENTATION_KEY = "org.jholsten.me2e.database.connection.implementation"
+
+        /**
          * Label key for specifying the pull policy for this container.
          * @see Container.pullPolicy
          */
@@ -224,6 +232,7 @@ internal class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironm
         node.put("password", password)
         node.set<ObjectNode>("initializationScripts", databaseInitializationScripts.toJsonNode())
         node.set<ObjectNode>("tablesToSkipOnReset", tablesToSkipOnReset.toArrayNode())
+        node.put("databaseConnectionClass", labels[DATABASE_CONNECTION_IMPLEMENTATION_KEY])
     }
 
     /**
@@ -257,6 +266,7 @@ internal class TestEnvironmentConfigDeserializer : JsonDeserializer<TestEnvironm
             DATABASE_USERNAME_KEY to labelsNode?.get(DATABASE_USERNAME_KEY)?.asText(),
             DATABASE_PASSWORD_KEY to labelsNode?.get(DATABASE_PASSWORD_KEY)?.asText(),
             DATABASE_RESET_SKIP_TABLES_KEY to labelsNode?.get(DATABASE_RESET_SKIP_TABLES_KEY)?.asText(),
+            DATABASE_CONNECTION_IMPLEMENTATION_KEY to labelsNode?.get(DATABASE_CONNECTION_IMPLEMENTATION_KEY)?.asText(),
             PULL_POLICY_KEY to labelsNode?.get(PULL_POLICY_KEY)?.asText(),
         )
     }
