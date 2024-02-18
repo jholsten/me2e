@@ -1583,14 +1583,84 @@ This includes the following states:
 - the list of all previously received requests is reset for all Mock Server instances
 
 ### Test Report
+After all tests have been executed, a test report is generated that contains detailed information about the executed tests and the state of the test environment.
+By default, the [`HtmlReportGenerator`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.report.generator.html/-html-report-generator/index.html) is used to generate this report, but you can also provide a custom implementation to generate the report or customize the existing HTML report.
+The following sections explain how you can realize this customizability and which contents are available for the report.
+
 #### Contents
-- Was sind die Inhalte des Berichts?
-- Wo kommen die Daten her?
+During the execution of the tests, a report data aggregator collects various data on the tests and the test environment.
+This includes:
+- standard metrics on the tests, i.e. execution times, status and cause of errors, among others
+- logs of the test runner and all Docker containers of the test environment
+- resource consumption of all Docker container over time
+- HTTP network traces for all HTTP requests sent in the Docker bridge networks of the Docker-Compose
+
+After the execution of all tests has been completed, this data is aggregated and transferred to the report generator in the form of the [`TestExecutionResult`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.report.result.model/-test-execution-result/index.html).
 
 #### Configuring the Report
-- hier auch: wie kann ich selber einen eigenen Generator schreiben?
+To customize the test report to your needs, you have various options:
+- Customization of the [`HtmlReportGenerator`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.report.generator.html/-html-report-generator/index.html) used by default
+- Implementation of your own report generator
 
-### Automatisierung CI/CD
+For both customization options, you must register your custom implementation as a report generator in me2e so that it is used to generate reports after the test execution.
+To do this, place the [`Me2eTestConfig`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e/-me2e-test-config/index.html) annotation anywhere in your project on any class and set the `reportGenerators` parameter to include your custom implementation.
+For example, to use the default HTML report and your custom implementation, add the following annotation:
+
+```kotlin
+@Me2eTestConfig(
+    reportGenerators = [HtmlReportGenerator::class, CustomReportGenerator::class]
+)
+class AppTest {
+
+}
+```
+
+For all report generators defined here, the [`generate`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.report.generator/-report-generator/generate.html) method is called after the test execution, passing the aggregated test execution result as a parameter.
+
+##### Customization of the `HtmlReportGenerator`
+The [`HtmlReportGenerator`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.report.generator.html/-html-report-generator/index.html) uses [Thymeleaf](https://www.thymeleaf.org/) as a template engine to fill HTML templates with data.
+The generator uses 2 different templates:
+- Landing page of the test results: `report/templates/index.html` (*attribute `indexTemplate`*)
+- Test details per class: `report/templates/test-detail.html` (*attribute `testDetailTemplate`*)
+
+The `additionalResources` attribute is used to define additional resources that are copied to the output directory, and the `outputDirectory` attribute is used to specify the directory in which the generated HTML files are to be stored.
+This class has been especially implemented so that you have as many options as possible to customize individual parts of its functionality.
+By implementing your own class that inherits from the `HtmlReportGenerator`, you can customize the following properties, for example:
+- Changing the templates: instead of using the predefined templates, you can also use your own Thymeleaf templates
+  - To do this, overwrite the attributes `indexTemplate` and/or `testDetailTemplate`, e.g.:
+```kotlin
+class CustomHtmlReportGenerator : HtmlReportGenerator(
+    testDetailTemplate = "my-custom-test-detail-template.html"
+)
+```
+
+- Changing the design: instead of using the standard `report-style.css` for styling the HTML files, you can also use a custom CSS file
+  - If you want to continue using the default Thymeleaf templates, the easiest way is to change the value for `additionalResources["css/report-style.css"]` when initializing your class, e.g.:
+```kotlin
+class CustomHtmlReportGenerator : HtmlReportGenerator() {
+    init {
+        additionalResources["css/report-style.css"] = "my-custom-style.css"
+    }
+}
+```
+- Execution of custom functions after the report generation, e.g. sending the report by E-Mail
+  - Overwrite the `generate` function and execute your function after calling the method of the superclass, e.g.:
+```kotlin
+class CustomHtmlReportGenerator : HtmlReportGenerator() {
+    override fun generate(result: TestExecutionResult): List<File> {
+        val generatedFiles = super.generate(result)
+        sendMail(generatedFiles)
+        return generatedFiles
+    }
+}
+```
+
+##### Implementation of your own report generator
+If you want to generate a report in a completely different format, such as a PDF file of an XML report, you need to implement the [`ReportGenerator`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.report.generator/-report-generator/index.html) class yourself.
+To do this, create a new class that inherits from the `ReportGenerator` and implement the `generate` function.
+The return value of this function should then contain the files that were generated with your report generator.
+
+### Running the End-to-End-Tests inside GitLab CI
 - evtl. auch: wie kann ich den Report veröffentlichen? Siehe https://gitlab.com/gitlab-org/gitlab/-/issues/23323
 
 TODO: Fast vs. Slow? (Can be done with JUnit-Tags, but what's the purpose for E2E-Tests? 
