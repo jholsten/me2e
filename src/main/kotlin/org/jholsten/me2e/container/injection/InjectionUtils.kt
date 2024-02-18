@@ -3,6 +3,7 @@ package org.jholsten.me2e.container.injection
 import org.apache.commons.lang3.reflect.FieldUtils
 import org.jholsten.me2e.Me2eTest
 import org.jholsten.me2e.container.Container
+import org.jholsten.me2e.container.injection.exception.NoSuchServiceException
 import org.jholsten.me2e.mock.MockServer
 import org.jholsten.me2e.utils.logger
 import java.lang.reflect.Field
@@ -14,7 +15,7 @@ import java.lang.reflect.Field
  * For each field that is annotated with [InjectService], the corresponding instance is retrieved from the [Me2eTest.containerManager]
  * or the [Me2eTest.mockServerManager]. If the [InjectService.name] is set, the corresponding instance is retrieved based on this
  * given name. Otherwise, the name of the field is converted to kebab case and the corresponding instance with this converted
- * name is retrieved. If the instance with the corresponding name does not exist, a warning is logged and the field is not set.
+ * name is retrieved. If the instance with the corresponding name does not exist, a [NoSuchServiceException] is thrown.
  */
 internal class InjectionUtils<T : Me2eTest>(
     /**
@@ -27,8 +28,8 @@ internal class InjectionUtils<T : Me2eTest>(
 
     /**
      * Injects container and Mock Server instances into the fields in [testClassInstance] which are annotated
-     * with [InjectService]. Retrieves instances to inject from the [Me2eTest.containerManager] and
-     * [Me2eTest.mockServerManager].
+     * with [InjectService]. Retrieves instances to inject from the [Me2eTest.containerManager] and [Me2eTest.mockServerManager].
+     * @throws NoSuchServiceException if service could not be injected.
      */
     @JvmSynthetic
     fun injectServices() {
@@ -54,28 +55,24 @@ internal class InjectionUtils<T : Me2eTest>(
         } else if (MockServer::class.java.isAssignableFrom(field.type)) {
             injectService(field, InjectableServiceType.MOCK_SERVER)
         } else {
-            logger.warn("Unable to inject service for field ${field.name}. Only container and Mock Server instances can be injected.")
+            throw NoSuchServiceException("Unable to inject service for field ${field.name}. Only container and Mock Server instances can be injected.")
         }
     }
 
     /**
      * Injects service instance into the given field.
-     * Retrieves container/Mock Server instance with the derived name from container/Mock Server
-     * manager and sets it as a value of the given field.
+     * Retrieves container/Mock Server instance with the derived name from container/Mock Server manager and sets it as a
+     * value of the given field.
      */
     private fun injectService(field: Field, serviceType: InjectableServiceType) {
         val serviceName = getServiceName(field)
-        val service: Any? = when (serviceType) {
+        val service: Any = when (serviceType) {
             InjectableServiceType.CONTAINER -> Me2eTest.containerManager.containers[serviceName]
             InjectableServiceType.MOCK_SERVER -> Me2eTest.mockServerManager.mockServers[serviceName]
-        }
-        if (service == null) {
-            logWarningForNonExistingService(serviceType, serviceName)
-            return
-        }
+        } ?: throw exceptionForNonExistingService(serviceType, serviceName)
+
         if (!field.type.isAssignableFrom(service.javaClass)) {
-            logWarningForWrongFieldType(serviceType, serviceName, service, field)
-            return
+            throw exceptionForWrongFieldType(serviceType, serviceName, service, field)
         }
         field.isAccessible = true
         field.set(testClassInstance, service)
@@ -116,18 +113,23 @@ internal class InjectionUtils<T : Me2eTest>(
         return stringBuilder.toString()
     }
 
-    private fun logWarningForNonExistingService(serviceType: InjectableServiceType, serviceName: String) {
+    private fun exceptionForNonExistingService(serviceType: InjectableServiceType, serviceName: String): NoSuchServiceException {
         val messageHint = when (serviceType) {
             InjectableServiceType.CONTAINER -> if (serviceName in Me2eTest.mockServerManager.mockServers) " Did you mean to use type 'MockServer'?" else ""
             InjectableServiceType.MOCK_SERVER -> if (serviceName in Me2eTest.containerManager.containers) " Did you mean to use type 'Container'?" else ""
         }
-        logger.warn("Unable to find $serviceType with name '$serviceName'. Instance $serviceName cannot be injected.$messageHint")
+        return NoSuchServiceException("Unable to inject services: Unable to find $serviceType with name '$serviceName'.$messageHint")
     }
 
-    private fun logWarningForWrongFieldType(serviceType: InjectableServiceType, serviceName: String, service: Any, field: Field) {
-        logger.warn(
-            "$serviceType instance '$serviceName' of type ${service.javaClass.simpleName} cannot be assigned to " +
-                "field '${field.name}' of type ${field.type.simpleName}. Instance $serviceName cannot be injected."
+    private fun exceptionForWrongFieldType(
+        serviceType: InjectableServiceType,
+        serviceName: String,
+        service: Any,
+        field: Field
+    ): NoSuchServiceException {
+        return NoSuchServiceException(
+            "Unable to inject services: $serviceType instance '$serviceName' of type ${service.javaClass.simpleName} cannot be assigned to " +
+                "field '${field.name}' of type ${field.type.simpleName}. Please check the datatype of the field."
         )
     }
 

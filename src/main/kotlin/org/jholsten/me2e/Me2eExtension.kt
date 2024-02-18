@@ -67,10 +67,10 @@ class Me2eExtension : BeforeAllCallback, BeforeEachCallback, AfterEachCallback {
      */
     override fun beforeAll(context: ExtensionContext?) {
         if (Me2eTestEnvironmentManager.status != Me2eTestEnvironmentManager.EnvironmentStatus.RUNNING) {
-            throw TestAbortedException(
-                "The execution of this test class is aborted since the test environment has not started successfully. " +
-                    "Please check the logs to figure out what when wrong when starting the environment."
-            )
+            val message = "The execution of this test class is aborted since the test environment has not started successfully. " +
+                "Please check the logs to figure out what when wrong when starting the environment."
+            logger.error(message)
+            throw TestAbortedException(message)
         }
     }
 
