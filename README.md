@@ -383,7 +383,7 @@ This URL is then used as the base URL for the HTTP client for the Microservice c
 
 ##### Specific Configuration for Containers of type `DATABASE`
 In order to be able to interact with the database management system within a database container via the me2e interfaces, some additional information is required, which is also set via labels in the Docker-Compose file.
-- `org.jholsten.me2e.database.system`: Name of the database management system. Currently supported are `MY_SQL`, `POSTGRESQL`, `MARIA_DB` and `MONGO_DB`; the value `OTHER` is set for all other systems. For more information, see [here](#interacting-with-other-database-management-systems).
+- `org.jholsten.me2e.database.system`: Name of the database management system. Currently supported are `MY_SQL`, `POSTGRESQL`, `MARIA_DB` and `MONGO_DB`; the value `OTHER` is set for all other systems. For more information, see [here](#data-management-for-other-database-management-systems).
 - `org.jholsten.me2e.database.name`: Name of the database to be interacted with.
 - `org.jholsten.me2e.database.schema`: Name of the database schema to which the database belongs. You only need to set this label for PostgreSQL databases if the database is not part of the `public` schema. For the other SQL database management systems, the schema corresponds to the name of the database.
 - `org.jholsten.me2e.database.username`: Username to be used for logging into the database. It is only necessary to set this label if interaction with the database requires authentication.
@@ -440,6 +440,7 @@ services:
 In addition to the previously described basic database properties, you can apply further configurations via the labels, which are explained in more detail in the following sections (see [here](#data-management)).
 - `org.jholsten.me2e.database.reset.skip-tables`: If not explicitly deactivated in the me2e-config file via `settings.state-reset.clear-all-tables`, all tables of all databases are cleared after each test. With the label `org.jholsten.me2e.database.reset.skip-tables`, you can specify the names of the tables to be skipped when the database is cleared as a comma-separated list. This configuration is particularly useful, for example, if you use a migration tool such as [Flyway](https://flywaydb.org/) and want to retain the table containing the migration history for all tests.
 - `org.jholsten.me2e.database.init-script.$name`: With labels that correspond to this pattern, you can define database scripts that are to be executed when the database is started and after a reset. Each script requires a unique name (`$name`) and with the label's value, you can specify the path to the script to be executed, which must be located in the `resources` folder of your project.
+- `org.jholsten.me2e.database.connection.implementation`: If you want to interact with a database of a database management system that is not yet supported, you must provide an implementation of the abstract class [`DatabaseConnection`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.database.connection/-database-connection/index.html) yourself. Use the label `org.jholsten.me2e.database.connection.implementation` to specify the full class name of your implementation so that it can be used to establish the connection when the container is started. 
 
 For instance, a PostgreSQL database for which the table `flyway_schema_history` is to be skipped when the database is cleared and for which the initialization script named `init_db`, which is located in the `resources` folder at path `database/init_orderdb.sql`, is to be configured in the Docker-Compose as follows:
 
@@ -939,8 +940,151 @@ settings:
 ```
 
 #### Data Management
-- Initialen Zustand setzen
-- Zustand zurücksetzen
+me2e offers the possibility to manage the data of a database container by
+- setting an initial state using the execution of a script and
+- resetting the state after each test.
+
+The prerequisite for this is that the database management system of the container is one of the supported ones (i.e. `MY_SQL`, `POSTGRESQL`, `MARIA_DB` or `MONGO_DB`) and that me2e can establish a connection to the database.
+This requires the name of the database as well as the username and password to be set.
+So first take a look [here](#specific-configuration-for-containers-of-type-database) at how to configure the database container correctly so that this data is available.
+
+If the database management system is not one of those supported by default, you can also perform these function, but you must first apply certain configurations for this database connection.
+For instructions on how to do this, see [here](#data-management-for-other-database-management-systems).
+
+##### Setting an initial State
+The initial state of a database can be set by executing a script.
+For SQL databases, an SQL script is required; for MongoDB, a JavaScript script is needed.
+Place these scripts in the `resources` folder of your test project and add a label `org.jholsten.me2e.database.init-script.$name` to the corresponding database container in the Docker-Compose file for each script, where `$name` is an arbitrary but unique name for your script and the value of the label contains the path to the script in the `resources` folder.
+The script's `$name` does not play a decisive role, but allows you to uniquely identify scripts by name and execute them yourself as desired.
+
+<ins>Example</ins>\
+Probably the most useful purpose for the initialization scripts is to create accounts before the tests are executed.
+The following PostgreSQL script, which is located in the `resources` folder under `scripts/accounts.sql`, could serve as an example for the creation of these accounts.
+
+<details open>
+    <summary><ins><b>PostgreSQL</b> Script (<code>scripts/accounts.sql</code>)</ins></summary>
+    
+```sql
+INSERT INTO account(id, username, password, role)
+VALUES ('00000000-1111-1111-1111-000000000000', 'user', '2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b', 'USER'),
+       ('00000000-1111-1111-1111-000000000001', 'admin', 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3', 'ADMIN');
+```
+</details>
+
+<details>
+    <summary><ins><b>MongoDB</b> Script (<code>scripts/accounts.js</code>)</ins></summary>
+    
+```javascript
+conn = new Mongo("mongodb://dbuser:password@localhost:27017"); // For a database without authentication, use `conn = new Mongo();`
+db = conn.getDB("orderdb");
+
+db.account.insertMany([
+    {
+        id: '00000000-1111-1111-1111-000000000000',
+        username: 'user',
+        password: '2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b',
+        role: 'USER'
+    },
+    {
+        id: '00000000-1111-1111-1111-000000000001',
+        username: 'admin',
+        password: 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3',
+        role: 'ADMIN'
+    }
+]);
+```
+</details>
+
+We now assign the name `create_accounts` to this script and add the following label to the database container in the Docker-Compose:
+
+<details open>
+    <summary><ins>Configuration for <b>PostgreSQL</b> Script <code>scripts/accounts.sql</code></ins></summary>
+
+```yaml
+  db:
+    # ...
+    labels:
+      # ...
+      "org.jholsten.me2e.database.init-script.create_accounts": "scripts/accounts.sql"
+```
+</details>
+
+<details>
+    <summary><ins>Configuration for <b>MongoDB</b> Script <code>scripts/accounts.js</code></ins></summary>
+
+```yaml
+  db:
+    # ...
+    labels:
+      # ...
+      "org.jholsten.me2e.database.init-script.create_accounts": "scripts/accounts.js"
+```
+</details>
+
+This script is now executed as soon as the container is started and all containers in the environment have the status "healthy".
+It is particularly important to define a healthcheck for the database container here, as the initialization scripts can only be executed once the database is fully up and running.
+
+If several scripts are defined for one database container, these are executed in the order in which they are specified in the labels.
+
+##### Resetting the State
+By default, the state of all databases is reset after each test (see [here](#state-reset)), so that each test starts with the same state and the order in which the tests are executed has no influence on the results.
+When resetting the state, all tables of the database are cleared first and then the initialization scripts are executed again.
+To exclude certain tables that should not be cleared, you can use the label `org.jholsten.me2e.database.reset.skip-tables`.
+To do this, enter a comma-separated list of the table names that should not be cleared under this label.
+
+<ins>Example</ins>\
+To prevent the tables `table1` and `table2` from being cleared when the database state is reset, enter the following label to the database container in the Docker-Compose.
+
+```yaml
+# docker-compose.yml
+services:
+  db:
+    # ...
+    labels:
+      "org.jholsten.me2e.database.reset.skip-tables": "table1,table2"
+``` 
+
+##### Data Management for other Database Management Systems
+The interaction with the databases takes place via the abstract class [`DatabaseConnection`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.database.connection/-database-connection/index.html), for which me2e provides 2 default implementations:
+- [`SQLDatabaseConnection`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.database.connection/-s-q-l-database-connection/index.html): for interacting with PostgreSQL, MySQL and MariaDB databases
+- [`MongoDBConnection`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.database.connection/-mongo-d-b-connection/index.html): for interacting with MongoDB databases
+
+In order to interact with a currently not supported database management system via the me2e interfaces, you need to implement the [`DatabaseConnection`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.database.connection/-database-connection/index.html) yourself.
+To do this, create a class that inherits from `DatabaseConnection` and that contains a class `Builder` that inherits from [`DatabaseConnection.Builder`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.database.connection/-database-connection/-builder/index.html).
+
+```kotlin
+package com.example
+
+import org.jholsten.me2e.container.database.connection.DatabaseConnection
+
+class CustomDatabaseConnection(host: String, port: Int, database: String, username: String?, password: String?) : DatabaseConnection(
+    host = host,
+    port = port,
+    database = database,
+    username = username,
+    password = password,
+) {
+    // ...
+
+    class Builder : DatabaseConnection.Builder<Builder>() {
+        // ...
+    }
+}
+```
+
+Now add the following label with the full class name of your custom database connection class to the database container that should use this implementation:
+
+```yaml
+# docker-compose.yml
+services:
+  db:
+    # ...
+    labels:
+      "org.jholsten.me2e.database.connection.implementation": "com.example.CustomDatabaseConnection"
+```
+
+With this setting, as soon as all containers are healthy, me2e will no longer attempt to use one of the default implementations `SQLDatabaseConnection` and `MongoDBConnecion`, but instead will set a new instance of your custom class in the `connection` attribute of the corresponding [`DatabaseContainer`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.database/-database-container/index.html) instance using the builder of your custom class.
+Please note that only the attributes defined in the `DatabaseConnection.Builder` (i.e. `host`, `port`, `database`, `username`, `password`) are available in your builder class. 
 
 ### Defining Tests
 #### Injecting services
@@ -948,11 +1092,6 @@ settings:
 #### Interacting with Containers
 
 #### Interacting with Databases
-
-##### Interacting with other Database Management Systems
-Die Interaktion mit den Datenbanken erfolgt über die [`DatabaseConnection`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.database.connection/-database-connection/index.html)
-
-In order to interact with a currently not supported database management system via the me2e interfaces, you need to implement the [`DatabaseConnection`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.database.connection/-database-connection/index.html) yourself. 
 
 #### Executing HTTP Requests and Verifying their Responses
 ##### Executing HTTP Requests
