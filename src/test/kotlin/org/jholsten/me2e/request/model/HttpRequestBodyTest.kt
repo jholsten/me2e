@@ -8,6 +8,7 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.ArgumentsProvider
 import org.junit.jupiter.params.provider.ArgumentsSource
 import java.io.File
+import java.io.FileNotFoundException
 import kotlin.test.*
 import java.nio.file.Files
 import java.util.stream.Stream
@@ -75,6 +76,20 @@ internal class HttpRequestBodyTest {
         RecursiveComparison.assertEquals(byteArrayOf(97, 98, 99), body.asBinary())
         assertEquals("YWJj", body.asBase64())
         assertEquals(ContentType.TEXT_PLAIN_UTF8, body.contentType)
+    }
+
+    @Test
+    fun `Contents from file should be set in request body`() {
+        val body = HttpRequestBody.Builder()
+            .withContentFromFile("test-file.txt")
+            .build()
+
+        assertEquals("Test", body.asString())
+    }
+
+    @Test
+    fun `Setting contents from non-existing file should fail`() {
+        assertFailsWith<FileNotFoundException> { HttpRequestBody.Builder().withContentFromFile("non-existing") }
     }
 
     class StringBodyArgumentProvider : ArgumentsProvider {

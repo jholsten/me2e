@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonNode
 import org.jholsten.me2e.parsing.exception.ParseException
 import org.jholsten.me2e.parsing.utils.DeserializerFactory
+import org.jholsten.me2e.parsing.utils.FileUtils
 import org.jholsten.me2e.utils.logger
 import java.io.File
 import java.nio.charset.Charset
@@ -107,6 +108,17 @@ class HttpRequestBody {
          */
         fun withContent(content: ByteArray): Builder = apply {
             this.binaryContent = content
+        }
+
+        /**
+         * Reads the content from the file with the given name, relative to this project's
+         * `resources` folder, and sets these contents, encoded as a byte array, for this request body.
+         * @param filename Name of the file whose contents should be read. Needs to be located in `resources` folder.
+         * @return This builder instance, to use for chaining.
+         * @throws java.io.FileNotFoundException if file with the given name could not be found.
+         */
+        fun withContentFromFile(filename: String): Builder = apply {
+            this.fileContent = FileUtils.getResourceAsFile(filename)
         }
 
         /**
