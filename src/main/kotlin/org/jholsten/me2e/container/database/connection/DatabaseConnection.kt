@@ -41,7 +41,7 @@ abstract class DatabaseConnection protected constructor(
     /**
      * Database management system which contains the database.
      */
-    val system: DatabaseManagementSystem,
+    val system: DatabaseManagementSystem = DatabaseManagementSystem.OTHER,
 ) {
     /**
      * Returns list of all tables of the database. Excludes system tables such as `pg_class` in PostgreSQL.
