@@ -231,9 +231,12 @@ class DockerCompose private constructor(
      */
     fun waitUntilHealthy(serviceNames: List<String>, timeout: Long) {
         val servicesWithHealthcheck = serviceNames.filter { hasHealthcheck(it) }
-        logger.info("Waiting at most $timeout seconds for ${servicesWithHealthcheck.size} services to become healthy...")
-        servicesWithHealthcheck.forEach { waitUntilHealthy(it, timeout) }
-        logger.info("Services [${servicesWithHealthcheck.joinToString(", ")}] are healthy.")
+        logWarningForMissingHealthchecks(servicesWithHealthcheck, serviceNames)
+        if (servicesWithHealthcheck.isNotEmpty()) {
+            logger.info("Waiting at most $timeout seconds for ${servicesWithHealthcheck.size} services to become healthy...")
+            servicesWithHealthcheck.forEach { waitUntilHealthy(it, timeout) }
+            logger.info("Services [${servicesWithHealthcheck.joinToString(", ")}] are healthy.")
+        }
     }
 
     /**
@@ -634,5 +637,19 @@ class DockerCompose private constructor(
             }
         }
         return stringBuilder.toString()
+    }
+
+    private fun logWarningForMissingHealthchecks(servicesWithHealthcheck: List<String>, serviceNames: List<String>) {
+        if (servicesWithHealthcheck.isEmpty()) {
+            logger.warn(
+                "No healthcheck is defined for any service in the Docker-Compose. As it is not ensured that all services are " +
+                    "fully up and running before the tests are executed, this can lead to unpredictable test results."
+            )
+        } else if (servicesWithHealthcheck.size != serviceNames.size) {
+            logger.warn(
+                "Not all services in the Docker-Compose have a healthcheck defined. As it is not ensured that all services are " +
+                    "fully up and running before the tests are executed, this can lead to unpredictable test results."
+            )
+        }
     }
 }
