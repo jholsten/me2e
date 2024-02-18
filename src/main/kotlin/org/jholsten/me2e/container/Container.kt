@@ -246,16 +246,19 @@ open class Container internal constructor(
      * @param containerPath Absolute path to the file to be copied inside the container. Note that this is always
      * considered as an absolute path inside the container, independent of the container's working directory.
      * @param destinationPath Absolute path to the destination file on this host.
+     * @return File copied from the container.
      * @throws IllegalStateException if container is not initialized, i.e. not started.
      * @throws java.io.FileNotFoundException if file at [containerPath] does not exist.
      * @throws DockerException if file could not be copied.
      */
-    fun copyFileFromContainer(containerPath: String, destinationPath: String) {
+    fun copyFileFromContainer(containerPath: String, destinationPath: String): File {
         assertThatContainerIsInitialized()
         logger.debug("Copying file '$containerPath' from container $name to host at path '$destinationPath'...")
         try {
-            File(destinationPath).parentFile?.mkdirs()
+            val destinationFile = File(destinationPath)
+            destinationFile.parentFile?.mkdirs()
             dockerContainer!!.state.copyFileFromContainer(containerPath, destinationPath)
+            return destinationFile
         } catch (e: NotFoundException) {
             throw FileNotFoundException("File '$containerPath' could not be found in container $name.")
         } catch (e: DockerClientException) {

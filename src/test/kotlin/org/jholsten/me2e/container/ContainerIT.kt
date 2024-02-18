@@ -151,8 +151,9 @@ class ContainerIT {
     )
     fun `Copying file from container should succeed`(containerPath: String, destinationPath: String) {
         val destination = "$tempDirectory/$destinationPath"
-        backendApi.copyFileFromContainer(containerPath, destination)
+        val file = backendApi.copyFileFromContainer(containerPath, destination)
 
+        assertEquals("", file.readText())
         assertFileExistsOnHost(destination)
         deleteFileOnHost(destinationPath)
     }
