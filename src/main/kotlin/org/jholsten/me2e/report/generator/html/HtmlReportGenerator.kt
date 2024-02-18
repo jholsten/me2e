@@ -44,13 +44,13 @@ open class HtmlReportGenerator(
 
     /**
      * Additional resources required for the templates (e.g. `.css` or `.js` files) to be
-     * copied to the [outputDirectory] as map of source path and destination path.
+     * copied to the [outputDirectory] as map of destination path and source path.
      * All source files need to be located in `resources` folder.
      */
-    protected val additionalResources: Map<String, String> = mapOf(
-        "report/css/report-style.css" to "css/report-style.css",
-        "report/tree-table/jquery.treetable.js" to "tree-table/jquery.treetable.js",
-        "report/tree-table/jquery.treetable.css" to "tree-table/jquery.treetable.css",
+    protected val additionalResources: MutableMap<String, String> = mutableMapOf(
+        "css/report-style.css" to "report/css/report-style.css",
+        "tree-table/jquery.treetable.js" to "report/tree-table/jquery.treetable.js",
+        "tree-table/jquery.treetable.css" to "report/tree-table/jquery.treetable.css",
     ),
 
     /**
@@ -128,7 +128,7 @@ open class HtmlReportGenerator(
      * Copies additional resources required for the test report in the [outputDirectory].
      */
     protected open fun copyAdditionalResources() {
-        for ((source, destination) in additionalResources) {
+        for ((destination, source) in additionalResources) {
             val resource = FileUtils.getResourceAsStream(source)
             val destinationFile = File("$outputDirectory/$destination")
             destinationFile.mkdirs()
