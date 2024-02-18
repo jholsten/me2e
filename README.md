@@ -487,7 +487,7 @@ Similar to a Docker-Compose file, you need to assign a unique key for each servi
 Please note that a separate Mock Server must be defined for each domain and each subdomain.
 
 <ins>Example</ins>\
-If your Microservice System communicates with two external systems that are accessible via http://example.com and http//payment.example.com, the Mock Server definition in the me2e-config could look like this:
+If your Microservice System communicates with two external systems that are accessible via http://example.com and http://payment.example.com, the Mock Server definition in the me2e-config could look like this:
 
 ```yaml
 # me2e-config.yml
@@ -1311,10 +1311,190 @@ val response = microservice.post(
 </table>
 
 ##### Verifying HTTP Responses
-- assertThat
+To verify that the response of a Microservice meets your expectations, you can use the [`assertThat`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.assertions/assert-that.html) method in combination with the functions from the [`assertions` package](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.assertions/index.html).
+This allows you to ensure that all possible properties of the response have the expected value.
 
+<ins>Examples</ins>
+<table>
+    <tr>
+        <th>Expected Response</th>
+        <th>Assertions</th>
+    </tr>
+    <tr>
+<td>
+
+```
+HTTP/1.1 200 OK
+Content-Type: text/plain
+Content-Length: 18
+
+Some Response Text
+```
+</td>
+<td>
+
+```kotlin
+assertThat(response)
+    .statusCode(equalTo(200))
+    .message(equalTo("OK"))
+    .protocol(equalTo("HTTP/1.1"))
+    .contentType(equalTo("text/plain"))
+    .body(equalTo("Some Response Text"))
+```
+</td>
+    </tr>
+    <tr>
+<td>
+
+```
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 31
+
+{"id": 123, "name": "John Doe"}
+```
+</td>
+<td>
+
+```kotlin
+assertThat(response)
+    .statusCode(equalTo(200))
+    .contentType(equalTo("application/json"))
+    .jsonBody(containsNode("id").withValue(equalTo("123")))
+    .jsonBody(containsNode("name").withValue(equalTo("John Doe")))
+```
+</td>
+    </tr>
+    <tr>
+<td>
+
+```
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 470
+Server: Apache/2.0
+
+{
+     "title": "Developing, Verifying, and Maintaining High-Quality Automated Test Scripts",
+     "authors": [
+         {
+             "firstname": "Vahid",
+             "lastname": "Garousi"
+         },
+         {
+             "firstname": "Michael",
+             "lastname": "Felderer"
+         }
+     ],
+     "year": 2016,
+     "keywords": ["Software Testing", "Test Automation"],
+     "journal": {
+         "title": "IEEE Software",
+         "volume": 33,
+         "issue": 3
+     }
+}
+```
+</td>
+<td>
+
+```kotlin
+assertThat(response)
+    .statusCode(between(200, 299))
+    .protocol(containsString("HTTP"))
+    .headers(containsKey("Server").withValue(equalTo("Apache/2.0")))
+    .jsonBody(containsNode("title").withValue(containsString("Automated Test Scripts")))
+    .jsonBody(containsNode("authors[0].lastname").withValue(equalTo("Garousi")))
+    .jsonBody(containsNode("authors[0]").withValue(equalTo("{\"firstname\":\"Vahid\",\"lastname\":\"Garousi\"}")))
+    .jsonBody(containsNode("year").withValue(equalTo("2016")))
+    .jsonBody(containsNode("keywords[1]").withValue(equalTo("Test Automation")))
+```
+</td>
+    </tr>
+    <tr>
+<td>
+
+```
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 32
+
+{"first": "value1", "second": 2}
+```
+</td>
+<td>
+
+```kotlin
+val expectedResponse = Pair("value1", 2)
+
+assertThat(response)
+    .statusCode(equalTo(200))
+    .objectBody(equalTo(expectedResponse))
+```
+</td>
+    </tr>
+</table>
+
+###### Defining Expected Responses
+With the functions presented above, the test is terminated as soon as the first property of the response does not meet the expectations.
+If you want to test several properties at the same time instead and receive a collective evaluation at the end after all properties have been tested, you can use the [`ExpectedResponse`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.request.assertions/-expected-response/index.html).
+As with the previous function, you can use instances of this class to define all the expected properties of the response and then pass this object to the [`conformsTo`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.request.assertions/-assertable-response/conforms-to.html) function.
+
+<ins>Example</ins>
+<table>
+    <tr>
+        <th>Expected Response</th>
+        <th>Assertions</th>
+    </tr>
+    <tr>
+<td>
+
+```
+HTTP/1.1 200 OK
+Content-Type: text/plain
+Content-Length: 18
+
+Some Response Text
+```
+</td>
+<td>
+
+```kotlin
+val expectedResponse = ExpectedResponse()
+    .expectStatusCode(equalTo(200))
+    .expectMessage(equalTo("OK"))
+    .expectProtocol(equalTo("HTTP/1.1"))
+    .expectContentType(equalTo("text/plain"))
+    .expectBody(equalTo("Some Response Text"))
+
+assertThat(response).conformsTo(expectedResponse)
+```
+</td>
+    </tr>
+</table>
 
 ##### Authentication
+If you want to send an authenticated request to a Microservice, for example with a Bearer token in the Authorization header, you can use the [`authenticate`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.microservice/-microservice-container/authenticate.html) method of the [`MicroserviceContainer`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.microservice/-microservice-container/index.html) class.
+You need to pass an instance of the [`Authenticator`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.microservice.authentication/-authenticator/index.html) class to this method, which uses the [`getRequestInterceptor`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.microservice.authentication/-authenticator/get-request-interceptor.html) function to provide a request interceptor that performs the required authentication and adapts the request accordingly.
+Note that this authenticator is used for all requests to this Microservice in the current test.
+Unless set otherwise in the me2e-config file in `settings.state-reset.reset-request-interceptors` (see [here](#state-reset)), this request interceptor is only valid for the execution of a single test and the interceptors are reset afterwards.
+
+By default, me2e only provides [`UsernamePasswordAuthentication`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.microservice.authentication/-username-password-authentication/index.html) for basic authentication.
+If you want to use other authentication methods, you need to provide a corresponding implementation yourself through a class that inherits from the [`Authenticator`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.microservice.authentication/-authenticator/index.html).
+
+<ins>Example</ins>
+```kotlin
+@Test
+fun `Executing authenticated GET request should succeed`() {
+    microservice.authenticate(UsernamePasswordAuthentication("admin", "secret"))
+
+    val response = microservice.get(RelativeUrl("/secured"))
+
+    assertThat(response)
+        .statusCode(equalTo(200))
+        .body(equalTo("\"admin\""))
+}
+```
 
 #### Mock Server Verification
 
