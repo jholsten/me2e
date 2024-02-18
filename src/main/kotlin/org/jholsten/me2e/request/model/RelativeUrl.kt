@@ -58,6 +58,7 @@ class RelativeUrl(
          * Examples:
          * - `/search`
          * - `/account/groups`
+         * The leading slash of the path is optional, as it is automatically prepended upon initialization.
          * @param path Path to set for the URL.
          * @return This builder instance, to use for chaining.
          */

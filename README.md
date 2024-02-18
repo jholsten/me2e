@@ -1186,7 +1186,7 @@ fun `File in container should have certain content`() {
 fun `Environment variable should have certain value`() {
     val result = backendApi.execute("echo", "\$MY_ENV")
     assertEquals(0, result.exitCode)
-    assertEquals("ExpectedContent", result.stdout)
+    assertEquals("ExpectedValue", result.stdout)
 }
 ```
 </td>
@@ -1194,13 +1194,127 @@ fun `Environment variable should have certain value`() {
 </table>
 
 #### Interacting with Databases
+The prerequisite for interacting with databases via the me2e interfaces is that a connection to the database has been established, i.e. all the required properties are set in the Docker-Compose (see [here](#specific-configuration-for-containers-of-type-database) and [here](#data-management)) and the database management system is either one of those that is supported by default or you have provided a custom implementation of the [`DatabaseConnection`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.database.connection/-database-connection/index.html) yourself (see [here](#data-management-for-other-database-management-systems)).
+If these requirements are met, you can interact with the database via the functions of the [`DatabaseContainer`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.database/-database-container/index.html) and, for example, read the entries from the database or execute certain scripts.
+
+<ins>Examples</ins>
+<table>
+    <tr>
+        <th>Checking whether certain tables are available in the database</th>
+<td>
+    
+```kotlin
+@Test
+fun `Certain tables should be available in the database`() {
+    val tables = database.tables
+    assertEquals(listOf("table1", "table2"), tables)
+}
+```
+</td>
+    </tr>
+    <tr>
+        <th>Checking whether a certain table contains certain entries</th>
+<td>
+    
+```kotlin
+@Test
+fun `Certain entries should be available in the database`() {
+    val result = database.getAllFromTable("table1")
+    assertEquals(listOf("column1", "column2"), result.columns)
+    assertEquals(listOf("value1", "value2", "value3"), result.getEntriesInColumn("column1"))
+}
+```
+</td>
+    </tr>
+</table>
 
 #### Executing HTTP Requests and Verifying their Responses
-##### Executing HTTP Requests
-- Authentifizierung
+With containers of type `MICROSERVICE`, which are represented by instances of the [`MicroserviceContainer`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.microservice/-microservice-container/index.html) class, you can interact via their HTTP REST API.
+You can execute [`GET`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.microservice/-microservice-container/get.html), [`POST`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.microservice/-microservice-container/post.html), [`PUT`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.microservice/-microservice-container/put.html), [`PATCH`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.microservice/-microservice-container/patch.html) and [`DELETE`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.microservice/-microservice-container/delete.html) requests using the integrated HTTP client, which is initialized with the container's base URL after it is started.
+For all of these functions, you need to pass the URL of the endpoint to be addressed, relative to the base URL of the microservice, as the first parameter.
+To specify this [relative URL](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.request.model/-relative-url/index.html), you can use either its constructor or its builder class.
+
+<ins>Examples</ins>\
+Assuming that the microservice has the following base URL: `http://localhost:1234`, the following relative URLs are resolved as follows:
+
+<table>
+    <tr>
+        <th>Relative URL using Constructor</th>
+        <th>Relative URL using Builder</th>
+        <th>Complete URL</th>
+    </tr>
+    <tr>
+<td>
+
+```kotlin
+RelativeUrl("/account?id=123")
+```
+</td>
+<td>
+
+```kotlin
+RelativeUrl.Builder()
+    .withPath("/account")
+    .withQueryParameter("id", "123")
+    .build()
+```
+</td>
+    <td><code>http://localhost:1234/account?id=123</code></td>
+    </tr>
+    <tr>
+<td>
+
+```kotlin
+RelativeUrl("/search?q=abc&q=xyz#p=42")
+```
+</td>
+<td>
+
+```kotlin
+RelativeUrl.Builder()
+    .withPath("/search")
+    .withQueryParameter("q", "abc")
+    .withQueryParameter("q", "xyz")
+    .withFragment("p=42")
+    .build()
+```
+</td>
+    <td><code>http://localhost:1234/search?q=abc&q=xyz#p=42</code></td>
+    </tr>
+</table>
+
+<ins>Request Examples</ins>
+<table>
+    <tr>
+        <th>Executing a <code>GET</code> request</th>
+<td>
+    
+```kotlin
+val response = microservice.get(RelativeUrl("/account?id=123"))
+```
+</td>
+    </tr>
+    <tr>
+        <th>Executing a <code>POST</code> request with body</th>
+<td>
+    
+```kotlin
+val response = microservice.post(
+    RelativeUrl("/account"),
+    HttpRequestBody.Builder()
+        .withJsonContent(CreateAccountDto(username = "user"))
+        .build()
+)
+```
+</td>
+    </tr>
+</table>
 
 ##### Verifying HTTP Responses
 - assertThat
+
+
+##### Authentication
 
 #### Mock Server Verification
 
