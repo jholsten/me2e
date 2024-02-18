@@ -132,13 +132,25 @@ internal class DatabaseContainerIT {
     @Suppress("UNUSED_PARAMETER")
     fun `Starting database container should execute initialization scripts`(name: String, databaseContainer: DatabaseContainer) {
         RecursiveComparison.assertEquals(listOf("company", "employee"), databaseContainer.tables, ignoreCollectionOrder = true)
+        val companyResult = databaseContainer.getAllFromTable("company")
+        val employeeResult = databaseContainer.getAllFromTable("employee")
         if (databaseContainer.system.isSQL) {
-            RecursiveComparison.assertEquals(expectedCompanies, databaseContainer.getAllFromTable("company"))
-            RecursiveComparison.assertEquals(expectedEmployees, databaseContainer.getAllFromTable("employee"))
+            RecursiveComparison.assertEquals(expectedCompanies, companyResult)
+            RecursiveComparison.assertEquals(expectedEmployees, employeeResult)
+            RecursiveComparison.assertEquals(listOf("id", "name"), companyResult.columns, ignoreCollectionOrder = true)
+            RecursiveComparison.assertEquals(listOf("id", "name", "company_id"), employeeResult.columns, ignoreCollectionOrder = true)
         } else {
-            assertEqualsIgnoreInternalId(expectedCompanies, databaseContainer.getAllFromTable("company"))
-            assertEqualsIgnoreInternalId(expectedEmployees, databaseContainer.getAllFromTable("employee"))
+            assertEqualsIgnoreInternalId(expectedCompanies, companyResult)
+            assertEqualsIgnoreInternalId(expectedEmployees, employeeResult)
+            RecursiveComparison.assertEquals(listOf("_id", "id", "name"), companyResult.columns, ignoreCollectionOrder = true)
+            RecursiveComparison.assertEquals(
+                listOf("_id", "id", "name", "company_id"),
+                employeeResult.columns,
+                ignoreCollectionOrder = true
+            )
         }
+        RecursiveComparison.assertEquals(listOf(1, 2), companyResult.getEntriesInColumn("id"))
+        RecursiveComparison.assertEquals(listOf("Employee A.1", "Employee A.2", "Employee B.1"), employeeResult.getEntriesInColumn("name"))
     }
 
     private fun assertEqualsIgnoreInternalId(expected: List<Map<String, Any?>>, actual: List<Map<String, Any?>>) {
