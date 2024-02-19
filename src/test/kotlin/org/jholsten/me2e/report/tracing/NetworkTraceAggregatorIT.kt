@@ -25,7 +25,7 @@ internal class NetworkTraceAggregatorIT {
 
     companion object {
         private val networkTraceAggregator = NetworkTraceAggregator()
-        private val configAnnotation = Me2eTestConfigScanner.findFirstTestConfigAnnotation()!!
+        private val configAnnotation = Me2eTestConfigScanner.findFirstTestConfigAnnotation()
         private val config = configAnnotation.format.parser.parseFile(configAnnotation.config)
 
         private val containerManager: ContainerManager = ContainerManager(
