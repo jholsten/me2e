@@ -61,11 +61,18 @@ class Me2eExtension : BeforeAllCallback, BeforeEachCallback, AfterEachCallback {
     private val logger = logger<Me2eExtension>()
 
     /**
+     * Flag indicating whether this extension is completely disabled.
+     * Can be set via the environment variable `ME2E_EXTENSION_DISABLED`.
+     */
+    private val disabled: Boolean = System.getenv("ME2E_EXTENSION_DISABLED")?.toBoolean() ?: false
+
+    /**
      * Callback function which is executed before the execution of a test class starts.
      * Checks whether the test environment has successfully started. If this is not the case, the current test class
      * and all subsequent test classes are aborted.
      */
     override fun beforeAll(context: ExtensionContext?) {
+        if (disabled) return
         if (Me2eTestEnvironmentManager.status != Me2eTestEnvironmentManager.EnvironmentStatus.RUNNING) {
             val message = "The execution of this test class is aborted since the test environment has not started successfully. " +
                 "Please check the logs to figure out what when wrong when starting the environment."
@@ -81,6 +88,7 @@ class Me2eExtension : BeforeAllCallback, BeforeEachCallback, AfterEachCallback {
      * If this attempt fails or if the container is still unhealthy, the test is aborted.
      */
     override fun beforeEach(context: ExtensionContext?) {
+        if (disabled) return
         if (Me2eTest.config.settings.assertHealthy) {
             checkContainerHealth()
         }
@@ -91,6 +99,7 @@ class Me2eExtension : BeforeAllCallback, BeforeEachCallback, AfterEachCallback {
      * If activated in the [Me2eTestConfig], the state of all containers, Mock Servers and databases are reset.
      */
     override fun afterEach(context: ExtensionContext?) {
+        if (disabled) return
         if (!Me2eTest.config.settings.stateReset.any()) return
         val exception = context?.executionException?.orElse(null)
         if (exception is TestAbortedException) {

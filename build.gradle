@@ -143,11 +143,6 @@ dokkaHtml {
     }
 }
 
-// Disable testcontainer's Ryuk for all tests
-tasks.withType(Test).configureEach {
-    environment "TESTCONTAINERS_RYUK_DISABLED", "true"
-}
-
 // Apply a specific Java toolchain to ease working on different environments.
 java {
     toolchain {
@@ -165,4 +160,8 @@ test {
     testLogging.showStackTraces = true
     // Disable Me2eTestExecutionListener for internal tests
     systemProperty("junit.platform.execution.listeners.deactivate", "org.jholsten.me2e.Me2eTestExecutionListener")
+    // Disable Me2e extension for internal tests
+    environment "ME2E_EXTENSION_DISABLED", "true"
+    // Disable testcontainer's Ryuk for internal tests
+    environment "TESTCONTAINERS_RYUK_DISABLED", "true"
 }
