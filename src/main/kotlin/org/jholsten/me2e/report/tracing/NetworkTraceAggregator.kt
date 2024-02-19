@@ -23,6 +23,8 @@ internal class NetworkTraceAggregator {
 
         /**
          * IP address of the host which is running the tests.
+         * If the environment variable `RUNNER_IP` is not set, it is assumed that the host which is running the tests
+         * is the same as the Docker host.
          */
         private val hostIpAddress: String by lazy {
             val ipAddress = System.getenv("RUNNER_IP")?.trim() ?: getHostDockerInternalIp()
@@ -32,7 +34,7 @@ internal class NetworkTraceAggregator {
 
         /**
          * Starts a temporary Docker container to retrieve the IP address of `host.docker.internal`,
-         * i.e. the IP address of the test runner.
+         * i.e. the IP address of the Docker host.
          * @return IP address of `host.docker.internal`.
          */
         private fun getHostDockerInternalIp(): String {
