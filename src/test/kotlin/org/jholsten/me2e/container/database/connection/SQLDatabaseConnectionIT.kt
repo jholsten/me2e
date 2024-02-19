@@ -12,6 +12,7 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.ArgumentsProvider
 import org.junit.jupiter.params.provider.ArgumentsSource
 import org.testcontainers.containers.GenericContainer
+import org.testcontainers.containers.wait.strategy.Wait
 import java.io.File
 import java.io.FileNotFoundException
 import java.util.stream.Stream
@@ -29,6 +30,7 @@ internal class SQLDatabaseConnectionIT {
                 )
             )
             .withExposedPorts(5432)
+            .waitingFor(Wait.forLogMessage(".*database system is ready to accept connections.*", 2))
 
         private lateinit var postgreSQLConnection: SQLDatabaseConnection
 
@@ -42,6 +44,7 @@ internal class SQLDatabaseConnectionIT {
                 )
             )
             .withExposedPorts(3306)
+            .waitingFor(Wait.forSuccessfulCommand("mysqladmin ping -h 127.0.0.1 -u user --password=123"))
 
         private lateinit var mySQLConnection: SQLDatabaseConnection
 
@@ -55,6 +58,7 @@ internal class SQLDatabaseConnectionIT {
                 )
             )
             .withExposedPorts(3306)
+            .waitingFor(Wait.forLogMessage(".*ready for connections.*", 2))
 
         private lateinit var mariaDBConnection: SQLDatabaseConnection
 
