@@ -75,30 +75,39 @@ class MongoDBConnection private constructor(
      * If specified, the settings provided in the constructor are used, otherwise the default [MongoClientSettings] are used.
      * The connection string is set to the value of the [url].
      */
-    val settings: MongoClientSettings = when {
-        settings != null -> MongoClientSettings.builder(settings)
-        else -> MongoClientSettings.builder()
-    }.applyConnectionString(ConnectionString(url)).build()
+    val settings: MongoClientSettings by lazy {
+        val builder = when {
+            settings != null -> MongoClientSettings.builder(settings)
+            else -> MongoClientSettings.builder()
+        }
+        builder.applyConnectionString(ConnectionString(url)).build()
+    }
 
     /**
      * Mongo client which is connecting to the database.
      */
-    val client: MongoClient = MongoClients.create(this.settings)
+    val client: MongoClient by lazy {
+        MongoClients.create(this.settings)
+    }
 
     /**
      * Connection to the database instance.
      */
-    val connection: MongoDatabase = client.getDatabase(database)
+    val connection: MongoDatabase by lazy {
+        client.getDatabase(database)
+    }
 
     /**
      * Command for executing shell commands inside the MongoDB container.
      * For versions < 5.0, the command is `mongo`, whereas for newer versions, the command is `mongosh`.
      * @see <a href="https://www.mongodb.com/docs/v4.4/mongo/#std-label-compare-mongosh-mongo">MongoDB Documentation</a>
      */
-    val mongoShellCommand: String? = if (container == null) {
-        null
-    } else {
-        getMongoCommand(container)
+    val mongoShellCommand: String? by lazy {
+        if (container == null) {
+            null
+        } else {
+            getMongoCommand(container)
+        }
     }
 
     override val tables: List<String>

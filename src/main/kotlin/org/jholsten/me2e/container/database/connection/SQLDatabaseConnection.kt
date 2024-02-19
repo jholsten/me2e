@@ -66,7 +66,9 @@ class SQLDatabaseConnection private constructor(
     /**
      * JDBC connection to the database.
      */
-    val connection: Connection = connect()
+    val connection: Connection by lazy {
+        connect()
+    }
 
     override val tables: List<String>
         get() = fetchTables()
