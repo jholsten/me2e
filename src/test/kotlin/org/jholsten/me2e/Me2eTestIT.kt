@@ -108,6 +108,13 @@ class Me2eTestIT : Me2eTest() {
         )
     }
 
+    @Test
+    fun `Invoking health endpoint should succeed`() {
+        val response = backendApi.get(RelativeUrl("/health"))
+
+        assertThat(response).statusCode(equalTo(200))
+    }
+
     @Nested
     inner class NestedMe2eTest {
         @Test
