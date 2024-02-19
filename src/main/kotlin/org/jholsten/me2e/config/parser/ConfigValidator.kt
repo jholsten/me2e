@@ -39,6 +39,7 @@ internal class ConfigValidator : Validator<TestConfig> {
     /**
      * Validates the stubs defined for the Mock Servers in the given test configuration.
      * Ensures that each [org.jholsten.me2e.mock.stubbing.MockServerStub.name] is unique.
+     * Also logs a warning if there are Mock Server without any registered stubs.
      */
     private fun validateMockServerStubs(testConfig: TestConfig) {
         val duplicateStubNames = testConfig.environment.mockServers.values
@@ -46,6 +47,14 @@ internal class ConfigValidator : Validator<TestConfig> {
             .filter { it.second.isNotEmpty() }
         if (duplicateStubNames.isNotEmpty()) {
             throwValidationExceptionForDuplicateStubNames(duplicateStubNames)
+        }
+        val mockServersWithoutStubs = testConfig.environment.mockServers.values.filter { it.stubs.isEmpty() }
+        if (mockServersWithoutStubs.isNotEmpty()) {
+            logger.warn(
+                "No stubs registered for Mock Servers ${mockServersWithoutStubs.map { it.name }}. " +
+                    "In order for these Mock Servers to respond to requests with predefined responses, you need to specify at least " +
+                    "one stub in the me2e-config file. Otherwise all requests will be answered with 404."
+            )
         }
     }
 
