@@ -9,9 +9,9 @@ import org.jholsten.me2e.container.injection.InjectService
 import org.jholsten.me2e.container.microservice.MicroserviceContainer
 import org.jholsten.me2e.mock.MockServer
 import org.jholsten.me2e.mock.verification.ExpectedRequest
+import org.jholsten.me2e.request.model.ContentType
 import org.jholsten.me2e.request.model.HttpMethod
 import org.jholsten.me2e.request.model.HttpRequestBody
-import org.jholsten.me2e.request.model.ContentType
 import org.jholsten.me2e.request.model.RelativeUrl
 import org.jholsten.me2e.utils.logger
 import org.junit.jupiter.api.AfterAll
@@ -48,10 +48,9 @@ class Me2eTestIT : Me2eTest() {
         @JvmStatic
         @BeforeAll
         fun beforeAll() {
-            mockServerManager.start()
-            containerManager.start()
+            Me2eTestEnvironmentManager.startTestEnvironment()
         }
-        
+
         @JvmStatic
         @AfterAll
         fun afterAll() {
