@@ -1,5 +1,6 @@
 package org.jholsten.me2e.report.tracing.model
 
+import org.jholsten.me2e.utils.prettyPrintJson
 import java.time.Duration
 import java.time.Instant
 import java.util.*
@@ -138,7 +139,7 @@ data class AggregatedNetworkTrace internal constructor(
             uri = packet.uri,
             method = packet.method,
             headers = packet.headers,
-            payload = packet.payload,
+            payload = packet.payload?.let { if (it is String) prettyPrintJson(it) else it },
         )
     }
 
@@ -217,7 +218,7 @@ data class AggregatedNetworkTrace internal constructor(
             statusCode = packet.statusCode,
             statusCodeDescription = packet.statusCodeDescription,
             headers = packet.headers,
-            payload = packet.payload,
+            payload = packet.payload?.let { if (it is String) prettyPrintJson(it) else it },
         )
     }
 }

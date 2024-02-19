@@ -29,6 +29,20 @@ internal inline fun <reified T> toJson(obj: T): String {
 }
 
 /**
+ * Tries to format the given content to a string with indentation.
+ * If [content] is not a (valid) JSON value, the original content is returned.
+ */
+internal fun prettyPrintJson(content: String): Any {
+    return try {
+        val mapper = DeserializerFactory.getObjectMapper()
+        val json = mapper.readTree(content)
+        mapper.writer(customPrettyPrinter).writeValueAsString(json)
+    } catch (e: Exception) {
+        content
+    }
+}
+
+/**
  * Custom printer for serializing objects to string.
  * Adds indentation to entries in arrays.
  */
