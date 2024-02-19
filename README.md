@@ -524,7 +524,6 @@ Note that the name must be unique for each Mock Server.
 A stub definition for the payment request mentioned in the example above may look like this: 
 
 ```json
-// stubs/payment-service/payment_request_stub.json
 {
   "request": {
     "method": "POST",
@@ -876,6 +875,10 @@ In theory, you could therefore replace the URL of the external system with the I
 However, as this may involve a modification of the code base and may require a great deal of effort, the recommended approach is to have the DNS entry for the hostname of the external system point to the IP of the test runner instead.
 To do this, add an [extra_hosts](https://docs.docker.com/compose/compose-file/compose-file-v3/#extra_hosts) entry for the domain to be simulated to the Docker-Compose file for each Microservice that communicates with the third-party service.
 If the host on which the tests are executed is the same as the host on which Docker is running, you can use Dockers predefined `host-gateway` entry for the IP address of the test runner.
+However, if the tests are executed within a CI/CD pipeline with [Docker-in-Docker](https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#use-docker-in-docker), the IP addresses of the Docker host and the test runner host differ.
+Therefore, you should use the value of the environment variable `RUNNER_IP` for the IP address of the test runner and use the `host-gateway` as the default value if this variable is not set.
+This allows you to run the tests both locally and inside the CI/CD pipeline.
+For more information on how to set this environment variable for the CI/CD pipeline, take a look at the [section on how to run tests inside a GitLab pipeline](#running-the-end-to-end-tests-inside-gitlab-ci). 
 
 <ins>Example</ins>\
 To forward requests to `example.com` and `payment.example.com` to the corresponding Mock Server instances, set:
@@ -886,8 +889,8 @@ services:
   order-service:
     # ...
     extra_hosts:
-      - "example.com:host-gateway"
-      - "payment.example.com:host-gateway"
+      - "example.com:${RUNNER_IP:-host-gateway}"
+      - "payment.example.com:${RUNNER_IP:-host-gateway}"
 ```
 
 In case you are receiving 403 errors and your operating system is Windows, you may need to [disable the automatic proxy detection](https://support.rezstream.com/hc/en-us/articles/360025156853-Disable-Auto-Proxy-Settings-in-Windows-10) (see [GitHub Issue #13127](https://github.com/docker/for-win/issues/13127)).
@@ -1660,13 +1663,359 @@ If you want to generate a report in a completely different format, such as a PDF
 To do this, create a new class that inherits from the `ReportGenerator` and implement the `generate` function.
 The return value of this function should then contain the files that were generated with your report generator.
 
-### Running the End-to-End-Tests inside GitLab CI
-- evtl. auch: wie kann ich den Report veröffentlichen? Siehe https://gitlab.com/gitlab-org/gitlab/-/issues/23323
+## Running the End-to-End-Tests inside GitLab CI
+To run your End-to-End-Tests inside a CI/CD pipeline, such as the [GitLab CI](https://docs.gitlab.com/ee/topics/build_your_application.html), you need an environment in which both a JDK in the correct version and Docker and Docker-Compose are installed.
+The easiest way to do this is to define a Dockerfile in which all the required programs are installed.
+For example, you can use the following Dockerfile for Java version 17:
 
-TODO: Fast vs. Slow? (Can be done with JUnit-Tags, but what's the purpose for E2E-Tests? 
-All tests are slow and running them separately would mean that I need to start the environment twice..)
+```dockerfile
+FROM openjdk:17.0.2-jdk-slim
 
-me2e (Microservice End-to-End) is a library for writing end-to-end tests for microservice applications.
+RUN apt-get update && \
+    apt-get install -y curl
+
+RUN curl -fsSL https://get.docker.com -o get-docker.sh
+RUN sh get-docker.sh
+```
+
+If you don't want to build the Docker image yourself, you can alternatively use one of the images from the [me2e GitLab Container Registry](https://gitlab.informatik.uni-bremen.de/master-thesis1/me2e/container_registry):
+
+| JDK-Version | Image                                                               |
+|:------------|:--------------------------------------------------------------------|
+| 17.0.2      | `gitlab.informatik.uni-bremen.de:5005/master-thesis1/me2e:17.0.2`   |
+| 18.0.2.1    | `gitlab.informatik.uni-bremen.de:5005/master-thesis1/me2e:18.0.2.1` |
+
+You can now use this image for the test execution inside the GitLab CI using [Docker-in-Docker (dind)](https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#use-docker-in-docker).
+
+{{% alert title="Important Note" color="warning" %}}
+If an image of your test environment is not publicly accessible, you need to log in to the corresponding registry first using `docker login`.
+{{% /alert %}}
+
+When using Docker-in-Docker, the Docker host is no longer the same as the host that executes the tests.
+To ensure that the HTTP packets sent by the test runner can still be correctly assigned to this host in the test report and that the [DNS entries created for the Mock Servers](#dns-configuration) continue to point to the correct IP address, you need to export the IP address of the test runner to the environment variable `RUNNER_IP`.
+
+```shell
+export RUNNER_IP=$(hostname -I)
+```
+
+Overall, the following GitLab CI executes your tests within the Docker image presented above using the command `./gradlew test`.
+If at least one of the executed tests fails, the test report is uploaded as an artifact (see `artifacts.when`).
+
+```yaml
+# .gitlab-ci.yml
+variables:
+  DOCKER_TLS_CERTDIR: ""
+
+test:
+  stage: test
+  image: gitlab.informatik.uni-bremen.de:5005/master-thesis1/me2e:17.0.2
+  # Use Docker-in-Docker:
+  services:
+    - name: docker:20.10.20-dind
+      alias: docker
+      command: [ "--tls=false" ]
+  before_script:
+    # Change access permission for gradlew executable:
+    - chmod +x ./gradlew
+  script:
+    # If there is any image inside your environment which is not publicly accessible, you need to log in to the registry:
+    - docker login -u REGISTRY_TOKEN -p $REGISTRY_TOKEN $CI_REGISTRY
+    # Export IP address of the test runner to environment variable:
+    - export RUNNER_IP=$(hostname -I)
+    # Run End-to-End-Tests using gradle:
+    - ./gradlew test
+  variables:
+    DOCKER_HOST: "tcp://docker:2375"
+  artifacts:
+    when: on_failure # Only uploads test report when at least one test has failed
+    paths:
+      - app/build/reports/me2e
+```
+
+{{% alert title="Important Note" color="warning" %}}
+This GitLab CI assumes that your test project is located in the `app/` subdirectory and that the report is therefore stored in the `app/build/reports/me2e` folder.
+If your project is located in a different directory, you need to adjust the path in the `artifacts` section accordingly.
+{{% /alert %}}
+
+To display the logs of your tests during the pipeline execution, you should adjust the `test` task in your `build.gradle` as follows:
+
+```groovy
+// build.gradle
+test {
+    // Use JUnit Platform for unit tests.
+    useJUnitPlatform()
+    // Show log output while running tests in pipeline
+    testLogging.showStandardStreams = true
+}
+```
+
+<details>
+    <summary><ins>GitLab Runner Configuration (<code>/etc/gitlab-runner/config.toml</code>)</ins></summary>
+    
+The GitLab runner required for the GitLab CI presented above does not require any special configuration; the default settings for the [Docker executor](https://docs.gitlab.com/runner/executors/docker.html) are sufficient.
+    
+```toml
+# /etc/gitlab-runner/config.toml
+[[runners]]
+  name = "E2E Docker Executor"
+  url = "$GITLAB_URL"
+  token = "$GITLAB_RUNNER_TOKEN"
+  executor = "docker"
+  [runners.custom_build_dir]
+  [runners.cache]
+    [runners.cache.s3]
+    [runners.cache.gcs]
+    [runners.cache.azure]
+  [runners.docker]
+    tls_verify = false
+    image = "docker:20.10.20"
+    privileged = true
+    disable_entrypoint_overwrite = false
+    oom_kill_disable = false
+    disable_cache = false
+    volumes = ["/cache"]
+    cache_dir = "/cache"
+    shm_size = 0
+```
+</details>
+
+### Caching
+The previously presented GitLab CI job does not include any caching, so that with each pipeline execution
+- the entire Gradle project is built and
+- all Docker images are pulled
+
+To improve the performance of your pipeline and thus reduce the runtime, you can set up both a Gradle and a Docker cache.
+
+#### Gradle Build Cache
+Add the following entries to your GitLab CI to set up the [Gradle Build Cache](https://docs.gradle.org/current/userguide/build_cache.html):
+
+```yaml
+variables:
+  GRADLE_USER_HOME: $CI_PROJECT_DIR/.gradle
+
+cache:
+  - key:
+      files:
+        - gradle/wrapper/gradle-wrapper.properties
+    paths:
+      - .gradle/wrapper
+      - .gradle/caches
+```
+
+In order for the cache to be used when executing the tests, you need to add the `--build-cache` flag to the Gradle test task.
+
+```shell
+./gradlew --build-cache test
+```
+
+<details>
+    <summary><ins>Complete GitLab CI with Gradle Build Cache</ins></summary>
+    
+```yaml
+# .gitlab-ci.yml
+variables:
+  DOCKER_TLS_CERTDIR: ""
+  GRADLE_USER_HOME: $CI_PROJECT_DIR/.gradle
+
+cache:
+  - key:
+      files:
+        - gradle/wrapper/gradle-wrapper.properties
+    paths:
+      - .gradle/wrapper
+      - .gradle/caches
+
+test:
+  stage: test
+  image: gitlab.informatik.uni-bremen.de:5005/master-thesis1/me2e:17.0.2
+  services:
+    - name: docker:20.10.20-dind
+      alias: docker
+      command: [ "--tls=false" ]
+  before_script:
+    - chmod +x ./gradlew
+  script:
+    # If there is any image inside your environment which is not publicly accessible, you need to log in to the registry:
+    - docker login -u REGISTRY_TOKEN -p $REGISTRY_TOKEN $CI_REGISTRY
+    - export RUNNER_IP=$(hostname -I)
+    - ./gradlew --build-cache test
+  variables:
+    DOCKER_HOST: "tcp://docker:2375"
+  artifacts:
+    when: on_failure
+    paths:
+      - app/build/reports/me2e
+```
+</details>
+
+#### Docker Image Cache
+Standardmäßig wird bei der Nutzung von Docker-in-Docker kein Image-Cache gespeichert, d.h. bei jeder Pipeline-Ausführung müssen alle Images deines Environments erneut vollständig gepullt werden.
+Eine Möglichkeit, um diesen Image-Cache über die Pipeline-Ausführungen hinweg zu erhalten, ist die Nutzung von "docker save".
+Mit diesem Befehl werden alle angegebenen Images in einem tarred Repository gespeichert, das anschließend mit "docker load" wieder geladen werden kann.
+
+Um alle Docker-Images, die bei deiner Testausführung verwendet wurden, in einer Datei "docker.tar" zu speichern, füge folgenden "after_script"-Schritt zu deinem Gitlab-CI-Job hinzu:
+```yaml
+after_script:
+  - echo "Storing Docker Image Cache..."
+  - mkdir -p docker
+  - docker save $(docker images -q) -o docker/cache.tar
+```
+
+Um diesen Image-Cache nun vor der Testausführung zu laden, füge folgenden Command in deinen "before_script"-Schritt ein:
+
+```shell
+if [[ -f "docker/cache.tar" ]]; then
+echo "Loading Docker Image Cache...";
+docker load -i docker/cache.tar;
+fi
+```
+
+Schließlich musst du noch den folgenden Eintrag zu deiner Gitlab-CI hinzufügen, damit der Cache im Ordner "docker" über die Pipeline-Ausführungen hinweg verfügbar ist:
+
+```yaml
+cache:
+  - key: docker-cache
+    paths:
+      - docker/
+```
+
+<details>
+    <summary><ins>Complete GitLab CI with Docker Image Cache</ins></summary>
+    
+```yaml
+# .gitlab-ci.yml
+variables:
+  DOCKER_TLS_CERTDIR: ""
+
+cache:
+  - key: docker-cache
+    paths:
+      - docker/
+
+test:
+  stage: test
+  image: gitlab.informatik.uni-bremen.de:5005/master-thesis1/me2e:17.0.2
+  services:
+    - name: docker:20.10.20-dind
+      alias: docker
+      command: [ "--tls=false" ]
+  before_script:
+    - chmod +x ./gradlew
+    - if [[ -f "docker/cache.tar" ]]; then
+      echo "Loading Docker Image Cache...";
+      docker load -i docker/cache.tar;
+      fi
+  script:
+    # If there is any image inside your environment which is not publicly accessible, you need to log in to the registry:
+    - docker login -u REGISTRY_TOKEN -p $REGISTRY_TOKEN $CI_REGISTRY
+    - export RUNNER_IP=$(hostname -I)
+    - ./gradlew test
+  after_script:
+    - echo "Storing Docker Image Cache..."
+    - mkdir -p docker
+    - docker save $(docker images -q) -o docker/cache.tar
+  variables:
+    DOCKER_HOST: "tcp://docker:2375"
+  artifacts:
+    when: on_failure
+    paths:
+      - app/build/reports/me2e
+```
+</details>
+
+### Publishing Test Reports
+Mit der zuvor vorgestellten Gitlab-CI werden die HTML- und CSS-Dateien, aus denen sich der Testreport zusammensetzt, als ZIP-Datei in den Artifacts des Jobs veröffentlicht.
+Alternativ kannst du diesen Report auch in den [Gitlab-Pages] deines Repositorys veröffentlichen, sodass jeder direkt über den Browser darauf zugreifen kann.
+
+Um jeden Testbericht - egal ob die Testausführung erfolgreich war oder nicht - zu veröffentlichen, solltest du zunächst die Artifacts-Einstellung für deinen Test-Job wie folgt anpassen:
+
+```yaml
+artifacts:
+  when: always
+  paths:
+    - app/build/reports/me2e
+```
+ 
+Füge dafür den folgenden Job in deine Gitlab-CI ein:
+
+```yaml
+pages:
+  stage: publish
+  allow_failure: true
+  script: 
+    - mkdir -p public/$CI_PIPELINE_ID
+    - cp app/build/reports/me2e/* public/$CI_PIPELINE_ID/ -R
+    - echo "Published test report to $CI_PAGES_URL/$CI_PIPELINE_ID/index.html"
+  artifacts:
+    paths:
+      - public
+``` 
+
+Damit werden die Dateien, die im Test-Job unter "build/reports/me2e/" gespeichert wurden, in den Ordner "public/$CI_PIPELINE_ID" kopiert, sodass diese in den Gitlab-Pages unter "ABC" abrufbar sind.
+Für diesen Job ist das "allow_failure"-Flag auf "true" gesetzt, da es theoretisch sein kann, dass im test-Job kein Report veröffentlicht wurde (z.B. wenn du nichts am Code verändert hast und der Gradle-Build-Cache aktiviert ist).
+
+Damit mehrere Testreports gleichzeitig veröffentlicht werden und nicht ein "pages"-Job alle vorher veröffentlichten Testreports überschreibt, musst du zudem folgenden Eintrag zu deiner Gitlab-CI hinzufügen:
+
+```yaml
+cache:
+  - paths:
+      - public
+```
+
+Damit ist nun jeder Testbericht jeder Pipeline-Ausführung abrufbar unter `{CI_PAGES_URL}/{CI_PIPELINE_ID}/index.html`.
+
+<details>
+    <summary><ins>Complete GitLab CI with Publication of Test Reports</ins></summary>
+    
+```yaml
+# .gitlab-ci.yml
+variables:
+  DOCKER_TLS_CERTDIR: ""
+
+stages:
+  - test
+  - publish
+
+cache:
+  - paths:
+      - public
+
+test:
+  stage: test
+  image: gitlab.informatik.uni-bremen.de:5005/master-thesis1/me2e:17.0.2
+  services:
+    - name: docker:20.10.20-dind
+      alias: docker
+      command: [ "--tls=false" ]
+  before_script:
+    - chmod +x ./gradlew
+  script:
+    # If there is any image inside your environment which is not publicly accessible, you need to log in to the registry:
+    - docker login -u REGISTRY_TOKEN -p $REGISTRY_TOKEN $CI_REGISTRY
+    - export RUNNER_IP=$(hostname -I)
+    - ./gradlew test
+  variables:
+    DOCKER_HOST: "tcp://docker:2375"
+  artifacts:
+    when: always
+    paths:
+      - app/build/reports/me2e
+        
+pages:
+  stage: publish
+  allow_failure: true
+  script: 
+    - mkdir -p public/$CI_PIPELINE_ID
+    - cp app/build/reports/me2e/* public/$CI_PIPELINE_ID/ -R
+    - echo "Published test report to $CI_PAGES_URL/$CI_PIPELINE_ID/index.html"
+  rules:
+    - exists:
+        - build/report/me2e
+  artifacts:
+    paths:
+      - public
+```
+</details>
 
 ## Usage
 ### Import
