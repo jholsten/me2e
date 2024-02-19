@@ -17,6 +17,49 @@ The library offers interfaces for the following core functions:
 
 In addition, a detailed test report is generated after the execution of all tests, which, besides basic metrics such as the success rate and execution times, also shows the logs of all Docker containers, their resource consumption over time and traces of the HTTP requests across the various components.
 
+## Table of Contents
+- [Prerequisites](#prerequisites)
+- [Getting Started](#getting-started)
+  - [1. Set up a new Project](#1-set-up-a-new-project)
+  - [2. Install the me2e Library](#2-install-the-me2e-library)
+  - [3. Add the Docker-Compose of your Microservice System](#3-add-the-docker-compose-of-your-microservice-system)
+  - [4. Define the me2e-config File](#4-define-the-me2e-config-file)
+  - [5. Write your first End-to-End-Test](#5-write-your-first-end-to-end-test)
+  - [6. Execute your End-to-End-Test](#6-execute-your-end-to-end-test)
+- [Usage](#usage)
+  - [Configuration](#configuration)
+    - [Configuring the Execution Settings](#configuring-the-execution-settings)
+    - [Defining the Test Environment for the Microservice System](#defining-the-test-environment-for-the-microservice-system)
+      - [Recommendations for the Definition of Services in the Docker-Compose File](#recommendations-for-the-definition-of-services-in-the-docker-compose-file)
+      - [Specific Configuration for Containers of type `MICROSERVICE`](#specific-configuration-for-containers-of-type-microservice)
+      - [Specific Configuration for Containers of type `DATABASE`](#specific-configuration-for-containers-of-type-database)
+    - [Mock Servers: Simulating external services](#mock-servers-simulating-external-services)
+      - [Mock Server Definition](#mock-server-definition)
+      - [Stub Definition](#stub-definition)
+      - [DNS Configuration](#dns-configuration)
+      - [TLS Configuration](#tls-configuration)
+    - [Data Management](#data-management)
+      - [Setting an initial State](#setting-an-initial-state)
+      - [Resetting the State](#resetting-the-state)
+      - [Data Management for other Database Management Systems](#data-management-for-other-database-management-systems)
+  - [Defining Tests](#defining-tests)
+    - [Injecting services](#injecting-services)
+    - [Interacting with Containers](#interacting-with-containers)
+    - [Interacting with Databases](#interacting-with-databases)
+    - [Executing HTTP Requests and Verifying their Responses](#executing-http-requests-and-verifying-their-responses)
+    - [Mock Server Verification](#mock-server-verification)
+  - [Measures against Flaky Tests](#measures-against-flaky-tests)
+    - [Assert Healthy](#assert-healthy)
+    - [Request-Retry](#request-retry)
+    - [State Reset](#state-reset)
+  - [Test Report](#test-report)
+    - [Contents](#contents)
+    - [Customizing the Report](#customizing-the-report)
+- [Running the End-to-End-Tests inside GitLab CI](#running-the-end-to-end-tests-inside-gitlab-ci)
+  - [Caching](#caching)
+  - [Publishing Test Reports](#publishing-test-reports)
+
+
 ## Prerequisites
 The definition and starting of the test environment relies on Docker and Docker-Compose.
 Accordingly, a prerequisite for using this library is that the Microservices are available as Docker images and that Docker-Compose (version 1 or 2) is installed on the system that executes the tests.
@@ -1620,7 +1663,7 @@ This includes:
 
 After the execution of all tests has been completed, this data is aggregated and transferred to the report generator in the form of the [`TestExecutionResult`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.report.result.model/-test-execution-result/index.html).
 
-#### Configuring the Report
+#### Customizing the Report
 To customize the test report to your needs, you have various options:
 - Customization of the [`HtmlReportGenerator`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.report.generator.html/-html-report-generator/index.html) used by default
 - Implementation of your own report generator
