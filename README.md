@@ -1565,12 +1565,12 @@ fun `Executing authenticated GET request should succeed`() {
 
 <ins>Example of a custom Authenticator</ins>
 ```kotlin
-class ApiKeyAuthenticator : Authenticator() {
+class ApiKeyAuthenticator(private val apiKey: String) : Authenticator() {
     override fun getRequestInterceptor(): RequestInterceptor {
         return object : RequestInterceptor {
             override fun intercept(chain: RequestInterceptor.Chain): HttpResponse {
                 val request = chain.getRequest().newBuilder()
-                    .addHeader("X-API-KEY", "secret")
+                    .addHeader("X-API-KEY", apiKey)
                     .build()
                 return chain.proceed(request)
             }
