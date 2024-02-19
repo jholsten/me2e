@@ -41,6 +41,9 @@ build-docker:
     - docker build --build-arg OPENJDK_VERSION=18.0.2.1 -t $CI_REGISTRY_IMAGE:18.0.2.1 .
     - docker push $CI_REGISTRY_IMAGE:17.0.2 .
     - docker push $CI_REGISTRY_IMAGE:18.0.2.1 .
+  rules:
+    - changes:
+        - Dockerfile
 
 # Runs JUnit tests inside Docker container (required to have access to Docker and Docker-Compose)
 test:
