@@ -58,8 +58,6 @@ test:
     - docker login -u REGISTRY_TOKEN -p $REGISTRY_TOKEN $CI_REGISTRY
     - export RUNNER_IP=$(hostname -I)
     - ./gradlew --build-cache test
-  variables:
-    DOCKER_HOST: "tcp://docker:2375"
   artifacts:
     when: always
     reports:
