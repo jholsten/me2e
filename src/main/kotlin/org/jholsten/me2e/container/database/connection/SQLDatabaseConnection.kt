@@ -97,14 +97,14 @@ class SQLDatabaseConnection private constructor(
      */
     override fun executeScript(name: String?, file: File) {
         val scriptName = name?.let { "$name (located at ${file.path})" } ?: file.path
-        logger.info("Executing SQL script $scriptName...")
+        logger.info("Executing SQL script $scriptName for database '$database'...")
         try {
             val scriptRunner = ScriptRunner(connection)
             scriptRunner.setSendFullScript(false)
             scriptRunner.setStopOnError(true)
             scriptRunner.runScript(FileReader(file))
         } catch (e: RuntimeSqlException) {
-            throw DatabaseException("Unable to execute script $scriptName: ${e.message}")
+            throw DatabaseException("Unable to execute script $scriptName for database '$database': ${e.message}")
         }
     }
 
@@ -113,7 +113,7 @@ class SQLDatabaseConnection private constructor(
             return
         }
 
-        logger.info("Clearing ${tablesToClear.size} tables...")
+        logger.info("Clearing ${tablesToClear.size} tables for database '$database'...")
         connection.createStatement().runWithAutoRollback { statement ->
             disableForeignKeyChecks(statement)
             for (table in tablesToClear) {
@@ -133,7 +133,7 @@ class SQLDatabaseConnection private constructor(
             } else {
                 throw DatabaseException("Unsupported system: $system")
             }
-            logger.info("Successfully reset database $database.")
+            logger.info("Successfully reset database '$database'.")
         }
     }
 

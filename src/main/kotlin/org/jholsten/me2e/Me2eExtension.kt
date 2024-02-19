@@ -166,7 +166,7 @@ class Me2eExtension : BeforeAllCallback, BeforeEachCallback, AfterEachCallback {
     private fun clearDatabases() {
         val databaseConnections = Me2eTest.containerManager.databases.values.filter { it.connection != null }
         if (databaseConnections.isNotEmpty()) {
-            logger.debug("Resetting entries of ${databaseConnections.size} databases.")
+            logger.info("Resetting entries of ${databaseConnections.size} databases.")
             for (database in databaseConnections) {
                 clearDatabase(database)
                 executeInitializationScripts(database)
@@ -180,7 +180,7 @@ class Me2eExtension : BeforeAllCallback, BeforeEachCallback, AfterEachCallback {
     private fun resetRequestInterceptors() {
         val microservices = Me2eTest.containerManager.microservices.values
         if (microservices.isNotEmpty()) {
-            logger.debug("Resetting ${microservices.size} request interceptors of microservice containers.")
+            logger.info("Resetting ${microservices.size} request interceptors of microservice containers.")
             for (microservice in microservices) {
                 microservice.resetRequestInterceptors()
             }
@@ -193,7 +193,7 @@ class Me2eExtension : BeforeAllCallback, BeforeEachCallback, AfterEachCallback {
     private fun resetMockServerRequests() {
         val mockServers = Me2eTest.mockServerManager.mockServers.values
         if (mockServers.isNotEmpty()) {
-            logger.debug("Resetting requests of ${mockServers.size} Mock Servers.")
+            logger.info("Resetting requests of ${mockServers.size} Mock Servers.")
             for (mockServer in mockServers) {
                 try {
                     mockServer.reset()

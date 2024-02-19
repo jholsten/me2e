@@ -132,18 +132,21 @@ class MongoDBConnection private constructor(
      */
     override fun executeScript(name: String?, file: File) {
         checkNotNull(container) { "As scripts cannot be executed using the Java-MongoClient, the reference to the corresponding Docker container needs to be set." }
-        checkNotNull(mongoShellCommand) { "Could not find Mongo on the PATH. Is it installed?" }
+        checkNotNull(mongoShellCommand) { "Could not find Mongo on the PATH for database '$database'. Is it installed?" }
         val scriptName = name?.let { "$name (located at ${file.path})" } ?: file.path
         if (!file.exists()) {
             throw FileNotFoundException("File $scriptName does not exist.")
         }
         logger.info("Copying script $scriptName to container...")
         container.copyFileToContainer(file.path, file.name)
-        logger.info("Executing script $scriptName...")
+        logger.info("Executing script $scriptName for database '$database'...")
         val command = arrayOf(mongoShellCommand!!, "--quiet", "<", file.name)
         val result = container.execute(*command)
         if (result.exitCode != 0) {
-            throw DatabaseException("Unable to execute script $scriptName (executed command: ${command.joinToString(" ")}): ${result.stdout}")
+            throw DatabaseException(
+                "Unable to execute script $scriptName for database '$database' " +
+                    "(executed command: ${command.joinToString(" ")}): ${result.stdout}"
+            )
         }
     }
 
@@ -152,7 +155,7 @@ class MongoDBConnection private constructor(
             return
         }
 
-        logger.info("Clearing ${tablesToClear.size} collections...")
+        logger.info("Clearing ${tablesToClear.size} collections for database '$database'...")
         for (table in tablesToClear) {
             val collection = connection.getCollection(table)
             collection.deleteMany(Document())
