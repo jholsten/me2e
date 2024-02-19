@@ -19,4 +19,16 @@ class QueryResult internal constructor(rows: List<Map<String, Any?>>) : ArrayLis
     fun getEntriesInColumn(columnName: String): List<Any?> {
         return this.map { it[columnName] }
     }
+
+    /**
+     * Tries to find the row in this query result for which the entry in the column with the given
+     * [columName] is equal to the given [value]. If multiple rows match this query, the first one
+     * is returned. If no such row could be found, `null` is returned.
+     * @param columName Name of the column for which matching row should be found.
+     * @param value Value to find in the column with the given name.
+     * @return Map of column name and value for the first row which contains the [value] in column [columName].
+     */
+    fun getByField(columName: String, value: Any): Map<String, Any?>? {
+        return this.find { it[columName] == value }
+    }
 }

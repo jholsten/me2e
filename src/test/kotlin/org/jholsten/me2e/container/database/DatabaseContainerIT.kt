@@ -139,6 +139,7 @@ internal class DatabaseContainerIT {
             RecursiveComparison.assertEquals(expectedEmployees, employeeResult)
             RecursiveComparison.assertEquals(listOf("id", "name"), companyResult.columns, ignoreCollectionOrder = true)
             RecursiveComparison.assertEquals(listOf("id", "name", "company_id"), employeeResult.columns, ignoreCollectionOrder = true)
+            RecursiveComparison.assertEquals(mapOf("id" to 2, "name" to "Company B"), companyResult.getByField("id", 2))
         } else {
             assertEqualsIgnoreInternalId(expectedCompanies, companyResult)
             assertEqualsIgnoreInternalId(expectedEmployees, employeeResult)
@@ -148,6 +149,7 @@ internal class DatabaseContainerIT {
                 employeeResult.columns,
                 ignoreCollectionOrder = true
             )
+            assertEqualsIgnoreInternalId(mapOf("id" to 2, "name" to "Company B"), companyResult.getByField("id", 2))
         }
         RecursiveComparison.assertEquals(listOf(1, 2), companyResult.getEntriesInColumn("id"))
         RecursiveComparison.assertEquals(listOf("Employee A.1", "Employee A.2", "Employee B.1"), employeeResult.getEntriesInColumn("name"))
@@ -155,5 +157,9 @@ internal class DatabaseContainerIT {
 
     private fun assertEqualsIgnoreInternalId(expected: List<Map<String, Any?>>, actual: List<Map<String, Any?>>) {
         RecursiveComparison.assertEquals(expected, actual.map { e -> e.filterKeys { it != "_id" } })
+    }
+
+    private fun assertEqualsIgnoreInternalId(expected: Map<String, Any?>, actual: Map<String, Any?>?) {
+        RecursiveComparison.assertEquals(expected, actual?.filterKeys { it != "_id" })
     }
 }
