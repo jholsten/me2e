@@ -1549,7 +1549,7 @@ Unless set otherwise in the me2e-config file in `settings.state-reset.reset-requ
 By default, me2e only provides [`UsernamePasswordAuthentication`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.microservice.authentication/-username-password-authentication/index.html) for basic authentication.
 If you want to use other authentication methods, you need to provide a corresponding implementation yourself through a class that inherits from the [`Authenticator`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.microservice.authentication/-authenticator/index.html).
 
-<ins>Example</ins>
+<ins>Example Usage</ins>
 ```kotlin
 @Test
 fun `Executing authenticated GET request should succeed`() {
@@ -1560,6 +1560,22 @@ fun `Executing authenticated GET request should succeed`() {
     assertThat(response)
         .statusCode(equalTo(200))
         .body(equalTo("admin"))
+}
+```
+
+<ins>Example of a custom Authenticator</ins>
+```kotlin
+class ApiKeyAuthenticator : Authenticator() {
+    override fun getRequestInterceptor(): RequestInterceptor {
+        return object : RequestInterceptor {
+            override fun intercept(chain: RequestInterceptor.Chain): HttpResponse {
+                val request = chain.getRequest().newBuilder()
+                    .addHeader("X-API-KEY", "secret")
+                    .build()
+                return chain.proceed(request)
+            }
+        }
+    }
 }
 ```
 
