@@ -58,6 +58,7 @@ In addition, a detailed test report is generated after the execution of all test
 - [Running the End-to-End-Tests inside GitLab CI](#running-the-end-to-end-tests-inside-gitlab-ci)
   - [Caching](#caching)
   - [Publishing Test Reports](#publishing-test-reports)
+  - [Bringing it all together: Recommended GitLab CI](#bringing-it-all-together-recommended-gitlab-ci)
 
 
 ## Prerequisites
@@ -2077,3 +2078,69 @@ pages:
       - public
 ```
 </details>
+
+### Bringing it all together: Recommended GitLab CI
+The following GitLab CI pipeline includes [Gradle Build Cache](#gradle-build-cache), [Docker Image Cache](#docker-image-cache) and publishes each test report on the repository's [GitLab Pages](#publishing-test-reports).
+
+```yaml
+# .gitlab-ci.yml
+variables:
+  DOCKER_TLS_CERTDIR: ""
+  GRADLE_USER_HOME: $CI_PROJECT_DIR/.gradle
+
+stages:
+  - test
+  - publish
+
+test:
+  stage: test
+  image: gitlab.informatik.uni-bremen.de:5005/master-thesis1/me2e:17.0.2
+  services:
+    - name: docker:20.10.20-dind
+      alias: docker
+      command: [ "--tls=false" ]
+  before_script:
+    - chmod +x ./gradlew
+    - if [[ -f "docker/cache.tar" ]]; then
+      echo "Loading Docker Image Cache...";
+      docker load -i docker/cache.tar;
+      fi
+  script:
+    - docker login -u REGISTRY_TOKEN -p $REGISTRY_TOKEN $CI_REGISTRY
+    - export RUNNER_IP=$(hostname -I)
+    - ./gradlew --build-cache test
+  after_script:
+    - echo "Storing Docker Image Cache..."
+    - mkdir -p docker
+    - docker save $(docker images -q) -o docker/cache.tar
+  variables:
+    DOCKER_HOST: "tcp://docker:2375"
+  cache:
+    - key:
+        files:
+          - gradle/wrapper/gradle-wrapper.properties
+      paths:
+        - .gradle/wrapper
+        - .gradle/caches
+    - key: docker-cache
+      paths:
+        - docker/
+  artifacts:
+    when: always
+    paths:
+      - app/build/reports/me2e
+
+pages:
+  stage: publish
+  allow_failure: true
+  script:
+    - mkdir -p public/$CI_PIPELINE_ID
+    - cp app/build/reports/me2e/* public/$CI_PIPELINE_ID/ -R
+    - echo "Published test report to $CI_PAGES_URL/$CI_PIPELINE_ID/index.html"
+  cache:
+    paths:
+      - public
+  artifacts:
+    paths:
+      - public
+```
