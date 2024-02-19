@@ -61,8 +61,28 @@ gradle init \
 ```
 </details>
 
+<br/>
+
+> The files that are created by default by the Gradle `init` task (i.e. `App` and `AppTest`) can be deleted.
+> Just remember to also delete the `application` task in your project's `build.gradle`, as the `App` class is referenced here.
+
+
 ### 2. Install the me2e Library
-Add the me2e library as a test dependency to your project.
+The library is published to the [GitLab Package Registry](https://gitlab.informatik.uni-bremen.de/api/v4/projects/33508/packages/maven).
+To be able to download the me2e library from this repository, you first need to add the GitLab Package Registry to the repositories section of your project's `build.gradle` file.
+
+```groovy
+repositories {
+    mavenCentral()
+    
+    maven {
+        url "https://gitlab.informatik.uni-bremen.de/api/v4/projects/33508/packages/maven"
+        name "GitLab"
+    }
+}
+```
+
+Now add the me2e library as a test dependency to your project.
 
 <details>
     <summary><ins>For <b>Java</b> Projects:</ins></summary>
@@ -1687,9 +1707,8 @@ If you don't want to build the Docker image yourself, you can alternatively use 
 
 You can now use this image for the test execution inside the GitLab CI using [Docker-in-Docker (dind)](https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#use-docker-in-docker).
 
-{{% alert title="Important Note" color="warning" %}}
-If an image of your test environment is not publicly accessible, you need to log in to the corresponding registry first using `docker login`.
-{{% /alert %}}
+> &#x26A0; **Important Note**\
+> If an image of your test environment is not publicly accessible, you need to log in to the corresponding registry first using `docker login`.
 
 When using Docker-in-Docker, the Docker host is no longer the same as the host that executes the tests.
 To ensure that the HTTP packets sent by the test runner can still be correctly assigned to this host in the test report and that the [DNS entries created for the Mock Servers](#dns-configuration) continue to point to the correct IP address, you need to export the IP address of the test runner to the environment variable `RUNNER_IP`.
@@ -1732,10 +1751,9 @@ test:
       - app/build/reports/me2e
 ```
 
-{{% alert title="Important Note" color="warning" %}}
-This GitLab CI assumes that your test project is located in the `app/` subdirectory and that the report is therefore stored in the `app/build/reports/me2e` folder.
-If your project is located in a different directory, you need to adjust the path in the `artifacts` section accordingly.
-{{% /alert %}}
+> &#x26A0; **Important Note**\
+> This GitLab CI assumes that your test project is located in the `app/` subdirectory and that the report is therefore stored in the `app/build/reports/me2e` folder.
+> If your project is located in a different directory, you need to adjust the path in the `artifacts` section accordingly.
 
 To display the logs of your tests during the pipeline execution, you should adjust the `test` task in your `build.gradle` as follows:
 
@@ -1849,11 +1867,12 @@ test:
 </details>
 
 #### Docker Image Cache
-Standardmäßig wird bei der Nutzung von Docker-in-Docker kein Image-Cache gespeichert, d.h. bei jeder Pipeline-Ausführung müssen alle Images deines Environments erneut vollständig gepullt werden.
-Eine Möglichkeit, um diesen Image-Cache über die Pipeline-Ausführungen hinweg zu erhalten, ist die Nutzung von "docker save".
-Mit diesem Befehl werden alle angegebenen Images in einem tarred Repository gespeichert, das anschließend mit "docker load" wieder geladen werden kann.
+By default, no image cache is saved when using Docker-in-Docker, i.e. all images of your environment are completely pulled again with each pipeline execution.
+One way to maintain the image cache across pipeline executions is to use [`docker save`](https://docs.docker.com/engine/reference/commandline/image_save/).
+This command saves all specified images in a tarred repository, which can then be loaded with [`docker load`](https://docs.docker.com/engine/reference/commandline/image_load/).
 
-Um alle Docker-Images, die bei deiner Testausführung verwendet wurden, in einer Datei "docker.tar" zu speichern, füge folgenden "after_script"-Schritt zu deinem Gitlab-CI-Job hinzu:
+To save all Docker images used in the pipeline execution to a file named `cache.tar`, add the following `after_script` step to your GitLab CI job:
+
 ```yaml
 after_script:
   - echo "Storing Docker Image Cache..."
@@ -1861,7 +1880,7 @@ after_script:
   - docker save $(docker images -q) -o docker/cache.tar
 ```
 
-Um diesen Image-Cache nun vor der Testausführung zu laden, füge folgenden Command in deinen "before_script"-Schritt ein:
+To load this image cache before executing the tests, add the following command to your `before_script` step:
 
 ```shell
 if [[ -f "docker/cache.tar" ]]; then
@@ -1870,7 +1889,7 @@ docker load -i docker/cache.tar;
 fi
 ```
 
-Schließlich musst du noch den folgenden Eintrag zu deiner Gitlab-CI hinzufügen, damit der Cache im Ordner "docker" über die Pipeline-Ausführungen hinweg verfügbar ist:
+Finally, you need to add the following entry to your GitLab CI so that the cache in the `docker` folder is available across the pipeline executions:
 
 ```yaml
 cache:
@@ -1924,10 +1943,9 @@ test:
 </details>
 
 ### Publishing Test Reports
-Mit der zuvor vorgestellten Gitlab-CI werden die HTML- und CSS-Dateien, aus denen sich der Testreport zusammensetzt, als ZIP-Datei in den Artifacts des Jobs veröffentlicht.
-Alternativ kannst du diesen Report auch in den [Gitlab-Pages] deines Repositorys veröffentlichen, sodass jeder direkt über den Browser darauf zugreifen kann.
-
-Um jeden Testbericht - egal ob die Testausführung erfolgreich war oder nicht - zu veröffentlichen, solltest du zunächst die Artifacts-Einstellung für deinen Test-Job wie folgt anpassen:
+With the GitLab CI presented above, the HTML and CSS files forming the test report are published in the job's artifacts and can be downloaded as a ZIP file.
+To ease access to this report, you can alternatively publish it in the [GitLab Pages](https://docs.gitlab.com/ee/user/project/pages/) of your repository so that anyone can access it directly via the browser.
+To publish every test report - regardless of whether the test execution was successful or not - you should first adjust the `artifacts.when` setting for your test job as follows:
 
 ```yaml
 artifacts:
@@ -1936,7 +1954,7 @@ artifacts:
     - app/build/reports/me2e
 ```
  
-Füge dafür den folgenden Job in deine Gitlab-CI ein:
+Now add the following job to your GitLab CI to publish the report generated in the `test` job on your repository's GitLab pages:
 
 ```yaml
 pages:
@@ -1951,10 +1969,10 @@ pages:
       - public
 ``` 
 
-Damit werden die Dateien, die im Test-Job unter "build/reports/me2e/" gespeichert wurden, in den Ordner "public/$CI_PIPELINE_ID" kopiert, sodass diese in den Gitlab-Pages unter "ABC" abrufbar sind.
-Für diesen Job ist das "allow_failure"-Flag auf "true" gesetzt, da es theoretisch sein kann, dass im test-Job kein Report veröffentlicht wurde (z.B. wenn du nichts am Code verändert hast und der Gradle-Build-Cache aktiviert ist).
+This copies the files from the directory `app/build/reports/me2e` saved in the `test` job to the `public/$CI_PIPELINE_ID` directory so that the test reports for each pipeline are each in their own directory.
+The `allow_failure` flag is set to `true` for this job, as it is possible that no report has been published in the `test` job, e.g. if you have not changed the code and the [Gradle Build Cache](#gradle-build-cache) is activated.
 
-Damit mehrere Testreports gleichzeitig veröffentlicht werden und nicht ein "pages"-Job alle vorher veröffentlichten Testreports überschreibt, musst du zudem folgenden Eintrag zu deiner Gitlab-CI hinzufügen:
+To ensure that several test reports are accessible in the GitLab pages at the same time and that one execution of the `pages` job does not overwrite all previously published test reports, you also need to add the following entry to your GitLab CI: 
 
 ```yaml
 cache:
@@ -1962,7 +1980,7 @@ cache:
       - public
 ```
 
-Damit ist nun jeder Testbericht jeder Pipeline-Ausführung abrufbar unter `{CI_PAGES_URL}/{CI_PIPELINE_ID}/index.html`.
+As a result, the test report for every pipeline execution is now accessible at the URL `{CI_PAGES_URL}/{CI_PIPELINE_ID}/index.html`.
 
 <details>
     <summary><ins>Complete GitLab CI with Publication of Test Reports</ins></summary>
@@ -2090,6 +2108,8 @@ Add the following entry to the `repositories` section of the project's `build.gr
 
 ```groovy
 repositories {
+    mavenCentral()
+    
     maven {
         url "https://gitlab.informatik.uni-bremen.de/api/v4/projects/33508/packages/maven"
         name "GitLab"
