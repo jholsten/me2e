@@ -2,7 +2,6 @@ variables:
   DOCKER_TLS_CERTDIR: ""
   GRADLE_USER_HOME: $CI_PROJECT_DIR/.gradle
   DOCKER_DRIVER: overlay2
-  E2E_TEST_IMAGE: $CI_REGISTRY_IMAGE:latest
 
 stages:
   - build
@@ -38,8 +37,10 @@ build-docker:
       command: [ "--tls=false" ]
   script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker build -t $E2E_TEST_IMAGE .
-    - docker push $E2E_TEST_IMAGE
+    - docker build --build-arg OPEN_JDK_VERSION=17.0.2 -t $CI_REGISTRY_IMAGE:17.0.2 .
+    - docker build --build-arg OPEN_JDK_VERSION=18.0.2.1 -t $CI_REGISTRY_IMAGE:18.0.2.1 .
+    - docker push $CI_REGISTRY_IMAGE:17.0.2 .
+    - docker push $CI_REGISTRY_IMAGE:18.0.2.1 .
   rules:
     - changes:
         - Dockerfile
@@ -47,7 +48,7 @@ build-docker:
 # Runs JUnit tests inside Docker container (required to have access to Docker and Docker-Compose)
 test:
   stage: test
-  image: $E2E_TEST_IMAGE
+  image: $CI_REGISTRY_IMAGE:17.0.2
   services:
     - name: docker:20.10.20-dind
       alias: docker
