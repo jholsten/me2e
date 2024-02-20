@@ -47,7 +47,7 @@ fun <T> equalTo(expected: T): Assertable<T?> {
  * Returns assertion for checking whether the expected JSON object is equal to an actual
  * value, i.e. an assertion which does not throw if `actual == expected`.
  *
- * To exclude certain nodes when comparing the objects, use [JsonBodyEqualityAssertion.whenIgnoringNodes].
+ * To exclude certain nodes when comparing the objects, use [JsonBodyEqualityAssertion.ignoringNodes].
  *
  * Example Usage:
  * ```kotlin

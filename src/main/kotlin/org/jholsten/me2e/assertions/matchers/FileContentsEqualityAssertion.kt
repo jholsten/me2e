@@ -41,7 +41,7 @@ class FileContentsEqualityAssertion internal constructor(private val filename: S
      * Parses string content from file as a JSON object and returns assertion for
      * checking the equality of this parsed instance and the actual JSON object.
      *
-     * To exclude certain nodes when comparing the objects, use [JsonBodyEqualityAssertion.whenIgnoringNodes].
+     * To exclude certain nodes when comparing the objects, use [JsonBodyEqualityAssertion.ignoringNodes].
      * @throws ParseException if string content from file could not be parsed to JSON node.
      */
     fun asJson(): JsonBodyEqualityAssertion {

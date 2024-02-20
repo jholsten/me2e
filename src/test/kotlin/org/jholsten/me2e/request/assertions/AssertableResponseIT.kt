@@ -1,7 +1,6 @@
 package org.jholsten.me2e.request.assertions
 
 import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.databind.node.ObjectNode
 import org.jholsten.me2e.assertions.*
@@ -388,8 +387,8 @@ internal class AssertableResponseIT {
     @Test
     fun `Asserting json body equality should not throw if assertion is satisfied`() {
         assertDoesNotThrow { assertThat(response).jsonBody(equalTo(expectedJsonNode)) }
-        assertDoesNotThrow { assertThat(response).jsonBody(equalTo(reducedJsonNode).whenIgnoringNodes("$.name")) }
-        assertDoesNotThrow { assertThat(response).jsonBody(equalTo(extendedJsonNode).whenIgnoringNodes("$.additional")) }
+        assertDoesNotThrow { assertThat(response).jsonBody(equalTo(reducedJsonNode).ignoringNodes("$.name")) }
+        assertDoesNotThrow { assertThat(response).jsonBody(equalTo(extendedJsonNode).ignoringNodes("$.additional")) }
     }
 
     @Test

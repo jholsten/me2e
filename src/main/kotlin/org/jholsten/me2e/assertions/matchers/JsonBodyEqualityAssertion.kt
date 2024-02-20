@@ -10,7 +10,7 @@ import org.intellij.lang.annotations.Language
 
 /**
  * Assertion for checking the equality of JSON objects.
- * Use [whenIgnoringNodes] to specify nodes of the objects which should be ignored.
+ * Use [ignoringNodes] to specify nodes of the objects which should be ignored.
  * By default, all values of all nodes are compared.
  */
 class JsonBodyEqualityAssertion internal constructor(private val expected: JsonNode) : Assertable<JsonNode?>(
@@ -25,15 +25,15 @@ class JsonBodyEqualityAssertion internal constructor(private val expected: JsonN
      * see [IETF](https://datatracker.ietf.org/doc/draft-ietf-jsonpath-base/).
      * @param nodesToIgnore Paths to the nodes to be ignored when comparing the JSON objects.
      */
-    fun whenIgnoringNodes(@Language("JSONPath") vararg nodesToIgnore: String): Assertable<JsonNode?> {
-        return whenIgnoringNodes(nodesToIgnore.toList())
+    fun ignoringNodes(@Language("JSONPath") vararg nodesToIgnore: String): Assertable<JsonNode?> {
+        return ignoringNodes(nodesToIgnore.toList())
     }
 
     /**
      * Returns assertion for comparing JSON nodes while ignoring the nodes at the given paths.
      * Internally, those nodes to ignore are removed from both the expected and the actual JSON object.
      */
-    private fun whenIgnoringNodes(nodesToIgnore: List<String>): Assertable<JsonNode?> {
+    private fun ignoringNodes(nodesToIgnore: List<String>): Assertable<JsonNode?> {
         return object : Assertable<JsonNode?>(
             assertion = { actual -> expected.removeNodes(nodesToIgnore) == actual?.removeNodes(nodesToIgnore) },
             message = "to be equal to\n\t$expected\nwhile ignoring nodes\n\t$nodesToIgnore",
