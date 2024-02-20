@@ -148,6 +148,9 @@ class MockServerIT {
                     .withBase64Body(equalToContentsFromFile(filename).asBase64())
                     .withJsonBody(equalToContentsFromFile(filename).asJson())
                     .withBinaryBody(equalToContentsFromFile(filename).asBinary())
+                    .withObjectBody(equalToContentsFromFile(filename).asObject(AssertableResponseIT.BodyClass::class.java))
+                    .withObjectBody(equalToContentsFromFile(filename).asObject(object : TypeReference<AssertableResponseIT.BodyClass>() {}))
+                    .withObjectBody<AssertableResponseIT.BodyClass>(equalToContentsFromFile(filename).asObject())
                     .andNoOther()
             )
         }

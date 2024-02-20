@@ -106,6 +106,9 @@ internal class AssertableResponseIT {
                 .base64Body(equalToContentsFromFile(filename).asBase64())
                 .jsonBody(equalToContentsFromFile(filename).asJson())
                 .binaryBody(equalToContentsFromFile(filename).asBinary())
+                .objectBody(equalToContentsFromFile(filename).asObject(BodyClass::class.java))
+                .objectBody(equalToContentsFromFile(filename).asObject(object : TypeReference<BodyClass>() {}))
+                .objectBody<BodyClass>(equalToContentsFromFile(filename).asObject())
         }
     }
 
@@ -449,6 +452,9 @@ internal class AssertableResponseIT {
             .expectBase64Body(equalToContentsFromFile(filename).asBase64())
             .expectJsonBody(equalToContentsFromFile(filename).asJson())
             .expectBinaryBody(equalToContentsFromFile(filename).asBinary())
+            .expectObjectBody(equalToContentsFromFile(filename).asObject(BodyClass::class.java))
+            .expectObjectBody(equalToContentsFromFile(filename).asObject(object : TypeReference<BodyClass>() {}))
+            .expectObjectBody<BodyClass>(equalToContentsFromFile(filename).asObject())
 
         assertDoesNotThrow { assertThat(response).conformsTo(specification) }
     }
