@@ -1,6 +1,9 @@
 package org.jholsten.me2e.request.assertions
 
 import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.JsonNodeFactory
+import com.fasterxml.jackson.databind.node.ObjectNode
 import org.jholsten.me2e.assertions.*
 import org.jholsten.me2e.parsing.exception.ParseException
 import org.jholsten.me2e.request.model.*
@@ -48,7 +51,30 @@ internal class AssertableResponseIT {
         )
     )
 
+    private val expectedJsonNode = JsonNodeFactory.instance.objectNode()
+        .put("name", "John")
+        .set<ObjectNode>(
+            "nested", JsonNodeFactory.instance.objectNode()
+                .put("key1", "value1")
+                .put("key2", "value2")
+        )
+        .set<ObjectNode>(
+            "details", JsonNodeFactory.instance.arrayNode()
+                .add(JsonNodeFactory.instance.objectNode().put("detail", 1))
+                .add(JsonNodeFactory.instance.objectNode().put("detail", 2))
+        )
+
+    private val reducedJsonNode: ObjectNode = expectedJsonNode.deepCopy()
+
+    private val extendedJsonNode: ObjectNode = expectedJsonNode.deepCopy()
+
+
     private val filename = "responses/expected_body.json"
+
+    init {
+        reducedJsonNode.remove("name")
+        extendedJsonNode.put("additional", "value")
+    }
 
     @Test
     fun `Asserting all properties should not throw if assertions are satisfied`() {
@@ -350,6 +376,19 @@ internal class AssertableResponseIT {
                 .jsonBody(containsNode("$.details[0].detail").withValue(equalTo("1")))
                 .jsonBody(containsNode("$.details[1].detail").withValue(equalTo("2")))
         }
+    }
+
+    @Test
+    fun `Asserting json body equality should not throw if assertion is satisfied`() {
+        assertDoesNotThrow { assertThat(response).jsonBody(equalTo(expectedJsonNode)) }
+        assertDoesNotThrow { assertThat(response).jsonBody(equalTo(reducedJsonNode).whenIgnoringNodes("$.name")) }
+        assertDoesNotThrow { assertThat(response).jsonBody(equalTo(extendedJsonNode).whenIgnoringNodes("$.additional")) }
+    }
+
+    @Test
+    fun `Asserting json body equality should throw if assertion is not satisfied`() {
+        assertFails { assertThat(response).jsonBody(equalTo(reducedJsonNode)) }
+        assertFails { assertThat(response).jsonBody(equalTo(extendedJsonNode)) }
     }
 
     @Test

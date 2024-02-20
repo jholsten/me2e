@@ -2,6 +2,7 @@
 
 package org.jholsten.me2e.assertions
 
+import com.fasterxml.jackson.databind.JsonNode
 import org.intellij.lang.annotations.Language
 import org.jholsten.me2e.assertions.matchers.*
 import org.jholsten.me2e.mock.MockServer
@@ -43,6 +44,22 @@ fun <T> equalTo(expected: T): Assertable<T?> {
 }
 
 /**
+ * Returns assertion for checking whether the expected JSON object is equal to an actual
+ * value, i.e. an assertion which does not throw if `actual == expected`.
+ *
+ * To exclude certain nodes when comparing the objects, use [JsonBodyEqualityAssertion.whenIgnoringNodes].
+ *
+ * Example Usage:
+ * ```kotlin
+ * assertThat(response).jsonBody(equalTo(expectedJson).whenIgnoringNodes("internal_id", "random_value"))
+ * ```
+ * @param expected Expected JSON object which should be equal to the actual JSON object.
+ */
+fun equalTo(expected: JsonNode): JsonBodyEqualityAssertion {
+    return JsonBodyEqualityAssertion(expected)
+}
+
+/**
  * Returns assertion for checking whether an actual value is equal to the contents from the
  * file with the given [filename].
  *
@@ -50,6 +67,7 @@ fun <T> equalTo(expected: T): Assertable<T?> {
  * ```kotlin
  * assertThat(response).body(equalToContentsFromFile("expected_string_content.txt").asString())
  * assertThat(response).jsonBody(equalToContentsFromFile("expected_json_content.json").asJson())
+ * assertThat(response).jsonBody(equalToContentsFromFile("expected_json_content.json").asJson().whenIgnoringNodes("internal_id"))
  * assertThat(response).binaryBody(equalToContentsFromFile("expected_binary_content").asBinary())
  * ```
  * @param filename Name of the file which contains the expected value. Needs to be located in
