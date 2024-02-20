@@ -15,7 +15,8 @@ import org.intellij.lang.annotations.Language
  */
 class JsonBodyEqualityAssertion internal constructor(private val expected: JsonNode) : Assertable<JsonNode?>(
     assertion = { actual -> expected == actual },
-    message = "to be equal to\n\t$expected",
+    message = "to be equal to\n\t${expected.toPrettyString()}",
+    stringRepresentation = { actual -> actual?.toPrettyString() },
 ) {
 
     /**
@@ -36,6 +37,7 @@ class JsonBodyEqualityAssertion internal constructor(private val expected: JsonN
         return object : Assertable<JsonNode?>(
             assertion = { actual -> expected.removeNodes(nodesToIgnore) == actual?.removeNodes(nodesToIgnore) },
             message = "to be equal to\n\t$expected\nwhile ignoring nodes\n\t$nodesToIgnore",
+            stringRepresentation = { actual -> actual?.toPrettyString() },
         ) {
             override fun toString(): String = "equal to $expected ignoring nodes $nodesToIgnore"
         }

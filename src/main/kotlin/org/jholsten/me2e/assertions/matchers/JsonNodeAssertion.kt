@@ -54,6 +54,7 @@ import org.jholsten.me2e.parsing.utils.DeserializerFactory
 class JsonNodeAssertion internal constructor(private val expectedPath: String) : Assertable<JsonNode?>(
     assertion = { actual -> actual != null && findNodeValue(actual, expectedPath) != null },
     message = "to contain node with path\n\t$expectedPath",
+    stringRepresentation = { actual -> actual?.toPrettyString() },
 ) {
     /**
      * Returns assertion for checking if the JSON body contains a node with the expected path with an expected value.
@@ -66,13 +67,20 @@ class JsonNodeAssertion internal constructor(private val expectedPath: String) :
             assertion = { actual ->
                 actual != null && findNodeValue(actual, expectedPath)?.let { expectedValue.assertion(it) } == true
             },
-            message = "to contain node with key $expectedPath with value ${expectedValue.message}"
+            message = "to contain node with key $expectedPath with value ${expectedValue.message}",
+            stringRepresentation = { actual -> actual?.toPrettyString() },
         ) {
             override fun toString(): String = "contains node with path $expectedPath and value $expectedValue"
         }
     }
 
     companion object {
+        /**
+         * Tries to find the JSON node with the given path in the given root.
+         * Returns `null` if node with the given path could not be found.
+         * @param root JSON body to search for the node with the given path.
+         * @param path Path to the JSON node to find.
+         */
         private fun findNodeValue(root: JsonNode, path: String): String? {
             val document = JsonPath.parse(root.toString())
             return try {

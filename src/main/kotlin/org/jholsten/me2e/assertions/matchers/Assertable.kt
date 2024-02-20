@@ -19,9 +19,15 @@ open class Assertable<T> internal constructor(
 
     /**
      * Message representing the expectation to output in case assertion was not successful.
-     * Is prefixed with `"Expected $property\n\t$actual\n"`.
+     * Is prefixed with `"Expected $property\n\t${stringRepresentation(actual)}\n"`.
      */
     val message: String,
+
+    /**
+     * Function for retrieving the string representation of the actual value.
+     * Is used to represent the actual value in the assertion failure message.
+     */
+    val stringRepresentation: (T) -> String? = { actual -> actual?.toString() },
 ) {
     /**
      * Evaluates the assertion for the given actual value.
@@ -32,7 +38,7 @@ open class Assertable<T> internal constructor(
     @JvmSynthetic
     internal fun evaluate(property: String, actual: T) {
         if (!assertion(actual)) {
-            val message = "Expected $property\n\t$actual\n$message"
+            val message = "Expected $property\n\t${stringRepresentation(actual)}\n$message"
             throw AssertionFailure(message)
         }
     }
