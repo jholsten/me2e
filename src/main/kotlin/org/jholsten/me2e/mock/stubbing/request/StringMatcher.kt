@@ -2,6 +2,7 @@ package org.jholsten.me2e.mock.stubbing.request
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
+import org.intellij.lang.annotations.Language
 import org.jholsten.me2e.utils.toJson
 
 /**
@@ -97,7 +98,7 @@ class StringMatcher internal constructor(
      * @return Whether the actual value conforms to the regex pattern requirements of this matcher.
      */
     @JvmSynthetic
-    internal fun matchesPattern(value: String): Boolean {
+    internal fun matchesPattern(@Language("RegExp") value: String): Boolean {
         val regexOptions = when (this.ignoreCase) {
             true -> setOf(RegexOption.IGNORE_CASE)
             else -> setOf()

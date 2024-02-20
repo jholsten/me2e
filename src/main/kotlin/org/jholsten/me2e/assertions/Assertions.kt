@@ -131,11 +131,11 @@ fun containsNode(@Language("JSONPath") expectedPath: String): JsonNodeAssertion 
  *
  * Example Usage:
  * ```kotlin
- * assertThat(response).protocol(matchesPattern("HTTP/.{3}"))
+ * assertThat(response).protocol(matchesPattern("HTTP.{4}"))
  * ```
  * @param expectedPattern Expected pattern to which the actual value should match.
  */
-fun matchesPattern(expectedPattern: String): Assertable<String?> {
+fun matchesPattern(@Language("RegExp") expectedPattern: String): Assertable<String?> {
     return PatternMatchAssertion(expectedPattern)
 }
 
