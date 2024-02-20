@@ -589,6 +589,7 @@ A stub definition for the payment request mentioned in the example above may loo
 
 ```json
 {
+  "name": "payment_request",
   "request": {
     "method": "POST",
     "path": {
@@ -1032,6 +1033,7 @@ The following PostgreSQL script, which is located in the `resources` folder unde
     <summary><ins><b>PostgreSQL</b> Script (<code>scripts/accounts.sql</code>)</ins></summary>
     
 ```sql
+-- scripts/accounts.sql
 INSERT INTO account(id, username, password, role)
 VALUES ('00000000-1111-1111-1111-000000000000', 'user', '2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b', 'USER'),
        ('00000000-1111-1111-1111-000000000001', 'admin', 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3', 'ADMIN');
@@ -1042,6 +1044,7 @@ VALUES ('00000000-1111-1111-1111-000000000000', 'user', '2bb80d537b1da3e38bd3036
     <summary><ins><b>MongoDB</b> Script (<code>scripts/accounts.js</code>)</ins></summary>
     
 ```javascript
+// scripts/accounts.js
 conn = new Mongo("mongodb://dbuser:password@localhost:27017"); // For a database without authentication, use `conn = new Mongo();`
 db = conn.getDB("orderdb");
 
@@ -1381,6 +1384,109 @@ val response = microservice.post(
 To verify that the response of a Microservice meets your expectations, you can use the [`assertThat`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.assertions/assert-that.html) method in combination with the functions from the [`assertions` package](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.assertions/index.html).
 This allows you to ensure that all possible properties of the response have the expected value.
 
+To specify assertions response bodies, you can use the following functions to compare parts or the entire content of the body:
+- [`body`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.request.assertions/-assertable-response/body.html): Specify expectations on the content of the body, encoded as string
+  - <ins>Example</ins>: Assuming the response body is `Some Response Text`, we can execute the following assertions, for example:
+    - Assert that the content of the body corresponds exactly to the string `Some Response Text`:
+
+        ```kotlin
+        assertThat(response).body(equalTo("Some Response Text"))
+        ```
+
+    - Assert that the content of the body includes the string `Some`:
+
+        ```kotlin
+        assertThat(response).body(containsString("Some"))
+        ```
+
+    - Assert that the content of the body matches the regular expression `.*Response Text`:
+
+        ```kotlin
+        assertThat(response).body(matchesPattern(".*Response Text"))
+        ```
+
+- [`objectBody`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.request.assertions/-assertable-response/object-body.html): Specify expectations on the content of the body, deserialized to an instance of a given class
+  - <ins>Example</ins>: Assuming the response body is `{"first": "value", "second": 2}`, we can execute the following assertion for example:
+
+     ```kotlin
+     val expectedBody = Pair("value", 2)
+     assertThat(response).objectBody(equalTo(expectedBody))
+     ```
+
+- [`binaryBody`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.request.assertions/-assertable-response/binary-body.html): Specify expectations on the raw binary content of the body
+  - <ins>Example</ins>: Assuming the response body is a binary value of `[97, 98, 99]`, we can execute the following assertion for example:
+
+     ```kotlin
+     assertThat(response).binaryBody(equalTo(byteArrayOf(97, 98, 99)))
+     ```
+
+- [`base64Body`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.request.assertions/-assertable-response/base64-body.html): Specify expectations on the raw binary content of the body, encoded as Base 64
+  - <ins>Example</ins>: Assuming the response body is a binary value of `[97, 98, 99]`, which is encoded as Base64 to `YWJj`, we can execute the following assertion for example:
+
+     ```kotlin
+     assertThat(response).base64Body(equalTo("YWJj"))
+     ```
+
+- [`jsonBody`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.request.assertions/-assertable-response/json-body.html): Specify expectations on the content of the body, parsed to a JSON object
+  - To specify assertions for a JSON body, you can pass the entire expected JSON object as a `JsonNode` and compare it with [`equalTo`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.assertions/equal-to.html).
+    - <ins>Example</ins>: Assuming the response body is `{"first": "value", "second": 2}`, we can execute the following assertion, for example:
+
+        ```kotlin
+        val expectedBody = JsonNodeFactory.instance.objectNode()
+            .put("first", "value")
+            .put("second", 2)
+        assertThat(response).jsonBody(equalTo(expectedBody))
+        ```
+
+    - In case you want to ignore certain nodes when comparing the JSON objects, use [`ignoringNodes`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.assertions.matchers/-json-body-equality-assertion/ignoring-nodes.html).
+      - <ins>Example</ins>: Assert that the JSON response body is equal to the expected object, while ignoring field `_id`:
+
+        ```kotlin
+        assertThat(response).jsonBody(equalTo(expectedBody).ignoringNodes("_id"))
+        ```
+
+  - Alternatively, you can use the [`containsNode`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.assertions/contains-node.html) function to specify assertions for individual nodes of the body. Specify the path to this node whose value you want to compare using a [JSONPath](https://datatracker.ietf.org/doc/draft-ietf-jsonpath-base/) expression. Such a JSONPath expressions begins with the root element `$`, after which you can specify the path to the corresponding node using `.` as the path separator. For detailed information on the JSONPath syntax and examples, take a look at this [IETF draft](https://datatracker.ietf.org/doc/draft-ietf-jsonpath-base/).
+    - <ins>Example</ins>: Assuming the response body is `{"first": "value", "second": 2}`, we can execute the following assertion, for example:
+
+        ```kotlin
+        assertThat(response).jsonBody(containsNode("$.first").withValue("value"))
+        assertThat(response).jsonBody(containsNode("$.second").withValue("2"))
+        ```
+
+Particularly with larger response bodies, the test cases can quickly become hard to read and difficult to maintain if the expectations are specified directly in the code.
+It is therefore recommended to save the expected response bodies in files in the `resources` folder and to use them in combination with the [`equalToContentsFromFile`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.assertions/equal-to-contents-from-file.html) function.
+With this method, specify the path of the file containing the expected response body and use [`asString`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.assertions.matchers/-file-contents-equality-assertion/as-string.html), [`asBinary`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.assertions.matchers/-file-contents-equality-assertion/as-binary.html), [`asJson`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.assertions.matchers/-file-contents-equality-assertion/as-json.html) or [`asObject`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.assertions.matchers/-file-contents-equality-assertion/as-object.html) to specify how the content of this file should be read.
+This function can be used in combination with all the functions presented above.
+- <ins>Example using [`body`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.request.assertions/-assertable-response/body.html)</ins>:
+
+     ```kotlin
+     assertThat(response).body(equalToContentsFromFile("expected.txt").asString())
+     ```
+  
+- <ins>Example using [`objectBody`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.request.assertions/-assertable-response/object-body.html)</ins>:
+
+     ```kotlin
+     assertThat(response).objectBody(equalToContentsFromFile("expected.json").asObject<Pair<String, Int>>())
+     ```
+  
+- <ins>Example using [`binaryBody`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.request.assertions/-assertable-response/binary-body.html)</ins>:
+
+     ```kotlin
+     assertThat(response).binaryBody(equalToContentsFromFile("expected_binary").asBinary())
+     ```
+  
+- <ins>Example using [`base64Body`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.request.assertions/-assertable-response/base64-body.html)</ins>:
+
+     ```kotlin
+     assertThat(response).base64Body(equalToContentsFromFile("expected_binary").asBase64())
+     ```
+  
+- <ins>Example using [`jsonBody`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.request.assertions/-assertable-response/json-body.html)</ins>:
+
+     ```kotlin
+     assertThat(response).jsonBody(equalToContentsFromFile("expected.json").asJson().ignoringNodes("_id"))
+     ```
+
 <ins>Examples</ins>
 <table>
     <tr>
@@ -1505,7 +1611,7 @@ assertThat(response)
 ###### Defining Expected Responses
 With the functions presented above, the test is terminated as soon as the first property of the response does not meet the expectations.
 If you want to test several properties at the same time instead and receive a collective evaluation at the end after all properties have been tested, you can use the [`ExpectedResponse`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.request.assertions/-expected-response/index.html).
-As with the previous function, you can use instances of this class to define all the expected properties of the response and then pass this object to the [`conformsTo`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.request.assertions/-assertable-response/conforms-to.html) function.
+As with the previous functions, you can use instances of this class to define all the expected properties of the response and then pass this object to the [`conformsTo`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.request.assertions/-assertable-response/conforms-to.html) function.
 
 <ins>Example</ins>
 <table>
@@ -1581,10 +1687,13 @@ class ApiKeyAuthenticator(private val apiKey: String) : Authenticator() {
 
 #### Mock Server Verification
 If you have set up a [Mock Server](#mock-servers-simulating-external-services) in your test environment to simulate an external system, you can also use the me2e functions to check whether an expected request has been set to a certain Mock Server.
-As before, use the [`assertThat`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.assertions/assert-that.html) method in combination with the functions from the [`assertions` package](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.assertions/index.html).
+As [with the functions for verifying HTTP responses presented before](#verifying-http-responses), use the [`assertThat`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.assertions/assert-that.html) method in combination with the functions from the [`assertions` package](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.assertions/index.html).
 Unlike before, however, in this context it only makes sense to compare all the properties of the requests that the Mock Server has received with the expectations.
 To do this, instantiate an object of the [`ExpectedRequest`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.mock.verification/-expected-request/index.html) class and set all the properties of the expected request.
 You can then use the [`receivedRequest`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.mock.verification/-mock-server-verification/received-request.html) method to verify that the Mock Server has received this expected request either any number of times or a certain number of times. 
+
+As with the verification of HTTP responses, similar functions for comparing the properties of the requests are available here as well, such as [`withBody`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.mock.verification/-expected-request/with-body.html) or [`withJsonBody`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.mock.verification/-expected-request/with-json-body.html).
+Alternatively, if you have assigned unique names to your stubs (see the [section on the stub definition](#stub-definition)), you can verify that a Mock Server has received a request that matches the request pattern defined in the stub with the given name using the function [`matchingStub`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.mock.verification/-expected-request/matching-stub.html).
 
 <ins>Examples</ins>
 <table>
@@ -1619,7 +1728,7 @@ assertThat(exampleServer).receivedRequest(
 </td>
     </tr>
     <tr>
-        <th>Verify that the Mock Server has received the expected request an arbitrary number of times</th>
+        <th>Verify that the Mock Server has received the expected request at least once</th>
 <td>
 
 ```kotlin
@@ -1629,6 +1738,29 @@ assertThat(exampleServer).receivedRequest(
         .withPath(equalTo("/account"))
         .withQueryParameters(containsKey("id").withValue(equalTo("123")))
 )
+```
+</td>
+    </tr>
+    <tr>
+        <th>Verify that the Mock Server has received the expected request with the expected request body in file <code>requests/example_request.json</code></th>
+<td>
+
+```kotlin
+assertThat(exampleServer).receivedRequest(
+    ExpectedRequest()
+        .withMethod(equalTo(HttpMethod.POST))
+        .withPath(equalTo("/account"))
+        .withJsonBody(equalToContentsFromFile("requests/example_request.json").ignoringNodes("_id"))
+)
+```
+</td>
+    </tr>
+    <tr>
+        <th>Verify that the Mock Server has received a request which matches the request pattern of the stub with name <code>example_stub</code></th>
+<td>
+
+```kotlin
+assertThat(exampleServer).receivedRequest(ExpectedRequest().matchingStub("example_stub"))
 ```
 </td>
     </tr>
