@@ -42,6 +42,24 @@ fun <T> equalTo(expected: T): Assertable<T?> {
 }
 
 /**
+ * Returns assertion for checking whether an actual value is equal to the contents from the
+ * file with the given [filename].
+ *
+ * Example Usage:
+ * ```kotlin
+ * assertThat(response).body(equalToContentsFromFile("expected_string_content.txt").asString())
+ * assertThat(response).jsonBody(equalToContentsFromFile("expected_json_content.json").asJson())
+ * assertThat(response).binaryBody(equalToContentsFromFile("expected_binary_content").asBinary())
+ * ```
+ * @param filename Name of the file which contains the expected value. Needs to be located in
+ * `resources` folder.
+ * @throws java.io.FileNotFoundException if file with the given name does not exist.
+ */
+fun equalToContentsFromFile(filename: String): FileContentsEqualityAssertion {
+    return FileContentsEqualityAssertion(filename)
+}
+
+/**
  * Returns assertion for checking whether the expected value is not equal to an actual value,
  * i.e. an assertion which does not throw if `actual != expected`.
  *

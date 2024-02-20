@@ -8,10 +8,7 @@ import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
 import org.apache.hc.core5.http.ContentType as ApacheContentType
 import org.apache.hc.core5.http.HttpEntity
 import org.apache.hc.core5.http.io.entity.StringEntity
-import org.jholsten.me2e.assertions.assertThat
-import org.jholsten.me2e.assertions.containsKey
-import org.jholsten.me2e.assertions.containsNode
-import org.jholsten.me2e.assertions.equalTo
+import org.jholsten.me2e.assertions.*
 import org.jholsten.me2e.config.model.MockServerConfig
 import org.jholsten.me2e.mock.verification.exception.VerificationException
 import org.jholsten.me2e.mock.stubbing.MockServerStub
@@ -80,6 +77,8 @@ class MockServerIT {
         )
     )
 
+    private val filename = "responses/expected_body.json"
+
     private val mockServerConfig = MockServerConfig()
 
     private val manager = MockServerManager(mapOf("example-service" to exampleServer), mockServerConfig)
@@ -145,6 +144,10 @@ class MockServerIT {
                     .withObjectBody(AssertableResponseIT.BodyClass::class.java, equalTo(expectedObj))
                     .withObjectBody(object : TypeReference<AssertableResponseIT.BodyClass>() {}, equalTo(expectedObj))
                     .withObjectBody<AssertableResponseIT.BodyClass>(equalTo(expectedObj))
+                    .withBody(equalToContentsFromFile(filename).asString())
+                    .withBase64Body(equalToContentsFromFile(filename).asBase64())
+                    .withJsonBody(equalToContentsFromFile(filename).asJson())
+                    .withBinaryBody(equalToContentsFromFile(filename).asBinary())
                     .andNoOther()
             )
         }

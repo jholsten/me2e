@@ -2,6 +2,7 @@ package org.jholsten.me2e.request.assertions
 
 import com.fasterxml.jackson.core.type.TypeReference
 import org.jholsten.me2e.assertions.*
+import org.jholsten.me2e.parsing.exception.ParseException
 import org.jholsten.me2e.request.model.*
 import org.jholsten.util.assertDoesNotThrow
 import kotlin.test.*
@@ -47,6 +48,8 @@ internal class AssertableResponseIT {
         )
     )
 
+    private val filename = "responses/expected_body.json"
+
     @Test
     fun `Asserting all properties should not throw if assertions are satisfied`() {
         assertDoesNotThrow {
@@ -73,6 +76,10 @@ internal class AssertableResponseIT {
                 .objectBody(BodyClass::class.java, equalTo(expectedObj))
                 .objectBody(object : TypeReference<BodyClass>() {}, equalTo(expectedObj))
                 .objectBody<BodyClass>(equalTo(expectedObj))
+                .body(equalToContentsFromFile(filename).asString())
+                .base64Body(equalToContentsFromFile(filename).asBase64())
+                .jsonBody(equalToContentsFromFile(filename).asJson())
+                .binaryBody(equalToContentsFromFile(filename).asBinary())
         }
     }
 
@@ -392,6 +399,10 @@ internal class AssertableResponseIT {
             .expectObjectBody(BodyClass::class.java, equalTo(expectedObj))
             .expectObjectBody(object : TypeReference<BodyClass>() {}, equalTo(expectedObj))
             .expectObjectBody<BodyClass>(equalTo(expectedObj))
+            .expectBody(equalToContentsFromFile(filename).asString())
+            .expectBase64Body(equalToContentsFromFile(filename).asBase64())
+            .expectJsonBody(equalToContentsFromFile(filename).asJson())
+            .expectBinaryBody(equalToContentsFromFile(filename).asBinary())
 
         assertDoesNotThrow { assertThat(response).conformsTo(specification) }
     }
@@ -416,6 +427,15 @@ internal class AssertableResponseIT {
 
         val e = assertFails { assertThat(response).conformsTo(specification) }
         assertEquals(14, e.failures.size)
+    }
+
+    @Test
+    fun `Asserting body with contents from file should throw if assertions are not satisfied`() {
+        val filename = "test-file.txt"
+        assertFailsWith<AssertionFailure> { assertThat(response).body(equalToContentsFromFile(filename).asString()) }
+        assertFailsWith<AssertionFailure> { assertThat(response).base64Body(equalToContentsFromFile(filename).asBase64()) }
+        assertFailsWith<AssertionFailure> { assertThat(response).binaryBody(equalToContentsFromFile(filename).asBinary()) }
+        assertFailsWith<ParseException> { assertThat(response).jsonBody(equalToContentsFromFile(filename).asJson()) }
     }
 
     data class BodyClass(
