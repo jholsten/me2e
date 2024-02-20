@@ -86,7 +86,7 @@ class MockServerDeserializerIT {
                     request = MockServerStubRequestMatcher(
                         hostname = "example.com",
                         method = HttpMethod.POST,
-                        path = StringMatcher(matches = "\\/account\\/(.*)\\/authorize\$"),
+                        path = StringMatcher(matches = "/account/(.*)/authorize$"),
                     ),
                     response = MockServerStubResponse(
                         statusCode = 200,

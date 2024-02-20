@@ -175,11 +175,11 @@
         },
         "matches": {
           "type": "string",
-          "description": "Matches if the string conforms to the defined regex pattern. Note that you need to escape special characters with double backslashes, e.g. `\\/account\\/(.*)\\/authorize`."
+          "description": "Matches if the string conforms to the defined regex pattern. Note that this pattern needs to be defined in the same way as a regex in Java, i.e. you need to use double backslashes for characters classes and escape special characters with double backslashes. Examples: \\\\w (= \\w), some\\\\.value, /account/(.*)/status."
         },
         "not-matches": {
           "type": "string",
-          "description": "Matches if the string does not conform to the defined regex pattern. Note that you need to escape special characters with double backslashes, e.g. `\\/account\\/(.*)\\/authorize`."
+          "description": "Matches if the string does not conform to the defined regex pattern. Note that this pattern needs to be defined in the same way as a regex in Java, i.e. you need to use double backslashes for characters classes and escape special characters with double backslashes. Examples: \\\\w (= \\w), some\\\\.value, /account/(.*)/status."
         },
         "contains": {
           "type": "string",

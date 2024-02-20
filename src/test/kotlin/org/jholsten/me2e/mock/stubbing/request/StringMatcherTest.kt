@@ -183,7 +183,7 @@ internal class StringMatcherTest {
     fun `Deserializing string matcher with regex should set correct properties`() {
         val value = """
             {
-                "matches": "\\/account\\/(.*)\\/authorize$"
+                "matches": "/account/(.*)/authorize$"
             }
         """.trimIndent()
 
@@ -191,9 +191,46 @@ internal class StringMatcherTest {
             .enable(JsonReadFeature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER.mappedFeature())
         val result = mapper.readValue(value, StringMatcher::class.java)
 
-        assertEquals("\\/account\\/(.*)\\/authorize$", result.matches)
+        assertEquals("/account/(.*)/authorize$", result.matches)
 
         assertTrue(result.matches("/account/123/authorize"))
         assertFalse(result.matches("/account/123/authorize-xyz"))
+    }
+
+    @Test
+    fun `Deserializing string matcher with regex with escaped fields should set correct properties`() {
+        val value = """
+            {
+                "matches": "\\.authorize$"
+            }
+        """.trimIndent()
+
+        val mapper = ObjectMapper().registerModule(KotlinModule.Builder().build())
+            .enable(JsonReadFeature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER.mappedFeature())
+        val result = mapper.readValue(value, StringMatcher::class.java)
+
+        assertEquals("\\.authorize$", result.matches)
+
+        assertTrue(result.matches(".authorize"))
+        assertFalse(result.matches(".authorize-xyz"))
+    }
+
+    @Test
+    fun `Deserializing string matcher with regex with regex values should set correct properties`() {
+        val value = """
+            {
+                "matches": "^\\d{3}$"
+            }
+        """.trimIndent()
+
+        val mapper = ObjectMapper().registerModule(KotlinModule.Builder().build())
+            .enable(JsonReadFeature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER.mappedFeature())
+        val result = mapper.readValue(value, StringMatcher::class.java)
+
+        assertEquals("^\\d{3}$", result.matches)
+
+        assertTrue(result.matches("123"))
+        assertFalse(result.matches("1234"))
+        assertFalse(result.matches("12-34"))
     }
 }

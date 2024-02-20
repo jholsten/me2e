@@ -171,13 +171,13 @@ internal class AssertableResponseIT {
     fun `Asserting protocol should throw if assertion is not satisfied`() {
         assertFails { assertThat(response).protocol(equalTo("http/2.0")) }
         assertFails { assertThat(response).protocol(containsString("ABC")) }
-        assertFails { assertThat(response).protocol(matchesPattern("^[A-Z]{4}\$")) }
+        assertFails { assertThat(response).protocol(matchesPattern("^[A-Z]{4}$")) }
         assertFails { assertThat(response).protocol(isNull()) }
         assertFails {
             assertThat(response)
                 .protocol(equalTo("http/2.0"))
                 .protocol(containsString("ABC"))
-                .protocol(matchesPattern("^[A-Z]{4}\$"))
+                .protocol(matchesPattern("^[A-Z]{4}$"))
                 .protocol(isNull())
         }
     }
@@ -203,13 +203,13 @@ internal class AssertableResponseIT {
     fun `Asserting message should throw if assertion is not satisfied`() {
         assertFails { assertThat(response).message(equalTo("Another Message")) }
         assertFails { assertThat(response).message(containsString("Something else")) }
-        assertFails { assertThat(response).message(matchesPattern("^[A-Z]{4}\$")) }
+        assertFails { assertThat(response).message(matchesPattern("^[A-Z]{4}$")) }
         assertFails { assertThat(response).message(isNull()) }
         assertFails {
             assertThat(response)
                 .message(equalTo("Another Message"))
                 .message(containsString("Something else"))
-                .message(matchesPattern("^[A-Z]{4}\$"))
+                .message(matchesPattern("^[A-Z]{4}$"))
                 .message(isNull())
         }
     }

@@ -28,6 +28,7 @@ class StringMatcher internal constructor(
      * Matches if the string conforms to the defined regex pattern.
      * A value of `null` indicates that the actual value does not have to match any regex pattern.
      */
+    @Language("RegExp")
     val matches: String? = null,
 
     /**

@@ -824,7 +824,7 @@ Content-Length: 19
 "request": {
     "method": "PUT",
     "path": {
-      "matches": "\\/account\\/(.*)\\/authorize$",
+      "matches": "/account/(.*)/authorize$",
       "contains": "ABC",
       "not-contains": "123",
       "ignore-case": true

@@ -3,7 +3,7 @@
   "request": {
     "method": "POST",
     "path": {
-      "matches": "\\/account\\/(.*)\\/authorize$"
+      "matches": "/account/(.*)/authorize$"
     }
   },
   "response": {

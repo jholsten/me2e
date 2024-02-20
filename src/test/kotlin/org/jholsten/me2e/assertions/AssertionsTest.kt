@@ -88,14 +88,14 @@ internal class AssertionsTest {
 
     @Test
     fun `Pattern match assertion should not throw if actual matches pattern`() {
-        assertDoesNotThrow { matchesPattern("^[A-Z0-9._-]{7}\$").evaluate("Property", "A.1-2_3") }
+        assertDoesNotThrow { matchesPattern("^[A-Z0-9._-]{7}$").evaluate("Property", "A.1-2_3") }
         assertDoesNotThrow { matchesPattern(".*").evaluate("Property", "some-value") }
     }
 
     @Test
     fun `Pattern match assertion should throw if actual does not match pattern`() {
-        assertFailsWith<AssertionFailure> { matchesPattern("^[A-Z0-9._-]{7}\$").evaluate("Property", "nope") }
-        assertFailsWith<AssertionFailure> { matchesPattern("^[A-Z]{3}\$").evaluate("Property", "abc") }
+        assertFailsWith<AssertionFailure> { matchesPattern("^[A-Z0-9._-]{7}$").evaluate("Property", "nope") }
+        assertFailsWith<AssertionFailure> { matchesPattern("^[A-Z]{3}$").evaluate("Property", "abc") }
     }
 
     @Test
