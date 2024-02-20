@@ -36,7 +36,7 @@ open class Assertable<T> internal constructor(
      * @throws AssertionFailure if assertion was not successful.
      */
     @JvmSynthetic
-    internal fun evaluate(property: String, actual: T) {
+    internal open fun evaluate(property: String, actual: T) {
         if (!assertion(actual)) {
             val message = "Expected $property\n\t${stringRepresentation(actual)}\n$message"
             throw AssertionFailure(message)

@@ -73,6 +73,7 @@ ext {
     mybatis_version = "3.5.7"
     thymeleaf_version = "3.1.2.RELEASE"
     json_path_version = "2.9.0"
+    json_assert_version = "1.5.1"
 }
 
 dependencies {
@@ -98,7 +99,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.10"
 
     // Dependencies for Jackson
-    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:$jackson_version"
+    api "com.fasterxml.jackson.module:jackson-module-kotlin:$jackson_version"
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jackson_version"
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jackson_version"
 
@@ -147,8 +148,9 @@ dependencies {
     // Dependency for generating HTML reports
     api "org.thymeleaf:thymeleaf:$thymeleaf_version"
 
-    // Dependency for finding JSON nodes by path
+    // Dependency for reading and comparing JSON nodes
     implementation "com.jayway.jsonpath:json-path:$json_path_version"
+    implementation "org.skyscreamer:jsonassert:$json_assert_version"
 }
 
 // Configuration for HTML documentation

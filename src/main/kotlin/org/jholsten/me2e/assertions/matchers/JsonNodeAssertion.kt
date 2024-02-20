@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.jayway.jsonpath.InvalidPathException
 import com.jayway.jsonpath.JsonPath
 import com.jayway.jsonpath.PathNotFoundException
+import org.jholsten.me2e.assertions.AssertionFailure
 import org.jholsten.me2e.parsing.utils.DeserializerFactory
 
 /**
@@ -62,14 +63,22 @@ class JsonNodeAssertion internal constructor(private val expectedPath: String) :
      * @param expectedValue Expectation for the value of the JSON node with the given key.
      */
     fun withValue(expectedValue: Assertable<String?>): Assertable<JsonNode?> {
-
         return object : Assertable<JsonNode?>(
             assertion = { actual ->
                 actual != null && findNodeValue(actual, expectedPath)?.let { expectedValue.assertion(it) } == true
             },
-            message = "to contain node with key $expectedPath with value ${expectedValue.message}",
-            stringRepresentation = { actual -> actual?.toPrettyString() },
+            message = "to contain node with path $expectedPath with value ${expectedValue.message}",
         ) {
+            override fun evaluate(property: String, actual: JsonNode?) {
+                val node = actual?.let { findNodeValue(it, expectedPath) }
+                    ?: throw AssertionFailure("Expected $property\n${actual?.toPrettyString()}\nto contain node with path\n\t$expectedPath")
+                if (!expectedValue.assertion(node)) {
+                    val message = "Expected $property\n${actual.toPrettyString()}\nto contain node " +
+                        "with path $expectedPath with value\n\t$node\n${expectedValue.message}"
+                    throw AssertionFailure(message)
+                }
+            }
+
             override fun toString(): String = "contains node with path $expectedPath and value $expectedValue"
         }
     }

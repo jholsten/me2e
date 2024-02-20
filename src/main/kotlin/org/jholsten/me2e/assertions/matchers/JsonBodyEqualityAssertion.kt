@@ -7,6 +7,10 @@ import com.jayway.jsonpath.JsonPath
 import com.jayway.jsonpath.PathNotFoundException
 import com.jayway.jsonpath.spi.json.JacksonJsonNodeJsonProvider
 import org.intellij.lang.annotations.Language
+import org.jholsten.me2e.assertions.AssertionFailure
+import org.skyscreamer.jsonassert.JSONCompare
+import org.skyscreamer.jsonassert.JSONCompareMode
+import org.skyscreamer.jsonassert.JSONCompareResult
 
 /**
  * Assertion for checking the equality of JSON objects.
@@ -15,9 +19,12 @@ import org.intellij.lang.annotations.Language
  */
 class JsonBodyEqualityAssertion internal constructor(private val expected: JsonNode) : Assertable<JsonNode?>(
     assertion = { actual -> expected == actual },
-    message = "to be equal to\n\t${expected.toPrettyString()}",
-    stringRepresentation = { actual -> actual?.toPrettyString() },
+    message = "to be equal to\n\n${expected.toPrettyString()}",
 ) {
+
+    override fun evaluate(property: String, actual: JsonNode?) {
+        evaluate(property, expected, actual)
+    }
 
     /**
      * Specifies the paths of nodes to ignore when comparing the actual JSON object to the expected one.
@@ -36,9 +43,12 @@ class JsonBodyEqualityAssertion internal constructor(private val expected: JsonN
     private fun ignoringNodes(nodesToIgnore: List<String>): Assertable<JsonNode?> {
         return object : Assertable<JsonNode?>(
             assertion = { actual -> expected.removeNodes(nodesToIgnore) == actual?.removeNodes(nodesToIgnore) },
-            message = "to be equal to\n\t$expected\nwhile ignoring nodes\n\t$nodesToIgnore",
-            stringRepresentation = { actual -> actual?.toPrettyString() },
+            message = "to be equal to\n\n${expected.toPrettyString()}\n\nwhile ignoring nodes\n\t$nodesToIgnore",
         ) {
+            override fun evaluate(property: String, actual: JsonNode?) {
+                evaluate(property, expected.removeNodes(nodesToIgnore), actual?.removeNodes(nodesToIgnore))
+            }
+
             override fun toString(): String = "equal to $expected ignoring nodes $nodesToIgnore"
         }
     }
@@ -64,6 +74,51 @@ class JsonBodyEqualityAssertion internal constructor(private val expected: JsonN
             }
         }
         return copy
+    }
+
+    /**
+     * Evaluates differences between the given [expected] and [actual] JSON objects.
+     * Includes differences in the message of the [AssertionFailure].
+     */
+    private fun evaluate(property: String, expected: JsonNode, actual: JsonNode?) {
+        if (actual == null) {
+            throw AssertionFailure("Expected $property\n\tnull\n$message")
+        }
+        val diff = JSONCompare.compareJSON(expected.toString(), actual.toString(), JSONCompareMode.STRICT)
+        if (diff.failed()) {
+            val diffMessage = diff.buildMessage()
+            val failures = diff.fieldFailures.size + diff.fieldUnexpected.size + diff.fieldMissing.size
+            throw AssertionFailure("Expected $property\n${actual.toPrettyString()}\n\n$message\n\nFound $failures Failures:\n$diffMessage")
+        }
+    }
+
+    /**
+     * Builds message representing the differences of the two JSON objects contained in the given result.
+     */
+    private fun JSONCompareResult.buildMessage(): String {
+        val stringBuilder = StringBuilder()
+        if (this.fieldMissing.isNotEmpty()) {
+            stringBuilder.appendLine(">>> Missing Fields:")
+            for (field in this.fieldMissing) {
+                stringBuilder.appendLine("\t- ${if (!field.field.isNullOrBlank()) "${field.field}." else ""}${field.expected}")
+            }
+            stringBuilder.appendLine()
+        }
+        if (this.fieldUnexpected.isNotEmpty()) {
+            stringBuilder.appendLine(">>> Unexpected Fields:")
+            for (field in this.fieldUnexpected) {
+                stringBuilder.appendLine("\t- ${if (!field.field.isNullOrBlank()) "${field.field}." else ""}${field.actual}")
+            }
+            stringBuilder.appendLine()
+        }
+        if (this.fieldFailures.isNotEmpty()) {
+            stringBuilder.appendLine(">>> Mismatched values:")
+            for (field in this.fieldFailures) {
+                stringBuilder.appendLine("\t- Expected field \"${field.field}\" to have value\n\t\t${field.expected}\n\t  but was\n\t\t${field.actual}\n")
+            }
+            stringBuilder.appendLine()
+        }
+        return stringBuilder.toString()
     }
 
     companion object {
