@@ -1806,9 +1806,20 @@ The following sections explain how you can realize this customizability and whic
 During the execution of the tests, a report data aggregator collects various data on the tests and the test environment.
 This includes:
 - standard metrics on the tests, i.e. execution times, status and cause of errors, among others
+
+![Test Report Metrics Example](docs/test_report_example_detailed_metrics.png)
+
 - logs of the test runner and all Docker containers of the test environment
+
+![Test Report Logs Example](docs/test_report_example_detailed_logs.png)
+
 - resource consumption of all Docker container over time
-- HTTP network traces for all HTTP requests sent in the Docker bridge networks of the Docker-Compose
+
+![Test Report Resource Usage Example](docs/test_report_example_detailed_resource_usage.png)
+
+- HTTP network traces for all HTTP requests sent in the Docker bridge networks of the Docker-Compose including status, headers and payloads, among others
+
+![Test Report HTTP Traces Example](docs/test_report_example_detailed_traces.png)
 
 After the execution of all tests has been completed, this data is aggregated and transferred to the report generator in the form of the [`TestExecutionResult`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.report.result.model/-test-execution-result/index.html).
 
