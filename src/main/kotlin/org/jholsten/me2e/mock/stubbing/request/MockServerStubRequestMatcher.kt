@@ -7,6 +7,7 @@ import com.github.tomakehurst.wiremock.http.HttpHeaders
 import com.github.tomakehurst.wiremock.http.Request
 import com.github.tomakehurst.wiremock.http.RequestMethod
 import org.jholsten.me2e.config.parser.deserializer.MockServerDeserializer
+import org.jholsten.me2e.mock.verification.MatchResult
 import org.jholsten.me2e.request.model.HttpMethod
 import org.jholsten.me2e.utils.toJson
 
@@ -67,22 +68,44 @@ class MockServerStubRequestMatcher internal constructor(
      * @return Whether the given request matches this request pattern.
      */
     @JvmSynthetic
-    internal fun matches(request: Request): Boolean {
-        if (!hostnameMatches(request.host)) {
-            return false
-        } else if (!methodMatches(request.method)) {
-            return false
-        } else if (!pathMatches(request.url)) {
-            return false
-        } else if (!headersMatch(request.headers)) {
-            return false
-        } else if (!queryParametersMatch(request)) {
-            return false
-        } else if (!bodyPatternsMatch(request)) {
-            return false
+    internal fun matches(request: Request): MatchResult {
+        var matches = true
+        val messages: MutableList<String> = mutableListOf()
+        val hostnameMatchResult = this.hostnameMatches(request.host)
+        if (!hostnameMatchResult.matches) {
+            matches = false
+            messages.addAll(hostnameMatchResult.failures)
+        }
+        val methodMatchResult = this.methodMatches(request.method)
+        if (!methodMatchResult.matches) {
+            matches = false
+            messages.addAll(methodMatchResult.failures)
+        }
+        val pathMatchResult = this.pathMatches(request.url)
+        if (!pathMatchResult.matches) {
+            matches = false
+            messages.addAll(pathMatchResult.failures)
+        }
+        val headersMatchResult = this.headersMatch(request.headers)
+        if (!headersMatchResult.matches) {
+            matches = false
+            messages.addAll(headersMatchResult.failures)
+        }
+        val queryParametersMatchResult = this.queryParametersMatch(request)
+        if (!queryParametersMatchResult.matches) {
+            matches = false
+            messages.addAll(queryParametersMatchResult.failures)
+        }
+        val bodyPatternsMatchResult = this.bodyPatternsMatch(request)
+        if (!bodyPatternsMatchResult.matches) {
+            matches = false
+            messages.addAll(bodyPatternsMatchResult.failures)
         }
 
-        return true
+        return MatchResult(
+            matches = matches,
+            failures = messages,
+        )
     }
 
     /**
@@ -91,8 +114,15 @@ class MockServerStubRequestMatcher internal constructor(
      * @return Whether the actual hostname matches the hostname defined for this stub.
      */
     @JvmSynthetic
-    internal fun hostnameMatches(actualHostname: String): Boolean {
-        return this.hostname == actualHostname
+    internal fun hostnameMatches(actualHostname: String): MatchResult {
+        val matches = this.hostname == actualHostname
+        return MatchResult(
+            matches = matches,
+            failures = when (matches) {
+                true -> listOf()
+                false -> listOf("Expected hostname\n\t$actualHostname\nto be equal to\n\t$hostname")
+            },
+        )
     }
 
     /**
@@ -102,12 +132,19 @@ class MockServerStubRequestMatcher internal constructor(
      * of the captured request is equal to the [method] defined for this stub.
      */
     @JvmSynthetic
-    internal fun methodMatches(actualMethod: RequestMethod): Boolean {
+    internal fun methodMatches(actualMethod: RequestMethod): MatchResult {
         if (this.method == null) {
-            return true
+            return MatchResult(true)
         }
 
-        return this.method.name == actualMethod.name
+        val matches = this.method.name == actualMethod.name
+        return MatchResult(
+            matches = matches,
+            failures = when (matches) {
+                true -> listOf()
+                false -> listOf("Expected method\n\t${actualMethod.name}\nto be equal to\n\t${this.method.name}")
+            },
+        )
     }
 
     /**
@@ -117,16 +154,24 @@ class MockServerStubRequestMatcher internal constructor(
      * of the captured request is equal to the [path] defined for this stub.
      */
     @JvmSynthetic
-    internal fun pathMatches(actualUrl: String): Boolean {
+    internal fun pathMatches(actualUrl: String): MatchResult {
         if (this.path == null) {
-            return true
+            return MatchResult(true)
         }
 
         val actualPath = when {
             actualUrl.contains("?") -> actualUrl.substring(0, actualUrl.indexOf("?"))
             else -> actualUrl
         }
-        return this.path.matches(actualPath)
+
+        val matches = this.path.matches(actualPath)
+        return MatchResult(
+            matches = matches,
+            failures = when (matches) {
+                true -> listOf()
+                false -> listOf("Expected path\n\t$actualPath\nto match\n\t$path")
+            },
+        )
     }
 
     /**
@@ -139,21 +184,33 @@ class MockServerStubRequestMatcher internal constructor(
      * of the captured request match the [headers] defined for this stub.
      */
     @JvmSynthetic
-    internal fun headersMatch(headers: HttpHeaders?): Boolean {
+    internal fun headersMatch(headers: HttpHeaders?): MatchResult {
         if (this.headers.isNullOrEmpty()) {
-            return true
+            return MatchResult(true)
         } else if (headers == null) {
-            return false
+            return MatchResult(false, listOf("Expected headers\n\tnull\nto match\n\t${this.headers}"))
         }
 
+        var matches = true
+        val messages: MutableList<String> = mutableListOf()
         for (header in this.headers) {
             val actualHeader = headers.getHeader(header.key.lowercase())
-            if (!actualHeader.isPresent || !actualHeader.values().any { header.value.matches(it) }) {
-                return false
+            if (!actualHeader.isPresent) {
+                matches = false
+                messages.add("Expected headers to contain key ${header.key}")
+            } else if (!actualHeader.values().any { header.value.matches(it) }) {
+                matches = false
+                messages.add(
+                    "Expected headers to contain key ${header.key} with values\n\t${actualHeader.values()}\n" +
+                        "to contain at least one value which matches\n\t${header.value}"
+                )
             }
         }
 
-        return true
+        return MatchResult(
+            matches = matches,
+            failures = messages,
+        )
     }
 
     /**
@@ -166,19 +223,31 @@ class MockServerStubRequestMatcher internal constructor(
      * parameters of the captured request match the [queryParameters] defined for this stub.
      */
     @JvmSynthetic
-    internal fun queryParametersMatch(request: Request): Boolean {
+    internal fun queryParametersMatch(request: Request): MatchResult {
         if (this.queryParameters.isNullOrEmpty()) {
-            return true
+            return MatchResult(true)
         }
 
+        var matches = true
+        val messages: MutableList<String> = mutableListOf()
         for (parameter in this.queryParameters) {
             val actualParameter = request.queryParameter(parameter.key.lowercase())
-            if (!actualParameter.isPresent || !actualParameter.values().any { parameter.value.matches(it) }) {
-                return false
+            if (!actualParameter.isPresent) {
+                matches = false
+                messages.add("Expected query parameters to contain key ${parameter.key}")
+            } else if (!actualParameter.values().any { parameter.value.matches(it) }) {
+                matches = false
+                messages.add(
+                    "Expected query parameters to contain key ${parameter.key} with values\n\t${actualParameter.values()}\n" +
+                        "to contain at least one value which matches\n\t${parameter.value}"
+                )
             }
         }
 
-        return true
+        return MatchResult(
+            matches = matches,
+            failures = messages,
+        )
     }
 
     /**
@@ -188,13 +257,24 @@ class MockServerStubRequestMatcher internal constructor(
      * of the captured request match all the [bodyPatterns] defined for this stub.
      */
     @JvmSynthetic
-    internal fun bodyPatternsMatch(request: Request): Boolean {
+    internal fun bodyPatternsMatch(request: Request): MatchResult {
         if (this.bodyPatterns.isNullOrEmpty()) {
-            return true
+            return MatchResult(true)
         }
 
         val body = request.bodyAsString
-        return this.bodyPatterns.all { it.matches(body) }
+        val messages: MutableList<String> = mutableListOf()
+        var matches = true
+        for (pattern in this.bodyPatterns) {
+            if (!pattern.matches(body)) {
+                matches = false
+                messages.add("Expected body\n\t$body\n\tto match\n\t$pattern")
+            }
+        }
+        return MatchResult(
+            matches = matches,
+            failures = messages,
+        )
     }
 
     override fun toString(): String = toJson(this)

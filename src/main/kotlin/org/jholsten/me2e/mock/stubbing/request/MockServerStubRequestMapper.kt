@@ -39,12 +39,12 @@ internal class MockServerStubRequestMapper private constructor() {
             val matcher = object : RequestMatcherExtension() {
                 override fun match(request: Request, parameters: Parameters): MatchResult {
                     val results = listOf(
-                        stubRequest.hostnameMatches(request.host) to 25.0,
-                        stubRequest.pathMatches(request.url) to 10.0,
-                        stubRequest.methodMatches(request.method) to 10.0,
-                        stubRequest.headersMatch(request.headers) to 1.0,
-                        stubRequest.queryParametersMatch(request) to 1.0,
-                        stubRequest.bodyPatternsMatch(request) to 1.0,
+                        stubRequest.hostnameMatches(request.host).matches to 25.0,
+                        stubRequest.pathMatches(request.url).matches to 10.0,
+                        stubRequest.methodMatches(request.method).matches to 10.0,
+                        stubRequest.headersMatch(request.headers).matches to 1.0,
+                        stubRequest.queryParametersMatch(request).matches to 1.0,
+                        stubRequest.bodyPatternsMatch(request).matches to 1.0,
                     )
 
                     return MatchResult.aggregateWeighted(results.map {

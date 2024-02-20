@@ -8,6 +8,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequestMapper.Companion.METADATA_MATCHER_KEY
 import org.jholsten.me2e.mock.stubbing.request.MockServerStubRequestMapper.Companion.METADATA_MOCK_SERVER_NAME_KEY
+import org.jholsten.me2e.mock.verification.MatchResult
 import kotlin.test.*
 
 internal class MockServerStubRequestMapperTest {
@@ -15,12 +16,12 @@ internal class MockServerStubRequestMapperTest {
     @Test
     fun `Mapping request with all patterns matching should return exact match`() {
         val stub = mockk<MockServerStubRequestMatcher>()
-        every { stub.hostnameMatches(any()) } returns true
-        every { stub.pathMatches(any()) } returns true
-        every { stub.methodMatches(any()) } returns true
-        every { stub.headersMatch(any()) } returns true
-        every { stub.queryParametersMatch(any()) } returns true
-        every { stub.bodyPatternsMatch(any()) } returns true
+        every { stub.hostnameMatches(any()) } returns MatchResult(true)
+        every { stub.pathMatches(any()) } returns MatchResult(true)
+        every { stub.methodMatches(any()) } returns MatchResult(true)
+        every { stub.headersMatch(any()) } returns MatchResult(true)
+        every { stub.queryParametersMatch(any()) } returns MatchResult(true)
+        every { stub.bodyPatternsMatch(any()) } returns MatchResult(true)
 
         val request = mockk<Request>()
         every { request.host } returns "example.com"
@@ -46,12 +47,12 @@ internal class MockServerStubRequestMapperTest {
     @Test
     fun `Mapping request with no patterns matching should return no match`() {
         val stub = mockk<MockServerStubRequestMatcher>()
-        every { stub.hostnameMatches(any()) } returns false
-        every { stub.pathMatches(any()) } returns false
-        every { stub.methodMatches(any()) } returns false
-        every { stub.headersMatch(any()) } returns false
-        every { stub.queryParametersMatch(any()) } returns false
-        every { stub.bodyPatternsMatch(any()) } returns false
+        every { stub.hostnameMatches(any()) } returns MatchResult(false)
+        every { stub.pathMatches(any()) } returns MatchResult(false)
+        every { stub.methodMatches(any()) } returns MatchResult(false)
+        every { stub.headersMatch(any()) } returns MatchResult(false)
+        every { stub.queryParametersMatch(any()) } returns MatchResult(false)
+        every { stub.bodyPatternsMatch(any()) } returns MatchResult(false)
 
         val request = mockk<Request>()
         every { request.host } returns "example.com"

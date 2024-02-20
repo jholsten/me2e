@@ -25,9 +25,9 @@ internal class MockServerStubRequestMatcherTest {
         )
         val request = wireMockRequest(url = "/search", method = RequestMethod.GET)
 
-        assertTrue(matcher.methodMatches(request.method))
-        assertTrue(matcher.pathMatches(request.url))
-        assertTrue(matcher.matches(request))
+        assertTrue(matcher.methodMatches(request.method).matches)
+        assertTrue(matcher.pathMatches(request.url).matches)
+        assertTrue(matcher.matches(request).matches)
     }
 
     @Test
@@ -39,9 +39,9 @@ internal class MockServerStubRequestMatcherTest {
         )
         val request = wireMockRequest(url = "/upload", method = RequestMethod.POST)
 
-        assertFalse(matcher.methodMatches(request.method))
-        assertFalse(matcher.pathMatches(request.url))
-        assertFalse(matcher.matches(request))
+        assertFalse(matcher.methodMatches(request.method).matches)
+        assertFalse(matcher.pathMatches(request.url).matches)
+        assertFalse(matcher.matches(request).matches)
     }
 
     @Test
@@ -53,9 +53,9 @@ internal class MockServerStubRequestMatcherTest {
         )
         val request = wireMockRequest(url = "/upload", method = RequestMethod.POST)
 
-        assertTrue(matcher.methodMatches(request.method))
-        assertFalse(matcher.pathMatches(request.url))
-        assertFalse(matcher.matches(request))
+        assertTrue(matcher.methodMatches(request.method).matches)
+        assertFalse(matcher.pathMatches(request.url).matches)
+        assertFalse(matcher.matches(request).matches)
     }
 
     @Test
@@ -72,8 +72,8 @@ internal class MockServerStubRequestMatcherTest {
             headers = HttpHeaders(HttpHeader("Content-Type", "application/json"))
         )
 
-        assertTrue(matcher.headersMatch(request.headers))
-        assertTrue(matcher.matches(request))
+        assertTrue(matcher.headersMatch(request.headers).matches)
+        assertTrue(matcher.matches(request).matches)
     }
 
     @Test
@@ -90,8 +90,8 @@ internal class MockServerStubRequestMatcherTest {
             headers = HttpHeaders(HttpHeader("Content-Type", "application/json"))
         )
 
-        assertTrue(matcher.headersMatch(request.headers))
-        assertTrue(matcher.matches(request))
+        assertTrue(matcher.headersMatch(request.headers).matches)
+        assertTrue(matcher.matches(request).matches)
     }
 
     @Test
@@ -107,8 +107,8 @@ internal class MockServerStubRequestMatcherTest {
             method = RequestMethod.GET,
         )
 
-        assertFalse(matcher.headersMatch(request.headers))
-        assertFalse(matcher.matches(request))
+        assertFalse(matcher.headersMatch(request.headers).matches)
+        assertFalse(matcher.matches(request).matches)
     }
 
     @Test
@@ -125,8 +125,8 @@ internal class MockServerStubRequestMatcherTest {
             headers = HttpHeaders(HttpHeader("Content-Type", "text/plain"))
         )
 
-        assertFalse(matcher.headersMatch(request.headers))
-        assertFalse(matcher.matches(request))
+        assertFalse(matcher.headersMatch(request.headers).matches)
+        assertFalse(matcher.matches(request).matches)
     }
 
     @Test
@@ -142,8 +142,8 @@ internal class MockServerStubRequestMatcherTest {
             method = RequestMethod.GET,
         )
 
-        assertTrue(matcher.queryParametersMatch(request))
-        assertTrue(matcher.matches(request))
+        assertTrue(matcher.queryParametersMatch(request).matches)
+        assertTrue(matcher.matches(request).matches)
     }
 
     @Test
@@ -159,8 +159,8 @@ internal class MockServerStubRequestMatcherTest {
             method = RequestMethod.GET,
         )
 
-        assertTrue(matcher.queryParametersMatch(request))
-        assertTrue(matcher.matches(request))
+        assertTrue(matcher.queryParametersMatch(request).matches)
+        assertTrue(matcher.matches(request).matches)
     }
 
     @Test
@@ -176,8 +176,8 @@ internal class MockServerStubRequestMatcherTest {
             method = RequestMethod.GET,
         )
 
-        assertFalse(matcher.queryParametersMatch(request))
-        assertFalse(matcher.matches(request))
+        assertFalse(matcher.queryParametersMatch(request).matches)
+        assertFalse(matcher.matches(request).matches)
     }
 
     @Test
@@ -193,8 +193,8 @@ internal class MockServerStubRequestMatcherTest {
             method = RequestMethod.GET,
         )
 
-        assertFalse(matcher.queryParametersMatch(request))
-        assertFalse(matcher.matches(request))
+        assertFalse(matcher.queryParametersMatch(request).matches)
+        assertFalse(matcher.matches(request).matches)
     }
 
     @Test
@@ -213,8 +213,8 @@ internal class MockServerStubRequestMatcherTest {
             body = "Hello World",
         )
 
-        assertTrue(matcher.bodyPatternsMatch(request))
-        assertTrue(matcher.matches(request))
+        assertTrue(matcher.bodyPatternsMatch(request).matches)
+        assertTrue(matcher.matches(request).matches)
     }
 
     @Test
@@ -234,8 +234,8 @@ internal class MockServerStubRequestMatcherTest {
             body = "Hello World",
         )
 
-        assertTrue(matcher.bodyPatternsMatch(request))
-        assertTrue(matcher.matches(request))
+        assertTrue(matcher.bodyPatternsMatch(request).matches)
+        assertTrue(matcher.matches(request).matches)
     }
 
     @Test
@@ -255,8 +255,8 @@ internal class MockServerStubRequestMatcherTest {
             body = "Hello World",
         )
 
-        assertFalse(matcher.bodyPatternsMatch(request))
-        assertFalse(matcher.matches(request))
+        assertFalse(matcher.bodyPatternsMatch(request).matches)
+        assertFalse(matcher.matches(request).matches)
     }
 
     @Test

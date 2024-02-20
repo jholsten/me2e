@@ -270,7 +270,7 @@ class ExpectedRequest {
      * pattern specified for the stub with the supplied name.
      */
     @JvmSynthetic
-    internal fun matches(mockServer: MockServer, request: Request): Boolean {
+    internal fun matches(mockServer: MockServer, request: Request): MatchResult {
         if (this.stubName != null) {
             this.stub = mockServer.stubs.firstOrNull { it.name == this.stubName }
             requireNotNull(this.stub) { "No stub with name ${this.stubName} exists for Mock Server ${mockServer.name}." }
@@ -278,19 +278,34 @@ class ExpectedRequest {
         }
         val mappedRequest = HttpRequestMapper.INSTANCE.toInternalDto(request)
         val json = getJson(mappedRequest)
-        val results = listOf(
-            listOf(mockServer.hostname == request.host),
-            method.map { it.assertion(mappedRequest.method) },
-            path.map { it.assertion(mappedRequest.url.path) },
-            headers.map { it.assertion(mappedRequest.headers.entries) },
-            queryParameters.map { it.assertion(mappedRequest.url.queryParameters) },
-            body.map { it.assertion(mappedRequest.body?.asString()) },
-            objectBody.map { it.evaluateBody(mappedRequest.body) },
-            binaryBody.map { it.assertion(mappedRequest.body?.asBinary()) },
-            base64Body.map { it.assertion(mappedRequest.body?.asBase64()) },
-            jsonBody.map { it.assertion(json) },
-        ).flatten()
-        return results.all { it }
+        val messages = listOf(
+            if (mockServer.hostname != request.host) listOf("Expected hostname\n\t${request.host}\nto be equal to\n\t${mockServer.hostname}") else listOf(),
+            method.map { evaluate { it.evaluate("method", mappedRequest.method) } },
+            path.map { evaluate { it.evaluate("path", mappedRequest.url.path) } },
+            headers.map { evaluate { it.evaluate("headers", mappedRequest.headers.entries) } },
+            queryParameters.map { evaluate { it.evaluate("query parameters", mappedRequest.url.queryParameters) } },
+            body.map { evaluate { it.evaluate("body", mappedRequest.body?.asString()) } },
+            objectBody.map { evaluate { it.evaluateBody("object body", mappedRequest.body) } },
+            binaryBody.map { evaluate { it.evaluate("binary body", mappedRequest.body?.asBinary()) } },
+            base64Body.map { evaluate { it.evaluate("base64 body", mappedRequest.body?.asBase64()) } },
+            jsonBody.map { evaluate { it.evaluate("json body", json) } },
+        ).flatten().filterNotNull()
+
+        return MatchResult(messages.isEmpty(), messages)
+    }
+
+    /**
+     * Evaluates the given assertion. Returns `null` if the assertion was successful.
+     * Returns the message of the failure in case the assertion was not successful.
+     * @return `null` if assertion was successful, else the message of the failure.
+     */
+    private fun evaluate(assertion: () -> Unit): String? {
+        return try {
+            assertion()
+            null
+        } catch (e: AssertionFailure) {
+            e.message
+        }
     }
 
     /**
@@ -350,16 +365,16 @@ class ExpectedRequest {
         val expected: Assertable<T?>,
     ) {
         /**
-         *
-         * Evaluates the given assertion on the given request body.
+         * Evaluates the given request body. Returns `null` if the assertion was successful.
+         * @see evaluate
          */
-        fun evaluateBody(body: HttpRequestBody?): Boolean {
+        fun evaluateBody(property: String, body: HttpRequestBody?): String? {
             val obj = try {
                 deserializeBody(body)
             } catch (e: ParseException) {
                 throw AssertionFailure("Unable to deserialize body: ${e.message}")
             }
-            return expected.assertion(obj)
+            return evaluate { expected.evaluate(property, obj) }
         }
 
         /**

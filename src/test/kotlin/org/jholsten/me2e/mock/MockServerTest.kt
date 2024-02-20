@@ -11,6 +11,7 @@ import org.jholsten.me2e.assertions.equalTo
 import org.jholsten.me2e.mock.verification.exception.VerificationException
 import org.jholsten.me2e.mock.stubbing.MockServerStub
 import org.jholsten.me2e.mock.verification.ExpectedRequest
+import org.jholsten.me2e.mock.verification.MatchResult
 import org.jholsten.me2e.request.mapper.HttpRequestMapper
 import org.jholsten.me2e.request.model.HttpRequest
 import org.jholsten.util.assertDoesNotThrow
@@ -140,8 +141,8 @@ internal class MockServerTest {
         )
         every { wireMockServer.allServeEvents } returns events
         mockkConstructor(ExpectedRequest::class)
-        every { anyConstructed<ExpectedRequest>().matches(any(), request1) } returns true
-        every { anyConstructed<ExpectedRequest>().matches(any(), request2) } returns false
+        every { anyConstructed<ExpectedRequest>().matches(any(), request1) } returns MatchResult(true)
+        every { anyConstructed<ExpectedRequest>().matches(any(), request2) } returns MatchResult(false)
 
         assertDoesNotThrow {
             server.verify(1, ExpectedRequest().withPath(equalTo("/some-path")))
@@ -202,9 +203,9 @@ internal class MockServerTest {
         )
         every { wireMockServer.allServeEvents } returns events
         mockkConstructor(ExpectedRequest::class)
-        every { anyConstructed<ExpectedRequest>().matches(any(), request1) } returns true
-        every { anyConstructed<ExpectedRequest>().matches(any(), request2) } returns true
-        every { anyConstructed<ExpectedRequest>().matches(any(), request3) } returns false
+        every { anyConstructed<ExpectedRequest>().matches(any(), request1) } returns MatchResult(true)
+        every { anyConstructed<ExpectedRequest>().matches(any(), request2) } returns MatchResult(true)
+        every { anyConstructed<ExpectedRequest>().matches(any(), request3) } returns MatchResult(false)
 
         val request1Verification = ExpectedRequest().withPath(equalTo("/some-path"))
         val request2Verification = ExpectedRequest().withPath(equalTo("/other-path"))

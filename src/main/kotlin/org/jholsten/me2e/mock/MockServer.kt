@@ -115,14 +115,16 @@ class MockServer internal constructor(
     @JvmSynthetic
     internal fun verify(times: Int?, expectedRequest: ExpectedRequest) {
         assertThatMockServerIsInitialized()
-        val matchResults = wireMockRequestsReceived.filter { expectedRequest.matches(this, it.request) }
+        val matchResults = wireMockRequestsReceived.map { it to expectedRequest.matches(this, it.request) }
+        val matched = matchResults.filter { it.second.matches }.size
+        val closestMatch = matchResults.minByOrNull { it.second.failures.size }
 
-        if (times != null && times != matchResults.size) {
-            throw VerificationException.forTimesNotMatching(name, times, expectedRequest, matchResults, wireMockRequestsReceived)
-        } else if (times == null && matchResults.isEmpty()) {
-            throw VerificationException.forNotReceivedAtLeastOnce(name, expectedRequest, wireMockRequestsReceived)
-        } else if (expectedRequest.noOther && wireMockRequestsReceived.size != matchResults.size) {
-            throw VerificationException.forOtherRequests(name, expectedRequest, matchResults, wireMockRequestsReceived)
+        if (times != null && times != matched) {
+            throw VerificationException.forTimesNotMatching(name, times, expectedRequest, closestMatch, matched, wireMockRequestsReceived)
+        } else if (times == null && matched == 0) {
+            throw VerificationException.forNotReceivedAtLeastOnce(name, expectedRequest, closestMatch, wireMockRequestsReceived)
+        } else if (expectedRequest.noOther && wireMockRequestsReceived.size != matched) {
+            throw VerificationException.forOtherRequests(name, expectedRequest, closestMatch, matched, wireMockRequestsReceived)
         }
     }
 
