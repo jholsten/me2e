@@ -180,7 +180,7 @@ class Me2eExtension : BeforeAllCallback, BeforeEachCallback, AfterEachCallback {
     private fun resetRequestInterceptors() {
         val microservices = Me2eTest.containerManager.microservices.values
         if (microservices.isNotEmpty()) {
-            logger.info("Resetting ${microservices.size} request interceptors of microservice containers.")
+            logger.info("Resetting request interceptors of ${microservices.size} microservice containers.")
             for (microservice in microservices) {
                 microservice.resetRequestInterceptors()
             }
