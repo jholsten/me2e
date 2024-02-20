@@ -2,6 +2,7 @@
 
 package org.jholsten.me2e.assertions
 
+import org.intellij.lang.annotations.Language
 import org.jholsten.me2e.assertions.matchers.*
 import org.jholsten.me2e.mock.MockServer
 import org.jholsten.me2e.mock.verification.MockServerVerification
@@ -106,19 +107,22 @@ fun <K> containsKey(expectedKey: K): MultiMapKeyContainsAssertion<K> {
 }
 
 /**
- * Returns assertion for checking whether a JSON body contains a node with the given path.
- * Use `.` as path separators to specify a path in the JSON tree. Use `[{index}]` to specify the element at index `index`
- * in an array node. See [JsonBodyAssertion] for detailed information on the format of the [JsonBodyAssertion.expectedPath].
- * For assertions concerning the value of the node with the [expectedPath], use [JsonBodyAssertion.withValue].
+ * Returns assertion for checking whether a JSON body contains a node with the given JSONPath expression.
+ * Each expression needs to start with the root element `$`. Starting from this root, specify the path to the node
+ * using `.` as path separators. Use `[{index}]`to specify the element at index `index` in an array node.
+ * For more information on the JSONPath syntax, see [IETF](https://datatracker.ietf.org/doc/draft-ietf-jsonpath-base/).
+ *
+ * For assertions concerning the value of the node with the [expectedPath], use [JsonNodeAssertion.withValue].
  *
  * Example Usage:
  * ```kotlin
- * assertThat(response).jsonBody(containsNode("journal.title").withValue(equalTo("IEEE Software")))
+ * assertThat(response).jsonBody(containsNode("$.journal.title").withValue(equalTo("IEEE Software")))
  * ```
- * @param expectedPath Expected path to the JSON node which should be contained in the actual JSON body.
+ * @param expectedPath Expected path to the JSON node which should be contained in the actual JSON body in JSONPath notation.
+ * @see <a href="https://datatracker.ietf.org/doc/draft-ietf-jsonpath-base/">IETF</a>
  */
-fun containsNode(expectedPath: String): JsonBodyAssertion {
-    return JsonBodyAssertion(expectedPath)
+fun containsNode(@Language("JSONPath") expectedPath: String): JsonNodeAssertion {
+    return JsonNodeAssertion(expectedPath)
 }
 
 /**

@@ -39,7 +39,7 @@ class Me2eTestSample : Me2eTest() {
         assertThat(response)
             .statusCode(equalTo(200))
             .message(equalTo("OK"))
-            .jsonBody(containsNode("result").withValue(equalTo("")))
+            .jsonBody(containsNode("$.result").withValue(equalTo("")))
 
         assertThat(paymentService).receivedRequest(
             ExpectedRequest()

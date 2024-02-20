@@ -72,6 +72,7 @@ ext {
     mongodb_connector_version = "4.11.1"
     mybatis_version = "3.5.7"
     thymeleaf_version = "3.1.2.RELEASE"
+    json_path_version = "2.9.0"
 }
 
 dependencies {
@@ -145,6 +146,9 @@ dependencies {
 
     // Dependency for generating HTML reports
     api "org.thymeleaf:thymeleaf:$thymeleaf_version"
+
+    // Dependency for finding JSON nodes by path
+    implementation "com.jayway.jsonpath:json-path:$json_path_version"
 }
 
 // Configuration for HTML documentation

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonNode
 import org.jholsten.me2e.assertions.AssertionFailure
 import org.jholsten.me2e.assertions.matchers.Assertable
-import org.jholsten.me2e.assertions.matchers.JsonBodyAssertion
+import org.jholsten.me2e.assertions.matchers.JsonNodeAssertion
 import org.jholsten.me2e.parsing.exception.ParseException
 import org.jholsten.me2e.request.model.HttpResponse
 
@@ -30,7 +30,7 @@ import org.jholsten.me2e.request.model.HttpResponse
  *         assertThat(response)
  *             .statusCode(equalTo(200))
  *             .message(equalTo("OK"))
- *             .jsonBody(containsNode("journal.title").withValue(equalTo("IEEE Software")))
+ *             .jsonBody(containsNode("$.journal.title").withValue(equalTo("IEEE Software")))
  *     }
  * }
  * ```
@@ -233,11 +233,11 @@ class AssertableResponse internal constructor(private val response: HttpResponse
 
     /**
      * Asserts that the body of the [response], parsed as JSON, satisfies the given assertion.
-     * See [JsonBodyAssertion] for detailed information on the format of the [JsonBodyAssertion.expectedPath].
+     * See [JsonNodeAssertion] for detailed information on the format of the [JsonNodeAssertion.expectedPath].
      *
      * Example Usage:
      * ```kotlin
-     * assertThat(response).jsonBody(containsNode("journal.title").withValue(equalTo("IEEE Software")))
+     * assertThat(response).jsonBody(containsNode("$.journal.title").withValue(equalTo("IEEE Software")))
      * ```
      * @param expected Expectation for the value of the [HttpResponse.body].
      * @return This instance, to use for chaining. Note that the following assertions will not be evaluated if this

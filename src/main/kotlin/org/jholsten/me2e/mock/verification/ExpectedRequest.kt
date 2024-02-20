@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.github.tomakehurst.wiremock.http.Request
 import org.jholsten.me2e.assertions.AssertionFailure
 import org.jholsten.me2e.assertions.matchers.Assertable
-import org.jholsten.me2e.assertions.matchers.JsonBodyAssertion
+import org.jholsten.me2e.assertions.matchers.JsonNodeAssertion
 import org.jholsten.me2e.mock.MockServer
 import org.jholsten.me2e.mock.stubbing.MockServerStub
 import org.jholsten.me2e.parsing.exception.ParseException
@@ -241,13 +241,13 @@ class ExpectedRequest {
 
     /**
      * Expects that the body of the expected incoming request, parsed as JSON, satisfies the given assertion.
-     * See [JsonBodyAssertion] for detailed information on the format of the [JsonBodyAssertion.expectedPath].
+     * See [JsonNodeAssertion] for detailed information on the format of the [JsonNodeAssertion.expectedPath].
      * You may call this function multiple times to place multiple requirements on the request body.
      * Not setting an expectation means that the body of the expected request is arbitrary.
      *
      * Example:
      * ```kotlin
-     * assertThat(mockServer).receivedRequest(ExpectedRequest().jsonBody(containsNode("journal.title").withValue(equalTo("IEEE Software"))))
+     * assertThat(mockServer).receivedRequest(ExpectedRequest().jsonBody(containsNode("$.journal.title").withValue(equalTo("IEEE Software"))))
      * ```
      * @param expected Expectation for the value of the [HttpRequest.body].
      * @return This instance, to use for chaining.

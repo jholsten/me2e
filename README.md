@@ -1427,8 +1427,8 @@ Content-Length: 31
 assertThat(response)
     .statusCode(equalTo(200))
     .contentType(equalTo("application/json"))
-    .jsonBody(containsNode("id").withValue(equalTo("123")))
-    .jsonBody(containsNode("name").withValue(equalTo("John Doe")))
+    .jsonBody(containsNode("$.id").withValue(equalTo("123")))
+    .jsonBody(containsNode("$.name").withValue(equalTo("John Doe")))
 ```
 </td>
     </tr>
@@ -1470,11 +1470,11 @@ assertThat(response)
     .statusCode(between(200, 299))
     .protocol(containsString("HTTP"))
     .headers(containsKey("Server").withValue(equalTo("Apache/2.0")))
-    .jsonBody(containsNode("title").withValue(containsString("Automated Test Scripts")))
-    .jsonBody(containsNode("authors[0].lastname").withValue(equalTo("Garousi")))
-    .jsonBody(containsNode("authors[0]").withValue(equalTo("{\"firstname\":\"Vahid\",\"lastname\":\"Garousi\"}")))
-    .jsonBody(containsNode("year").withValue(equalTo("2016")))
-    .jsonBody(containsNode("keywords[1]").withValue(equalTo("Test Automation")))
+    .jsonBody(containsNode("$.title").withValue(containsString("Automated Test Scripts")))
+    .jsonBody(containsNode("$.authors[0].lastname").withValue(equalTo("Garousi")))
+    .jsonBody(containsNode("$.authors[0]").withValue(equalTo("{\"firstname\":\"Vahid\",\"lastname\":\"Garousi\"}")))
+    .jsonBody(containsNode("$.year").withValue(equalTo("2016")))
+    .jsonBody(containsNode("$.keywords[1]").withValue(equalTo("Test Automation")))
 ```
 </td>
     </tr>

@@ -53,11 +53,21 @@ internal class AssertableResponseTest {
 
     @Test
     fun `Asserting json body should not throw if assertion is satisfied`() {
-        assertThat(response).jsonBody(containsNode("title").withValue(containsString("Automated Test Scripts")))
-        assertThat(response).jsonBody(containsNode("authors[0].lastname").withValue(equalTo("Garousi")))
-        assertThat(response).jsonBody(containsNode("authors[0]").withValue(equalTo("{\"firstname\":\"Vahid\",\"lastname\":\"Garousi\"}")))
-        assertThat(response).jsonBody(containsNode("year").withValue(equalTo("2016")))
-        assertThat(response).jsonBody(containsNode("keywords[1]").withValue(equalTo("Test Automation")))
-        assertThat(response).jsonBody(containsNode("journal.title").withValue(equalTo("IEEE Software")))
+        assertThat(response).jsonBody(containsNode("$.title").withValue(containsString("Automated Test Scripts")))
+        assertThat(response).jsonBody(containsNode("$.authors[0].lastname").withValue(equalTo("Garousi")))
+        assertThat(response).jsonBody(containsNode("$.authors[0]").withValue(equalTo("{\"firstname\":\"Vahid\",\"lastname\":\"Garousi\"}")))
+        assertThat(response).jsonBody(containsNode("$.year").withValue(equalTo("2016")))
+        assertThat(response).jsonBody(containsNode("$.keywords[1]").withValue(equalTo("Test Automation")))
+        assertThat(response).jsonBody(containsNode("$.keywords").withValue(equalTo("[\"Software Testing\",\"Test Automation\"]")))
+        assertThat(response).jsonBody(containsNode("$.journal.title").withValue(equalTo("IEEE Software")))
+        assertThat(response).jsonBody(containsNode("$.journal").withValue(equalTo("{\"title\":\"IEEE Software\",\"volume\":33,\"issue\":3}")))
+        assertThat(response).jsonBody(
+            containsNode("$.authors").withValue(
+                equalTo(
+                    "[{\"firstname\":\"Vahid\",\"lastname\":\"Garousi\"}," +
+                        "{\"firstname\":\"Michael\",\"lastname\":\"Felderer\"}]"
+                )
+            )
+        )
     }
 }

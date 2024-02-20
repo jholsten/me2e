@@ -93,11 +93,11 @@ class Me2eTestIT : Me2eTest() {
 
         logger.info(backendApi.getLogs().toString())
         assertThat(response).statusCode(equalTo(200))
-        assertThat(response).jsonBody(containsNode("id").withValue(equalTo("123")))
-        assertThat(response).jsonBody(containsNode("items[0].name").withValue(equalTo("A")))
-        assertThat(response).jsonBody(containsNode("items[0].value").withValue(equalTo("42")))
-        assertThat(response).jsonBody(containsNode("items[1].name").withValue(equalTo("B")))
-        assertThat(response).jsonBody(containsNode("items[1].value").withValue(equalTo("1")))
+        assertThat(response).jsonBody(containsNode("$.id").withValue(equalTo("123")))
+        assertThat(response).jsonBody(containsNode("$.items[0].name").withValue(equalTo("A")))
+        assertThat(response).jsonBody(containsNode("$.items[0].value").withValue(equalTo("42")))
+        assertThat(response).jsonBody(containsNode("$.items[1].name").withValue(equalTo("B")))
+        assertThat(response).jsonBody(containsNode("$.items[1].value").withValue(equalTo("1")))
 
         assertThat(paymentService).receivedRequest(
             ExpectedRequest()
