@@ -1,5 +1,7 @@
 package org.jholsten.me2e.assertions.matchers
 
+import org.jholsten.me2e.assertions.AssertionFailure
+
 /**
  * Assertion for checking if a map with a list of values contains an expected key.
  * For assertions concerning the value of the entry with the [expectedKey], use [withValue] and [withValues].
@@ -21,6 +23,16 @@ class MultiMapKeyContainsAssertion<K> internal constructor(private val expectedK
             assertion = { actual -> evaluateValue(actual?.get(expectedKey), expectedValue) },
             message = "to contain key $expectedKey with value\n\t$expectedValue",
         ) {
+            override fun evaluate(property: String, actual: Map<K, V>?) {
+                val entry = actual?.get(expectedKey)
+                    ?: throw AssertionFailure("Expected $property\n\t$actual\nto contain key\n\t$expectedKey")
+                if (!evaluateValue(entry, expectedValue)) {
+                    val message = "Expected $property\n\t$actual\nto contain key $expectedKey with value\n" +
+                        "\t$entry\nto contain at least one value ${expectedValue.message}"
+                    throw AssertionFailure(message)
+                }
+            }
+
             override fun toString(): String = "contains key $expectedKey with value $expectedValue"
         }
     }
@@ -36,6 +48,16 @@ class MultiMapKeyContainsAssertion<K> internal constructor(private val expectedK
             assertion = { actual -> actual?.get(expectedKey) == expectedValues },
             message = "to contain key $expectedKey with values\n\t$expectedValues",
         ) {
+            override fun evaluate(property: String, actual: Map<K, V>?) {
+                val entry = actual?.get(expectedKey)
+                    ?: throw AssertionFailure("Expected $property\n\t$actual\nto contain key\n\t$expectedKey")
+                if (entry != expectedValues) {
+                    val message = "Expected $property\n\t$actual\nto contain key $expectedKey " +
+                        "with values\n\t$entry\nto be equal to\n\t$expectedValues"
+                    throw AssertionFailure(message)
+                }
+            }
+
             override fun toString(): String = "contains key $expectedKey with values $expectedValues"
         }
     }
