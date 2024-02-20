@@ -13,7 +13,7 @@ import org.intellij.lang.annotations.Language
  * Use [whenIgnoringNodes] to specify nodes of the objects which should be ignored.
  * By default, all values of all nodes are compared.
  */
-class JsonBodyEqualityAssertion(private val expected: JsonNode) : Assertable<JsonNode?>(
+class JsonBodyEqualityAssertion internal constructor(private val expected: JsonNode) : Assertable<JsonNode?>(
     assertion = { actual -> expected == actual },
     message = "to be equal to\n\t$expected",
 ) {
