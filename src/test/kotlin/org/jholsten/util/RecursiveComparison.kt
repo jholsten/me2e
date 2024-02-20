@@ -8,13 +8,22 @@ class RecursiveComparison {
 
     companion object {
         @JvmStatic
-        fun <T> assertEquals(expected: T, actual: T, ignoreCollectionOrder: Boolean = false, fieldsToIgnore: List<String> = listOf()) {
+        fun <T> assertEquals(
+            expected: T,
+            actual: T,
+            ignoreCollectionOrder: Boolean = false,
+            fieldsToIgnore: List<String> = listOf(),
+            comparatorForFields: Pair<Comparator<*>, List<String>>? = null,
+        ) {
             val config = RecursiveComparisonConfiguration.builder()
                 .withIgnoreCollectionOrder(ignoreCollectionOrder)
                 .withIgnoredFields(*fieldsToIgnore.toTypedArray())
-                .build()
 
-            Assertions.assertThat(actual).usingRecursiveComparison(config).isEqualTo(expected)
+            if (comparatorForFields != null) {
+                config.withComparatorForFields(comparatorForFields.first, *comparatorForFields.second.toTypedArray())
+            }
+
+            Assertions.assertThat(actual).usingRecursiveComparison(config.build()).isEqualTo(expected)
         }
 
         @JvmStatic

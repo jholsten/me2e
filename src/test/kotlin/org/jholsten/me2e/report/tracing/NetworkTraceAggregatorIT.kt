@@ -4,6 +4,7 @@ import org.jholsten.me2e.Me2eTestConfigScanner
 import org.jholsten.me2e.container.ContainerManager
 import org.jholsten.me2e.container.microservice.MicroserviceContainer
 import org.jholsten.me2e.mock.MockServerManager
+import org.jholsten.me2e.parsing.utils.DeserializerFactory
 import org.jholsten.me2e.parsing.utils.FileUtils
 import org.jholsten.me2e.report.logs.model.ServiceSpecification
 import org.jholsten.me2e.report.result.model.FinishedTestResult
@@ -18,6 +19,7 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import java.time.Instant
 import java.util.*
+import kotlin.Comparator
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -61,29 +63,42 @@ internal class NetworkTraceAggregatorIT {
 
     private val backendApi: MicroserviceContainer = containerManager.containers["backend-api"] as MicroserviceContainer
 
+    private val jsonComparator = object : Comparator<String?> {
+        override fun compare(o1: String?, o2: String?): Int {
+            if (o1 != null && o2 != null) {
+                val json1 = DeserializerFactory.getObjectMapper().readTree(o1)
+                val json2 = DeserializerFactory.getObjectMapper().readTree(o2)
+                return when (json1 == json2) {
+                    true -> 0
+                    else -> 1
+                }
+            }
+            return 1
+        }
+    }
+
     @Test
     fun `Packets from all networks should be aggregated to traces`() {
-        val test =
-            FinishedTestResult(
-                testId = "TestA",
-                source = "org.jholsten.me2e.TestA",
-                path = listOf(),
-                parentId = null,
-                children = listOf(),
-                status = TestResult.Status.SUCCESSFUL,
-                startTime = startTime,
-                endTime = Instant.now().plusSeconds(10),
-                numberOfTests = 1,
-                numberOfFailures = 0,
-                numberOfSkipped = 0,
-                numberOfAborted = 0,
-                displayName = "Test A",
-                tags = setOf(),
-                reportEntries = listOf(),
-                logs = listOf(),
-                stats = listOf(),
-                throwable = null,
-            )
+        val test = FinishedTestResult(
+            testId = "TestA",
+            source = "org.jholsten.me2e.TestA",
+            path = listOf(),
+            parentId = null,
+            children = listOf(),
+            status = TestResult.Status.SUCCESSFUL,
+            startTime = startTime,
+            endTime = Instant.now().plusSeconds(10),
+            numberOfTests = 1,
+            numberOfFailures = 0,
+            numberOfSkipped = 0,
+            numberOfAborted = 0,
+            displayName = "Test A",
+            tags = setOf(),
+            reportEntries = listOf(),
+            logs = listOf(),
+            stats = listOf(),
+            throwable = null,
+        )
 
         backendApi.post(RelativeUrl("/search"), HttpRequestBody(content = "{\"id\": 123}", ContentType.JSON_UTF8))
 
@@ -94,7 +109,7 @@ internal class NetworkTraceAggregatorIT {
             version = "HTTP/1.1",
             "/search",
             method = "POST",
-            payload = "{\"id\": 123}",
+            payload = "{\"id\":123}",
         )
         val expectedResponse = expectedResponsePacket(
             version = "HTTP/1.1",
@@ -201,12 +216,14 @@ internal class NetworkTraceAggregatorIT {
         RecursiveComparison.assertEquals(
             request,
             trace.request,
-            fieldsToIgnore = listOf("number", "timestamp", "sourceIp", "sourcePort", "destinationIp", "destinationPort", "headers")
+            fieldsToIgnore = listOf("number", "timestamp", "sourceIp", "sourcePort", "destinationIp", "destinationPort", "headers"),
+            comparatorForFields = jsonComparator to listOf("payload")
         )
         RecursiveComparison.assertEquals(
             response,
             trace.response,
-            fieldsToIgnore = listOf("number", "timestamp", "sourceIp", "sourcePort", "destinationIp", "destinationPort", "headers")
+            fieldsToIgnore = listOf("number", "timestamp", "sourceIp", "sourcePort", "destinationIp", "destinationPort", "headers"),
+            comparatorForFields = jsonComparator to listOf("payload")
         )
     }
 }
