@@ -60,6 +60,20 @@ fun equalTo(expected: JsonNode): JsonBodyEqualityAssertion {
 }
 
 /**
+ * Returns assertion for checking whether the contents of the expected binary value are equal to the contents
+ * of the actual binary value, i.e. an assertion which does not throw if `expected.contentEquals(actual)`.
+ *
+ * Example Usage:
+ * ```kotlin
+ * assertThat(response).binaryBody(equalTo(byteArrayOf(97, 98, 99)))
+ * ```
+ * @param expected Expected binary value whose contents should be equal to the contents of the actual value.
+ */
+fun equalTo(expected: ByteArray): Assertable<ByteArray?> {
+    return BinaryEqualityAssertion(expected)
+}
+
+/**
  * Returns assertion for checking whether an actual value is equal to the contents from the
  * file with the given [filename].
  *

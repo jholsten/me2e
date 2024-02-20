@@ -34,12 +34,7 @@ class FileContentsEqualityAssertion internal constructor(private val filename: S
      */
     fun asBinary(): Assertable<ByteArray?> {
         val expected = file.readBytes()
-        return object : Assertable<ByteArray?>(
-            assertion = { actual -> expected.contentEquals(actual) },
-            message = "to be equal to\n\t$expected",
-        ) {
-            override fun toString(): String = "equal to $expected"
-        }
+        return BinaryEqualityAssertion(expected)
     }
 
     /**

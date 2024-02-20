@@ -12,6 +12,13 @@ import kotlin.test.*
 
 internal class AssertableResponseIT {
 
+    private val expectedBinaryContent = byteArrayOf(
+        123, 34, 110, 97, 109, 101, 34, 58, 32, 34, 74, 111, 104, 110, 34, 44, 32, 34, 110, 101, 115, 116, 101, 100, 34, 58,
+        32, 123, 34, 107, 101, 121, 49, 34, 58, 32, 34, 118, 97, 108, 117, 101, 49, 34, 44, 32, 34, 107, 101, 121, 50, 34, 58, 32,
+        34, 118, 97, 108, 117, 101, 50, 34, 125, 44, 32, 34, 100, 101, 116, 97, 105, 108, 115, 34, 58, 32, 91, 123, 34, 100, 101,
+        116, 97, 105, 108, 34, 58, 32, 49, 125, 44, 32, 123, 34, 100, 101, 116, 97, 105, 108, 34, 58, 32, 50, 125, 93, 125,
+    )
+
     private val response = HttpResponse(
         request = HttpRequest(
             url = Url("https://google.com/"),
@@ -30,12 +37,7 @@ internal class AssertableResponseIT {
         ),
         body = HttpResponseBody(
             contentType = ContentType.JSON_UTF8,
-            content = byteArrayOf(
-                123, 34, 110, 97, 109, 101, 34, 58, 32, 34, 74, 111, 104, 110, 34, 44, 32, 34, 110, 101, 115, 116, 101, 100, 34, 58,
-                32, 123, 34, 107, 101, 121, 49, 34, 58, 32, 34, 118, 97, 108, 117, 101, 49, 34, 44, 32, 34, 107, 101, 121, 50, 34, 58, 32,
-                34, 118, 97, 108, 117, 101, 50, 34, 125, 44, 32, 34, 100, 101, 116, 97, 105, 108, 115, 34, 58, 32, 91, 123, 34, 100, 101,
-                116, 97, 105, 108, 34, 58, 32, 49, 125, 44, 32, 123, 34, 100, 101, 116, 97, 105, 108, 34, 58, 32, 50, 125, 93, 125,
-            ),
+            content = expectedBinaryContent,
         ),
     )
 
@@ -102,6 +104,7 @@ internal class AssertableResponseIT {
                 .objectBody(BodyClass::class.java, equalTo(expectedObj))
                 .objectBody(object : TypeReference<BodyClass>() {}, equalTo(expectedObj))
                 .objectBody<BodyClass>(equalTo(expectedObj))
+                .binaryBody(equalTo(expectedBinaryContent))
                 .body(equalToContentsFromFile(filename).asString())
                 .base64Body(equalToContentsFromFile(filename).asBase64())
                 .jsonBody(equalToContentsFromFile(filename).asJson())
@@ -325,7 +328,8 @@ internal class AssertableResponseIT {
         assertDoesNotThrow { assertThat(response).binaryBody(isNotNull()) }
         assertDoesNotThrow {
             assertThat(response)
-                .binaryBody(equalTo(response.body?.asBinary()))
+                .binaryBody(equalTo(expectedBinaryContent.copyOf()))
+                .binaryBody(equalTo(expectedBinaryContent))
                 .binaryBody(isNotNull())
         }
     }
