@@ -1442,7 +1442,7 @@ To specify assertions response bodies, you can use the following functions to co
       - <ins>Example</ins>: Assert that the JSON response body is equal to the expected object, while ignoring field `_id`:
 
         ```kotlin
-        assertThat(response).jsonBody(equalTo(expectedBody).ignoringNodes("_id"))
+        assertThat(response).jsonBody(equalTo(expectedBody).ignoringNodes("$._id"))
         ```
 
   - Alternatively, you can use the [`containsNode`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.assertions/contains-node.html) function to specify assertions for individual nodes of the body. Specify the path to this node whose value you want to compare using a [JSONPath](https://datatracker.ietf.org/doc/draft-ietf-jsonpath-base/) expression. Such a JSONPath expressions begins with the root element `$`, after which you can specify the path to the corresponding node using `.` as the path separator. For detailed information on the JSONPath syntax and examples, take a look at this [IETF draft](https://datatracker.ietf.org/doc/draft-ietf-jsonpath-base/).
@@ -1484,7 +1484,7 @@ This function can be used in combination with all the functions presented above.
 - <ins>Example using [`jsonBody`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.request.assertions/-assertable-response/json-body.html)</ins>:
 
      ```kotlin
-     assertThat(response).jsonBody(equalToContentsFromFile("expected.json").asJson().ignoringNodes("_id"))
+     assertThat(response).jsonBody(equalToContentsFromFile("expected.json").asJson().ignoringNodes("$._id"))
      ```
 
 <ins>Examples</ins>
@@ -1750,7 +1750,7 @@ assertThat(exampleServer).receivedRequest(
     ExpectedRequest()
         .withMethod(equalTo(HttpMethod.POST))
         .withPath(equalTo("/account"))
-        .withJsonBody(equalToContentsFromFile("requests/example_request.json").ignoringNodes("_id"))
+        .withJsonBody(equalToContentsFromFile("requests/example_request.json").ignoringNodes("$._id"))
 )
 ```
 </td>
