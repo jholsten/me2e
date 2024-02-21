@@ -7,6 +7,7 @@ import org.jholsten.me2e.mock.MockServer
 import javax.annotation.processing.*
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.Element
+import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.TypeMirror
 import javax.tools.Diagnostic
@@ -14,7 +15,8 @@ import kotlin.reflect.KClass
 
 /**
  * Annotation processor for fields annotated with [InjectService] which ensures that all prerequisites are fulfilled.
- * Requires field to be of type [Container] or [MockServer] and the enclosing class to extend [Me2eTest].
+ * Requires field to be of type [Container] or [MockServer], the enclosing class to extend [Me2eTest] and the field
+ * to not be `static` or part of a companion object.
  * If any of these requirements is not met, the compiler will show an error.
  */
 @AutoService(Processor::class)
@@ -31,6 +33,7 @@ internal class InjectServiceAnnotationProcessor : AbstractProcessor() {
             for (element in annotatedElements) {
                 assertThatFieldTypeIsValid(element)
                 assertThatEnclosingClassIsValid(element)
+                assertThatFieldIsNotStatic(element)
             }
         }
 
@@ -68,6 +71,24 @@ internal class InjectServiceAnnotationProcessor : AbstractProcessor() {
             processingEnv.messager.printMessage(
                 Diagnostic.Kind.ERROR,
                 "@InjectService annotation can only be applied to fields of classes which extend ${Me2eTest::class.qualifiedName}",
+                element
+            )
+        }
+    }
+
+    /**
+     * Ensures that the annotated field is not static, i.e. it does not have the `static` modifier and is
+     * not part of a companion object. This is required since the services are injected when a [Me2eTest]
+     * instance is initialized and this is not triggered for static fields.
+     * In case this prerequisite is not fulfilled, an error message is transferred to the compiler.
+     * @param element Field annotated with [InjectService].
+     */
+    private fun assertThatFieldIsNotStatic(element: Element) {
+        if (element.modifiers.contains(Modifier.STATIC)) {
+            processingEnv.messager.printMessage(
+                Diagnostic.Kind.ERROR,
+                "@InjectService annotation cannot be applied to static fields or fields of companion objects.\n" +
+                    "Please use the Me2eTest.containerManager or Me2eTest.mockServerManager to access the service.",
                 element
             )
         }

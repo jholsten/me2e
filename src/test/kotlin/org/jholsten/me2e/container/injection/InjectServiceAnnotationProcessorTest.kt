@@ -11,6 +11,9 @@ internal class InjectServiceAnnotationProcessorTest {
         "@InjectService annotation can only be applied to fields of type org.jholsten.me2e.container.Container and org.jholsten.me2e.mock.MockServer"
     private val invalidEnclosingClassMessage =
         "@InjectService annotation can only be applied to fields of classes which extend org.jholsten.me2e.Me2eTest"
+    private val invalidModifierMessage =
+        "@InjectService annotation cannot be applied to static fields or fields of companion objects.\n  " +
+            "Please use the Me2eTest.containerManager or Me2eTest.mockServerManager to access the service."
 
     @Test
     fun `Compiling test class with valid annotations should succeed`() {
@@ -198,5 +201,32 @@ internal class InjectServiceAnnotationProcessorTest {
         assertThat(compilation).failed()
         assertThat(compilation).hadErrorCount(1)
         assertThat(compilation).hadErrorContaining(invalidFieldTypeMessage)
+    }
+
+    @Test
+    fun `Compiling test class with annotated static fields should fail`() {
+        val compilation = javac()
+            .withProcessors(InjectServiceAnnotationProcessor())
+            .compile(
+                JavaFileObjects.forSourceString(
+                    "com.example.E2ETest",
+                    """
+                    package com.example;
+                        
+                    import org.jholsten.me2e.Me2eTest;
+                    import org.jholsten.me2e.container.Container;
+                    import org.jholsten.me2e.container.injection.InjectService;
+                    
+                    class E2ETest extends Me2eTest {
+                        @InjectService
+                        private static Container container;
+                    }
+                    """.trimIndent()
+                )
+            )
+
+        assertThat(compilation).failed()
+        assertThat(compilation).hadErrorCount(1)
+        assertThat(compilation).hadErrorContaining(invalidModifierMessage)
     }
 }
