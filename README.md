@@ -1995,7 +1995,6 @@ The GitLab runner required for the GitLab CI presented above does not require an
     oom_kill_disable = false
     disable_cache = false
     volumes = ["/cache"]
-    cache_dir = "/cache"
     shm_size = 0
 ```
 </details>
