@@ -2,10 +2,7 @@ package org.jholsten.samples
 
 import org.jholsten.me2e.Me2eTest
 import org.jholsten.me2e.Me2eTestConfig
-import org.jholsten.me2e.assertions.assertThat
-import org.jholsten.me2e.assertions.containsKey
-import org.jholsten.me2e.assertions.containsNode
-import org.jholsten.me2e.assertions.equalTo
+import org.jholsten.me2e.assertions.*
 import org.jholsten.me2e.config.model.ConfigFormat
 import org.jholsten.me2e.container.injection.InjectService
 import org.jholsten.me2e.container.microservice.MicroserviceContainer
@@ -39,13 +36,14 @@ class Me2eTestSample : Me2eTest() {
         assertThat(response)
             .statusCode(equalTo(200))
             .message(equalTo("OK"))
-            .jsonBody(containsNode("$.result").withValue(equalTo("")))
+            .jsonBody(equalToContentsFromFile("responses/expected_response.json").asJson())
 
         assertThat(paymentService).receivedRequest(
             ExpectedRequest()
                 .withPath(equalTo("/search"))
-                .withMethod(equalTo(HttpMethod.GET))
+                .withMethod(equalTo(HttpMethod.POST))
                 .withQueryParameters(containsKey("id").withValue(equalTo("xyz")))
+                .withJsonBody(containsNode("$.auth").withValue(equalTo("secret")))
                 .andNoOther()
         )
     }

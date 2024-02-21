@@ -43,6 +43,13 @@ fun httpRequestBodyWithJsonContent(): HttpRequestBody {
         .build()
 }
 
+fun httpRequestBodyWithJsonContentFromFile(): HttpRequestBody {
+    return HttpRequestBody.Builder()
+        .withContentFromFile("payload.json")
+        .withContentType(ContentType.JSON_UTF8)
+        .build()
+}
+
 fun url(): Url {
     return Url("https://example.com/search?q=xyz&q=abc&id=12#p=42")
 }

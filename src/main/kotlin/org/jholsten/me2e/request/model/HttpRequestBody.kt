@@ -15,6 +15,7 @@ import java.util.*
  * Stores binary content of the body along with its content type.
  * @sample org.jholsten.samples.request.httpRequestBodyWithStringContent
  * @sample org.jholsten.samples.request.httpRequestBodyWithJsonContent
+ * @sample org.jholsten.samples.request.httpRequestBodyWithJsonContentFromFile
  */
 class HttpRequestBody {
     /**
