@@ -458,12 +458,12 @@
         <div th:if="${test.status.name != 'SKIPPED'}">
             <div th:if="${!test.traces.isEmpty()}">
                 <h4>Network Traces</h4>
-                <div class="traces-table-container">
+                <div class="traces-table-container" th:id="${'traces-table-container-' + test.testId}">
                     <table class="traces-table" th:id="${'traces-' + test.testId}"
                            th:with="timeSeries=${tracesTimeSeries.get(test.testId)}">
                         <thead>
                         <tr>
-                            <th>Request</th>
+                            <th th:id="${'traces-table-request-header-' + test.testId}">Request</th>
                             <th>
                                 <div class="gantt-row" style="background-color: white">
                                     <div></div>
@@ -482,7 +482,8 @@
                                       th:styleappend="${'background-color:' + (status <= 199 ? '#1a6bff' : (status <= 299 ? '#0BBD58' : (status <= 399 ? '#1ac0ff' : (status <= 499 ? '#ffb91a' : '#FF5F56'))))}"
                                       class="status"></span>
                                 <span class="overflow">
-                                    <span th:text="${request.statusLine}" class="inline-code"></span>
+                                    <span th:text="${request.statusLine}" th:attr="onclick=|scrollToTrace('${test.testId}', '${trace.id}')|"
+                                          class="inline-code" style="cursor: pointer;"></span>
                                 </span>
                             </td>
                             <td th:with="left=${@java.time.Duration@between(timeSeries[0], request.timestamp).toMillis() * 1.5}">
@@ -490,7 +491,7 @@
                                     <div style="background-color: white;"></div>
                                     <div class="gantt-item"
                                          th:with="width=${@java.time.Duration@between(request.timestamp, response.timestamp).toMillis() * 1.5}">
-                                        <details th:style="'left:' + ${left} + 'px'">
+                                        <details th:id="${'gantt-bar-' + trace.id}" th:style="'left:' + ${left} + 'px'">
                                             <summary th:styleappend="'width:' + ${width} + 'px'" style="display: block;">
                                                 <span class="gantt-bar"
                                                       th:styleappend="'background-color:' + ${trace.client != null ? trace.client.color : '#4541DD'}">
@@ -966,6 +967,16 @@
             indent: 20,
         });
     });
+</script>
+
+<script>
+    function scrollToTrace(testId, traceId) {
+        const tracesContainer = document.getElementById(`traces-table-container-${testId}`);
+        const traceGanttBar = document.getElementById(`gantt-bar-${traceId}`);
+        const requestColumn = document.getElementById(`traces-table-request-header-${testId}`);
+        tracesContainer.scrollLeft = traceGanttBar.offsetLeft - tracesContainer.offsetLeft - requestColumn.offsetWidth - 50;
+        traceGanttBar.open = !traceGanttBar.open;
+    }
 </script>
 </body>
 </html>
