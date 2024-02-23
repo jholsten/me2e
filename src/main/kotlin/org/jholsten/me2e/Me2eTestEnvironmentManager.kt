@@ -93,7 +93,9 @@ internal class Me2eTestEnvironmentManager {
                 logger.warn("Unable to stop Docker-Compose:", e)
             }
             try {
-                mockServerManager.stop()
+                if (mockServerManager.isRunning) {
+                    mockServerManager.stop()
+                }
             } catch (e: Exception) {
                 logger.warn("Unable to stop Mock Server:", e)
             }
