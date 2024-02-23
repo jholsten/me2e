@@ -158,4 +158,8 @@ class HttpHeaders internal constructor(
     override fun hashCode(): Int {
         return values.hashCode()
     }
+
+    override fun toString(): String {
+        return this.values.toString()
+    }
 }

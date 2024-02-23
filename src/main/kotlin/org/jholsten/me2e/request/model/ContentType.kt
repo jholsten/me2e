@@ -64,4 +64,8 @@ class ContentType(
     private fun assertContentTypeIsValid(): MediaType {
         return requireNotNull(value.toMediaTypeOrNull()) { "Invalid content type \"$value\"" }
     }
+
+    override fun toString(): String {
+        return this.value
+    }
 }

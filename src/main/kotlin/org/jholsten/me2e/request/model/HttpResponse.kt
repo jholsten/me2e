@@ -35,4 +35,8 @@ class HttpResponse internal constructor(
      * Response body of this response.
      */
     val body: HttpResponseBody? = null,
-)
+) {
+    override fun toString(): String {
+        return "$protocol $statusCode $message"
+    }
+}

@@ -273,4 +273,8 @@ class HttpRequestBody {
     inline fun <reified T> asObject(): T? {
         return asObject(object : TypeReference<T>() {})
     }
+
+    override fun toString(): String {
+        return this.asString() ?: "null"
+    }
 }

@@ -118,4 +118,8 @@ class HttpRequest internal constructor(
             )
         }
     }
+
+    override fun toString(): String {
+        return "$method $url"
+    }
 }
