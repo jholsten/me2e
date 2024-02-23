@@ -80,6 +80,24 @@ internal class Me2eTestEnvironmentManager {
                 EnvironmentStatus.FAILED
             }
         }
+
+        /**
+         * Stops the test environment including all containers and Mock Servers.
+         */
+        @JvmSynthetic
+        fun stopTestEnvironment() {
+            logger.info("Stopping test environment...")
+            try {
+                containerManager.stop()
+            } catch (e: Exception) {
+                logger.warn("Unable to stop Docker-Compose:", e)
+            }
+            try {
+                mockServerManager.stop()
+            } catch (e: Exception) {
+                logger.warn("Unable to stop Mock Server:", e)
+            }
+        }
     }
 
     /**

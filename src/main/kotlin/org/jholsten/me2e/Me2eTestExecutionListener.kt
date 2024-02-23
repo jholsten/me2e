@@ -78,5 +78,6 @@ internal class Me2eTestExecutionListener : TestExecutionListener {
      */
     override fun testPlanExecutionFinished(testPlan: TestPlan) {
         ReportDataAggregator.onTestExecutionFinished(testPlan)
+        Me2eTestEnvironmentManager.stopTestEnvironment()
     }
 }
