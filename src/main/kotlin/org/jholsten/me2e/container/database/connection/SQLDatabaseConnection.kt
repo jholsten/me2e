@@ -18,7 +18,7 @@ import java.sql.Statement
  *
  * To instantiate instances of this class, use the [Builder].
  */
-open class SQLDatabaseConnection private constructor(
+open class SQLDatabaseConnection protected constructor(
     /**
      * Hostname on which the database container is running.
      */
@@ -145,7 +145,7 @@ open class SQLDatabaseConnection private constructor(
      * Builder for instantiating instances of [SQLDatabaseConnection].
      * @constructor Instantiates a new builder instance for constructing a [SQLDatabaseConnection].
      */
-    class Builder : DatabaseConnection.Builder<Builder>() {
+    open class Builder : DatabaseConnection.Builder<Builder>() {
         private val logger = logger<Builder>()
 
         private var schema: String? = null

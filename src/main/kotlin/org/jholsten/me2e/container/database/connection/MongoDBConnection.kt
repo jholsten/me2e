@@ -20,7 +20,7 @@ import java.io.FileNotFoundException
  *
  * To instantiate instances of this class, use the [Builder].
  */
-open class MongoDBConnection private constructor(
+open class MongoDBConnection protected constructor(
     /**
      * Hostname on which the database container is running.
      */
@@ -174,7 +174,7 @@ open class MongoDBConnection private constructor(
      * Builder for instantiating instances of [MongoDBConnection].
      * @constructor Instantiates a new builder instance for constructing a [MongoDBConnection].
      */
-    class Builder : DatabaseConnection.Builder<Builder>() {
+    open class Builder : DatabaseConnection.Builder<Builder>() {
         private var container: Container? = null
         private var settings: MongoClientSettings? = null
 
