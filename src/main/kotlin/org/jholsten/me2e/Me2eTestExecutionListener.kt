@@ -77,7 +77,7 @@ internal class Me2eTestExecutionListener : TestExecutionListener {
      * @param testPlan Describes the tree of tests that have been executed.
      */
     override fun testPlanExecutionFinished(testPlan: TestPlan) {
-        ReportDataAggregator.onTestExecutionFinished(testPlan)
         Me2eTestEnvironmentManager.stopTestEnvironment()
+        ReportDataAggregator.onTestExecutionFinished(testPlan)
     }
 }
