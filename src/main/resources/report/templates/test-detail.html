@@ -491,7 +491,7 @@
                                     <div style="background-color: white;"></div>
                                     <div class="gantt-item"
                                          th:with="width=${@java.time.Duration@between(request.timestamp, response.timestamp).toMillis() * 1.5}">
-                                        <details th:id="${'gantt-bar-' + trace.id}" th:style="'left:' + ${left} + 'px'">
+                                        <details th:id="${'gantt-bar-' + test.testId + '-' + trace.id}" th:style="'left:' + ${left} + 'px'">
                                             <summary th:styleappend="'width:' + ${width} + 'px'" style="display: block;">
                                                 <span class="gantt-bar"
                                                       th:styleappend="'background-color:' + ${trace.client != null ? trace.client.color : '#4541DD'}">
@@ -972,7 +972,7 @@
 <script>
     function scrollToTrace(testId, traceId) {
         const tracesContainer = document.getElementById(`traces-table-container-${testId}`);
-        const traceGanttBar = document.getElementById(`gantt-bar-${traceId}`);
+        const traceGanttBar = document.getElementById(`gantt-bar-${testId}-${traceId}`);
         const requestColumn = document.getElementById(`traces-table-request-header-${testId}`);
         tracesContainer.scrollLeft = traceGanttBar.offsetLeft - tracesContainer.offsetLeft - requestColumn.offsetWidth - 50;
         traceGanttBar.open = !traceGanttBar.open;
