@@ -114,7 +114,7 @@ internal class NetworkTraceAggregatorIT {
         val expectedResponse = expectedResponsePacket(
             version = "HTTP/1.1",
             200,
-            statusCodeDescription = "OK",
+            message = "OK",
             payload = "{\"id\":123,\"items\":[{\"name\":\"A\",\"value\":42},{\"name\":\"B\",\"value\":1}]}",
         )
         val first = test.traces[0]
@@ -180,7 +180,7 @@ internal class NetworkTraceAggregatorIT {
     private fun expectedResponsePacket(
         version: String,
         statusCode: Int,
-        statusCodeDescription: String,
+        message: String,
         payload: Any?,
     ): AggregatedNetworkTrace.ResponsePacket {
         return AggregatedNetworkTrace.ResponsePacket(
@@ -192,7 +192,7 @@ internal class NetworkTraceAggregatorIT {
             destinationPort = -1,
             version = version,
             statusCode = statusCode,
-            statusCodeDescription = statusCodeDescription,
+            message = message,
             headers = mapOf(),
             payload = payload,
         )

@@ -63,7 +63,7 @@ internal class HttpResponsePacket(
      * Description of the response code of the HTTP response.
      */
     @JsonProperty("status_code_description")
-    val statusCodeDescription: String,
+    val message: String,
 
     /**
      * Frame number of the request to which this response corresponds.

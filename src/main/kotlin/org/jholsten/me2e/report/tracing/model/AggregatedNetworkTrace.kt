@@ -190,7 +190,7 @@ data class AggregatedNetworkTrace internal constructor(
         /**
          * Description of the response code of the HTTP response.
          */
-        val statusCodeDescription: String,
+        val message: String,
 
         /**
          * Response headers as a map of key and value.
@@ -205,7 +205,7 @@ data class AggregatedNetworkTrace internal constructor(
         /**
          * Status line of the HTTP response.
          */
-        val statusLine: String = "$version $statusCode $statusCodeDescription"
+        val statusLine: String = "$version $statusCode $message"
 
         internal constructor(packet: HttpResponsePacket) : this(
             number = packet.number,
@@ -216,7 +216,7 @@ data class AggregatedNetworkTrace internal constructor(
             destinationPort = packet.destinationPort,
             version = packet.version,
             statusCode = packet.statusCode,
-            statusCodeDescription = packet.statusCodeDescription,
+            message = packet.message,
             headers = packet.headers,
             payload = packet.payload?.let { if (it is String) prettyPrintJson(it) else it },
         )
