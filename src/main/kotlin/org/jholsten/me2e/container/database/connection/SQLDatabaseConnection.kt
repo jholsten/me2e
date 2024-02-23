@@ -18,7 +18,7 @@ import java.sql.Statement
  *
  * To instantiate instances of this class, use the [Builder].
  */
-class SQLDatabaseConnection private constructor(
+open class SQLDatabaseConnection private constructor(
     /**
      * Hostname on which the database container is running.
      */

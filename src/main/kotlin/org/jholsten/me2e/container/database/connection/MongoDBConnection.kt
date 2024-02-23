@@ -20,7 +20,7 @@ import java.io.FileNotFoundException
  *
  * To instantiate instances of this class, use the [Builder].
  */
-class MongoDBConnection private constructor(
+open class MongoDBConnection private constructor(
     /**
      * Hostname on which the database container is running.
      */
