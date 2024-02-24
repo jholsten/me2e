@@ -2,7 +2,7 @@ package org.jholsten.me2e.container.database.connection
 
 import org.apache.ibatis.jdbc.RuntimeSqlException
 import org.apache.ibatis.jdbc.ScriptRunner
-import org.jholsten.me2e.container.Container
+import org.jholsten.me2e.container.database.DatabaseContainer
 import org.jholsten.me2e.container.database.DatabaseManagementSystem
 import org.jholsten.me2e.container.database.model.QueryResult
 import org.jholsten.me2e.container.database.exception.DatabaseException
@@ -53,7 +53,7 @@ open class SQLDatabaseConnection protected constructor(
     /**
      * Reference to the Docker container which serves this database.
      */
-    container: Container?,
+    container: DatabaseContainer?,
 
     /**
      * Name of the schema to which this database belongs.

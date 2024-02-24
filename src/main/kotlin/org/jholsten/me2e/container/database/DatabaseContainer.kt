@@ -330,6 +330,7 @@ class DatabaseContainer internal constructor(
             )
         }
         connection = builderInstance
+            .withContainer(this)
             .withHost(state.host)
             .withPort(exposedPort.external!!)
             .withDatabase(database!!)

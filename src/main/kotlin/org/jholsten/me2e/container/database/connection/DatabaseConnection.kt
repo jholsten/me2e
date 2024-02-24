@@ -1,6 +1,6 @@
 package org.jholsten.me2e.container.database.connection
 
-import org.jholsten.me2e.container.Container
+import org.jholsten.me2e.container.database.DatabaseContainer
 import org.jholsten.me2e.container.database.DatabaseManagementSystem
 import org.jholsten.me2e.container.database.exception.DatabaseException
 import org.jholsten.me2e.container.database.model.QueryResult
@@ -47,7 +47,7 @@ abstract class DatabaseConnection protected constructor(
     /**
      * Reference to the Docker Container which serves this database.
      */
-    val container: Container?
+    val container: DatabaseContainer?
 ) {
     /**
      * Returns list of all tables of the database. Excludes system tables such as `pg_class` in PostgreSQL.
@@ -171,7 +171,7 @@ abstract class DatabaseConnection protected constructor(
          * Reference to the Docker Container which serves this database.
          * @see DatabaseConnection
          */
-        protected var container: Container? = null
+        protected var container: DatabaseContainer? = null
 
         /**
          * Sets the hostname on which the database container is running.
@@ -232,7 +232,7 @@ abstract class DatabaseConnection protected constructor(
          * @param container Reference to the Docker container which serves this database.
          * @return This builder instance, to use for chaining.
          */
-        fun withContainer(container: Container?): SELF {
+        fun withContainer(container: DatabaseContainer?): SELF {
             this.container = container
             return self()
         }

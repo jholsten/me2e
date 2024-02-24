@@ -2,7 +2,7 @@ package org.jholsten.me2e.container.database.connection
 
 import io.mockk.mockk
 import org.bson.Document
-import org.jholsten.me2e.container.Container
+import org.jholsten.me2e.container.database.DatabaseContainer
 import org.jholsten.me2e.container.database.model.QueryResult
 import org.jholsten.me2e.container.model.DockerContainerReference
 import org.jholsten.util.RecursiveComparison
@@ -35,7 +35,7 @@ internal class MongoDBConnectionIT {
             .withExposedPorts(27017)
             .waitingFor(Wait.forSuccessfulCommand("echo 'db.runCommand(\"ping\").ok' | mongo --quiet"))
 
-        private val unsecuredContainer = Container(
+        private val unsecuredContainer = DatabaseContainer(
             name = "mongo-db",
             image = "mongo:4.4.27",
         )
@@ -53,7 +53,7 @@ internal class MongoDBConnectionIT {
             .withExposedPorts(27017)
             .waitingFor(Wait.forSuccessfulCommand("echo 'db.runCommand(\"ping\").ok' | mongo -u user -p 123 --quiet"))
 
-        private val securedContainer = Container(
+        private val securedContainer = DatabaseContainer(
             name = "mongo-db-secured",
             image = "mongo:4.4.27",
         )

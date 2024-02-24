@@ -43,13 +43,21 @@ class CustomDatabaseConnectionIT {
     }
 }
 
-open class CustomDatabaseConnection(host: String, port: Int, database: String, username: String?, password: String?) : DatabaseConnection(
+open class CustomDatabaseConnection(
+    host: String,
+    port: Int,
+    database: String,
+    username: String?,
+    password: String?,
+    container: DatabaseContainer?,
+) : DatabaseConnection(
     host = host,
     port = port,
     database = database,
     username = username,
     password = password,
     system = DatabaseManagementSystem.OTHER,
+    container = container,
 ) {
     private val logger = logger<CustomDatabaseConnection>()
 
@@ -84,6 +92,7 @@ open class CustomDatabaseConnection(host: String, port: Int, database: String, u
                 database = requireNotNull(database),
                 username = username,
                 password = password,
+                container = container,
             )
         }
     }

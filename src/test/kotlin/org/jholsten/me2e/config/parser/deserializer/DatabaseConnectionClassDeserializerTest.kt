@@ -7,6 +7,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import io.mockk.mockk
 import org.jholsten.me2e.container.database.CustomDatabaseConnection
+import org.jholsten.me2e.container.database.DatabaseContainer
 import org.jholsten.me2e.parsing.exception.ValidationException
 import kotlin.test.*
 
@@ -91,21 +92,13 @@ class DatabaseConnectionClassDeserializerTest {
     }
 }
 
-class CustomDatabaseConnectionWithoutBuilder(host: String, port: Int, database: String, username: String?, password: String?) :
-    CustomDatabaseConnection(
-        host = host,
-        port = port,
-        database = database,
-        username = username,
-        password = password,
-    )
-
-class CustomDatabaseConnectionWithBuilderWithPrivateConstructor(
+class CustomDatabaseConnectionWithoutBuilder(
     host: String,
     port: Int,
     database: String,
     username: String?,
-    password: String?
+    password: String?,
+    container: DatabaseContainer?,
 ) :
     CustomDatabaseConnection(
         host = host,
@@ -113,6 +106,24 @@ class CustomDatabaseConnectionWithBuilderWithPrivateConstructor(
         database = database,
         username = username,
         password = password,
+        container = container,
+    )
+
+class CustomDatabaseConnectionWithBuilderWithPrivateConstructor(
+    host: String,
+    port: Int,
+    database: String,
+    username: String?,
+    password: String?,
+    container: DatabaseContainer?,
+) :
+    CustomDatabaseConnection(
+        host = host,
+        port = port,
+        database = database,
+        username = username,
+        password = password,
+        container = container,
     ) {
     class Builder private constructor() : CustomDatabaseConnection.Builder()
 }
@@ -122,7 +133,8 @@ class CustomDatabaseConnectionWithBuilderWithoutNoArgsConstructor(
     port: Int,
     database: String,
     username: String?,
-    password: String?
+    password: String?,
+    container: DatabaseContainer?,
 ) :
     CustomDatabaseConnection(
         host = host,
@@ -130,6 +142,7 @@ class CustomDatabaseConnectionWithBuilderWithoutNoArgsConstructor(
         database = database,
         username = username,
         password = password,
+        container = container,
     ) {
     class Builder(value: String) : CustomDatabaseConnection.Builder()
 }

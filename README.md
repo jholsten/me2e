@@ -1127,7 +1127,7 @@ package com.example
 
 import org.jholsten.me2e.container.database.connection.DatabaseConnection
 
-class CustomDatabaseConnection(host: String, port: Int, database: String, username: String?, password: String?, container: Container?) : DatabaseConnection(
+class CustomDatabaseConnection(host: String, port: Int, database: String, username: String?, password: String?, container: DatabaseContainer?) : DatabaseConnection(
     host = host,
     port = port,
     database = database,

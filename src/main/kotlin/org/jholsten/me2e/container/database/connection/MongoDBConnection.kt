@@ -6,7 +6,7 @@ import com.mongodb.client.MongoClient
 import com.mongodb.client.MongoClients
 import com.mongodb.client.MongoDatabase
 import org.bson.Document
-import org.jholsten.me2e.container.Container
+import org.jholsten.me2e.container.database.DatabaseContainer
 import org.jholsten.me2e.container.database.DatabaseManagementSystem
 import org.jholsten.me2e.container.database.exception.DatabaseException
 import org.jholsten.me2e.container.database.model.QueryResult
@@ -56,7 +56,7 @@ open class MongoDBConnection protected constructor(
      * Reference to the Docker container which serves this database.
      * Is required to run scripts.
      */
-    container: Container?,
+    container: DatabaseContainer?,
 ) : DatabaseConnection(host, port, database, username, password, DatabaseManagementSystem.MONGO_DB, container) {
     private val logger = logger<MongoDBConnection>()
 
@@ -206,7 +206,7 @@ open class MongoDBConnection protected constructor(
      * To find the correct command, both are tried out one after the other. If none of the commands
      * is set on the PATH, `null` is returned.
      */
-    private fun getMongoCommand(container: Container): String? {
+    private fun getMongoCommand(container: DatabaseContainer): String? {
         val mongoshResult = container.execute("mongosh", "--version")
         if (mongoshResult.exitCode == 0) {
             logger.info("Using command 'mongosh' to execute commands on the Mongo shell.")
