@@ -144,7 +144,7 @@ abstract class DatabaseConnection protected constructor(
         protected var host: String? = null
 
         /**
-         * Port on which the database container is accessible.
+         * Port on which the database container is accessible from [host].
          * @see DatabaseConnection.port
          */
         protected var port: Int? = null
@@ -186,8 +186,8 @@ abstract class DatabaseConnection protected constructor(
         }
 
         /**
-         * Sets the port on which the database container is accessible.
-         * @param port Port number on which the container is accessible.
+         * Sets the port on which the database container is accessible from [host].
+         * @param port Port number on which the container is accessible from [host].
          * @return This builder instance, to use for chaining.
          */
         fun withPort(port: Int): SELF {
