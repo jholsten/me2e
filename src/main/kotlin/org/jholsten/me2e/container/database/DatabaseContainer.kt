@@ -288,6 +288,7 @@ class DatabaseContainer internal constructor(
                 .build()
         } else if (system.isSQL) {
             connection = SQLDatabaseConnection.Builder()
+                .withContainer(this)
                 .withHost(state.host)
                 .withPort(exposedPort.external!!)
                 .withSystem(system)

@@ -2,6 +2,7 @@ package org.jholsten.me2e.container.database.connection
 
 import org.apache.ibatis.jdbc.RuntimeSqlException
 import org.apache.ibatis.jdbc.ScriptRunner
+import org.jholsten.me2e.container.Container
 import org.jholsten.me2e.container.database.DatabaseManagementSystem
 import org.jholsten.me2e.container.database.model.QueryResult
 import org.jholsten.me2e.container.database.exception.DatabaseException
@@ -50,12 +51,17 @@ open class SQLDatabaseConnection protected constructor(
     system: DatabaseManagementSystem,
 
     /**
+     * Reference to the Docker container which serves this database.
+     */
+    container: Container?,
+
+    /**
      * Name of the schema to which this database belongs.
      * In case of [DatabaseManagementSystem.MY_SQL] and [DatabaseManagementSystem.MARIA_DB], this is the name of the database.
      * For [DatabaseManagementSystem.POSTGRESQL], the schema is different to the database and is set to `public` by default.
      */
     val schema: String,
-) : DatabaseConnection(host, port, database, username, password, system) {
+) : DatabaseConnection(host, port, database, username, password, system, container) {
     private val logger = logger<SQLDatabaseConnection>()
 
     /**
@@ -142,6 +148,17 @@ open class SQLDatabaseConnection protected constructor(
     }
 
     /**
+     * Establishes JDBC connection to the database and registers the
+     * corresponding driver for the [system].
+     */
+    protected open fun connect(): Connection {
+        registerDriver()
+        val connection = DriverManager.getConnection(jdbcUrl, username, password)
+        logger.info("Established connection to database $jdbcUrl.")
+        return connection
+    }
+
+    /**
      * Builder for instantiating instances of [SQLDatabaseConnection].
      * @constructor Instantiates a new builder instance for constructing a [SQLDatabaseConnection].
      */
@@ -195,6 +212,7 @@ open class SQLDatabaseConnection protected constructor(
                 password = password,
                 system = requireNotNull(system) { "System cannot be null" },
                 schema = requireNotNull(schema) { "Schema cannot be null" },
+                container = container,
             )
         }
     }
@@ -208,17 +226,6 @@ open class SQLDatabaseConnection protected constructor(
             command += " CASCADE"
         }
         statement.executeUpdate(command)
-    }
-
-    /**
-     * Establishes JDBC connection to the database and registers the
-     * corresponding driver for the [system].
-     */
-    private fun connect(): Connection {
-        registerDriver()
-        val connection = DriverManager.getConnection(jdbcUrl, username, password)
-        logger.info("Established connection to database $jdbcUrl.")
-        return connection
     }
 
     /**

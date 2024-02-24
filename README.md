@@ -892,7 +892,7 @@ You can specify the following properties of the response:
         <td>
 
 ```
-HTTP/1.1 201
+HTTP/1.1 201 Created
 Content-Type: text/plain
 Content-Length: 9
 
@@ -1127,12 +1127,13 @@ package com.example
 
 import org.jholsten.me2e.container.database.connection.DatabaseConnection
 
-class CustomDatabaseConnection(host: String, port: Int, database: String, username: String?, password: String?) : DatabaseConnection(
+class CustomDatabaseConnection(host: String, port: Int, database: String, username: String?, password: String?, container: Container?) : DatabaseConnection(
     host = host,
     port = port,
     database = database,
     username = username,
     password = password,
+    container = container,
 ) {
     // ...
 
@@ -1154,7 +1155,7 @@ services:
 ```
 
 With this setting, as soon as all containers are healthy, me2e will no longer attempt to use one of the default implementations `SQLDatabaseConnection` and `MongoDBConnecion`, but instead will set a new instance of your custom class in the `connection` attribute of the corresponding [`DatabaseContainer`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.database/-database-container/index.html) instance using the builder of your custom class.
-Please note that only the attributes defined in the `DatabaseConnection.Builder` (i.e. `host`, `port`, `database`, `username`, `password`) are available in your builder class. 
+Please note that only the attributes defined in the `DatabaseConnection.Builder` (i.e. `host`, `port`, `database`, `username`, `password`, `container`) are available in your builder class. 
 
 ### Defining Tests
 Now that the configuration options for the me2e library have been explained in more detail, we will take a close look at the options for defining End-to-End-Tests.

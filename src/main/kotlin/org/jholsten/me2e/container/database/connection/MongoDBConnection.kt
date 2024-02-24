@@ -50,14 +50,14 @@ open class MongoDBConnection protected constructor(
      * Settings to use for the connection to MongoDB.
      * The connection string is set to [url] upon initialization.
      */
-    settings: MongoClientSettings?,
+    settings: MongoClientSettings? = null,
 
     /**
      * Reference to the Docker container which serves this database.
      * Is required to run scripts.
      */
-    val container: Container?,
-) : DatabaseConnection(host, port, database, username, password, DatabaseManagementSystem.MONGO_DB) {
+    container: Container?,
+) : DatabaseConnection(host, port, database, username, password, DatabaseManagementSystem.MONGO_DB, container) {
     private val logger = logger<MongoDBConnection>()
 
     /**
@@ -75,7 +75,7 @@ open class MongoDBConnection protected constructor(
      * If specified, the settings provided in the constructor are used, otherwise the default [MongoClientSettings] are used.
      * The connection string is set to the value of the [url].
      */
-    val settings: MongoClientSettings by lazy {
+    open val settings: MongoClientSettings by lazy {
         val builder = when {
             settings != null -> MongoClientSettings.builder(settings)
             else -> MongoClientSettings.builder()
@@ -86,14 +86,14 @@ open class MongoDBConnection protected constructor(
     /**
      * Mongo client which is connecting to the database.
      */
-    val client: MongoClient by lazy {
+    open val client: MongoClient by lazy {
         MongoClients.create(this.settings)
     }
 
     /**
      * Connection to the database instance.
      */
-    val connection: MongoDatabase by lazy {
+    open val connection: MongoDatabase by lazy {
         client.getDatabase(database)
     }
 
@@ -175,18 +175,7 @@ open class MongoDBConnection protected constructor(
      * @constructor Instantiates a new builder instance for constructing a [MongoDBConnection].
      */
     open class Builder : DatabaseConnection.Builder<Builder>() {
-        private var container: Container? = null
         private var settings: MongoClientSettings? = null
-
-        /**
-         * Sets reference to the Docker container which serves this database.
-         * Is required to run scripts.
-         * @param container Reference to the Docker container which serves this database.
-         * @return This builder instance, to use for chaining.
-         */
-        fun withContainer(container: Container?): Builder = apply {
-            this.container = container
-        }
 
         /**
          * Sets settings to use for the connection to MongoDB.
