@@ -147,10 +147,12 @@ open class MongoDBConnection protected constructor(
         checkNotNull(mongoShellCommand) { "Could not find Mongo on the PATH for database '$database'. Is it installed?" }
         val scriptName = name?.let { "$name (located at ${file.path})" } ?: file.path
         if (!file.exists()) {
-            throw FileNotFoundException("File $scriptName does not exist.")
+            throw FileNotFoundException("File $scriptName does not exist on host.")
         }
-        logger.info("Copying script $scriptName to container...")
-        container.copyFileToContainer(file.path, file.name)
+        if (!container.fileExistsInContainer(file.name)) {
+            logger.info("Copying script $scriptName to container...")
+            container.copyFileToContainer(file.path, file.name)
+        }
         logger.info("Executing script $scriptName for database '$database'...")
         val command = executeScriptCommand(mongoShellCommand!!, file.name)
         val result = container.execute(*command)
