@@ -31,6 +31,8 @@ import org.testcontainers.containers.ComposeContainer as DockerComposeV2
 import java.io.File
 import java.io.OutputStream
 import java.time.Duration
+import java.util.concurrent.Callable
+import java.util.concurrent.Executors
 
 /**
  * Service for instantiating and interacting with a Docker-Compose environment using either Docker-Compose version v1 or v2.
@@ -234,7 +236,7 @@ class DockerCompose private constructor(
         logWarningForMissingHealthchecks(servicesWithHealthcheck, serviceNames)
         if (servicesWithHealthcheck.isNotEmpty()) {
             logger.info("Waiting at most $timeout seconds for ${servicesWithHealthcheck.size} services to become healthy...")
-            servicesWithHealthcheck.forEach { waitUntilHealthy(it, timeout) }
+            waitUntilHealthy(servicesWithHealthcheck.map { HealthcheckTask(it, timeout) })
             logger.info("Services [${servicesWithHealthcheck.joinToString(", ")}] are healthy.")
         }
     }
@@ -577,20 +579,18 @@ class DockerCompose private constructor(
     }
 
     /**
-     * Waits at most [timeout] seconds until the service with the given name becomes healthy.
-     * @throws HealthTimeoutException if the service did not become healthy within [timeout] seconds.
+     * Invokes all given healthcheck tasks in parallel threads and waits until all are finished.
+     * If at least one of the tasks returns `false` (i.e. the container is not healthy), a [HealthTimeoutException] is thrown.
+     * @throws HealthTimeoutException if at least one of the services did not become healthy.
      */
-    private fun waitUntilHealthy(serviceName: String, timeout: Long) {
-        val waitStrategy = Wait.forHealthcheck().withStartupTimeout(Duration.ofSeconds(timeout))
-        try {
-            logger.debug("Waiting for service $serviceName to become healthy...")
-            waitStrategy.waitUntilReady(ContainerWaitStrategyTarget(getDockerContainer(serviceName).id))
-            logger.debug("Service $serviceName is healthy.")
-        } catch (e: ContainerLaunchException) {
-            val healthState = getHealthcheckInfo(serviceName)?.buildMessage()
-            val message = "Timed out waiting for container '$serviceName' to become healthy. " +
-                "To increase the timeout, change the value for `settings.docker.health-timeout` in your me2e-config file." +
-                if (healthState != null) "\nCurrent health state:\n$healthState" else ""
+    private fun waitUntilHealthy(tasks: List<HealthcheckTask>) {
+        val results = executor.invokeAll(tasks).map { it.get() }
+        val unhealthyServices = results.filter { (_, isHealthy) -> !isHealthy }.map { it.first }
+        if (unhealthyServices.isNotEmpty()) {
+            val healthStates = unhealthyServices.map { it to getHealthcheckInfo(it) }
+            val message = "Timed out waiting for containers $unhealthyServices to become healthy.\n" +
+                "To increase the timeout, change the value for `settings.docker.health-timeout` in your me2e-config file.\n\n" +
+                "Current health states:\n\n" + healthStates.buildMessage()
             throw HealthTimeoutException(message)
         }
     }
@@ -619,13 +619,29 @@ class DockerCompose private constructor(
     }
 
     /**
+     * Builds message representing the health states of the given containers.
+     */
+    private fun List<Pair<String, HealthState?>>.buildMessage(): String {
+        val stringBuilder = StringBuilder()
+        for ((serviceName, healthState) in this) {
+            stringBuilder.appendLine("${"-".repeat(35)} $serviceName ${"-".repeat(35)}")
+            if (healthState == null) {
+                stringBuilder.appendLine("No health state info available")
+            } else {
+                stringBuilder.appendLine(healthState.buildMessage())
+            }
+        }
+        return stringBuilder.toString()
+    }
+
+    /**
      * Builds message representing the given health state of a container.
      */
     private fun HealthState.buildMessage(): String {
         val stringBuilder = StringBuilder()
         stringBuilder.appendLine("- Status: $status")
         stringBuilder.appendLine("- Failing Streak: $failingStreak")
-        if (this.log != null) {
+        if (this.log != null && this.log.isNotEmpty()) {
             stringBuilder.appendLine("Results of the last health checks:\n")
             for (log in this.log) {
                 stringBuilder.appendLine("- Start: ${log.start}")
@@ -635,6 +651,8 @@ class DockerCompose private constructor(
                 stringBuilder.appendLine(log.output)
                 stringBuilder.appendLine("-".repeat(50))
             }
+        } else {
+            stringBuilder.appendLine("No healthcheck logs available. Container probably didn't start.")
         }
         return stringBuilder.toString()
     }
@@ -651,5 +669,35 @@ class DockerCompose private constructor(
                     "fully up and running before the tests are executed, this can lead to unpredictable test results."
             )
         }
+    }
+
+    /**
+     * Task for executing a healthcheck for a service that is being executed in a thread.
+     */
+    private inner class HealthcheckTask(private val serviceName: String, private val timeout: Long) : Callable<Pair<String, Boolean>> {
+
+        /**
+         * Waits at most [timeout] seconds until the service with the given name becomes healthy.
+         * @return `true` if service did become healthy within [timeout] seconds, `false` otherwise.
+         */
+        override fun call(): Pair<String, Boolean> {
+            val waitStrategy = Wait.forHealthcheck().withStartupTimeout(Duration.ofSeconds(timeout))
+            logger.debug("Waiting for service '$serviceName' to become healthy...")
+            val result = try {
+                waitStrategy.waitUntilReady(ContainerWaitStrategyTarget(getDockerContainer(serviceName).id))
+                logger.info("Service '$serviceName' is healthy.")
+                true
+            } catch (e: ContainerLaunchException) {
+                false
+            }
+            return serviceName to result
+        }
+    }
+
+    companion object {
+        /**
+         * Thread pool executor to use for waiting until all services are healthy.
+         */
+        private val executor = Executors.newCachedThreadPool()
     }
 }
