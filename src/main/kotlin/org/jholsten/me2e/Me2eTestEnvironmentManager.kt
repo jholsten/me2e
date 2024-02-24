@@ -86,6 +86,7 @@ internal class Me2eTestEnvironmentManager {
          */
         @JvmSynthetic
         fun stopTestEnvironment() {
+            if (status != EnvironmentStatus.RUNNING) return
             logger.info("Stopping test environment...")
             try {
                 containerManager.stop()
