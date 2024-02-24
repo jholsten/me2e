@@ -13,10 +13,7 @@ import org.junit.jupiter.params.provider.CsvSource
 import org.opentest4j.TestAbortedException
 import java.io.File
 import java.io.FileNotFoundException
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 class ContainerIT {
 
@@ -93,6 +90,7 @@ class ContainerIT {
 
         assertFileExistsInContainer(containerPath)
         deleteFileInContainer(containerPath)
+        assertFalse(backendApi.fileExistsInContainer(containerPath))
     }
 
     @Test
@@ -123,6 +121,7 @@ class ContainerIT {
 
         assertFileExistsInContainer(containerPath)
         deleteFileInContainer(containerPath)
+        assertFalse(backendApi.fileExistsInContainer(containerPath))
     }
 
     @Test
@@ -176,7 +175,7 @@ class ContainerIT {
     }
 
     private fun assertFileExistsInContainer(containerPath: String) {
-        val result = backendApi.execute("test", "-e", containerPath)
-        assertEquals(0, result.exitCode, "File $containerPath does not exist in container.")
+        val result = backendApi.fileExistsInContainer(containerPath)
+        assertTrue(result, "File $containerPath does not exist in container.")
     }
 }

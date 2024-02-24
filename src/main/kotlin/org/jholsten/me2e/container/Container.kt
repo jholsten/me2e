@@ -267,6 +267,17 @@ open class Container internal constructor(
     }
 
     /**
+     * Returns whether a file at the given path exists inside this Docker container.
+     * @param containerPath Absolute path to the file for which existence should be checked. Note that this is always
+     * considered as an absolute path inside the container, independent of the container's working directory.
+     * @return `true` if file exists inside container, else `false`.
+     */
+    fun fileExistsInContainer(containerPath: String): Boolean {
+        val result = execute("test", "-e", containerPath)
+        return result.exitCode == 0
+    }
+
+    /**
      * Returns all log output from the container from [since] until now along with their timestamps,
      * by executing `docker logs --since $since --timestamps $containerId`.
      *
