@@ -65,7 +65,7 @@ open class MongoDBConnection protected constructor(
      * Is composed of the address on which the database container is accessible and - if provided - the
      * credentials to use for logging in.
      */
-    val url: String = when {
+    open val url: String = when {
         username != null && password != null -> "mongodb://$username:$password@$host:$port"
         else -> "mongodb://$host:$port"
     }
@@ -102,12 +102,24 @@ open class MongoDBConnection protected constructor(
      * For versions < 5.0, the command is `mongo`, whereas for newer versions, the command is `mongosh`.
      * @see <a href="https://www.mongodb.com/docs/v4.4/mongo/#std-label-compare-mongosh-mongo">MongoDB Documentation</a>
      */
-    val mongoShellCommand: String? by lazy {
+    open val mongoShellCommand: String? by lazy {
         if (container == null) {
             null
         } else {
             getMongoCommand(container)
         }
+    }
+
+    /**
+     * Command to use for executing a script with a given filename in array format.
+     * Takes the [mongoShellCommand] and the name of the file to be executed and needs to
+     * return the command to be used to execute the script inside the Docker container.
+     *
+     * Override this attribute if your MongoDB version cannot handle a command in the format
+     * `mongo --quiet < $filename` or `mongosh --quiet < $filename`.
+     */
+    open val executeScriptCommand: (String, String) -> Array<String> = { mongoShellCommand, filename ->
+        arrayOf(mongoShellCommand, "--quiet", "<", filename)
     }
 
     override val tables: List<String>
@@ -140,7 +152,7 @@ open class MongoDBConnection protected constructor(
         logger.info("Copying script $scriptName to container...")
         container.copyFileToContainer(file.path, file.name)
         logger.info("Executing script $scriptName for database '$database'...")
-        val command = arrayOf(mongoShellCommand!!, "--quiet", "<", file.name)
+        val command = executeScriptCommand(mongoShellCommand!!, file.name)
         val result = container.execute(*command)
         if (result.exitCode != 0) {
             throw DatabaseException(
