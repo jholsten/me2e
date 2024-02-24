@@ -103,6 +103,7 @@ class ContainerIT {
         for (filename in expectedFilenames) {
             assertFileExistsInContainer("$containerPath/$filename")
         }
+        assertTrue(backendApi.fileExistsInContainer(containerPath))
         deleteFileInContainer(containerPath)
     }
 
@@ -134,6 +135,7 @@ class ContainerIT {
         for (filename in expectedFilenames) {
             assertFileExistsInContainer("$containerPath/$filename")
         }
+        assertTrue(backendApi.fileExistsInContainer(containerPath))
         deleteFileInContainer(containerPath)
     }
 
