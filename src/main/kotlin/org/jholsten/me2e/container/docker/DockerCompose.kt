@@ -31,6 +31,7 @@ import org.testcontainers.containers.ComposeContainer as DockerComposeV2
 import java.io.File
 import java.io.OutputStream
 import java.time.Duration
+import java.time.Instant
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 
@@ -681,11 +682,12 @@ class DockerCompose private constructor(
          * @return `true` if service did become healthy within [timeout] seconds, `false` otherwise.
          */
         override fun call(): Pair<String, Boolean> {
+            val healthcheckStart = Instant.now()
             val waitStrategy = Wait.forHealthcheck().withStartupTimeout(Duration.ofSeconds(timeout))
             logger.debug("Waiting for service '$serviceName' to become healthy...")
             val result = try {
                 waitStrategy.waitUntilReady(ContainerWaitStrategyTarget(getDockerContainer(serviceName).id))
-                logger.info("Service '$serviceName' is healthy.")
+                logger.info("Service '$serviceName' is healthy. Took ${Duration.between(healthcheckStart, Instant.now()).toMillis()} ms.")
                 true
             } catch (e: ContainerLaunchException) {
                 false
