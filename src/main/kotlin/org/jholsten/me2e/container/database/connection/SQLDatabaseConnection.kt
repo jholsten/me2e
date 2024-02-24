@@ -108,6 +108,7 @@ open class SQLDatabaseConnection protected constructor(
             val scriptRunner = ScriptRunner(connection)
             scriptRunner.setSendFullScript(false)
             scriptRunner.setStopOnError(true)
+            scriptRunner.setLogWriter(null) // Disables printing script lines
             scriptRunner.runScript(FileReader(file))
         } catch (e: RuntimeSqlException) {
             throw DatabaseException("Unable to execute script $scriptName for database '$database': ${e.message}")
