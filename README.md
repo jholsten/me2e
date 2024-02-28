@@ -1653,36 +1653,18 @@ You need to pass an instance of the [`Authenticator`](https://master-thesis1.glp
 Note that this authenticator is used for all subsequent requests to this Microservice in the current test.
 Unless set otherwise in the me2e-config file in `settings.state-reset.reset-request-interceptors` (see [here](#state-reset)), this request interceptor is only valid for the execution of a single test and the interceptors are reset afterwards.
 
-By default, me2e only provides [`UsernamePasswordAuthentication`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.microservice.authentication/-username-password-authentication/index.html) for basic authentication.
+By default, me2e only provides [`UsernamePasswordAuthentication`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.microservice.authentication/-username-password-authentication/index.html) for basic authentication and [`ApiKeyAuthentication`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.microservice.authentication/-api-key-authentication/index.html) for authentication using an API key.
 If you want to use other authentication methods, you need to provide a corresponding implementation yourself through a class that inherits from the [`Authenticator`](https://master-thesis1.glpages.informatik.uni-bremen.de/me2e/kdoc/me2e/org.jholsten.me2e.container.microservice.authentication/-authenticator/index.html).
 
 <ins>Example Usage</ins>
 ```kotlin
 @Test
 fun `Executing authenticated GET request should succeed`() {
-    microservice.authenticate(UsernamePasswordAuthentication("admin", "secret"))
+    microservice.authenticate(ApiKeyAuthentication("secret-api-key"))
 
     val response = microservice.get(RelativeUrl("/secured"))
 
-    assertThat(response)
-        .statusCode(equalTo(200))
-        .body(equalTo("admin"))
-}
-```
-
-<ins>Example of a custom Authenticator</ins>
-```kotlin
-class ApiKeyAuthenticator(private val apiKey: String) : Authenticator() {
-    override fun getRequestInterceptor(): RequestInterceptor {
-        return object : RequestInterceptor {
-            override fun intercept(chain: RequestInterceptor.Chain): HttpResponse {
-                val request = chain.getRequest().newBuilder()
-                    .addHeader("X-API-KEY", apiKey)
-                    .build()
-                return chain.proceed(request)
-            }
-        }
-    }
+    assertThat(response).statusCode(equalTo(200))
 }
 ```
 

@@ -10,7 +10,7 @@ import org.jholsten.me2e.request.interceptor.RequestInterceptor
  * is requested from an authentication server and set in the `Authorization` header of the request.
  * While the [RequestInterceptor.intercept] method is executed for every request, the [initialize] method is only executed
  * once when [org.jholsten.me2e.container.microservice.MicroserviceContainer.authenticate] is called.
- * @sample org.jholsten.samples.container.ApiKeyAuthenticator
+ * @see ApiKeyAuthentication
  * @see UsernamePasswordAuthentication
  * @constructor Instantiates a new authenticator.
  */
