@@ -23,7 +23,7 @@ class JsonBodyEqualityAssertion internal constructor(private val expected: JsonN
 ) {
 
     override fun evaluate(property: String, actual: JsonNode?) {
-        evaluate(property, expected, actual)
+        evaluate(property, expected, actual, message)
     }
 
     /**
@@ -46,7 +46,7 @@ class JsonBodyEqualityAssertion internal constructor(private val expected: JsonN
             message = "to be equal to\n\n${expected.toPrettyString()}\n\nwhile ignoring nodes\n\t$nodesToIgnore",
         ) {
             override fun evaluate(property: String, actual: JsonNode?) {
-                evaluate(property, expected.removeNodes(nodesToIgnore), actual?.removeNodes(nodesToIgnore))
+                evaluate(property, expected.removeNodes(nodesToIgnore), actual?.removeNodes(nodesToIgnore), message)
             }
 
             override fun toString(): String = "equal to $expected ignoring nodes $nodesToIgnore"
@@ -80,7 +80,7 @@ class JsonBodyEqualityAssertion internal constructor(private val expected: JsonN
      * Evaluates differences between the given [expected] and [actual] JSON objects.
      * Includes differences in the message of the [AssertionFailure].
      */
-    private fun evaluate(property: String, expected: JsonNode, actual: JsonNode?) {
+    private fun evaluate(property: String, expected: JsonNode, actual: JsonNode?, message: String) {
         if (actual == null) {
             throw AssertionFailure("Expected $property\n\tnull\n$message")
         }
