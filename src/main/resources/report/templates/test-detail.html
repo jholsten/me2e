@@ -564,8 +564,10 @@
                                                         <td class="label">Headers:</td>
                                                         <td class="inline-code break-word">
                                                             <div th:each="entry : ${request.headers}">
-                                                                <b th:text="${entry.key} + ':'"></b>
-                                                                <span th:text="${entry.value}"></span>
+                                                                <div th:each="value : ${entry.value}">
+                                                                    <b th:text="${entry.key} + ':'"></b>
+                                                                    <span th:text="${value}"></span>
+                                                                </div>
                                                             </div>
                                                         </td>
                                                     </tr>

@@ -114,9 +114,9 @@ data class AggregatedNetworkTrace internal constructor(
         val method: String,
 
         /**
-         * Request headers as a map of key and value.
+         * Request headers as a map of key and values.
          */
-        val headers: Map<String, String>,
+        val headers: Map<String, List<String>>,
 
         /**
          * Request body of the HTTP request.
@@ -193,9 +193,9 @@ data class AggregatedNetworkTrace internal constructor(
         val message: String,
 
         /**
-         * Response headers as a map of key and value.
+         * Response headers as a map of key and values.
          */
-        val headers: Map<String, String>,
+        val headers: Map<String, List<String>>,
 
         /**
          * Response body of the HTTP response.

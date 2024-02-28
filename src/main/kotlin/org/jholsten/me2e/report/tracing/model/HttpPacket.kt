@@ -76,9 +76,9 @@ internal abstract class HttpPacket(
     val version: String,
 
     /**
-     * Request/Response headers as a map of key and value.
+     * Request/Response headers as a map of key and values.
      */
-    val headers: Map<String, String>,
+    val headers: Map<String, List<String>>,
 
     /**
      * Request/Response body of this packet.

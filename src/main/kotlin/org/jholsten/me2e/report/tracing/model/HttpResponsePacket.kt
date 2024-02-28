@@ -77,9 +77,9 @@ internal class HttpResponsePacket(
     val duration: Float?,
 
     /**
-     * Response headers as a map of key and value.
+     * Response headers as a map of key and values.
      */
-    headers: Map<String, String>,
+    headers: Map<String, List<String>>,
 
     /**
      * Response body of the HTTP response.

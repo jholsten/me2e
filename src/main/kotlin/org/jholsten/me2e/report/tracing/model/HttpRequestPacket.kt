@@ -64,9 +64,9 @@ internal class HttpRequestPacket(
     val method: String,
 
     /**
-     * Request headers as a map of key and value.
+     * Request headers as a map of key and values.
      */
-    headers: Map<String, String>,
+    headers: Map<String, List<String>>,
 
     /**
      * Request body of the HTTP request.

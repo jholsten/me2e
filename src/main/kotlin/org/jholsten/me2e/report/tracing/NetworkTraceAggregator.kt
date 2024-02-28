@@ -352,11 +352,11 @@ internal class NetworkTraceAggregator {
      */
     private fun findMockServer(packet: HttpRequestPacket): NetworkNodeSpecification? {
         val host = packet.headers.filterKeys { it.lowercase() == "host" }.firstNotNullOfOrNull { it.value }
-        if (host == null) {
+        if (host.isNullOrEmpty()) {
             logger.warn("Host header is not set for request $packet.")
             return null
         }
-        return mockServers[host]
+        return mockServers[host.first()]
     }
 
     /**
