@@ -102,6 +102,7 @@ internal class NetworkTraceAggregatorIT {
 
         backendApi.post(RelativeUrl("/search"), HttpRequestBody(content = "{\"id\": 123}", ContentType.JSON_UTF8))
 
+        Thread.sleep(1000)
         networkTraceAggregator.collectPackets(listOf(test))
 
         assertEquals(2, test.traces.size)

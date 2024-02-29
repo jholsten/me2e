@@ -138,8 +138,6 @@ internal class NetworkTraceAggregator {
     internal fun collectPackets(roots: List<FinishedTestResult>) {
         if (networkTraceCollectors.isEmpty()) return
         logger.info("Collecting packets...")
-        // Since network capturing may be delayed by a couple of milliseconds, we wait a little bit
-        Thread.sleep(1000)
         val packets: MutableList<HttpPacket> = mutableListOf()
         for (monitor in networkTraceCollectors.values) {
             packets.addAll(monitor.collect())
