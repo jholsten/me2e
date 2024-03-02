@@ -49,6 +49,7 @@ open class HtmlReportGenerator(
      */
     protected val additionalResources: MutableMap<String, String> = mutableMapOf(
         "css/report-style.css" to "report/css/report-style.css",
+        "images/favicon.ico" to "report/images/favicon.ico",
         "tree-table/jquery.treetable.js" to "report/tree-table/jquery.treetable.js",
         "tree-table/jquery.treetable.css" to "report/tree-table/jquery.treetable.css",
     ),
